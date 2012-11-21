@@ -31,14 +31,14 @@ class User < ActiveRecord::Base
   has_one :portfolio_image, :as=> :attachable , :dependent=>:destroy, :conditions=> "filename != 'login_logo'"
   has_one :logo_image, :as=> :attachable, :dependent=>:destroy, :conditions=> "filename = 'login_logo'", :class_name=> 'PortfolioImage'
   #~ has_one :client_logo_image, :class_name => 'PortfolioImage', :conditions => "attachable_type = 'ClientSetting'  or attachable_type = 'ClientExtension'"
-  has_one :client_logo_image, :class_name => 'PortfolioImage', :conditions => "attachable_type = 'Client'"
-  has_many :variance_thresholds, :dependent=>:destroy
-  has_one :client_setting, :dependent=>:destroy
-  has_one :db_settings, :dependent=>:destroy
-  has_one :amp_users_phone_call, :dependent=>:destroy
-  has_many :suites
-  belongs_to :client
-  accepts_nested_attributes_for :portfolio_image, :allow_destroy => true
+  #has_one :client_logo_image, :class_name => 'PortfolioImage', :conditions => "attachable_type = 'Client'"
+  #has_many :variance_thresholds, :dependent=>:destroy
+  #has_one :client_setting, :dependent=>:destroy
+  #has_one :db_settings, :dependent=>:destroy
+  #has_one :amp_users_phone_call, :dependent=>:destroy
+  #has_many :suites
+  #belongs_to :client
+  #accepts_nested_attributes_for :portfolio_image, :allow_destroy => true
 
   #Validations
   #~ validates_presence_of :login,:if => Proc.new { |user| !user.is_shared_user && !user.is_set_password},:message=>"User name can't be blank"
