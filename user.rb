@@ -8,8 +8,8 @@ class User < ActiveRecord::Base
 
   #Attr accessor
   #attr_accessor :is_shared_user,:designation_check
-  attr_accessor :is_new_user,:is_asset_manager
-  attr_accessor :is_set_password, :is_asset_edit, :is_set_company,:ignore_password
+  #attr_accessor :is_new_user,:is_asset_manager
+  #attr_accessor :is_set_password, :is_asset_edit, :is_set_company,:ignore_password
 
   #Scope to find the user based on client admin ids
   scope :by_client_ids, (lambda do |client_id,email|
