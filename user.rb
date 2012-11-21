@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   include Authorization::AasmRoles
 
   #Attr accessor
-  attr_accessor :is_shared_user,:designation_check
+  #attr_accessor :is_shared_user,:designation_check
   attr_accessor :is_new_user,:is_asset_manager
   attr_accessor :is_set_password, :is_asset_edit, :is_set_company,:ignore_password
 
