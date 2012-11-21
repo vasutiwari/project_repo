@@ -7,9 +7,9 @@ class LeaseController < ApplicationController
   before_filter :prop_and_port_collection,:except=>['download_lease_doc','change_portfolio','getting_started','vacant_occupied_suites','rent_sch_tot_calc','rent_sch_persft_total_calc','rent_revenue_total_calc','item_destroy', 'get_property_suite_details','month_calc','stacking']
   before_filter :change_session_value, :only=>[:management,:pipeline, :alert,:stacking_plan,:budget,:encumbrance,:rent_roll,:suites, :dashboard_terms]
   before_filter   :check_property_access, :only=> [:management,:pipeline,:alert,:stacking_plan, :budget,:encumbrance,:rent_roll,:suites, :dashboard_terms]
-     if request.xhr?
-      unless @pdf
-        respond_to do |format|
+    # if request.xhr?
+     # unless @pdf
+      #  respond_to do |format|
           format.js {
             render :update do |page|
               page.replace_html  "show_assets_list", :partial => "/lease/management", :locals => {:note_collection => @note, :portfolio_collection => @portfolio_collection}
