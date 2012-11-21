@@ -1,0 +1,89 @@
+<% vacant_regualr_units,vacant_waterfront_units = get_vacant_units_for_waterfront_and_regular_units_graph %>
+<% rent_regualr_averages,rent_waterfront_averages = get_rent_units_for_waterfront_and_regular_units_graph %>
+<%note = @note
+dispaly_months = @dispaly_months
+%>
+<div class="container">
+    <div class="clearfloat">
+    </div>
+    <div class="content">
+        <div class="box-1col">
+            <div class="bdr-bottom-gry">
+                <div class="wrsTab fltLeft">
+                    <ul>
+                        <li class="wrsTabSelect" id="wrsTabMultifamily1" onclick="selectTab('wrsTabMultifamily', 'wrsTabContent', 'wrsTabSelect', 2, '1')">
+                            <a href="#" onclick="change_property_floor_plan_drop_down_values('vacancies_and_inquiries', <%= note.id %>, <%= params[:portfolio_id] %>)">Vacancies & Inquiries</a>
+                        </li>
+                        <li id="wrsTabMultifamily2" onclick="selectTab('wrsTabMultifamily', 'wrsTabContent', 'wrsTabSelect', 2, '2')">
+                            <a href="#" class="" onclick="change_property_floor_plan_drop_down_values('rent_analysis', <%= note.id %>, <%= params[:portfolio_id] %>)">Rent Analysis</a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="update_floor_plan_data">
+                    <%= render :partial => "display_property_floor_plan_drop_down" %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <div class="clearfloat">
+            </div>
+            <div id="wrsTabContent1">
+                <div id="show_weekly_graphs">
+                    <%= render :partial => "weekly_graphs" %>
+                </div>
+                <div id="show_time_based_tables">
+                    <%= render :partial => "multifamily_property_timeline_tables" %>
+                </div>
+            </div>
+            <div id="wrsTabContent2" style="display:none;">
+                <div id="show_rent_analysis_graph">
+                    <%= render :partial => "rent_analysis_graph" %>
+                </div>
+                <div class="clearfloat">
+                </div>
+                <% if note.present? && note.is_waterfront %>
+                <div class="fltLeft box2-colWhite">
+                    <div class="box-title">
+                        <span class="title">Vacancy Comparison (Waterfront vs Regular Units)</span>
+                    </div>
+                    <% if  check_empty_values(vacant_regualr_units) || check_empty_values(vacant_waterfront_units) %>
+                    <div id="vacant_waterfront_and_regular_units">
+                        <script>
+                            myChart = new FusionCharts("/FusionCharts/MSColumn3D.swf", 'FactorySum3', 400, 250, 0, 0);
+                            myChart.setDataXML("<chart showLabels='1' showvalues='0' decimals='0' yAxisMaxValue='100' yAxisName='Units'>    <categories>        <%dispaly_months.present? && dispaly_months.each do |dispaly_month| %><category label= '<%= dispaly_month.titleize%>'/><%end %>    </categories>    <dataset seriesName='Regular Units' color='#d5b34c' showValues='0'>        <%vacant_regualr_units.present? && vacant_regualr_units.each do |vacant_regualr_unit| %><set value='<%= vacant_regualr_unit%>' /><%end %>    </dataset>    <dataset seriesName='Waterfront Units' color='#b1c9dc' showValues='0'> <%vacant_waterfront_units.present? && vacant_waterfront_units.each do |vacant_waterfront_unit| %><set value='<%= vacant_waterfront_unit%>' /><%end %>    </dataset></chart>")
+                            myChart.render("vacant_waterfront_and_regular_units");
+                        </script>
+                    </div>
+                    <% else %>
+                    <div style="text-align: center; height: 40px;width: 277px; line-height: 60px;">
+                        Data Unavailable. Please Upload Weekly Data
+                    </div>
+                    <% end %>
+                </div>
+                <div class="fltrt box2-colWhite">
+                    <div class="box-title">
+                        <span class="title">Rent Comparison (Waterfront vs Regular Units)</span>
+                    </div>
+                    <% if  check_empty_values(rent_waterfront_averages) || check_empty_values(rent_regualr_averages) %>
+                    <div id="rent_waterfront_and_regular_units">
+                        <script>
+                            myChart = new FusionCharts("/FusionCharts/MSCombiDY2D.swf", 'FactorySum4', 400, 250, 0, 0);
+                            myChart.setDataXML("<chart PYAxisName='Rent'  showValues='0' decimals='3' setAdaptiveYMin='1' setAdaptiveSYMin='1' lineThickness='3' numberPrefix='$' showSecondaryLimits='0' showDivLineSecondaryValue='0'>    <categories>        <%dispaly_months.present? && dispaly_months.each do |dispaly_month| %><category label= '<%= dispaly_month.titleize%>'/><%end %>    </categories>    <dataset seriesname='Waterfront Avg. Rent' parentYAxis='P' color='#51d84f' renderAs='Line'>        <%rent_waterfront_averages.present? && rent_waterfront_averages.each do |rent_waterfront_average| %><set value='<%= rent_waterfront_average%>' /><%end %>    </dataset>    <dataset parentYAxis='P' seriesname='Regular Avg. Rent' color='#2690d3' renderAs = 'Line'>        <%rent_regualr_averages.present? && rent_regualr_averages.each do |rent_regualr_average| %><set value='<%= rent_regualr_average%>' /><%end %>    </dataset></chart>")
+                            myChart.render("rent_waterfront_and_regular_units");
+                        </script>
+                    </div>
+                    <% else %>
+                    <div style="text-align: center; height: 40px;width: 277px; line-height: 60px;">
+                        Data Unavailable. Please Upload Weekly Data
+                    </div>
+                    <% end %>
+                </div>
+                <div class="clear">
+                </div>
+                <% end %>
+            </div>
+            <div class="clearfloat">
+            </div>
+        </div>
+    </div>
+</div>

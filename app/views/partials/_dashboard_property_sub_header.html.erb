@@ -1,0 +1,84 @@
+<div class="navSubmenu dashboardLeasingSubMenu" id="dashboard_sub_tab" style="visibility:hidden;">
+  <%if all_properties.present?%>
+		
+		  
+			<%if params[:property_id].present? || session[:property__id].present?%>			
+        <a href="/nav_dashboard/dashboard?portfolio_id=<%=property_obj.try(:portfolio).try(:id)%>&property_id=<%=property_obj.try(:id)%>" class="loader_event" >Home</a>|
+      <%else%>
+        <a href="/nav_dashboard/dashboard?portfolio_id=<%=session[:portfolio__id].present? ? session[:portfolio__id] : property_obj.try(:portfolio).try(:id)%>" class="loader_event">Home</a>|
+      <%end%>
+		<%if current_user.try(:client).try(:is_financials_required)%>
+      <%if (params[:property_id].present? && controller_name == 'dashboard' && action_name == 'financial_info') || session[:property__id].present?%>
+        <a href="/dashboard/<%=property_obj.try(:portfolio).try(:id)%>/financial_info?property_id=<%=property_obj.try(:id)%>" class="<%= (controller_name == 'dashboard' && action_name == 'financial_info') ? 'selected' : '' %> loader_event" >Financial Info</a>|
+      <%else%>
+        <a href="/dashboard/financial_info?portfolio_id=<%=session[:portfolio__id].present? ? session[:portfolio__id] : property_obj.try(:portfolio).try(:id)%>" class="<%= (controller_name == 'dashboard' && action_name == 'financial_info') ? 'selected' : '' %> loader_event" >Financial Info</a>|
+      <%end%>
+    <%end%>
+
+    <%lease_type = session[:property__id].present? ? get_property_type_display(session[:property__id]) : get_portfolio_type_display(session[:portfolio__id])%>
+
+    <%if lease_type.eql?('Commercial') && session[:property__id].present? && session[:portfolio__id].blank?%>
+      <%= link_to "Leasing Info", property_commercial_leasing_info_path(portfolio_obj.try(:id), property_obj.try(:id)),:class => "#{(controller_name == 'dashboard' && action_name == 'property_commercial_leasing_info') ? 'selected' : ''} loader_event" %> |
+
+
+    <%elsif lease_type.eql?('Multifamily') && session[:property__id].present? && session[:portfolio__id].blank?%>
+      <%= link_to "Leasing Info", property_multifamily_leasing_info_path(portfolio_obj.try(:id), property_obj.try(:id)),:class => "#{(controller_name == 'dashboard' && action_name == 'property_multifamily_leasing_info') ? 'selected' : ''} loader_event" %> |
+
+
+    <%elsif lease_type.eql?('Commercial') && session[:portfolio__id].present? && session[:property__id].blank?%>
+      <a href="/dashboard/<%= session[:portfolio__id].present? ? session[:portfolio__id] : property_obj.try(:portfolio).try(:id)%>/portfolio_commercial_leasing_info" class="<%= (controller_name == 'dashboard' && action_name == 'portfolio_commercial_leasing_info') ? 'selected' : '' %> loader_event">Leasing Info</a>|
+
+
+    <%elsif lease_type.eql?('Multifamily') && session[:portfolio__id].present? && session[:property__id].blank?%>
+      <a href="/dashboard/<%= session[:portfolio__id].present? ? session[:portfolio__id] : property_obj.try(:portfolio).try(:id)%>/portfolio_multifamily_leasing_info" class="<%= (controller_name == 'dashboard' && action_name == 'portfolio_multifamily_leasing_info') ? 'selected' : '' %> loader_event">Leasing Info</a>|
+
+    <%else%>
+      <!--
+                            <a href="/dashboard/portfolio_commercial_leasing_info?portfolio_id=<%#= property_obj.try(:portfolio).try(:id)%>" class="<%#= (controller_name == 'dashboard' && action_name == 'leasing_info') ? 'selected' : '' %>">Leasing Info</a>|
+      -->
+      <a href="#"> Leasing Info </a>
+
+    <%end%>
+
+    <%if params[:property_id] || session[:property__id].present?%>
+      <a href="/dashboard/property_info?property_id=<%= property_obj.try(:id)%>&portfolio_id=<%= portfolio_obj.try(:id)%>" class="<%= (controller_name == 'dashboard' && action_name == 'property_info') ? 'selected' : '' %> loader_event">Property Info</a>
+    <%else%>
+      <!--	<a href="/dashboard/properties" class="<%#= (controller_name == 'dashboard' && action_name == 'properties') ? 'selected' : '' %>">Properties</a> 	-->
+    <%#= link_to "Properties", properties_path(:portfolio_id=> portfolio_obj.try(:id)), :class=> (controller_name == 'dashboard' && action_name == 'properties') ? 'selected' : '' %>
+
+    <%#if current_user.try(:client).try(:is_financials_required)%>
+      <%= link_to "Properties", welcomes_path(:portfolio_id=> portfolio_obj.try(:id),:from_property_tab => true), :class=> (controller_name == 'users' && action_name == 'welcome') ? 'selected' : '' %>
+    <%#else%>
+    <%#*<a class="disable">Properties</a>%>
+    <%#end%>
+
+    <%end%>
+    <%if (session[:property__id].present? && session[:portfolio__id].blank?)%>
+      |<%= link_to "Trends", property_trends_path(portfolio_obj.try(:id), property_obj.try(:id)), :class=> (controller_name == 'dashboard' && action_name == 'trends') ? 'selected' : '' %>
+    <%else%>
+      |<%= link_to "Trends", portfolio_trends_path(portfolio_obj.try(:id)), :class=> (controller_name == 'dashboard' && action_name == 'trends') ? 'selected' : '' %>
+    <%end%>
+
+
+  <%else%>
+    <a class="loader_event">Home</a> | <a class="loader_event">Financial Info</a> | <a class="loader_event">Leasing Info</a> | <a class="selected loader_event">Property Info</a> |
+  <%end%>
+
+</div>
+<script>
+jQuery(document).ready(function()
+	{
+	 if (jQuery('#dashboard_id').attr('class').indexOf('selected') !== -1)
+	  jQuery('#dashboard_sub_tab').css('visibility','visible');
+	}
+	);
+
+  jQuery('#dashboard_sub_tab').mouseover(function()
+	{
+    mousehover('dashboard_id','dashboard')
+	});
+
+	jQuery('#dashboard_sub_tab').mouseout(function(){
+    delayed_mouseout('dashboard_id');
+});
+</script>

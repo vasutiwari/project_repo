@@ -1,0 +1,27 @@
+<div class="adpsectiontitle" id >Property Management Systems :</div>
+<div class="adprowwrapper">
+  <%unless property_management_systems.empty?%>
+    <div class="tabulardataborder">
+      <div class="adpsectionheadblue" style="background-image: none">
+        <div class="adptabularcol1" style="width: 200px">S.No</div>
+        <div class="adptabularcol1" style="width: 200px">Name</div>
+        <!--commented temporarily<div class="adptabularcol1">Username</div>-->
+        <div class="adptabularcol1" style="width: 200px">Short code</div>
+      </div>
+      <% i = 0 %>
+      <% property_management_systems.each_with_index do |p, count| %>
+        <div class="<%=cycle('adpsectionheadwhite', 'adpsectionheadlightgray') %>" style="background-image: none" >
+          <div class="adptabularcol1" style="width: 200px"><%= i+= 1 %></div>
+          <div class="adptabularcol1" style="width: 200px"><%=display_truncated_chars(p.name, 30, true)   if p.name %></div>
+          <div class="adptabularcol1" style="width: 200px"><%=display_truncated_chars(p.short_code, 30, true)   if p.short_code %></div>
+          <div class="adptabularcol1"  style="width: 270px"><%=link_to image_tag("/images/edit.png", :alt=>"Edit",:border=>"0", :title=>'Edit'),edit_admin_property_management_system_path(p)%>&nbsp;&nbsp;&nbsp;&nbsp;<%=link_to image_tag("/images/new_icon_delete.gif", :alt=>"Delete",:border=>"0", :title=>'Delete'),admin_property_management_system_path(p),:method=>:delete,:confirm => 'You are going to delete this property management system'%></div>
+        </div>
+      <%end%>
+    </div>
+    <div class="bottomrow" style="background-image: none; float: right">
+      <%=will_paginate property_management_systems , :renderer => PaginationListLinkRenderer,:previous_label => "Previous",:next_label => "Next",:class => "bottomcol" %>
+    </div>
+  <%else%>
+    <h3>There is no property management system in the list...add one now !!</h3>
+  <%end%>
+</div>

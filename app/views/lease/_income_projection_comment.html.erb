@@ -1,0 +1,68 @@
+<%= lease_form.fields_for :income_projection do |income_projection_form| %>
+<div class="lssectionwrapper">
+    <div id="ReviewApprovals">
+        <div class="lsrowwrapper" style="float:none;">
+            Comments and Approvals  TTT
+        </div>
+        <div>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Comments
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                    <%=income_projection_form.text_area :comments, :size => "80x3", :class =>"lstextfield" %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <%= income_projection_form.fields_for :note do |note_form| %>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Review Notes
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                    <%=note_form.text_area :content, :size => "80x3", :class =>"lstextfield" %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Approval
+                </div>
+                <div class="incomename" style="margin:0 0 0 90px">
+                    By:
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                    <%=income_projection_form.text_field :approval_by, :size => "40", :class =>"lstextfield" %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <div class="incomenamerow">
+                <div class="incomename" style="margin:0 0 0 130px">
+                    Date:
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                    <%=income_projection_form.text_field :approval_date, :size => "40", :class =>"lstextfield" %>
+                    <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>">
+                    </input><input type="hidden" id = ":portfolio_id" name="portfolio_id" value ="<%=params[:portfolio_id]%>"><% unless @income_projection.new_record? %>
+                    <input type="hidden" id="income_projection_id" name="income_projection_id" value ="<%=@income_projection.try(:id)%>"><% end %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="suitesavebuttbor">
+    <div class="butwrapper2">
+        <div style="margin-left:188px;">
+            <%=income_projection_form.submit "Save" %>
+            <span>&nbsp;</span>
+        </div>
+    </div>
+</div>
+<% end %>
+

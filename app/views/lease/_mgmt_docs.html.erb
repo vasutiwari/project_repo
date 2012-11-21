@@ -1,0 +1,142 @@
+<script type="text/javascript">
+  form_name ="#mgmt_docs_form"
+  form_txt ="docs"
+  tab = "7"
+	add_attachment = 0;
+  activive_tab(form_txt)
+  trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+</script>
+<%folder_collection = @lease_folder%>
+<%if @pdf && !params[:partial_pages].split(',').index('1')%>
+<%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+<%end%>
+
+<div id="delet_lease_file">
+	<%portid=params[:portfolio_id]%>
+	<%propid=params[:property_id] ? params[:property_id] : params[:id]%>
+	<%propid=note_collection.id if @pdf%>
+		<%lease_folder =  Folder.find_by_real_estate_property_id_and_name_and_is_master(propid,"Lease Files",1)%>
+	<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update",:portfolio_id=>portid,:property_id=>propid}, :html=>{:target => "lease_doc_frame",:id=>"mgmt_docs_form", :multipart => true} do |lease_form| -%>
+			<div class="alertbody" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+			<!--for attachment form fields start-->
+				<div class="lsrowwrapper">Docs
+				<%unless @pdf%>
+				<div class="graybutton" id="add_attach_doc"  style="float:right; margin:0;">
+				<a href="" onclick="add_attachment_docs(<%=portid%>,<%=propid%>); return false;">Upload File</a><span>&nbsp;</span>
+				</div>
+				<%end%>
+				<div id='hide_doc' style="display:none;">
+					<div class="attachment_highlights lsrowwrapper" onmouseover="jQuery(this).css('background-color','#f6f6f6');" onmouseout="jQuery(this).css('background-color','#ffffff');" style="background-color: rgb(255, 255, 255);">
+					<div class='lsrowwrapper'>
+						<span class='closeme' onclick='add_hide_doc();return false;'>X</span>Attach File
+					</div>
+					<div class='termsform' style='padding-left:0px;'>
+						<%#= lease_form.fields_for :documents do |doc_form| %>
+							<%#if doc_form.object.new_record? %>
+								<%#= doc_form.file_field :uploaded_data,:onchange=>'document.forms.mgmt_docs_form.submit();'%>
+								<%#= doc_form.hidden_field :real_estate_property_id, :value => params[:property_id]%>
+								<%#= doc_form.hidden_field :folder_id, :value => lease_folder.try(:id)%>
+							<%#end%>
+						<%#end%>
+						<%#= lease_form.fields_for :documents do |doc_form| %>
+							<%#if !doc_form.object.new_record? %>
+								<%= file_field_tag :uploaded_data,:onchange=>'document.forms.mgmt_docs_form.submit();'%>
+								<%= hidden_field_tag :real_estate_property_id,params[:property_id]%>
+								<%= hidden_field_tag :folder_id,lease_folder.try(:id)%>
+							<%#end%>
+						<%#end%>
+						<!--<input type='file' name='doc_data_upload' id='filefield' onchange='document.forms.mgmt_docs_form.submit();'/>-->
+					</div>
+				</div>
+		</div></div>
+		<!--for attachment form fields end-->
+				<div class="lssectionwrapper noborder">
+					<%lease_docs(lease_folder,propid,@lease.id)%>
+					<%if @lease_docs.present?%>
+						<div class="docsrow boldtxt" style="border-top:1px solid #eee;">
+							<div class="docssname namefirst" style="width:455px;">File Name</div>
+							<div class="docssname" style="width:220px;">Uploaded by</div>
+							<%unless @pdf%><div class="docssname" style="width:65px;">Action</div><%end%>
+						</div>
+						<!--for document data display start-->
+								<%@lease_docs.each do |lease_doc|%>
+									<div class="docsrow">
+										<div class="docssname namefirst" style="width:455px;"><%=lease_doc.filename%></div>
+										<div class="docssname" style="width:220px;"><%=lease_doc.user.name.present? ? lease_doc.user.name : lease_doc.user.email%></div>
+										<%unless @pdf%>
+											<div class="docssname" style="width:65px;">
+												<a href="<%=download_doc_path(lease_doc.id)%>"><img src="/images/dispositions_due_icon3.png" title="download" width="16" height="16" align="absmiddle" /></a>
+												<a href="javascript:;" onclick = "if(confirm('Are you sure you want to delete this document?')){lease_file_delete(<%=lease_doc.id%>,<%=portid%>,<%=propid%>,<%=@lease.try(:id)%>);}return false;"> <img src="/images/delete.png" title="delete" width="16" height="16" align="absmiddle" /></a>
+											</div>
+										<%end%>
+									</div>
+								<%end%>
+						<%else%>
+							<div class='no-data'> No Data To Display </div>
+						<%end%>
+					<!--for document data display end-->
+				</div>
+			</div>
+				<input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+				<input type="hidden" id = "tab_id" name="tab_id" value ="7" > </input>
+				<input type="hidden" id = "form_txt" name="form_txt" value ="docs" > </input>
+				<input type="hidden" id = "property_id" name="property_id" value ="<%=propid%>" > </input>
+				<input type="hidden" id = "doc_form" name="doc_form" value ="false" > </input>
+				<input type="hidden" id = "doc_data" name="doc_data" value ="true" > </input>
+				<input type="hidden" id = "lease_id" name="lease_id" value ="<%=params[:lease_id]%>" > </input>
+				<input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>" > </input>
+  		 <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+		 <%= render "tmp_params", :params => params %>
+
+
+		<%unless @pdf%>
+    <div class="button-box">
+      <%if !@lease.try(:id).blank? %>
+        <% @lease_collection = Lease.find(@lease.id)%>
+				<span style="display:none" id ="approve_id">
+                                 <!--<input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(confirm('Are you sure you want to approve this lease ?'))mark_as_executed(<%#= @lease_collection.id %>,<%#=portfolio_collection.id%>,<%#=params[:property_id]%>,'interested_suite','approve');return false;}else{flash_writter('<%#=FLASH_MESSAGES['leases']['115']%>');return false;}"/>-->
+        </span>
+				<%unless is_leasing_agent%>
+				<span style="display:none" id ="execute_id">
+				  <%lease = @lease_collection%>
+					<%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+        	<%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+					<%if expiration!= 'false' && commencement != 'false'%>
+								<%vars = expiration < Date.today ? 'status_inactive' : 'execute' %>
+						<%else%>
+							  <%vars = 'false'%>
+					<%end%>
+				<%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+				  <!--<input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="if (<%#=lease.is_detailed_view == true%> && <%#=vars != 'false'%> && <%#=check%> && <%#=!lease.property_lease_suite.nil?%> && <%#=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){mark_as_executed(<%#= lease.id %>,<%#=portfolio_collection.id%>,<%#=params[:property_id]%>,'negotiated_suite','<%#=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0'); return false;}"/> -->
+        </span>
+      <%end%>
+      <%end%>
+    </div>
+  <%end%>
+	<%end%>
+	<iframe id="lease_doc_frame" name="lease_doc_frame" style="display: none"></iframe>
+</div>
+<style type="text/css">
+a img
+      {
+        border: none;
+      }
+</style>
+
+<script>
+<%if @lease%>
+jQuery(document).ready(function() {
+  update_print_pdf_link('<%=portid%>','<%=params[:property_id]%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+});
+<%end%>
+
+  if(variable == "nego_pipeline")
+	  {
+				jQuery('#execute_id').show();
+		}
+	if(variable == "inters_pipeline")
+	  {
+		  jQuery('#approve_id').show();
+		}
+</script>
+

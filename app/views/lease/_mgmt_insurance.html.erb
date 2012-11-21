@@ -1,0 +1,194 @@
+<script type="text/javascript">
+  form_name ="#mgmt_insurance_form"
+  form_txt ="insurance"
+  tab = "4"
+  add_attachment = <%=@lease.insurance.documents.count%>;
+  yield_calender('true');
+  activive_tab(form_txt)
+  pdf_click= 'false';
+  trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+</script>
+<%  prop_lease_suite,total_added_suites = params_formation %>
+<!-- these values will be pasted within the form_for
+      <input type="hidden" id = "tab_id" name="tab_id" value ="4" > </input>
+      <input type="hidden" id = "form_txt" name="form_txt" value ="insurance" > </input>
+-->
+<%portid=portfolio_collection.id%>
+<%propid=params[:property_id]%>
+
+<%if @pdf && !params[:partial_pages].split(',').index('1')%>
+  <%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+<%end%>
+
+<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update",:portfolio_id=>portid,:property_id=>propid}, :html=>{:target => "lease_insurance_frame", :multipart => true,:id=>"mgmt_insurance_form"} do |lease_form| -%>
+  <%= lease_form.fields_for :insurance do |insurance_form| %>
+    <div class="alertbody" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+      <div class="lebredcomseow2 marked"><%unless @pdf%> Marked fields required for sending alerts <%end%></div>
+      <!--insurance start-->
+      <%= render 'insurance_fields', :f => insurance_form %>
+      <!--insurance end-->
+      <!--for attach  files start-->
+      <%@value = 0%>
+      <div class="lsrowwrapper" style="color:#000 !important; padding:10px 0">Attach Certificate & Details</div>
+      <div class="insurancenamerow boldtxt">
+        <div class="insurancename namefirst" style="width:182px; text-align:center">Attachment</div>
+        <div class="insurancename" style="width:87px; text-align:center; margin:0 0 0 118px">Expiration</div>
+        <div class="insurancename" style="width:202px; text-align:center; margin:0 0 0 160px">Notes / Category Info</div>
+      </div>
+      <div class="lease_insurance_ex" id="doc_add_fields">
+        <%= insurance_form.fields_for :documents do |builder| %>
+          <%= render 'document_fields', :f => builder%>
+        <%end%>
+      </div>
+      <div class="insurancenamerow" id="add_attach_copies_of_files" style="margin:0;">
+        <%unless @pdf%><%= link_to_attach_copies"+ Attach Another Certificate & Details", insurance_form, :documents,"insurance_docs"%><%end%>
+      </div>
+      <!--for attach  files end-->
+      <div class="lssectionwrapper" style="padding-bottom:15px; background: url(/images/lease_insurancebody.png) repeat-y -28px 50% transparent;">
+        <div class="insurancenamerow boldtxt" style="padding:0; border-top:1px solid #EEEEEE;">
+          <div class="insurancename" style="border-bottom: 1px solid #EEEEEE; float: left;margin: 0; padding: 0; text-align: center; width: 459px; color:#000 !important; font-size:12px !important;">Requirement</div>
+          <div class="insurancename" style="border-bottom: 1px solid #EEEEEE; float: left;margin: 0; padding: 0; text-align: center; width: 291px; color:#000 !important; font-size:12px !important;">Tracking</div>
+        </div>
+        <div class="insurancenamerow boldtxt" style="padding:10px 0;">
+          <div class="insurancename namefirst" style="color:#000 !important; font-size:12px !important;">Categories</div>
+          <div class="insurancename" style="margin:0 0 0 106px;color:#000 !important; text-align:center; font-size:12px !important;">Required</div>
+          <div class="insurancename" style="margin:0 0 0 70px;color:#000 !important;font-size:12px !important;">Notes/Coverage</div>
+          <div class="insurancename" style="margin:0 0 0 90px;color:#000 !important; text-align:center;font-size:12px !important;">Required</div>
+          <div class="insurancename" style="margin:0 0 0 75px;color:#000 !important; font-size:12px !important;">Notes/Issues</div>
+        </div>
+        <!--for insurance catagories start-->
+        <%@insurance_value=1%>
+        <div class="lease_insurance" style="background:none;">
+          <!--[if IE 7]>
+                                                                                    <style>
+                                                                                    .insurancenamerow input[type=checkbox] {
+                                                                                            top:0px;
+                                                                                    }
+                                                                                    </style>
+                                                                            <![endif]-->
+          <%= insurance_form.fields_for :ins_categories do |builder| %>
+            <%= render 'ins_catag_fields', :f => builder,:insurance_value => @insurance_value%>
+          <%end%>
+        </div>
+        <!--for insurance catagories end-->
+      </div>
+      <!--for lease insurance contacts start-->
+      <div class="insurancenamerow" style="padding:10px 0">
+        <!--for broker contacts start-->
+        <div class="lstextnamebox" style=" width:150px; text-align:left;">Insurance Broker Contact</div>
+        <div class="lsfiledactive">
+          <%= insurance_form.text_field :broker_contact_name ,:type=>"text", :class=>"lstextfield", :style=>"width:200px"%>
+        </div>
+        <div class="hoursbox2">
+          <div class="lstextnamebox" style=" width:155px; text-align:right;">Broker Email</div>
+          <div class="lsfiledactive">
+            <%= insurance_form.text_field :broker_contact_email ,:type=>"text", :class=>"lstextfield", :style=>"width:200px"%>
+          </div>
+        </div>
+        <!--for broker contacts end-->
+        <!--for carrier contacts start-->
+        <div class="hoursbox2" style="margin-top:10px">
+          <div class="lstextnamebox" style=" width:150px; text-align:left;">Insurance Carrier Contact</div>
+          <div class="lsfiledactive">
+            <%= insurance_form.text_field :carrier_contact_name ,:type=>"text", :class=>"lstextfield", :style=>"width:200px"%>
+          </div>
+        </div>
+        <!--for carrier contacts end-->
+      </div>
+      <!--for lease insurance contacts end-->
+      <!--for Messages &amp; Communication Log with Tenant, Insurer start-->
+      <div class="lsrowwrapper"> Messages &amp; Communication Log with Tenant, Insurer</div>
+      <div class="lssectionwrapper">
+        <div class="hoursrow margin_left" style="margin:0 0 15px;">
+          <div class="lsfiledactive">
+            <%if @lease.insurance && @lease.insurance.messages_communication_log.present?%>
+              <%= insurance_form.text_area :messages_communication_log ,:class =>"expand25-300  textarea", :style=>"width:748px", :cols => "27", :rows => "3",:value => @lease.insurance.messages_communication_log, :onclick=>"if(this.value == 'Enter email ids here, separated by commas'){this.value = ''}",:onblur=>"if(this.value == ''){this.value = 'Enter email ids here, separated by commas';this.style.color='gray';}"%>
+            <%else%>
+              <%= insurance_form.text_area :messages_communication_log ,:class =>"expand25-300  textarea", :style=>"width:748px", :cols => "27", :rows => "3",:value => "Enter email ids here, separated by commas", :onclick=>"if(this.value == 'Enter email ids here, separated by commas'){this.value = ''}",:onblur=>"if(this.value == ''){this.value = 'Enter email ids here, separated by commas';this.style.color='gray';}"%>
+            <%end%>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--for Messages &amp; Communication Log with Tenant, Insurer end-->
+    <%= insurance_form.hidden_field :lease_id, :value => @lease.try(:id) %>
+    <input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="4" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="insurance" > </input>
+    <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" > </input>
+    <input type="hidden" id = "insurance_form" name="insurance_form" value ="false" > </input>
+    <input type="hidden" id = "lease_id" name="lease_id" value ="<%=params[:lease_id]%>" > </input>
+    <input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>" > </input>
+    <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+    <%= render "tmp_params", :params => params %>
+
+      <div class="button-box">
+			<%unless @pdf || @lease.is_archived%>
+        <input type="button" class="button-green" value="Save" onclick="jQuery('#mgmt_insurance_form').submit();"/>
+        <%if !@lease.try(:id).blank? %>
+          <% @lease_collection = Lease.find(@lease.id)%>
+          <span style="display:none" id ="approve_id">
+            <input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_insurance_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');}return false;}else{flash_writter('<%=FLASH_MESSAGES['leases']['115']%>');return false;}"/>
+          </span>
+          <%unless is_leasing_agent%>
+            <span style="display:none" id ="execute_id">
+              <%lease = @lease_collection%>
+              <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+              <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+              <%if expiration!= 'false' && commencement != 'false'%>
+                <%vars = expiration < Date.today ? 'status_inactive' : 'execute' %>
+              <%else%>
+                <%vars = 'false'%>
+              <%end%>
+              <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+							<%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline")%>
+              <input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="<%if check_status%> alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){jQuery('#mgmt_insurance_form').submit(); mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}<%end%>"/>
+            </span>
+          <%end%>
+        <%end%>
+			<%end%>
+      </div>
+  <%end%>
+<%end%>
+<iframe id="lease_insurance_frame" name="lease_insurance_frame" style="display: none"></iframe>
+<!--[if IE 7]>
+	<style>
+	.insurancenamerow input[type=checkbox] {
+		top:0px;
+	}
+	</style>
+	<![endif]-->
+<script type="text/javascript">
+  jQuery('.is_required').click(function () {
+    jQuery(this).attr('value','1');
+  });
+  jQuery('.is_received').click(function () {
+    jQuery(this).attr('value','1');
+  });
+</script>
+
+
+<script>
+<%if @lease%>
+    jQuery(document).ready(function() {
+		jQuery("textarea[class*=expand]").TextAreaExpander();
+      update_print_pdf_link('<%=params[:portfolio_id]%>','<%=params[:property_id]%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+    });
+<%end%>
+
+  if(variable == "nego_pipeline")
+  {
+    jQuery('#execute_id').show();
+  }
+  if(variable == "inters_pipeline")
+  {
+    jQuery('#approve_id').show();
+  }
+  jQuery(document).ready(function() {
+    if (add_attachment >= 5) {
+      jQuery('#add_attach_copies_of_files').hide();
+    }
+  });
+</script>
+
+

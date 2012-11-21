@@ -1,0 +1,50 @@
+			<%if insurance_value.eql?(1)%><div class="lsrowwrapper" style="color:#000 !important; padding:10px 0">General Liability</div><%elsif insurance_value.eql?(4)%><div class="lsrowwrapper" style="color:#000 !important; padding:10px 0">Others</div><%end%>
+				<div class="insurancenamerow">
+					<div class="lstextnamebox" style=" width:162px; text-align:left;"><%=insurance_value.eql?(1) ? "Property Damage" : insurance_value.eql?(2) ? "Personal Injury" : insurance_value.eql?(3) ? "Additional Endorsements" : insurance_value.eql?(4) ? "Workers Comp" : insurance_value.eql?(5) ? "Business Interruption" : insurance_value.eql?(6) ? "Fire/Casualty" : insurance_value.eql?(7) ? "Umbrella/Excess" : insurance_value.eql?(8) ? "Condemnation" : insurance_value.eql?(9) ? "Glass" : insurance_value.eql?(10) ? "Auto/ Business Vehicle" : insurance_value.eql?(11) ? "Product Liability" : insurance_value.eql?(12) ? "Personal property" : insurance_value.eql?(13) ? "Waiver of Subrogation" : ""%></div>
+					<div class="hoursbox2" style="width:266px;">
+						<div class="hoursbox2 chebox">
+							<%= f.check_box :is_required,{:class =>"is_required"},f.object.is_required%>
+						</div>
+						<div class="lsfiledactive" style="float:right">
+							<%#= f.text_area :notes_or_coverage_details,:rows => "1",:cols => "27"%>
+							<%= f.text_field :requirement_notes,:class=>"lstextfield",:style=>"width:200px"%>
+						</div>
+					</div>
+					<div class="hoursbox2" style="margin-left:35px;width:264px;">
+						<div class="hoursbox2 chebox">
+							<%= f.check_box :is_received,{:class =>"is_received"},f.object.is_received%>
+						</div>
+						<div class="lsfiledactive" style="float:right">
+							<%= f.text_field :tracking_notes,:class=>"lstextfield",:style=>"width:200px"%>
+						</div>
+					</div>
+				</div>
+	<%if insurance_value.eql?(1)%>
+		<%f.hidden_field :category_id, :value =>"1"%>
+	<%elsif insurance_value.eql?(2)%>
+	<%f.hidden_field :category_id, :value =>"2"%>
+		<%elsif insurance_value.eql?(3)%>
+	<%f.hidden_field :category_id, :value =>"3"%>
+		<%elsif insurance_value.eql?(4)%>
+	<%f.hidden_field :category_id, :value =>"4"%>
+		<%elsif insurance_value.eql?(5)%>
+	<%f.hidden_field :category_id, :value =>"5"%>
+		<%elsif insurance_value.eql?(6)%>
+	<%f.hidden_field :category_id, :value =>"6"%>
+		<%elsif insurance_value.eql?(7)%>
+	<%f.hidden_field :category_id, :value =>"7"%>
+		<%elsif insurance_value.eql?(8)%>
+	<%f.hidden_field :category_id, :value =>"8"%>
+		<%elsif insurance_value.eql?(9)%>
+	<%f.hidden_field :category_id, :value =>"9"%>
+		<%elsif insurance_value.eql?(10)%>
+	<%f.hidden_field :category_id, :value =>"10"%>
+		<%elsif insurance_value.eql?(11)%>
+	<%f.hidden_field :category_id, :value =>"11"%>
+		<%elsif insurance_value.eql?(12)%>
+	<%f.hidden_field :category_id, :value =>"12"%>
+		<%elsif insurance_value.eql?(13)%>
+	<%f.hidden_field :category_id, :value =>"13"%>
+	<%end%>
+	
+		<%@insurance_value+=1%>

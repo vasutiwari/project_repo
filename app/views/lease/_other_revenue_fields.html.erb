@@ -1,0 +1,40 @@
+<script type="text/javascript">
+  yield_calender('true');
+  current_real_id = '<%=params[:property_id]%>';
+</script>
+<div id="other_rev_field" class="fields">
+  <div class="rentnamerow close" onmouseover="jQuery(this).css('background-color','#f6f6f6');this.style.width='765px'" onmouseout="jQuery(this).css('background-color','#ffffff');this.style.width='750px'">
+    <div class="rentform other_rev_suite_class">
+      <%= f.text_field :other_revenue_type ,:type=>"text", :class=>"lstextfield", :style=>"width:80px"%>
+    </div>
+    <div class="rentform">
+      <%= f.text_field :billable_sqft,:type=>"text", :class=>"lstextfield", :style=>"width:78px",:precision => 2,:onblur=>"other_rev_calc(jQuery(this).val(),jQuery(this).attr('id'),'other_revenue_psf_and_tot_calc');"%>
+    </div>
+    <div class="rentform">
+      <%= f.text_field :from_date ,:type=>"text", :value => (f.object && f.object.from_date.present?) ? lease_date_format(f.object.try(:from_date)) : "mm/dd/yyyy", :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:70px", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%= f.text_field :to_date ,:type=>"text", :value =>(f.object && f.object.to_date.present?) ? lease_date_format(f.object.try(:to_date)) : "mm/dd/yyyy",:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:70px",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%= f.text_field :amount_per_month_per_sqft ,:type=>"text", :class=>"lstextfield", :style=>"width:78px;",:precision => 2,:onblur=>"other_rev_calc(jQuery(this).val(),jQuery(this).attr('id'),'other_revenue_tot_calc');"%>
+    </div>
+    <div class="rentform">
+      <%= f.text_field :amount_per_month,:type=>"text", :class=>"lstextfield", :style=>"width:78px;",:precision => 2,:onblur=>"other_rev_calc(jQuery(this).val(),jQuery(this).attr('id'),'other_revenue_psf_calc');"%>
+    </div>
+    <div class="rentform">
+      <%if @pdf%>
+        <span style="width:66px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.billing_freq == "" ? '' :  f.object.billing_freq%></span>
+      <%else%>
+        <%= f.select :billing_freq, options_for_select( OtherRevenue::BILLING_FREQ,f.object.billing_freq),{},html_options = {:class => "rentselect", :style=>"width:70px;"}%>
+      <%end%>
+    </div>
+    <span class="closeme" style="margin-top: -5px;"><%= link_to_remove_other_rev_fields "X", f%></span>
+  </div>
+</div>
+ <%#= f.hidden_field :suite_id, :value => nil %>
+
+
+

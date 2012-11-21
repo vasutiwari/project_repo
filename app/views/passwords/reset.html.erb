@@ -1,0 +1,25 @@
+	<% content_for :title , "AMP-Reset password" %>
+<% disply = flash[:error].nil? && !flash[:notice].nil? ?  flash[:notice] : ''  %>
+	<h2> Reset Password</h2>
+	<h3>Please enter a new password and confirm it.</h3>
+		<%= form_for :user, :url => { :action => 'update_after_forgetting' },:html=>{:id=>"reset_password"} do |f| %>
+			<div class="loginForm">
+			<% classname = flash[:error].nil? ? 'input' : 'inputError' %>
+			<div class="label">Name:</div>  <div class="inputBox"><%= @user.name %></div>
+			<div class="clearfix"></div>
+			<div class="label">Password:</div>
+			<div class="inputBox"><%= f.password_field :password, :class=>"#{classname}" %></div>
+			<% if !flash[:error].nil? %><div class="errormessage"><%=flash[:error] %></div><% end %>
+			<div class="clearfix"></div>
+			<div class="label">Password Confirmation:</div>
+			<div class="inputBox"><%= f.password_field :password_confirmation, :class=>"#{classname}" %></div>	
+			<!--<div class="errormessage">Error Message will come here</div>-->
+			<div class="clearfix"></div>
+			<%= hidden_field_tag :reset_code, params[:reset_code] %>
+			<div class="label">&nbsp;</div>
+			<div class="inputBox">
+			<div class="left"><!--<a class="button orange alignleft" href="#">Log In</a>--><%= submit_tag 'Reset Password',:class => "button alignleft" %></div>
+			</div>
+			<div class="clearfix"></div>
+			</div>
+<% end %>

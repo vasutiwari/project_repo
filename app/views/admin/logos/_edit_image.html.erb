@@ -1,0 +1,144 @@
+<div class="fieldiconcol">
+    <img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/>
+</div><%= fields_for :client,@client do |client_form| %>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Client Name :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%= client_form.text_field :name %>
+        <span style="color:red;font-size:12px;" class="errorprompt"><%= error_message_on :client, :name, 'Client ' %></span>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Client Email :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%= client_form.text_field :email %><span style="color:red;font-size:12px;"><%= error_message_on :client, :email %></span>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Host :
+    </div>
+    <div class="fieldinput">
+        <%= client_form.text_field :host %>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Contact Person:
+    </div>
+    <div class="fieldinput">
+        <%= client_form.text_field :contact_person %>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Chart of Accounts:
+    </div>
+    <div class="fieldinput">
+        <%= client_form.select :chart_of_accounts,(1..20).collect{|u|["Type  #{u}", u]} %>
+    </div>
+</div>
+<% end %>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Email Extensions :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%= text_area_tag :client_extension , (params[:client_extension].blank? ? portfolio_image.client_settings.map(&:extension).join(",").split(',').uniq.join(",") : params[:client_extension]),:cols => 39,:rows => 2 %>
+        <% if !flash.now[:extension_error].blank? %>
+        <% flash.now[:extension_error].each do |error| %>
+        <br/>
+        <span style="color:red;font-size:12px;"><%= error %></span>
+        <% end %>
+        <% end %>
+    </div>
+    <center>
+        - or -
+    </center>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Separate Emails :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%= text_area_tag :separate_email , (params[:separate_email].blank? ? portfolio_image.client_settings.map(&:separate_email).compact.join(",").split(",").uniq.join(",") : params[:separate_email]),:cols => 39,:rows => 1 %>
+        <% if flash.now[:separate_email_error].present? %>
+        <% flash.now[:separate_email_error].flatten.each do |error| %>
+        <br/>
+        <span style="color:red;font-size:12px;"><%= error %></span>
+        <% end %>
+        <% end %>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Browse Logo :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%= f.file_field :uploaded_data,:size => 24 %>
+        <br/>
+        <span style="color:red;font-size:12px;"><%= flash.now[:upload_error] %></span>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel myclass">
+        Accounting System Type :
+    </div>
+    <div class="fieldinput myclass">
+        <%= select_tag 'client_type[accounting_system_types]', options_for_select(AccountingSystemType.all.map{|x| [x.type_name,x.id]}, (@portfolio_image.client_settings.map(&:accounting_system_type_ids).flatten.uniq.blank? ? (AccountingSystemType.all.map(&:id)) : (portfolio_image.client_settings.map(&:accounting_system_type_ids).flatten.uniq))), { :multiple => true, :size =>4, :id => "client_type_accounting_system_types",:style=>"width:270px;"} %>
+    </div>
+</div>
+<%= fields_for :user do  |f| -%>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Admin Name :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%=f.text_field  :name %><span style="color:red;font-size:12px;"><%= error_message_on :user, :name %></span>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Admin Email :
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%=f.text_field :email %><span style="color:red;font-size:12px;"><%= error_message_on :user, :email %></span>
+    </div>
+</div>
+<div class="fieldrow">
+    <div class="fieldlabel">
+        Company Name:
+        <font color=red>
+            *
+        </font>
+    </div>
+    <div class="fieldinput">
+        <%=f.text_field :company_name %><span style="color:red;font-size:12px;"><%= error_message_on :user, :company_name %></span>
+    </div>
+</div>
+<%end %>

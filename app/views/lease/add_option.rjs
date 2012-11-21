@@ -1,0 +1,5 @@
+table_name = "#lssectionwrapper#{@option_section_number.to_i}"
+generate_option_table(page,table_name)
+# page.call "add_class_for_datepicker","date_of_note_#{@number}","maturity_#{@number}"
+#page.call "yield_calender" 
+@n = @option_section_number.to_i + 1

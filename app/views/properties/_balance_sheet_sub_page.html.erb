@@ -1,0 +1,113 @@
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+
+  partial_page="balance_sheet_subpage"
+  active_call="performance_review"
+  financial_sub = "<%=params[:financial_sub]%>"
+  financial_subid = "<%=params[:financial_subid]%>"
+</script>
+<script>
+<%if note_collection.gross_rentable_area && note_collection.gross_rentable_area!=0%>
+    grossRent=true;
+<%else%>
+    grossRent=false;
+<%end%>
+<%if note_collection.no_of_units && note_collection.no_of_units!=0%>
+    noOfUnits=true;
+<%else%>
+    noOfUnits=false;
+<%end%>
+</script>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id, :from=>"balance_sheet_subpage",:financial_sub=>params[:financial_sub],:financial_subid =>params[:financial_subid]} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_sqft_popup'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"balance_sheet_subpage",:financial_sub=>params[:financial_sub],:financial_subid =>params[:financial_subid]} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_unit_popup'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+
+<%if params[:financial_sub] == "transactions"%>
+    <%=render :partial=>"/properties/transactions.html.erb"%>
+<%else%>
+
+<div id ="portfolio_overview_property_graph">
+  <% if !time_line_actual.nil?  and !time_line_actual.empty? and !asset_details_collection.nil? and !asset_details_collection.empty?%>
+    <div class="financials_tablewrapper financials_tablewrapper_balance_sheet"  style="margin-left:168px;background-image: url(/images/asset_balance.png);">
+      <div style="z-index: 1450;" class="renttableheaderow renttableheaderow_balance_sheet headerBlueBg">
+        <div class="financials_tablelabel financials_tablelabel_balance" style="text-align:left;left:11px;">&nbsp;&nbsp;</div>
+        <div class="financials_tablelabel2 financials_tablelabel2_balance">Actuals $</div>
+      </div>
+      <% for asset_detail in asset_details_collection%>
+				  <%if color_display.nil?
+					 breadcrumb_in_financial(asset_detail.Title,asset_detail.Record_id)
+				   color_display =  @color_display
+					 end
+  			%>
+        <% if color_display && color_display == "income"
+          use_color = income_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+        else
+          use_color = expense_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+        end
+      %>
+        <div style="z-index: 1300;" class="tablecontentrow tablecontentrow_balance_sheet">
+          <div class="financials_tablelabel financials_tablelabel_balance hovehide"><%=raw "<img border=0 src=/images/asset_listicon.png ><span id='color_display' title=#{color_display}></span>"+subpages_in_financial_review(asset_detail.Title,asset_detail.Record_id)%></div>
+          <div class="financials_tablelabel2 financials_tablelabel2_balance"><%= params[:sqft_calc] ? display_currency_overview(asset_detail.Actuals.to_f / (@note.gross_rentable_area ? @note.gross_rentable_area.to_f : 1 ) ) : (params[:unit_calc] ? display_currency_overview(asset_detail.Actuals.to_f / (@note.no_of_units ? @note.no_of_units.to_f : 1 ) ) : display_currency_overview(asset_detail.Actuals.to_f))%></div>
+        </div>
+      <% end %>
+      <%if @total%>
+        <% for asset_detail in @total%>
+          <% if color_display && color_display == "income"
+            use_color = income_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+          else
+            use_color = expense_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+          end
+        %>
+          <div style="z-index: 1300;color:black;" class="tablecontentrow tablecontentrow_balance_sheet">
+            <div class="financials_subhead3 financials_tablelabel_balance_total">Total <%=asset_detail.Title.gsub(/\sdetail/,'').titleize %></div>
+            <div class="financials_tablelabel2 financials_tablelabel2_balance"><%=params[:sqft_calc] ? display_currency_overview(asset_detail.Actuals.to_f  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(asset_detail.Actuals.to_f  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(asset_detail.Actuals.to_f))%></div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<%else%>
+  <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+  <div  class="rhscontentrow rhscontentrowtime">
+    <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+    <% if note_collection.class == RealEstateProperty %>
+      <% note_name = note_collection.property_name %>
+    <% else %>
+      <% note_name = note_collection.note_id %>
+    <% end %>
+    <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+      <span style="font-size:13px;">Data Unavailable. Please add Asset Financial data at
+			<!--
+			<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+			<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+			.</span>
+    <% else %>
+      <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+    <% end %>
+  </div>
+<%end%>
+<%end%>
+<script>
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+//changeExplanantionText(last_renderer,active_sub_month)
+ jQuery('#yrForecast').hide();
+</script>

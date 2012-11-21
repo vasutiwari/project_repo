@@ -1,0 +1,14 @@
+<div id="sbox-window" style="" class="">
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+	<b>Message</b>
+	<a style="cursor: pointer;" onclick="Control.Modal.close();return false;" id="sbox-btn-close"></a>
+    <div class="dialog_light_center">
+		<%=find_comment(params[:resource],params[:type]) if params[:type] == "folder" || params[:type] == "document"%>
+    <%=find_comment_document_name(params[:resource],params[:type]) if params[:type] == "document_name"%>
+    <%=shared_doc_name_doc_comment(params[:resource]).comments if params[:type] == "document_name_document" && shared_doc_name_doc_comment(params[:resource]) != nil%>
+      <div class="dialog_second_center">
+        </div>
+    </div>
+  </div>
+</div>
+

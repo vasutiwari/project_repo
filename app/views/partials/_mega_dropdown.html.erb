@@ -1,0 +1,340 @@
+<%if is_leasing_agent%>
+<%
+    shared_folders = Folder.find_by_sql("SELECT * FROM folders WHERE id IN (SELECT folder_id FROM shared_folders WHERE is_portfolio_folder =1 AND user_id = #{current_user.id })")
+    shared_portfolios = Portfolio.where("is_basic_portfolio = false and id in (?) and leasing_type= 'Commercial' and name not in ('portfolio_created_by_system','portfolio_created_by_system_for_bulk_upload','portfolio_created_by_system_for_deal_room')",shared_folders.collect{|x| x.portfolio_id}) if !(shared_folders.nil? || shared_folders.blank?)
+    shared=  SharedFolder.includes(:folder=>:real_estate_property).where("shared_folders.is_property_folder = ? and shared_folders.user_id = ? and real_estate_properties.leasing_type= 'Commercial' and real_estate_properties.property_name not in ('portfolio_created_by_system','portfolio_created_by_system_for_bulk_upload','portfolio_created_by_system_for_deal_room')",true,current_user.id) if (shared_portfolios.nil? || shared_portfolios.blank?)
+		prop_ids = shared.map(&:real_estate_property_id) if shared
+		shared_properties = prop_ids.present? ? RealEstateProperty.where(:id=>prop_ids) : []
+%>
+
+  <% comm_portfolios = shared_portfolios || []%>
+  <% multi_portfolios = []%>
+  <% comm_properties = shared_properties%>
+  <% multi_properties = []%>
+
+<%else%>
+
+  <% comm_portfolios = (Portfolio.find_portfolios(current_user).uniq.select {|i| i.try(:leasing_type).eql?('Commercial')}).sort_by(&:name)%>
+
+  <% multi_portfolios = (Portfolio.find_portfolios(current_user).uniq.select {|i| i.try(:leasing_type).eql?('Multifamily')}).sort_by(&:name)%>
+
+  <%# comm_properties = RealEstateProperty.where("leasing_type= 'Commercial' and user_id= #{current_user.id} and property_name not in ('property_created_by_system','property_created_by_system_for_bulk_upload','property_created_by_system_for_deal_room')")%>
+
+	<%comm_properties = (RealEstateProperty.includes(:portfolios).find_owned_and_shared_properties_of_a_user(current_user.id,prop_folder=true).uniq.select {|i| i.try(:leasing_type).eql?('Commercial')}).sort_by(&:property_name)%>
+
+  <%# multi_properties = RealEstateProperty.where("leasing_type= 'Multifamily' and user_id= #{current_user.id} and property_name not in ('property_created_by_system','property_created_by_system_for_bulk_upload','property_created_by_system_for_deal_room')")%>
+
+	<%multi_properties = (RealEstateProperty.includes(:portfolios).find_owned_and_shared_properties_of_a_user(current_user.id,prop_folder=true).uniq.select {|i| i.try(:leasing_type).eql?('Multifamily')}).sort_by(&:property_name)%>
+
+<%end%>
+<%financial_access = current_user.try(:client).try(:is_financials_required)%>
+<%if all_properties.present?%>
+<div class="megaDdContainer">
+	<div class="megaDdHeader">
+		<a href="javascript:void(0)" id="ddBtn" class="ddBtnOpen" onmouseover="changeMegaBtn();"></a>
+		<div class="highlightTitle">
+
+		<%condition1 = (params[:property_id].present? || params[:id].present? || params[:nid].present? || session[:property__id].present?) && session[:portfolio__id].blank?%>
+		<%condition2 = (params[:portfolio_id].present? || params[:pid].present? || session[:portfolio__id].present?) && session[:property__id].blank?%>
+
+			<%if condition1%>Selected Property<%elsif condition2%>Selected Portfolio<%else%>Selected Portfolio<%end%>
+		</div>
+		<div class="padDiv">
+			<div>
+				<%if condition1%>
+				<%image = real_estate_property_image(note_collection.try(:id)) %>				
+				<%property = note_collection%>
+				<%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+				<%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>				
+				<img src=<%=image_src.present? ? image_src : "/images/pro-thumb-default.png"%> width="47" height="39" class="img fltlft" />
+				<%elsif condition2%>
+				<%image = portfolio_collection.try(:portfolio_image).try(:public_filename) %>
+				<img src=<%=image.present? ? image : "/images/pro-thumb-default.png"%> width="47" height="39" class="img fltlft" />
+				<%else%>
+				<%image = portfolio_collection.try(:portfolio_image).try(:public_filename) %>
+				<img src=<%=image.present? ? image : "/images/pro-thumb-default.png"%> width="47" height="39" class="img fltlft" />
+				<%end%>
+				<div class="ddProdInfo">
+					<b style="word-wrap:break-word;">
+					<%if condition1%>
+					<div>
+					<span id = "property_name_id" title="<%= note_collection.present? ? note_collection.property_name : 'temp property name'%>">
+					<b><%= note_collection.present? ? truncate(note_collection.property_name, :length=>36) : 'temp property name'%></b>
+					</span>
+					<br><span style="font-weight:normal;"> 	<%if (params[:property_id].present? || params[:id].present? || params[:nid].present? || session[:property__id].present?) && note_collection.try(:leasing_type).eql?("Commercial")%>
+					<%=calculations_commercial(note_collection).present? && calculations_commercial(note_collection) != 0  ? "#{number_with_delimiter(calculations_commercial(note_collection).to_i)} SF," : " "%>
+					<%elsif (params[:property_id].present? || params[:id].present? || params[:nid].present? || session[:property__id].present?) && note_collection.try(:leasing_type).eql?("Multifamily")%>
+
+					<%final_calc_multifamily = calculations_multifamily(note_collection)%>
+					<%unit_string = (final_calc_multifamily.to_i == 1) ? "Unit" : "Units"%>
+
+					<%=(final_calc_multifamily.present? && final_calc_multifamily.to_i != 0) ? "#{number_with_delimiter(final_calc_multifamily.to_i)} #{unit_string}," : " "%><%end%><%=note_collection.try(:property_type).name %></span><br><span style="font-weight:normal;"><%= note_collection.city.present? ? note_collection.city : note_collection.state%></span></div>
+					<%elsif condition2%>
+					<div title="<%= portfolio_collection.present? ? portfolio_collection.name : 'temp portfolio name'%>" id="<%=portfolio_collection.present? ? portfolio_collection.id : ''%>" class="portfolio_selected"><%= portfolio_collection.present? ? truncate(portfolio_collection.name, :length=>36) : 'temp portfolio name'%></div>
+					<%else%>
+					<div title="<%= portfolio_collection.present? ? portfolio_collection.name : 'temp portfolio name'%>"  id="<%=portfolio_collection.present? ? portfolio_collection.id : ''%>" class="portfolio_selected"><%= portfolio_collection.present? ? truncate(portfolio_collection.name, :length=>36) : 'temp portfolio name'%></div>
+					<%end%>
+					</b>
+				<%if (params[:action].eql?('show_pipeline') || params[:property_id].present? || (params[:id].present? && params[:property_selection].present?) || params[:nid].present? || session[:property__id].present?) && (note_collection.try(:leasing_type).eql?("Commercial") || note_collection.try(:leasing_type).eql?("Multifamily"))%>
+				<%else%>
+					<%#mega_dd_sqft_cals(portfolio_collection)%>
+					<%#=@total_sf.present? ? "#{number_with_delimiter(@total_sf.to_i)} SF" : "0 SF"%>
+					<%if portfolio_collection.try(:leasing_type).eql?("Commercial") && !params[:action].eql?("show_pipeline")%>
+					<%comm_prop_count = portfolio_collection.try(:real_estate_properties).uniq.map(&:leasing_type).delete_if{|x| x.eql?("Multifamily")}.compact.count%>
+					<%=comm_prop_count%> <%if comm_prop_count == 1%>Property<%else%>Properties<%end%><br/> <%mega_dd_sqft_cals(portfolio_collection)%><%=(@total_sf.present? && @total_sf != 0) ? "#{number_with_delimiter(@total_sf.to_i)} SF" : " "%>
+					<%elsif !params[:action].eql?("show_pipeline")%>
+					<%mult_prop_count = portfolio_collection.try(:real_estate_properties).uniq.map(&:leasing_type).delete_if{|x| x.eql?("Commercial")}.compact.count%>
+					<%=mult_prop_count%> <%if mult_prop_count == 1%>Property<%else%>Properties<%end%><br/> <%mega_dd_sqft_cals(portfolio_collection)%><%unit_string1 = (@total_sf == 1) ? "Unit" : "Units"%><%=(@total_sf.present? && @total_sf != 0) ? "#{number_with_delimiter(@total_sf.to_i)} #{unit_string1}" : " "%>
+					<%end%>
+					<%end%>
+				</div>
+			</div>
+		</div>
+	</div>
+	<%# portfolio = note_collection.try(:portfolio)%>
+
+	<%if params[:property_id].present?%>
+	<% portfolio = note_collection.try(:portfolio)%>
+	<%if is_leasing_agent%>
+	<%properties_list = portfolio.try(:real_estate_properties).where(:leasing_type=> "Commercial") & shared_properties%>
+	<%else%>
+	<% properties_list = portfolio.try(:leasing_type).eql?("Commercial") ? portfolio.try(:real_estate_properties).where(:leasing_type=> "Commercial") : portfolio.try(:leasing_type).eql?("Multifamily") ? portfolio.try(:real_estate_properties).where(:leasing_type=> "Multifamily") : nil%>
+	<%end%>
+	<%else%>
+	<%if is_leasing_agent%>
+	  <%properties_list = portfolio_collection.try(:real_estate_properties).where(:leasing_type=> "Commercial") & shared_properties%>
+	<%else%>
+	<% properties_list = portfolio_collection.try(:leasing_type).eql?("Commercial") ? portfolio_collection.try(:real_estate_properties).where(:leasing_type=> "Commercial") : portfolio_collection.try(:leasing_type).eql?("Multifamily") ? portfolio_collection.try(:real_estate_properties).where(:leasing_type=> "Multifamily") : nil%>
+	<%end%>
+	<%end%>
+	<%if session[:property__id].present?%>
+	<%var_prop = note_collection.present? ? note_collection : nil%>
+	<%else%>
+	<%var = portfolio.present? ? portfolio : portfolio_collection%>
+	<%end%>
+
+	<div id="mega-menu" class="ddOuter" style="display:none;">
+		<div style="padding-left:125px;">
+			<div class="tabs">
+			<%if session[:portfolio__id].present? && session[:property__id].blank?
+							portfolio_access = Portfolio.find_by_id_and_user_id(session[:portfolio__id],current_user.id) || SharedFolder.where(:user_id => current_user.id, :portfolio_id => session[:portfolio__id]).try(:first) %>
+				<%elsif session[:property__id].present? && session[:portfolio__id].blank?
+							property = RealEstateProperty.find_real_estate_property(session[:property__id],nil)
+							portfolio_access = Portfolio.find_by_id_and_user_id(property.try(:portfolio_id),current_user.id) || SharedFolder.where(:user_id => current_user.id, :portfolio_id => property.try(:portfolio_id)).try(:first) %>
+					<%end%>
+					<%count_var = portfolio_access.present? ? '5' : '4'%>
+
+				 <%if portfolio_access.present?%>
+				<h2 class="titledropdown">Selected Portfolio</h2>
+				<div id="tab5" class= " " >
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected',<%=count_var%>, '5');none_tab_for_no_portfolios();"><%= portfolio_collection.try(:name)%>  <span>(<%= is_leasing_agent.eql?(true) ? "0" : portfolio_collection.try(:real_estate_properties).try(:uniq).count rescue 0 %>)</span></a>
+				</div>
+					<%end%>
+
+				<h2 class="titledropdown" style="<%#if comm_portfolios.compact.count == 0 && multi_portfolios.compact.count == 0 %>display:block;<%#end%>">Portfolio</h2>
+				<div id="tab1" style="<%if comm_portfolios.compact.count == 0%>display:none;<%end%>" class=<%= var.try(:leasing_type).eql?("Commercial") ? 'tabSelected' : ''%> >
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected', <%=count_var%>, '1');none_tab_for_no_portfolios();">Commercial <span>(<%=  is_leasing_agent.eql?(true) ? "0" :  comm_portfolios.compact.uniq.count%>)</span></a>
+				</div>
+				<div id="tab2" style="<%if multi_portfolios.compact.count == 0%>display:none;<%end%>" class=<%= var.try(:leasing_type).eql?("Multifamily") ? 'tabSelected' : ''%> >
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected',<%=count_var%>, '2');none_tab_for_no_portfolios();">Multifamily <span>(<%= is_leasing_agent.eql?(true) ? "0" :   multi_portfolios.compact.uniq.count%>)</span></a>
+				</div>
+				<div id="tab6" style="<%if comm_portfolios.compact.count == 0 && multi_portfolios.compact.count == 0%>display:block;<%else%>display:none;<%end%>">
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected', <%=count_var%>, '6');">None <span>(0)</span></a>
+				</div>
+				<h2 class="titledropdown" style="<%if comm_properties.compact.count == 0 && multi_properties.compact.count == 0%>display:none;<%end%>">Property</h2>
+				<div id="tab3" style="<%if comm_properties.compact.count == 0%>display:none<%end%>" class=<%= var_prop.try(:leasing_type).eql?("Commercial") ? 'tabSelected' : ''%> >
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected', <%=count_var%>, '3');none_tab_for_no_portfolios();">Commercial <span>(<%= comm_properties.compact.uniq.count%>)</span></a>
+				</div>
+				<div id="tab4" style="<%if multi_properties.compact.count == 0%>display:none<%end%>;" class=<%= var_prop.try(:leasing_type).eql?("Multifamily") ? 'tabSelected' : ''%> >
+					<a href="javascript:void(0)" onmouseover="selectTab('tab', 'tabContentDiv', 'tabSelected', <%=count_var%>, '4');none_tab_for_no_portfolios();">Multifamily <span>(<%= multi_properties.compact.uniq.count%>)</span></a>
+				</div>
+
+			</div>
+			<div>
+				<div class="tabContentDiv closee" id="tabContentDiv1" style=<%= var.try(:leasing_type).eql?("Commercial") ? 'display:block;' : 'display:none;'%>>
+					<h2 class="fltlft">Portfolio > Commercial</h2>
+					<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent">
+					<%if comm_portfolios.present? && !is_leasing_agent %>
+						<ul>
+							<%comm_portfolios.each do |port| %>
+							<li class= <%=var.try(:id).eql?(port.id) ? 'current_selection' : ''%>>
+							<%image = port.portfolio_image.try(:public_filename) %>
+
+							<%last_prop_id = port.try(:real_estate_properties).try(:first).try(:id)%>
+							<%port_url = (((params[:controller].eql?("users") && params[:action].eql?("welcome")) || params[:action].eql?("property_info")) && financial_access ) ? "/dashboard/#{port.id}/properties" : ((params[:action].eql?("portfolio_multifamily_leasing_info") || params[:action].eql?("portfolio_commercial_leasing_info")  || params[:action].eql?("property_commercial_leasing_info") || params[:action].eql?("property_multifamily_leasing_info") || !financial_access) && !params[:controller].eql?("nav_dashboard")) ? "/dashboard/#{port.id}/portfolio_commercial_leasing_info" : params[:action].eql?("show_asset_files") ? "/files/#{port.id}?folder_id=#{Folder.folder_of_a_portfolio(port.id).try(:id)}&hide_var=true" : (params[:controller].eql?("collaboration_hub") && params[:action].eql?("index")) ?  "/collaboration_hub?portfolio_id=#{port.id}" :  (params[:controller].eql?("properties") && params[:action].eql?("show")) ? "/real_estate/#{port.id}/properties/#{last_prop_id}?portfolio_selection=true" :  (params[:controller].eql?("nav_dashboard") && params[:action].eql?("dashboard")) ? "/nav_dashboard/dashboard?portfolio_id=#{port.id}" : "/dashboard/#{port.id}/financial_info"%>
+
+							<a href="<%if is_leasing_agent%><%=goto_asset_view_path(current_user.id)%><%else%><%=port_url%><%end%>" class="loader_event">
+								<div><img src=<%=image.present? ? image : "/images/prepertyThumb.png"%> width="47" height="39" title="" alt="" class="fltlft"/>
+									<span class="mega_word_wrap" title="<%= port.name%>"><%=truncate(port.name, :length=>20)%></span>
+									<br />
+									<span class="mega_word_wrap_prop_offices"><%comm_prop_count1 = port.try(:real_estate_properties).uniq.map(&:leasing_type).delete_if{|x| x.eql?("Multifamily")}.compact.count%>
+									<%=comm_prop_count1%> <%if comm_prop_count1 == 1%>Property<%else%>Properties<%end%><br/> <%mega_dd_sqft_cals(port)%><%=(@total_sf.present? && @total_sf != 0 ) ? "#{number_with_delimiter(@total_sf.to_i)} SF" : ""%></span>
+									<br>
+									<%variable1 = port.try(:real_estate_properties).delete_if{|x| x.eql?("Multifamily")}.map(&:property_type_id)%>
+									<%string1 = PropertyType.where(:id=>variable1).map(&:name).compact.join(',')%>
+									<!--<span class="mega_word_wrap_prop_offices"><%#= string1%></span>-->
+
+								</div>
+								</a>
+							</li>
+							<%end%>
+						</ul>
+						<%else%>
+						No Data To Display
+				  <%end%>
+					</div>
+				</div>
+				<div class="tabContentDiv closee" id="tabContentDiv2" style=<%= var.try(:leasing_type).eql?("Multifamily") ? 'display:block;' : 'display:none;'%>>
+					<h2 class="fltlft">Portfolio > Multifamily</h2>
+					<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent">
+					<%if multi_portfolios.present? && !is_leasing_agent%>
+						<ul>
+							<%multi_portfolios.each do |port| %>
+							<li class= <%=var.try(:id).eql?(port.id) ? 'current_selection' : ''%>>
+							<%image = port.portfolio_image.try(:public_filename) %>
+							<%last_prop_id = port.try(:real_estate_properties).try(:first).try(:id)%>
+
+							<%port_url = (((params[:controller].eql?("users") && params[:action].eql?("welcome")) || params[:action].eql?("property_info")) && financial_access ) ? "/dashboard/#{port.id}/properties" :  ( (params[:action].eql?("portfolio_commercial_leasing_info") || params[:action].eql?("portfolio_multifamily_leasing_info") || params[:action].eql?("property_commercial_leasing_info") || params[:action].eql?("property_multifamily_leasing_info") || !financial_access) && !params[:controller].eql?("nav_dashboard")) ? "/dashboard/#{port.id}/portfolio_multifamily_leasing_info" : params[:action].eql?("show_asset_files") ? "/files/#{port.id}?folder_id=#{Folder.folder_of_a_portfolio(port.id).try(:id)}&hide_var=true" : (params[:controller].eql?("collaboration_hub") && params[:action].eql?("index")) ?  "/collaboration_hub?portfolio_id=#{port.id}" :  (params[:controller].eql?("properties") && params[:action].eql?("show")) ? "/real_estate/#{port.id}/properties/#{last_prop_id}?portfolio_selection=true" : (params[:controller].eql?("nav_dashboard") && params[:action].eql?("dashboard")) ? "/nav_dashboard/dashboard?portfolio_id=#{port.id}" : "/dashboard/#{port.id}/financial_info"%>
+
+							<a href="<%=port_url%>" class="mega_word_wrap loader_event">
+								<div><img src=<%=image.present? ? image : "/images/prepertyThumb.png"%> width="47" height="39" title="" alt="" class="fltlft"/>
+									<span class="mega_word_wrap" title="<%= port.name%>"><%=truncate(port.name, :length=>20)%></span>
+									<br />
+									<span class="mega_word_wrap_prop_offices"><%mult_prop_count1 = port.try(:real_estate_properties).uniq.map(&:leasing_type).delete_if{|x| x.eql?("Commercial")}.compact.count%>
+									<%=mult_prop_count1%> <%if mult_prop_count1 == 1%>Property<%else%>Properties<%end%><br/> <%mega_dd_sqft_cals(port)%><%unit_string2 = (@total_sf == 1) ? "Unit" : "Units"%><%=(@total_sf.present? && @total_sf != 0) ? "#{number_with_delimiter(@total_sf.to_i)} #{unit_string2}" : ""%></span>
+									<br>
+									<%variable2 = port.try(:real_estate_properties).delete_if{|x| x.eql?("Commercial")}.map(&:property_type_id)%>
+									<%string2 = PropertyType.where(:id=>variable2).map(&:name).compact.join(',')%>
+									<!--<span class="mega_word_wrap_prop_offices"><%#= string2%></span>-->
+								</div>
+								</a>
+							</li>
+							<%end%>
+						</ul>
+						<%else%>
+						No Data To Display
+				  <%end%>
+					</div>
+				</div>
+
+
+
+				<div class="tabContentDiv closee" id="tabContentDiv3" style=<%= var_prop.try(:leasing_type).eql?("Commercial") ? 'display:block;' : 'display:none;'%>>
+					<h2 class="fltlft">Property > Commercial</h2>
+					<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent-property" style="height:183px;">
+					<%if comm_properties.present?%>
+						<ul>
+							<%comm_properties.each do |prop| %>
+							<li class= <%=var_prop.try(:id).eql?(prop.id) ? 'current_selection' : ''%>>
+							<%image = real_estate_property_image(prop.id) %>							
+							<%property = prop%>
+				      <%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+				      <%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>							
+							<%comm_url = (params[:action].eql?("property_multifamily_leasing_info") || params[:action].eql?("portfolio_multifamily_leasing_info") || params[:action].eql?("portfolio_commercial_leasing_info"))? "/dashboard/#{prop.try(:portfolio_id)}/property_commercial_leasing_info/#{prop.id}" : url_formation_for_mega_drop_down(prop.try(:portfolio_id),prop.try(:id),prop.try(:leasing_type))%>
+								<a href="<%=comm_url%>" class="loader_event"><div><img src=<%=image_src.present? ? image_src : "/images/prepertyThumb.png"%> width="47" height="39" title="" alt="" class="fltlft"/><span class="mega_word_wrap_prop" title="<%=prop.property_name%>"><%= truncate(prop.property_name, :length=>13)%></span> <span class="smlfont"><%=calculations_commercial(prop).present? && calculations_commercial(prop) != 0  ? "#{number_with_delimiter(calculations_commercial(prop).to_i)} SF, " : " "%><%=prop.try(:property_type).name %></span>
+                      <span class="smlfont" title="<%= prop.city.present? ? prop.city : prop.state%>"><%= prop.city.present? ? truncate(prop.city, :length=>15) : truncate(prop.state, :length=>15)%></span></div></a>
+							</li>
+							<%end%>
+						</ul>
+						<%else%>
+						No Data To Display
+						<%end%>
+					</div>
+				</div>
+				<div class="tabContentDiv closee" id="tabContentDiv4" style=<%= var_prop.try(:leasing_type).eql?("Multifamily") ? 'display:block;' : 'display:none;'%>>
+					<h2 class="fltlft">Property > Multifamily</h2>
+					<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent-property" style="height:183px;">
+						<%if multi_properties.present?%>
+						<ul>
+							<%multi_properties.each do |prop| %>
+							<li class= <%=var_prop.try(:id).eql?(prop.id) ? 'current_selection' : ''%> >
+							<%image = real_estate_property_image(prop.id) %>							
+							<%property = prop%>
+				      <%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+				      <%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>							
+							<%multi_url = (params[:action].eql?("property_commercial_leasing_info") || params[:action].eql?("portfolio_commercial_leasing_info") || params[:action].eql?("portfolio_multifamily_leasing_info")) ? "/dashboard/#{prop.try(:portfolio_id)}/property_multifamily_leasing_info/#{prop.id}" : url_formation_for_mega_drop_down(prop.try(:portfolio_id),prop.try(:id),prop.try(:leasing_type))%>
+								<a href="<%=multi_url%>" class="loader_event"><div><img src=<%=image_src.present? ? image_src : "/images/prepertyThumb.png"%> width="47" height="39" title="" alt="" class="fltlft"/><span class="mega_word_wrap_prop" title="<%=prop.property_name%>"><%= truncate(prop.property_name, :length=>13)%></span>  <span class="smlfont">
+								<%final_calc_multifamily1 = calculations_multifamily(prop)%>
+					      <%unit_string3 = (final_calc_multifamily1.to_i == 1) ? "Unit" : "Units"%>
+								<%=final_calc_multifamily1.present? && final_calc_multifamily1 != 0 ? "#{number_with_delimiter(final_calc_multifamily1.to_i)} #{unit_string3}, " : " "%>
+								<%=prop.try(:property_type).try(:name) %></span>
+								<span class="smlfont" title="<%= prop.city.present? ? prop.city : prop.state%>"><%= prop.city.present? ? truncate(prop.city, :length=>15) : truncate(prop.state, :length=>15)%></span></div></a>
+							</li>
+							<%end%>
+						</ul>
+						<%else%>
+						No Data To Display
+						<%end%>
+					</div>
+				</div>
+					<div class="tabContentDiv closee" id="tabContentDiv5" style="display:none;">
+					<h2 class="fltlft"> <%= portfolio_collection.present? && portfolio_collection.try(:name)%> Property List </h2>
+						<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent-property" style="height:183px;">
+					<%if properties_list.present? %>
+						<ul>
+							<%properties_list.includes(:portfolios).uniq.sort_by(&:property_name).each do |prop| %>
+							<li class=<%=var_prop.try(:id).eql?(prop.id) ? 'current_selection' : ''%>>
+							<% image = real_estate_property_image(prop.id) %>							
+							<%property = prop%>
+				      <%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+				      <%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>							
+									<a href="<%= (params[:action].eql?("property_commercial_leasing_info") || params[:action].eql?("portfolio_commercial_leasing_info")) ? "/dashboard/#{prop.try(:portfolio_id)}/property_commercial_leasing_info/#{prop.id}"  :  (params[:action].eql?("portfolio_multifamily_leasing_info") || params[:action].eql?("property_multifamily_leasing_info")) ? "/dashboard/#{prop.try(:portfolio_id)}/property_multifamily_leasing_info/#{prop.id}" : url_formation_for_mega_drop_down(prop.try(:portfolio).try(:id),prop.try(:id),prop.try(:leasing_type))%>" class="loader_event"><div><img src=<%=image_src.present? ? image_src : "/images/prepertyThumb.png"%> width="47" height="39" title="" alt="" class="fltlft"/><span class="mega_word_wrap_prop" title="<%=prop.property_name%>"><%= truncate(prop.property_name, :length=>13)%></span>
+									<%if  prop.try(:leasing_type).eql?("Commercial") && !prop.try(:property_name).eql?("property_created_by_system")%>
+									<span class="smlfont"><%=calculations_commercial(prop).present? && calculations_commercial(prop) != 0  ? "#{number_with_delimiter(calculations_commercial(prop).to_i)} SF, " : " "%><%=prop.try(:property_type).name %> </span>
+									<span class="smlfont" title="<%= prop.city.present? ? prop.city : prop.state%>"><%= prop.city.present? ? truncate(prop.city, :length=>15) : truncate(prop.state, :length=>15)%></span>
+									<%elsif  prop.try(:leasing_type).eql?("Multifamily") && !prop.try(:property_name).eql?("property_created_by_system")%>
+									<span class="smlfont">
+									<%final_calc_multifamily2 = calculations_multifamily(prop)%>
+					       <%unit_string4 = (final_calc_multifamily2.to_i == 1) ? "Unit" : "Units"%>
+
+									<%=final_calc_multifamily2.present? && final_calc_multifamily2 != 0 ? "#{number_with_delimiter(final_calc_multifamily2.to_i)} #{unit_string4}, " : " "%>
+									<%=prop.try(:property_type).name %></span>
+									<span class="smlfont" title="<%= prop.city.present? ? prop.city : prop.state%>"><%= prop.city.present? ? truncate(prop.city, :length=>15) : truncate(prop.state, :length=>15)%></span>
+									<%end%>
+								</div></a>
+							</li>
+							<%end%>
+						</ul>
+					<%else%>
+						No Data To Display
+				  <%end%>
+					</div>
+				</div>
+
+
+				<div class="tabContentDiv closee" id="tabContentDiv6" style="display:none;">
+					<a href="javascript:void(0)" onclick="changeMegaBtn('mega-dd-btn'); " class="fltrt closeDiv">Close</a>
+					<div class="clearfloat"></div>
+					<div class="tabContent">
+						Notify the admin for access to portfolios.
+				  </div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+<%end%>
+
+<script>
+
+jQuery('body').click(function() {
+   jQuery('#mega-menu').hide();
+	 jQuery('#ddBtn').attr('className','ddBtnOpen');
+});
+
+jQuery('#ddBtn, #mega-menu').click(function(event){
+   event.stopPropagation();
+});
+</script>

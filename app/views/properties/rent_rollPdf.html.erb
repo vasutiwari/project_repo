@@ -1,0 +1,5 @@
+<%  if @note.leasing_type == 'Commercial' %>
+  <%#= render :partial => "/properties/rent_roll" %>
+<% else %>
+  <%= render :partial => "/properties/wres/rent_roll",:locals=>{:rent_roll_wres => @rent_roll_wres,:portfolio_collection => @portfolio,:note_collection => @note,:navigation_start_position => @navigation_start_position,:start_date => @start_date} %>
+<% end %>

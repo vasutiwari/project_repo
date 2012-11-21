@@ -1,0 +1,339 @@
+<style>
+  textarea {
+    clear: both;
+    display: block;
+    font-family: arial;
+    font-size: 1em;
+    width:40em;
+    padding: 2px 4px;
+  }
+</style>
+<%  prop_lease_suite,total_added_suites = params_formation %>
+<script type="text/javascript">
+  form_name ="#mgmt_cap_exp_form"
+  form_txt ="cap_exp"
+  tab = "3"
+  pdf_click= 'false';
+  other_exp_count = <%=@lease.cap_ex.other_exps.count%>;
+  add_tenant_improve_item = <%=@lease.cap_ex.tenant_improvements.count%>;
+  yield_calender('true');
+  activive_tab(form_txt);
+  trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+</script>
+
+<!-- these values will be pasted within the form_for
+      <input type="hidden" id = "tab_id" name="tab_id" value ="3" > </input>
+      <input type="hidden" id = "form_txt" name="form_txt" value ="cap_exp" > </input>
+-->
+
+<%if @pdf && !params[:partial_pages].split(',').index('1')%>
+  <%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+<%end%>
+
+<%portid=portfolio_collection.id%>
+<%propid=params[:property_id]%>
+<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update",:portfolio_id=>portid,:property_id=>propid}, :html=>{:target => "lease_cap_exp_frame",:id=>"mgmt_cap_exp_form"} do |lease_form| -%>
+  <%= lease_form.fields_for :cap_ex do |cap_ex_form| %>
+    <div class="alertbody" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+      <div class="lebredcomseow2 marked"><%unless @pdf%> Marked fields required for sending alerts <%end%></div>
+      <!--for tenant_improvements start-->
+      <div class="lsrowwrapper"> Tenant Improvements </div>
+      <div class="lssectionwrapper2" >
+        <div id = "capexadditem">
+          <div class="capexnamerow boldtxt">
+            <div class="capexname namefirst" style="width:95px;">Name</div>
+            <div class="capexname" style="width:90px;">Amt PSF($)</div>
+            <div class="capexname" style="width:90px;">Tot Amt($)</div>
+            <div class="capexname" style="width:110px;">Work start Date</div>
+            <div class="capexname" style="width:305px;">Notes/Suites</div>
+          </div>
+          <!--for tenant improvements form fields start-->
+            <%@tenant_add_item=1%>
+            <%= cap_ex_form.fields_for :tenant_improvements do |builder| %>
+              <%= render 'tenant_improvement_fields', :f => builder %>
+            <%end%>
+            <!--for tenant improvements form fields end-->
+            <%unless @pdf%>
+              <div class="capexnamerow rentnamerowtotal boldtxt" id="tenant_improve_total" style=" padding:5px 0;">
+                <div class="capexname namefirst" style="width:95px;">&nbsp;</div>
+                <div class="capexname" id="total_psf_amount" style="width:90px;"></div>
+                <div class="capexname" style="width:90px" id="amount_total"></div>
+              </div>
+            <%end%>
+          <%text = !@pdf ? "+ Add Item" : ''%>
+          <div id="add_item_tenant_improvement"><%= link_to_add_option_for_tenant_improvement "#{text}", cap_ex_form, :tenant_improvements,"tenant_improvement_item"%></div>
+
+          <!--<div class="hoursrow5 version" style="margin:10px 0"><a href="" id="hide_add_item_link" onclick="add_other_item++;add_tenant_improve_items(add_other_item); return false;">+Add Item</a></div>-->
+        </div>
+      </div>
+      <div class="lssectonwrapper"></div>
+      <!--for tenant_improvements end-->
+      <!--for leasing commissions start-->
+			<div class="lsrowwrapper"> Leasing Commissions
+
+				<span style="font-weight:normal">
+				<%if @lease.present? && @lease.cap_ex.present? && @lease.cap_ex.leasing_commissions.present? && !cap_ex_form.object.new_record? && params[:is_percentage] !='false' && @lease.cap_ex.is_percentage == true || (cap_ex_form.object.new_record?)%>
+					<label style="margin-right:16px; margin-left:313px;"><input id="percentage" name="radio" type="radio" value=""  checked="checked"/> Use Percentage</label>
+					<label><input id="total_amt" class="lease_com_radio" type="radio" value="" name="radio" /> Use Total Amt</label>
+				<%else%>
+					<label style="margin-right:16px; margin-left:313px;"><input id="percentage" name="radio" type="radio" value=""/> Use Percentage</label>
+					<label><input id="total_amt" class="lease_com_radio" type="radio" value="" name="radio"  checked="checked" /> Use Total Amt</label>
+				<%end%>
+				</span>
+
+			</div>
+      <div class="lssectionwrapper2">
+        <div class="capexnamerow boldtxt">
+          <div class="capexname namefirst" style="width:95px;border-bottom:1px solid #eee">Type</div>
+          <div class="capexname" style="width:90px;">&nbsp;</div>
+          <div class="capexname" id="percentage_for_years_title" style="width:304px; <%if !@pdf%>border-bottom:1px solid #eee<%end%>"><%if @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>Percentage for Years<%elsif !@pdf%>Percentage for Years<%end%></div>
+        </div>
+        <div class="capexnamerow boldtxt">
+          <div class="capexname namefirst" style="width:95px">&nbsp;</div>
+          <div class="capexname" style="width:90px;">Broker/ Agent</div>
+					<div class="use_percentage_title" >
+					<%if @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>
+						<div class="numbername" style="margin-left:15px;">1</div>
+						<div class="numbername">2</div>
+						<div class="numbername">3</div>
+						<div class="numbername">4</div>
+						<div class="numbername">5</div>
+						<div class="numbername">6</div>
+						<div class="numbername">7</div>
+						<div class="numbername">8</div>
+						<div class="numbername">9</div>
+						<div class="numbername">10</div>
+						<%elsif !@pdf%>
+						<div class="numbername" style="margin-left:15px;">1</div>
+						<div class="numbername">2</div>
+						<div class="numbername">3</div>
+						<div class="numbername">4</div>
+						<div class="numbername">5</div>
+						<div class="numbername">6</div>
+						<div class="numbername">7</div>
+						<div class="numbername">8</div>
+						<div class="numbername">9</div>
+						<div class="numbername">10</div>
+						<%end%>
+					</div>
+            <div class="use_tot_amt_title" style="<%if @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage != true%>display:block;<%elsif !@pdf || @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>display:none;<%end%>">
+							<div class="capexname" style="width:90px;">Tot Amt($)</div>
+							<div class="capexname" style="width:90px;">$/ SF</div>
+						</div>
+         <!-- <div class="numbername">&nbsp;</div>
+          <div class="capexname" style="width:84px">Tot Amt($)</div>
+          <div class="capexname" style="width:84px">$/ SF</div>-->
+        </div>
+        <!--for leasing commissions data start-->
+        <%@value=1%>
+        <%= cap_ex_form.fields_for :leasing_commissions do |builder| %>
+          <%= render 'leasing_commission_fields', :f => builder,:cap_ex => cap_ex_form %>
+        <%end%>
+				<input type="hidden" id = "is_percentage_name" name="is_percentage" value ="<%=@lease.try(:cap_ex).try(:is_percentage) %>" > </input>
+        <!--for leasing commissions data end-->
+      </div>
+      <!--for leasing commissions end-->
+      <div class="lsrowwrapper"> Other Exp</div>
+      <div class="lssectionwrapper">
+        <!--for other exp start-->
+        <div class="capexnamerow boldtxt">
+          <div class="capexname namefirst" style="width:110px">Name</div>
+          <div class="capexname" style="width:110px">Amt PSF($)</div>
+          <div class="capexname" style="width:110px">Tot Amt($)</div>
+          <div class="capexname" style="width:375px">Notes/Suites</div>
+        </div>
+        <!--other exp form fields start-->
+        <%@otherexp_add_item = 1%>
+        <%= cap_ex_form.fields_for :other_exps do |builder| %>
+          <%= render 'other_exp_fields', :f => builder %>
+        <%end%>
+        <!--other exp form fields end-->
+        <!--for other exp add items start-->
+        <div id="addig_exp" class="hoursrow5 version" style="margin:10px 0"><div id="add_item_otherexp"><%unless @pdf%><%= link_to_add_option_for_other_exp"+ Add Item", cap_ex_form, :other_exps,"other_exp_item" %><%end%></div></div>
+        <!--<div class="hoursrow5 version" style="margin:10px 0"><a href="" id="add_item_otherexp" onclick="add_other_exp_item++;add_other_exp_items(add_other_exp_item); return false;">+Add Item</a></div>-->
+        <!--for other exp add items end-->
+        <!--for other exp end-->
+        <!--for cap exp start-->
+        <%= render 'cap_ex_fields', :f => cap_ex_form%>
+        <!--for cap exp end-->
+
+      </div>
+    </div>
+
+    <%#= lease_form.hidden_field :real_estate_property_id, :value => params[:property_id] %>
+    <%#= lease_form.hidden_field :user_id, :value => current_user.id %>
+    <%= cap_ex_form.hidden_field :lease_id, :value => @lease.try(:id) %>
+    <input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="3" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="cap_exp" > </input>
+    <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" > </input>
+    <input type="hidden" id = "cap_exp_form" name="cap_exp_form" value ="false" > </input>
+    <input type="hidden" id = "lease_id" name="lease_id" value ="<%=params[:lease_id]%>" > </input>
+    <input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>" > </input>
+    <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+
+    <%= render "tmp_params", :params => params %>
+		  <div class="button-box">
+			<%unless @pdf || @lease.is_archived%>
+        <input type="button" class="button-green" value="Save" onclick="jQuery('#mgmt_cap_exp_form').submit();"/>
+        <%if !@lease.try(:id).blank? %>
+          <% @lease_collection = Lease.find(@lease.id)%>
+          <span style="display:none" id ="approve_id">
+            <input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_cap_exp_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');}return false;}else{flash_writter('<%=FLASH_MESSAGES['leases']['115']%>');return false;}"/>
+          </span>
+          <%unless is_leasing_agent%>
+            <span style="display:none" id ="execute_id">
+              <%lease = @lease_collection%>
+              <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+              <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+              <%if expiration!= 'false' && commencement != 'false'%>
+                <%vars =  expiration < Date.today  ? 'status_inactive' : 'execute' %>
+              <%else%>
+                <%vars = 'false'%>
+              <%end%>
+              <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+							<%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline")%>
+              <input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="<%if check_status%> alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){jQuery('#mgmt_cap_exp_form').submit(); mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}<%end%>"/>
+            </span>
+          <%end%>
+        <%end%>
+			 <%end%>
+      </div>
+
+<iframe id="lease_cap_exp_frame" name="lease_cap_exp_frame" style="display: none"></iframe>
+<script>
+
+<%if @lease%>
+    jQuery(document).ready(function() {
+		jQuery("textarea[class*=expand]").TextAreaExpander();
+      update_print_pdf_link('<%=portid%>','<%=propid%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+    });
+<%end%>
+
+  if(variable == "nego_pipeline")
+  {
+    jQuery('#execute_id').show();
+  }
+  if(variable == "inters_pipeline")
+  {
+    jQuery('#approve_id').show();
+  }
+  jQuery(document).ready(function() {
+    if (add_tenant_improve_item >= 5) {
+      jQuery('#add_item_tenant_improvement').hide();
+    }
+    if (other_exp_count >= 5) {
+      jQuery('#add_item_otherexp').hide();
+    }
+  });
+	//cap_ex_is_percenatge =  <%=(@lease.present? && @lease.cap_ex.present? && @lease.cap_ex.leasing_commissions.present? && !cap_ex_form.object.new_record? && params[:is_percentage] !='false' && @lease.cap_ex.is_percentage == true || (cap_ex_form.object.new_record? && params[:is_percentage] !='false' && !params[:is_percentage].blank?)) ? true : false%>
+	cap_ex_is_percenatge =  <%=(@lease.present? && @lease.cap_ex.present? && @lease.cap_ex.leasing_commissions.present? && !cap_ex_form.object.new_record? && params[:is_percentage] !='false' && @lease.cap_ex.is_percentage == true || (cap_ex_form.object.new_record?)) ? true : false%>
+			jQuery("#percentage").change(function(){
+				var sum =0
+                jQuery(".lease_tot_amt").each(function(e){
+                      val = jQuery(this).val()
+                      if(val!="" || val.length != 0)
+                           sum = sum + parseFloat(val)
+                       })
+					    if (sum > 0)
+                           var flag = confirm("Are you sure want to delete ?");
+                       else
+                         flag = true;
+						if (flag) {
+							jQuery('.for_use_percentage').show();
+							jQuery('.for_use_total_amount').hide();
+							jQuery('.use_percentage_title').show();
+							jQuery('.use_tot_amt_title').hide();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_total_amount').hide();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_dollar_per_sf').hide();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_total_amount').hide();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_dollar_per_sf').hide();
+							jQuery('#percentage_for_years_title').show();
+							jQuery('#for_use_total_amount_1').hide();
+							jQuery('#for_use_per_sf_1').hide();
+							jQuery('#for_use_total_amount_2').hide();
+							jQuery('#for_use_per_sf_2').hide();
+							jQuery('#for_use_total_amount_3').show();
+	    	      jQuery('#for_use_per_sf_3').show();
+							jQuery('#is_percentage_name').attr('value', 'true');
+							jQuery('.lease_com').val("");
+					}
+					else {
+						jQuery('#total_amt').attr('checked', 'true');
+					}
+			});
+
+
+	jQuery("#total_amt").change(function(){
+		var sum=0
+				jQuery(".check_percentage").each(function(e){
+					var val = jQuery(this).val()
+                    if(val!="" || val.length != 0)
+                       sum = sum + parseFloat(val)
+                     })
+					 bonus_total_amount = jQuery("#lease_cap_ex_attributes_leasing_commissions_attributes_2_total_amount").val()
+					if ((sum > 0) || (bonus_total_amount != "" || bonus_total_amount.length != 0))
+                           var flag = confirm("Are you sure want to delete ?");
+                       else
+                         flag = true;
+						if (flag) {
+							jQuery('.for_use_percentage').hide();
+							jQuery('.for_use_total_amount').show();
+							jQuery('.use_percentage_title').hide();
+							jQuery('.use_tot_amt_title').show();
+							jQuery('#percentage_for_years_title').hide();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_total_amount').show();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_dollar_per_sf').show();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_total_amount').show();
+							jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_dollar_per_sf').show();
+							jQuery('#for_use_total_amount_3').hide();
+							jQuery('#for_use_per_sf_3').hide();
+							jQuery('#is_percentage_name').attr('value', 'false');
+							jQuery('.lease_com').val("");
+						}
+					else {
+						jQuery('#percentage').attr('checked', 'true');
+					}
+	});
+
+if(cap_ex_is_percenatge==false)
+{
+		jQuery('.for_use_percentage').hide();
+		jQuery('.for_use_total_amount').show();
+		jQuery('.use_percentage_title').hide();
+		jQuery('.use_tot_amt_title').show();
+		jQuery('#percentage_for_years_title').hide();
+		jQuery('#for_use_total_amount_3').hide();
+		jQuery('#for_use_per_sf_3').hide();
+		jQuery('#for_use_total_amount_1').hide();
+		jQuery('#for_use_per_sf_1').hide();
+	  jQuery('#for_use_total_amount_2').hide();
+		jQuery('#for_use_per_sf_2').hide();
+		jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_total_amount').show();
+		jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_dollar_per_sf').show();
+		jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_total_amount').show();
+		jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_dollar_per_sf').show();
+}
+ jQuery(document).ready(function() {
+			if(cap_ex_is_percenatge!=false)
+			{
+ 				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_total_amount').hide();
+				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_0_dollar_per_sf').hide();
+				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_total_amount').hide();
+				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_1_dollar_per_sf').hide();
+				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_2_total_amount').show();
+				jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_2_dollar_per_sf').show();
+				jQuery('#for_use_total_amount_3').show();
+	    	jQuery('#for_use_per_sf_3').show();
+				jQuery('#for_use_total_amount_1').hide();
+	    	jQuery('#for_use_per_sf_1').hide();
+				jQuery('#for_use_total_amount_2').hide();
+	    	jQuery('#for_use_per_sf_2').hide();
+			}
+ });
+
+
+
+</script>
+  <%end%>
+<%end%>

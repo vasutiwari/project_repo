@@ -1,0 +1,71 @@
+<div class="fltlft mgnL3 maginR20">
+  <%if trend_graph.present?%>
+  <%
+    a = {"income detail"  => "Operating Revenue","operating income"  => "Operating Revenues"}
+    title = a[params[:selected_link].strip].present? ? a[params[:selected_link].strip] : params[:selected_link].strip.gsub(' detail','').gsub(' Detail','')
+  %>
+  <div class="box-title"><span class="title" <%if params[:tl_period] == "11"%>title="<%= title.titleize %> Trailing 12 Months vs Trailing 13 to 24 Months"<%end%>><%if  !params[:tl_period].present? || params[:tl_period] == "4"%><%= title.titleize %> <%= params[:tl_year].to_i - 1%> vs <%= params[:tl_year]%><%elsif params[:tl_period] == "3"%><%= title.titleize %> <%= params[:tl_year].to_i - 1%> vs <%= params[:tl_year]%><%elsif params[:tl_period] == "11"%><%= title.titleize %> T 12 Mo vs T 13 to 24 Mo<%end%></span></div>
+  <%else%>
+  <div class="box-title"><span class="title"><%if  !params[:tl_period].present? || params[:tl_period] == "4"%>YTD Trend<%elsif params[:tl_period] == "3"%>Last Year Trend<%elsif params[:tl_period] == "11"%>Trailing 12 Months Trend<%end%></span></div>
+  <%end%>
+  <div class="graph" id="trendGraph1"></div>
+  <div class="graph" id="trendGraph2" style="display:none;">No data to display</div>
+  <%if trend_graph.present?%>
+    <%if local_operating_trend_graph.present? || local_operating_trend_graph1.present? %>
+      <%
+      month_array = params[:tl_period] == "4" ? @month_array : month_array
+      month_array_string = params[:tl_period] == "4" ? @prev_month_array_string : month_array_string
+    %>
+      <%if params[:tl_period] == "3"%>
+        <script>
+          myChart = new FusionCharts("/FusionCharts/MSCombi2D.swf",'OperatingTrend', 434, 275, 0, 0);
+          myChart.setDataXML("<chart palette='2' caption='<%= params[:tl_year].to_i - 1%> vs <%= params[:tl_year]%> ' subCaption='' showValues='0' divLineDecimalPrecision='1' limitsDecimalPrecision='1' PYAxisName='Amount' SYAxisName='Quantity' numberPrefix='$' formatNumberScale='1'><categories ><%month_array_string.present? && month_array_string.each do |month|%><category label= '<%= month.split('-')[0].titleize%>'/><%end%></categories><dataset seriesName='<%= params[:tl_year].to_i - 1%>' color='1e8bd1' anchorBorderColor='1e8bd1' ><%month_array.present? && month_array.each_with_index do |month,i|%><set value='<%= (@second_last_operating_trend.present? ? @second_last_operating_trend["#{@second_last_operating_trend.keys}"][month] : 0)%>' /><%end%></dataset><dataset seriesName='<%= params[:tl_year]%>' color='ef663a' anchorBorderColor='ef663a' renderAs='Area'><%month_array.present? && month_array.each_with_index do |month,i|%><set value='<%= (@operating_trend.present? ? @operating_trend["#{@operating_trend.keys}"][month] : 0 )%>' /><%end%></dataset></chart>");
+          myChart.render("trendGraph1");
+        </script>
+      <%elsif params[:tl_period] == "11"%>
+        <%
+        current_trailing,prev_trailing = {},{}
+        if @operating_trend.present? && @operating_trend["#{@operating_trend.keys}"].present? && @operating_trend1.present? && @operating_trend1["#{@operating_trend1.keys}"].present?
+          current_trailing = @operating_trend["#{@operating_trend.keys}"].merge(@operating_trend1["#{@operating_trend1.keys}"]){|key, first, second| first.to_i + second.to_i }
+        elsif @operating_trend.present? && @operating_trend["#{@operating_trend.keys}"].present?
+          current_trailing = @operating_trend["#{@operating_trend.keys}"]
+        elsif @operating_trend1.present? && @operating_trend1["#{@operating_trend1.keys}"].present?
+          current_trailing = @operating_trend1["#{@operating_trend1.keys}"]
+        end
+        if @second_last_operating_trend.present? && @second_last_operating_trend["#{@second_last_operating_trend.keys}"].present? && @second_last_operating_trend1.present? && @second_last_operating_trend1["#{@second_last_operating_trend1.keys}"].present?
+          prev_trailing = @second_last_operating_trend["#{@second_last_operating_trend.keys}"].merge(@second_last_operating_trend1["#{@second_last_operating_trend1.keys}"]){|key, first, second| first.to_i + second.to_i }
+        elsif @second_last_operating_trend.present? && @second_last_operating_trend["#{@second_last_operating_trend.keys}"].present?
+          prev_trailing = @second_last_operating_trend["#{@second_last_operating_trend.keys}"]
+        elsif @second_last_operating_trend1.present? && @second_last_operating_trend1["#{@second_last_operating_trend1.keys}"].present?
+          prev_trailing = @second_last_operating_trend1["#{@second_last_operating_trend1.keys}"]
+        end
+      %>
+        <script>
+          myChart = new FusionCharts("/FusionCharts/MSCombi2D.swf",'OperatingTrend', 434, 275, 0, 0);
+          myChart.setDataXML("<chart palette='2' caption='<%=  params[:tl_period].eql?("11") ? "#{params[:tl_year].to_i - 2}-#{params[:tl_year].to_i - 1} vs #{params[:tl_year].to_i - 1}-#{params[:tl_year].to_i}" : params[:tl_year].to_i - 1%>' subCaption='' showValues='0' divLineDecimalPrecision='1' limitsDecimalPrecision='1' PYAxisName='Amount' SYAxisName='Quantity' numberPrefix='$' formatNumberScale='1'><categories ><%month_array_string.present? && month_array_string.each do |month|%><category label= '<%= month.split('-')[0].titleize%>'/><%end%></categories><dataset seriesName='Last Year' color='1e8bd1' anchorBorderColor='1e8bd1' ><%month_array.present? && month_array.each_with_index do |month,i|%><set value='<%= (prev_trailing.present? ? prev_trailing[month] : 0)%>' /><%end%></dataset><dataset seriesName='This Year' color='ef663a' anchorBorderColor='ef663a' renderAs='Area'><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (current_trailing.present? ? current_trailing[month] : 0 )%>' /><%end%></dataset></chart>");
+          myChart.render("trendGraph1");
+        </script>
+      <%else%>
+        <script>
+          myChart = new FusionCharts("/FusionCharts/MSCombi2D.swf",'OperatingTrend', 434, 275, 0, 0);
+          myChart.setDataXML("<chart palette='2' caption='<%= params[:tl_year].to_i - 1%> vs <%= params[:tl_year]%>' subCaption='' showValues='0' divLineDecimalPrecision='1' limitsDecimalPrecision='1' PYAxisName='Amount' SYAxisName='Quantity' numberPrefix='$' formatNumberScale='1'><categories ><%month_array_string.present? && month_array_string.each do |month|%><category label= '<%= month.split('-')[0].titleize%>'/><%end%></categories><dataset seriesName='Last Year' color='1e8bd1' anchorBorderColor='1e8bd1' ><%month_array_string.present? && month_array_string.each_with_index do |month,i|%><set value='<%= (@operating_trend1.present? ? @operating_trend1["#{@operating_trend1.keys}"][month.split('-')[0]] : 0)%>' /><%end%></dataset><dataset seriesName='This Year' color='ef663a' anchorBorderColor='ef663a' renderAs='Area'><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (@operating_trend.present? ? @operating_trend["#{@operating_trend.keys}"][month] : 0 )%>' /><%end%></dataset></chart>");
+          myChart.render("trendGraph1");
+        </script>
+      <%end%>
+    <%else%>
+      <div style="text-align: center; height: 251px;width: 434px; line-height: 219px;">No data available </div>
+    <%end%>
+  <%else%>
+    <%if operating_trend_rev.present? || operating_trend_exp.present? ||  operating_trend_noi.present? || operating_trend_cap.present? || operating_trend_cash.present? || operating_trend_maint.present? %>
+      <script>
+        myChart = new FusionCharts("/FusionCharts/MSLine.swf",'OperatingTrend', 434, 275, 0, 0);
+        myChart.setDataXML("<chart numdivlines='9' lineThickness='2' showValues='0' numVDivLines='12' numberPrefix='$' formatNumberScale='1' labelDisplay='ROTATE' slantLabels='0' anchorRadius='2' anchorBgAlpha='50' 	showAlternateVGridColor='1' anchorAlpha='100' animation='1' limitsDecimalPrecision='0' divLineDecimalPrecision='1' bgColor='FFFFFF,FFFFFF,FFFFFF'><categories ><%month_array_string.present? && month_array_string.each do |month|%><category label= '<%= month.titleize%>'/><%end%></categories><dataset seriesName='Op Rev' color='1e8bd1' anchorBorderColor='1e8bd1' ><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (operating_trend_rev.present? && operating_trend_rev[month] && operating_trend_rev[month] != 0.0 ? operating_trend_rev[month] : nil)%>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>'/><%end%></dataset><dataset seriesName='Op Exp' color='ef663a' anchorBorderColor='ef663a'><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (operating_trend_exp.present? && operating_trend_exp[month] && operating_trend_exp[month] != 0.0 ? operating_trend_exp[month] : nil )%>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>'/><%end%></dataset><dataset seriesName='NOI' color='2ad62a' anchorBorderColor='2ad62a'><%month_array.present? && month_array.each_with_index do |month,i|%> <%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (operating_trend_noi.present? && operating_trend_noi[month] && operating_trend_noi[month] != 0.0 ? operating_trend_noi[month] : nil)%>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>'/><%end%></dataset><dataset seriesName='Cap Exp' color='dbdc26' anchorBorderColor='dbdc26'><%month_array.present? && month_array.each_with_index do |month,i|%> <%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (operating_trend_maint.present? && operating_trend_maint[month] && operating_trend_maint[month] != 0.0 ? operating_trend_maint[month] : nil) || (operating_trend_cap.present? && operating_trend_cap[month] && operating_trend_cap[month] != 0.0 ? (operating_trend_cap[month].to_f * -1) : nil)%>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>&page_refer=capital'/><%end%></dataset><dataset seriesName='Cash' color='ab3ce5s' anchorBorderColor='ab3ce5s'><%month_array.present? && month_array.each_with_index do |month,i|%> <%month_selected = find_graph_month(month.split("-")[0])%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=first_two_digit_year+month_array_string[i].split("-")[1]%><set value='<%= (operating_trend_cash.present? && operating_trend_cash[month] && operating_trend_cash[month] != 0.0 ? operating_trend_cash[month] : nil)%>'  link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>&page_refer=cash' /><%end%></dataset></chart>");
+        myChart.render("trendGraph1");
+      </script>
+    <%else%>
+      <div style="text-align: center; height: 251px;width: 434px; line-height: 219px;">No data available </div>
+    <%end%>
+  <%end%>
+</div>
+
+

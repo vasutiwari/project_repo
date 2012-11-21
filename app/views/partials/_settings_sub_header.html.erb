@@ -1,0 +1,54 @@
+<%property_collection = property_obj %>
+<div class="navSubmenu settingSubmenu" style="visibility:hidden;"  id="settings_sub_tab">
+	<%#if tab_collection != "4"%>
+	<%p params[:from_debt_summary]%>
+		<a onclick="clear_email_id_tb();activate_settings_tabs('basic');form_txt='basic';set_tab(1,'basic');if(check_variance_threshold()){if(document.getElementById('real_estate_property_property_name') != null){}; if(check_image_type()){add_property_form_submit(form_name); <%#if property_collection.valid? && !property_collection.address.nil?%>form_name='#basic_details_form'; <%#end%>}}"  style="display:none;cursor: pointer;" class="hide_tabs <%if params[:from_property_details] !='true' && params[:call_from_variances] != 'true' &&  params[:from_debt_summary] !='true' &&  params[:highlight_users_form] !='true'%>selected<%end%>" id="tabactive1">Basic</a>		
+		<a href="/real_estates/add_property/<%=property_collection.portfolio_id%>/?property_id=<%=property_collection.id%>&highlight_basic_form=true&folder_revoke=true" method="put" style="width:16,height:16,border:0;"  id="tabactive1" class="show_tabs <%if params[:highlight_basic_form] == 'true'%>selected<%end%>">Basic</a>
+		|
+		<a onclick="clear_email_id_tb();activate_settings_tabs('property');form_txt='property';remove_extra_space();deactivate_click('property_onclick');if(check_variance_threshold()){ if(check_image_type()){set_tab(2,'property');add_property_form_submit(form_name); <%#if property_collection.valid? && !property_collection.address.nil?%>form_name='#property_form';<%#end%>}} " style="display:none;cursor: pointer;" class="hide_tabs <%if params[:from_property_details] =='true'%>selected<%end%>" id="tabactive2">Property</a>
+		<a href="/real_estates/add_property/<%=property_collection.portfolio_id%>/?property_id=<%=property_collection.id%>&from_property_details=true&folder_revoke=true" method="put" style="width:16,height:16,border:0;"  id="tabactive2" class="show_tabs <%if params[:from_property_details] == 'true'%>selected<%end%>">Property</a>
+		|		
+		<a onclick ="clear_email_id_tb();activate_settings_tabs('loan');form_txt='loan';remove_extra_space();deactivate_click('loan_onclick');if(check_variance_threshold()){if(check_image_type()){set_tab(3,'loan');add_property_form_submit(form_name);  <%#if property_collection.valid? && !property_collection.address.nil?%> form_name='#loan_form'; <%#end%>}}" style="display:none;cursor: pointer;" class="hide_tabs <%if params[:from_debt_summary] =='true'%>selected<%end%>" id="tabactive3">Debt</a>		
+		<a href="/real_estates/add_property/<%=property_collection.portfolio_id%>?property_id=<%=property_collection.id%>&from_debt_summary=true&folder_revoke=true" method="put" style="width:16,height:16,border:0;"  id="tabactive3" class="show_tabs <%if params[:from_debt_summary] == 'true'%>selected<%end%>">Debt</a>		
+		|
+		<a onclick="clear_email_id_tb();activate_settings_tabs('users');form_txt='users';remove_extra_space();deactivate_click('users_onclick');if(check_variance_threshold()){if(check_image_type()){set_tab(5,'users');add_property_form_submit(form_name); <%#if property_collection.valid? && !property_collection.address.nil?%>form_name='#users_form';<%#end%>}} " style="display:none;cursor: pointer;" class="hide_tabs <%if params[:highlight_users_form] =='true'%>selected<%end%>" id="tabactive4">Users</a>		
+		  <a href="/real_estates/add_property/<%=property_collection.portfolio_id%>/?property_id=<%=property_collection.id%>&highlight_users_form=true&folder_revoke=true" method="put" style="width:16,height:16,border:0;"  id="tabactive4" class="show_tabs <%if params[:highlight_users_form] == 'true'%>selected<%end%>">Users</a>
+		<%if current_user.try(:client).try(:is_financials_required)%>
+		|
+		<a onclick="clear_email_id_tb();activate_settings_tabs('variances');form_txt='variances';remove_extra_space();deactivate_click('variances_onclick');if(check_image_type()){set_tab(6,'variances');add_property_form_submit(form_name); <%#if property_collection.valid? && !property_collection.address.nil?%>form_name='#variances_form';<%#end%>} " style="display:none;cursor: pointer;" class="hide_tabs <%if params[:call_from_variances] =='true'%>selected<%end%>" id="tabactive5">
+					Variances</a>
+					 <a href="/real_estates/add_property/<%=property_collection.portfolio_id%>/?property_id=<%=property_collection.id%>&call_from_variances=true&folder_revoke=true" method="put" style="width:16,height:16,border:0;"  id="tabactive5" class="show_tabs <%if params[:call_from_variances] == 'true'%>selected<%end%>">Variances</a>
+		<%end%>					
+		<%if property_collection && is_commercial(property_collection)%>
+			|			
+			<a onclick="clear_email_id_tb();activate_settings_tabs('alerts');form_txt='alerts';remove_extra_space();deactivate_click('alerts_onclick');if(check_variance_threshold()){if(check_image_type()){set_tab(8,'alerts');add_property_form_submit(form_name); <%#if property_collection.valid? && !property_collection.address.nil?%>form_name='#alerts_form';<%#end%>}}" style="display:none;cursor: pointer;" class="hide_tabs" id="tabactive6">
+						Alerts</a>						
+						<a href="/real_estates/add_property/<%=property_collection.portfolio_id%>/?property_id=<%=property_collection.id%>&folder_revoke=true&call_from_alerts=true" method="put" style="width:16,height:16,border:0;"  id="tabactive6" class="show_tabs <%if params[:call_from_alerts] == 'true'%>selected<%end%>">Alerts</a>
+		<%end%>
+	<%#end%>
+</div>
+
+<script>
+jQuery(document).ready(function()
+	{
+	settings_tab_mousehover(<%= params[:call_from_alerts].present? ? params[:call_from_alerts] : 'false'%>)
+	}
+	);	
+	jQuery(window).load(function(){
+   jQuery('.suitemid').show();
+});
+
+ jQuery('#settings_sub_tab').mouseover(function()
+	{
+    mousehover('settings_id','settings')
+	});
+	
+	jQuery('#settings_sub_tab').mouseout(function(){
+    delayed_mouseout('settings_id');
+});
+
+function clear_email_id_tb(){
+if(jQuery('#collaborator_list'))
+{jQuery('#collaborator_list').val('');}
+}
+</script>

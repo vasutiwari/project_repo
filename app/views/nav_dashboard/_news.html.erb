@@ -1,0 +1,70 @@
+<!-- Added for news display start-->
+<script type="text/javascript">
+	var countnews=0;
+  google.load("feeds", "1");
+  String.prototype.truncate = function(length) {
+    if (this.length > length) {
+      return this.slice(0, length - 3) + "...";
+    } else {
+      return this;
+    }
+  };
+  // Our callback function, for when a feed is loaded.
+  function feedLoaded(result) {
+    if (!result.error) {
+      var div_content = jQuery('#content').get();
+      //jQuery(div_content).empty()
+      for (var i = 0; i < result.feed.entries.length; i++) {
+        var entry = result.feed.entries[i];
+        var myString = entry.link;
+        s=myString.substr(myString.length - 1);
+        if (s=="/"){
+          entry.link=myString.substring(0, myString.length - 1)
+        }
+        var pub_date = entry.publishedDate;
+				var currentDate = new Date(pub_date);
+				var day = currentDate.getDate();
+				var month = currentDate.getMonth() + 1;
+				var year = currentDate.getFullYear();
+				var pub_date_final=(day + "/" + month + "/" + year);
+        countnews=countnews+1;
+				if (countnews!=8){
+					a='<div class="newdata"><div class="floatL marginRB10"><img src="/images/newsbox_icon.png" width="33" alt="" title="" /></div><div><a href="/home/news?dash_link='+entry.link+' &id='+countnews+'" class = "dash_news_link" title="'+entry.title+'" value = '+entry.link+' target="_blank">' +entry.title.truncate(150) + '</a><br /><span class="textgry">'+pub_date_final+'</span></div></div>'
+					jQuery(a).appendTo(div_content);
+				}
+      }
+    }
+  }
+
+  function OnLoad(val) {
+    // Create a feed instance that will grab Digg's feed.
+    var feed = new google.feeds.Feed(val);
+    feed.setNumEntries(2);
+    // Calling load sends the request off.  It requires a callback function.
+    feed.load(feedLoaded);
+  }
+  //~ google.setOnLoadCallback(OnLoad);
+</script>
+<!-- Added for news display end-->
+<div class="updatbox floatR"><h1>News</h1>
+	<div id='content'></div>
+		<%#google_parsing%>
+		<%#xmlUrl = []%>
+		<%#-for  j in 1..@parent_title_count%>
+			<%#v=@child[j]["children"]%>
+			<%#title=v[1].attributes["title"].value%>
+			<%#if !title.nil?%>
+				<%#xmlUrl<<v[1].attributes["xmlUrl"].value%>
+			<%#end%>
+		<%#end%>
+		<a href="/home/news" class="floatR vmore">View More</a>
+</div>   
+<script>
+<%#if !xmlUrl.nil?%>
+    OnLoad("http://www.cpexecutive.com/category/property-types/multi-family/feed/")
+    OnLoad("http://www.cpexecutive.com/category/property-types/office/feed/")
+    OnLoad("http://www.cpexecutive.com/category/property-types/retail/feed/")
+    OnLoad("http://www.cpexecutive.com/category/property-types/industrial/feed/")
+<%#else%>
+<%#end%>
+</script>

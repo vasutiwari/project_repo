@@ -1,0 +1,56 @@
+<%user_id=current_user.id%>
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+		<div class="dialog_light_center" style="width:351px;">
+				<div class="dialog_second_center">
+					<div class="uploadwrapper">
+						<div class="" style="width:457px;padding-top:0px;">
+							<div class="uploadlabelrow">
+									<div class="newfolder_fieldlabel" style="font-weight:normal;">
+
+									<div style="padding:15px; background:#fff;" >
+									<div class="boldtxt" style="margin-bottom:20px; font-size:14px !important;">Portfolios<div>
+									<%if @portfolios.present?%>
+										<div style="height:31px; overflow:hidden;">
+											<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+											<thead>
+												<tr>
+													<th align="center"  width="89" height="30">S.No</th>
+													<th align="center"  width="186">Property Name</th>
+												<!--	<th align="center"  width="85" height="30">Days Vacant</th>-->
+												</tr>
+											</thead>
+										</table>
+									</div>
+										<%width1="97"%>
+										<%width2="178"%>
+										<%width3="85"%>
+									<div style="max-height:336px; overflow-x: hidden; overflow-y:auto; margin-top:0px;">
+										<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+											<%@portfolios.each_with_index do |portfolio,k|%>
+											<tbody>
+												<tr class="<%= cycle("odd", "even") %>">
+													<td align="center" width=<%=width1%>><%=k+1%></td>
+													<td align="" width=<%=width2%>><a href="/client_admin/<%=user_id%>/portfolios/<%=portfolio.id%>/edit"><span style="margin-left:5px;"><%=portfolio.name%></span></a></td>
+								<!--					<td align="center" width=<%#=width3%>>test</td>-->
+												</tr>
+											</tbody>
+											<%end%>
+										</table>
+								</div>
+             <%else%>
+             No Data to Display
+             <%end%>
+              </div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+  </div>
+	<a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>

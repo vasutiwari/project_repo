@@ -1,0 +1,11 @@
+<script>
+  share  = true;
+  folder = true;
+  file = false;
+</script>
+<div class="basicbodycontainer" style="height:auto;width:625px;">
+  <%permalink_generation_for_folder(params[:id])%>
+  <%=render :partial=>"/collaborators/share_link_send_folder"%>
+  <h4> &nbsp;</h4>
+  <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>

@@ -1,0 +1,66 @@
+<div style="z-index: 0;margin-bottom: 20px;" class="listofownedbox">
+	<div class="listheadingbox">
+		<div class="listimgbox"><img border="0" width="13" height="12" src="/images/executivearrow.png">
+		</div>
+		<div class="listtextbox">
+			List of Owned Servers
+		</div>
+	</div>
+	<div class="addserverrow5">
+		<div class="addserversno">
+			S.No.
+		</div>
+		<div class="addserverurl">
+			Server URL
+		</div>
+		<div class="addserveractions">
+			Actions
+		</div>
+	</div>
+	<%if @db_settings_list.present?%>
+	<%@db_settings_list.each_with_index do |list, count|%>
+	
+	<div class="addserverrow" style="z-index:<%= 5000-count*1%>">
+		<div class="addserversno2">
+			<%= params[:db_page] ? (5*(params[:db_page].to_i-1)+count+1) : (count+1) %>
+		</div>
+		<div class="addserverurl2">
+			<%= list.server_url  if list.server_url%>
+		</div>
+		<div class="addserveractions2">
+			<div onmouseout="this.className='dummy2'" onmouseover="this.className='userwrapperon'" class="dummy2">
+				<div class="userwrapper5">
+					<span class="dataoption3"><a href="#"></a>
+						<div class="userdrop5">
+						<div class="bordertopline"></div>
+							<div class="row5">
+								<div class="icon5"><img border="0" width="16" height="16" src="/images/white_edit.png">
+								</div>
+								<div class="labe5">
+									<a href="<%= edit_admin_db_setting_path(:id=>list, :from=>params[:page])%>">Edit</a>
+								</div>
+							</div>
+							<div class="row5">
+								<div class="icon5"><img border="0" width="16" height="16" src="/images/delete.png">
+								</div>
+								<div class="labe5">
+									<%= link_to "Delete", admin_db_setting_path(list),:method=>:delete,:confirm => 'Are you sure want to delete this settings?'%>
+								</div>
+							</div>
+						</div> </span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<%end%>
+	<% else %>
+	<div class="addadminrow" style="z-index: 5000;background-image: none;text-align: center;padding: 10px 0px 10px 0px;" >
+		No Server (Admin) Details Added
+	</div>
+	<%end%>
+</div>
+<% if @db_settings_list.present?%>
+<div class="bottomrow" style="background-image: none; float: right;padding-top:2px;">
+	<%= will_paginate @db_settings_list, :param_name =>  'db_page', :renderer => PaginationListLinkRenderer,:previous_label => "Previous",:next_label => "Next",:class => "bottomcol" %>
+</div>
+<% end %> 

@@ -1,0 +1,58 @@
+	<div class="box-3col-small-das fltlft marginL5">
+      <div class="box-title"><span class="title"><%if  !params[:tl_period].present? || params[:tl_period] == "4" || params[:tl_period] == "11"%>Current Occupancy<%elsif params[:tl_period] == "3"%>Last Year Occupancy<%end%></span></div>			
+			<%prop_collection = RealEstateProperty.find_real_estate_property(params[:property_id])%>
+			<%if prop_collection && prop_collection.try(:leasing_type) == "Commercial"%>
+				<%path_for_rent_roll = "/lease/#{params[:portfolio_id]}/rent_roll/#{params[:property_id]}/property_rentroll"%>
+			<%elsif prop_collection && prop_collection.try(:leasing_type) == "Multifamily"%>
+				<%path_for_rent_roll = "/performance_review_property/rent_roll?portfolio_id=#{params[:portfolio_id]}&id=#{params[:property_id]}&property_id=#{params[:property_id]}&partial_page=rent_roll_highlight&tl_year=#{Time.now.year}&from_lease=ya"%>
+			<%end%>
+      <div class="value-box">
+        <%if occupancy_sqft.present?  && occupancy_sqft != "0"%><%if session[:property__id].present? && session[:portfolio__id].blank?%><p class="value"> <a href="<%=path_for_rent_roll%>"><%= occupancy_percent %>%, <%= occupancy_sqft %></a></p><%else%><p class="value"><%= occupancy_percent %>%, <%= occupancy_sqft %> SF</p><%end%><%else%><p class="value-status" style="font-weight:normal;"> No data available</p>
+<%end%>
+        <p class="value-status"><%if @sqft_var_percent_check%><span class=" <%= (diff && diff >= 0 ?  "above" : "below" )%>"><%=sf_var_percent%>% <%= sf_variance%> SF <%= (diff && diff >= 0 ?  "above" : "below" ) %>  budget </span><%end%></p>
+      </div>
+    </div>
+	<%portfolio = Portfolio.find_by_id(params[:portfolio_id])%>
+	<%property_id = params[:property_id].present? ? params[:property_id] : portfolio.try(:real_estate_properties).try(:first).try(:id)%>
+		<%ytd_noi = find_ytd_noi(operating_statement) if operating_statement.present?%>
+   <div class="box-3col-small-das fltlft margin10LR">
+      <div class="box-title"><span class="title"><%if  !params[:tl_period].present? || params[:tl_period] == "4"%>YTD NOI <%elsif params[:tl_period] == "3"%> Last Year NOI<%elsif params[:tl_period] == "11"%> Trailing 12 Months NOI<%end%></span></div>
+      <div class="value-box">
+				<%if ytd_noi.present? && (ytd_noi[:actuals].present? ||  ytd_noi[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= property_id%>?tl_period=<%= params[:tl_period]%>&tl_year=<%= params[:tl_year]%>">$<%= ( ytd_noi.nil? || ytd_noi[:actuals].nil? ? 0 : dashboard_currency_display(ytd_noi[:actuals],'false')) %></a></p>
+        <p class="value-status"><span class="<%if ytd_noi[:actuals] > ytd_noi[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(ytd_noi[:percent])%>, $<%= dashboard_currency_display(ytd_noi[:variant])%><%if ytd_noi[:actuals] > ytd_noi[:budget]%> above<%else%> below<%end%> budget</span></p>
+				<%else%>
+				<p class="value-status" style="font-weight:normal;"> No data available</p>
+				<%end%>
+      </div>
+    </div>
+
+		<%if note_collection.present? && is_multifamily(note_collection)%>
+		<%net_income = find_net_income(operating_statement) if operating_statement.present?%>
+    <div class="box-3col-small-das fltlft">
+      <div class="box-title"><span class="title"><%if !params[:tl_period].present? || params[:tl_period] == "4"%>YTD Net Income <%elsif params[:tl_period] == "3"%>Last Year Net Income<%elsif params[:tl_period] == "11"%>Trailing 12 Months Net Income<%end%></span></div>
+      <div class="value-box">
+				<%if net_income.present? && (net_income[:actuals].present? ||  net_income[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= property_id%>?tl_period=<%= params[:tl_period]%>&tl_year=<%= params[:tl_year]%>">$<%= ( net_income.nil? || net_income[:actuals].nil? ? 0 : dashboard_currency_display(net_income[:actuals],'false')) %></a></p>
+        <p class="value-status"><span class="<%if net_income[:actuals] > net_income[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(net_income[:percent])%>, $<%= dashboard_currency_display(net_income[:variant])%><%if net_income[:actuals] > net_income[:budget]%> above<%else%> below<%end%> budget</span></p>
+				<%else%>
+				<p class="value-status" style="font-weight:normal;"> No data available</p>
+				<%end%>
+      </div>
+    </div>
+		<%end%>
+
+		<%if  note_collection.present? && is_commercial(note_collection)%>
+		<%net_cash,cash_type = find_net_cash(operating_statement)  if operating_statement.present?%>
+   <div class="box-3col-small-das fltlft">
+      <div class="box-title"><span class="title"><%if !params[:tl_period].present? || params[:tl_period] == "4"%>YTD Net Cash Flow<%elsif params[:tl_period] == "3"%>Last Year Net Cash Flow<%elsif params[:tl_period] == "11"%>Trailing 12 Months Net Cash Flow<%end%></span></div>
+      <div class="value-box">
+			<%if net_cash.present? && (net_cash[:actuals].present? ||  net_cash[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= property_id%>?tl_period=<%= params[:tl_period]%>&tl_year=<%= params[:tl_year]%>&page_refer=cash">$<%= ( net_cash.nil? || net_cash[:actuals].nil? ? 0 : dashboard_currency_display(net_cash[:actuals],'false')) %></a></p>
+  			 <p class="value-status"><span class="<%if net_cash[:actuals] > net_cash[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(net_cash[:percent])%>, $<%= dashboard_currency_display(net_cash[:variant])%><%if net_cash[:actuals] > net_cash[:budget]%> above<%else%> below<%end%> budget</span></p>
+				 <%else%>
+				 <p class="value-status" style="font-weight:normal;"> No data available </p>
+				 <%end%>
+      </div>
+    </div>
+		<%end%>

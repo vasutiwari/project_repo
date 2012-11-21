@@ -1,0 +1,18 @@
+if @chk_exist.blank? || (@tmp_doc.folder.parent_id ==0 && @chk_exist.user_id != current_user.id )
+  page['upload_form'].reset
+  page.hide 'modal_container'
+  page.hide 'modal_overlay'
+  update_partials(page)
+  if @error_file.nil?
+    page.call 'load_completer'
+    page.call "flash_writter", "#{@tmp_doc.filename} uploaded successfully"
+  else
+    page.call 'load_completer'
+    #  page.alert "#{@tmp_doc.filename} file was corrupted or not in regular format, please upload a valid file to parse the data.."
+  end
+else
+  page['upload_form'].reset
+  update_partials(page)
+  page.call 'load_completer'
+  page.replace_html 'basic_style', :partial => 'replace_options', :locals=>{:new_doc_id=>@tmp_doc.id, :exist_doc_id=>@chk_exist.id, :port_id=>@portfolio.id, :fol_id=>@folder.id}
+end

@@ -1,0 +1,34 @@
+<div class="fieldiconcol"><img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/></div>
+<div class="fieldrow">
+  <div class="fieldlabel">Name <font color=red>*</font> </div>
+  <div class="fieldinput"><%=text_field :user, :name %> <span style="color:red;font-size:12px;"><%= error_message_on :user, :name %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Company <font color=red>*</font> </div>
+  <div class="fieldinput"><%=text_field :user, :company_name %> <span style="color:red;font-size:12px;"><%= error_message_on :user, :company_name %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Email Id <font color=red>*</font> </div>
+  <div class="fieldinput"><%=text_field :user, :email %> <span style="color:red;font-size:12px;"><%= error_message_on :user, :email %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Phone <font color=red>*</font> </div>
+  <div class="fieldinput"><%=text_field :user, :phone_number %><span style="color:red;font-size:12px;"><%= error_message_on :user, :phone_number %></span></div>
+</div>
+
+<div class="fieldrow">
+  <div class="fieldlabel">Job Title <font color=red>*</font> </div>
+  <div class="fieldinput"><%=text_field :user, :designation %><span style="color:red;font-size:12px;"><%= error_message_on :user, :designation %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Department <font color=red></font> </div>
+  <div class="fieldinput"><%=text_field :user, :department %><br /><span style="color:red;font-size:12px;"><%= error_message_on :user, :department %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Address <font color=red></font> </div>
+  <div class="fieldinput"><%=text_area :user, :address,:rows=>5,:cols=>34 %><br /><span style="color:red;font-size:12px;"><%= error_message_on :user, :address %></span></div>
+</div>
+<div class="fieldrow">
+  <div class="fieldlabel">Comments <font color=red></font> </div>
+  <div class="fieldinput"><%=text_area :user, :comment,:rows=>5,:cols=>34 %><br /><span style="color:red;font-size:12px;"><%= error_message_on :user, :comment %></span></div>
+</div>

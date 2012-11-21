@@ -1,0 +1,110 @@
+<div id ="leases_and_occupancy_property_graph">
+			<div class="detailedrhsbar">
+				<% if !params[:buyer_id].nil? %>
+					<div class="detaileddeactbutwrapper">
+						<div class="notesalelf"><img src="/images/detailed_budget_dealf.png"  width="9" height="30"/></div>
+						<div class="detaileddeactbutmid"><a href="" onclick="performance_overview_acq_property(<%=portfolio_collection.id%>,<%=note_collection.id%>,<%= prop.action_done_by %>); return false;">Actuals &amp; Budgets</a></div>
+						<div class="notesalelf"><img src="/images/detailed_budget_deactrt.png"  width="7" height="30" /></div>
+					</div>
+					<div class="detailedactbutwrapper">
+						<div class="notesalelf"><img src="/images/but_avtive_lf.png"  width="9" height="30"/></div>
+						<div class="detailedactbutmid">Leases &amp; Occupancy</div>
+						<div class="notesalelf"><img src="/images/butactivert.png" width="7" height="30" /></div>
+					</div>
+				<% else %>
+					<div class="detaileddeactbutwrapper">
+						<div class="notesalelf"><img src="/images/detailed_budget_dealf.png"  width="5" height="28"/></div>
+						<div class="detaileddeactbutmid"><a href="" onclick="performance_overview_property(<%=portfolio_collection.id%>,<%=note_collection.id%>);return false;">Actuals &amp; Budgets</a></div>
+						<div class="notesalelf"><img src="/images/detailed_budget_deactrt.png"  width="6" height="28" /></div>
+					</div>
+					<div class="detailedactbutwrapper">
+						<div class="notesalelf"><img src="/images/but_avtive_lf.png"  width="9" height="30"/></div>
+						<div class="detailedactbutmid">Leases &amp; Occupancy</div>
+						<div class="notesalelf"><img src="/images/butactivert.png" width="7" height="30" /></div>
+					</div>
+				<% end %>
+			</div>
+	<% if !rent_roll_group.nil? && !rent_roll_group.blank?%>
+	<div class="rhsrow" id = "rent_roll_details">
+		<div class="rhscol1">
+			<div class="rhsgreycol">Total Rented Area</div>
+			<div class="rhsgreencol"><%= rent_area.to_i %>&nbsp;SqFt</div>
+		</div>
+		<div class="rhscol2">
+			<div class="rhsgreycol"> Rent / SqFt </div>
+			<div class="rhsgreencol"><% if rent_area <= 0
+			rent_area = 1
+			end %><%= display_currency(((rent_sum/rent_area).to_f), precision_count=2) %></div>
+		</div>
+		<div class="rhscol3">
+			<div class="rhsgreycol"> Aged Receivables</div>
+			<div class="rhsgreencol"><%= display_currency(aged_recievables) %></div>
+		</div>
+	</div>
+	<div class="rhscontentrow">
+		<div class="rhscontentcol1">
+			<div class="contentcol1headrow">Occupancy</div>
+			<div class="contentcol1imagecol">
+				<!--<img src="/images/detailed_leases_graph1.png" width="306" height="218" />-->
+				<div   id = "gh_graph_occupancy_chart" style="display:block;">
+					<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" height="350" id="HTML_graph_occupancy_chart" width="350">
+						<param name="allowscriptaccess" value="always"></param>
+						<param name="movie" value="/FusionCharts/Pie2D.swf"></param>
+						<param name="FlashVars" value="chartWidth=350&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/occupancy_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>"></param>
+						<param name="quality" value="high"></param>
+						<param name="wmode" value="transparent"></param>
+						<embed wmode="transparent" FlashVars="chartWidth=350&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/occupancy_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>" allowScriptAccess="always" height="350" name="HTML_graph_occupancy_chart" pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="/FusionCharts/Pie2D.swf" type="application/x-shockwave-flash" width="350"></embed>
+					</object>
+				</div>
+			</div>
+		</div>
+		<div class="rhscontentcol1">
+			<div class="contentcol1headrow">Lease Expirations</div>
+			<div class="contentcol1imagecol">
+				<!-- <img src="/images/detailed_leases_graph2.png" width="306" height="218" />-->
+				<div   id = "gh_graph_lease_expiration_chart" style="display:block;">
+					<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" height="350" id="HTML_graph_lease_expiration_chart" width="350">
+						<param name="allowscriptaccess" value="always"></param>
+						<param name="movie" value="/FusionCharts/ScrollCombi2D.swf"></param>
+						<param name="FlashVars" value="chartWidth=350&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/lease_expiration_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>"></param>
+						<param name="quality" value="high"></param>
+						<param name="wmode" value="transparent"></param>
+						<embed wmode="transparent" FlashVars="chartWidth=350&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/lease_expiration_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>" allowScriptAccess="always" height="350" name="HTML_graph_lease_expiration_chart" pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="/FusionCharts/ScrollCombi2D.swf" type="application/x-shockwave-flash" width="350"></embed>
+					</object>
+				</div>
+			</div>
+		</div>
+		<div class="rhscontentrow">
+		<div class="rhscontentcol1">
+			<div class="contentcol1headrow">Rent Distribution</div>
+			<div class="contentcol1imagecol">
+				<!-- <img src="/images/detailed_leases_graph3.png" width="306" height="213" /> -->
+				<div   id = "gh_graph_rent_distribution_chart" style="display:block;">
+					<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" height="350" id="HTML_graph_rent_distribution_chart" width="625">
+						<param name="allowscriptaccess" value="always"></param>
+						<param name="movie" value="/FusionCharts/MSCombiDY2D.swf"></param>
+						<param name="FlashVars" value="chartWidth=625&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/rent_distribution_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>"></param>
+						<param name="quality" value="high"></param>
+						<param name="wmode" value="transparent"></param>
+						<embed wmode="transparent" FlashVars="chartWidth=625&amp;chartHeight=350&amp;debugmode=0&amp;dataURL=/rent_distribution_chart_property/<%=params[:id]%>/<%= start_date%>/<%= end_date%>/<%= user_id_graph%>" allowScriptAccess="always" height="350" name="HTML_graph_rent_distribution_chart" pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="/FusionCharts/MSCombiDY2D.swf" type="application/x-shockwave-flash" width="625"></embed>
+					</object>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<% else %>
+		<div class="rhscontentrow">
+			<div class="rhscontentcol1">
+			<% if note_collection.user_id == current_user.id %>
+				<% req_actual_folder = fetch_missing_actuals_real_estate(note_collection.id) %>
+				<% start_date = (!start_date.nil? ? start_date : Time.now) %>
+				<% note_name = (note_collection.class == RealEstateProperty ?  note_collection.property_name :  note_collection.note_id) %>
+				<div class="contentcol1headrow" style="padding-left:30px;width:500px;"><span style="color: black;font-size:12px;">Rent Roll is not updated for <b><%= note_name %></b> on <b><%= start_date.to_date.beginning_of_month.strftime("%b-%Y") %></b>, you need to fill & update the files present in the <b>Data Setup</b> > <b>Income, Cash Flow & Rent Roll</b> or <a href="#<%#= show_folder_path(req_actual_folder) %>" onclick="show_data_hub_docs_real_estate(<%= portfolio_collection.id%>,selected_item,'hide_del');return false;">click here to visit the folder</a>.</span></div>
+			<% else %>
+				<div class="contentcol1headrow"><span style="padding-left:30px;color: black;font-size:14px;">Seller has not updated RENT ROLL data</b></span></div>
+			<% end %>
+			</div>
+		</div>	
+	<% end %>
+</div>

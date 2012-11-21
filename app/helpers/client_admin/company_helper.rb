@@ -1,0 +1,2 @@
+module ClientAdmin::CompanyHelper
+end

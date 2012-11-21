@@ -1,0 +1,102 @@
+<%portfolio_id=portfolio_collection ? portfolio_collection.id : 0%>
+<%note_id=note_collection ? note_collection.id : 0 %>
+<% initial_tab_class = (params[:partial_disp].nil? || params[:partial_disp] != 'data_hub') %>
+<% exec_tab = initial_tab_class ? 'executivesubtab' : 'deactivesubtab' %>
+<% data_hub_tab = initial_tab_class ? 'deactivesubtab' : 'executivesubtab' %>
+<div class="<%if is_leasing_agent%>deactivesubtab<%else%><%=exec_tab%><%end%>" id="p_review">
+  <div class="left"></div>
+  <div class="tabwrapper" style="width: 120px;">
+    <%unless is_leasing_agent%>
+      <a href="" onclick="sqftCalc=undefined;parSqftCalc=undefined;partial_page='portfolio_partial';active_title('performance_review');performanceReviewCalls('for_notes',{main_head_call:true});return false;">
+        <div class="tabicon" style="text-align: center ! important;" id="p_review_img"><img src="/images/performanceicon1.png" width="30" height="25" border="0" /></div></a>
+    <%else%>
+      <div class="tabicon" style="text-align: center ! important;" id="p_review_img"><img src="/images/performanceicon1.png" width="30" height="25" border="0" /></div>
+    <%end%>
+    <div class="tablabel" style="padding:0 5px;">
+      <%unless is_leasing_agent%>
+        <a href="" onclick="sqftCalc=undefined;parSqftCalc=undefined;partial_page='portfolio_partial';active_title('performance_review');performanceReviewCalls('for_notes',{main_head_call:true});return false;">Reports &amp; Analysis</a>
+      <%else%>
+        Reports &amp; Analysis
+      <%end%>
+    </div>
+  </div>
+  <div class="right"></div>
+</div>
+<%if note_collection.leasing_type.eql?('Commercial')%>
+  <div class="<%if !is_leasing_agent%>deactivesubtab<%else%><%=exec_tab%><%end%>" id="lease_view">
+    <div class="left"></div>
+    <div class="tabwrapper" style="padding:0 5px; width:86px" >
+      <a href="" onclick="<%if is_leasing_agent%>active_title('property_pipeline');set_call('property_pipeline','<%=portfolio_collection.id%>',selected_item);<%else%>active_title('lease_management');set_call('lease_management','<%=portfolio_collection.id%>',selected_item);<%end%>return false;">
+        <div class="tabicon" style="text-align: center ! important;"><img src="/images/lease_icon.png" width="30" height="25" border="0" />&nbsp;</div></a>
+      <div class="tablabel" style="padding:0 5px;"><a onclick="<%if is_leasing_agent%>active_title('property_pipeline');set_call('property_pipeline','<%=portfolio_collection.id%>',selected_item);<%else%>active_title('lease_management');set_call('lease_management','<%=portfolio_collection.id%>',selected_item);<%end%>return false;">Lease Mgmt</a></div>
+    </div>
+    <div class="right"></div>
+  </div>
+<%end%>
+<!--
+<div class="deactivesubtab"  id="d_pipe" >
+  <div class="left"></div>
+  <div class="tabwrapper">
+    <a href="" onclick="load_writter();active_sub_title('property_pipeline');set_call('property_pipeline','<%=portfolio_collection.id%>',selected_item);load_completer();return false;">
+      <div class="tabicon"><img src="/images/lease_pipeicon.png" width="23" height="23" border="0" />&nbsp;</div>
+      <div class="tablabel">Pipeline</div>
+    </a>
+  </div>
+  <div class="right"></div>
+</div>
+-->
+<div class="<%= data_hub_tab %>" id="d_hub">
+  <div class="left"></div>
+  <div class="tabwrapper" style="width:120px;">
+    <a href="" onclick="active_title('data_hub');show_data_hub_docs_real_estate(port_id,selected_item,'hide_del');return false;" class="bluecolor">
+      <div class="tabicon"><img src="/images/executive_icon2.png" width="30" height="25" border="0" />&nbsp;</div></a>
+    <div class="tablabel" style="padding:0 0px;"><a href="" onclick="active_title('data_hub');show_data_hub_docs_real_estate(port_id,selected_item,'hide_del');return false;" class="bluecolor">Files &amp; Collaboration</a></div>
+  </div>
+  <div class="right"></div>
+</div>
+<div class="deactivesubtab" id="p_view">
+  <div class="left"></div>
+  <div class="tabwrapper" style="width:100px;">
+    <a href="" onclick="show_property_view_real_estate(<%=portfolio_id%>,selected_item);return false;">
+      <div class="tabicon"><img src="/images/performanceicon3.png" width="30" height="25" border="0" />&nbsp;</div></a>
+    <div class="tablabel" style="padding: 0pt 5px;"><a href="" onclick="show_property_view_real_estate(<%=portfolio_id%>,selected_item);return false;">Physical Details</a></div>
+
+  </div>
+  <div class="right"></div>
+</div>
+<div class="deactivesubtab" id="n_terms">
+  <div class="left"></div>
+  <div class="tabwrapper" style="width:100px;">
+    <%unless is_leasing_agent%>
+      <a href="" onclick="active_title('note_terms');set_call(active_call,'<%=portfolio_collection.id%>',selected_item);return false;">
+        <div class="tabicon"><img src="/images/executive_icon4.png" width="30" height="25" border="0" />&nbsp;</div></a>
+    <%else%>
+      <div class="tabicon"><img src="/images/executive_icon4.png" width="30" height="25" border="0" />&nbsp;</div>
+    <%end%>
+    <div class="tablabel" style="padding: 0pt 5px;">
+      <%unless is_leasing_agent%>
+        <a href="" onclick="active_title('note_terms');set_call(active_call,'<%=portfolio_collection.id%>',selected_item);return false;">Debt Summary</a>
+      <%else%>
+                              Debt Summary
+      <%end%>
+    </div>
+  </div>
+  <div class="right"></div>
+</div>
+<div class="deactivesubtab" id="n_s_review">
+  <div class="left"></div>
+  <div class="tabwrapper" style="width:70px;">
+    <%unless is_leasing_agent%>
+      <a href="" onclick="active_title('property_settings');set_call('property_settings','<%=portfolio_collection.id%>',selected_item);return false;">
+        <div class="tabicon"><img src="/images/performanceicon6.png" width="30" height="25" border="0" />&nbsp;</div></a>
+    <%else%>
+      <div class="tabicon"><img src="/images/performanceicon6.png" width="30" height="25" border="0" />&nbsp;</div>
+    <%end%>
+    <div class="tablabel" style="padding: 0pt 5px;">
+      <%unless is_leasing_agent%>
+        <a href="" onclick="active_title('property_settings');set_call('property_settings','<%=portfolio_collection.id%>',selected_item);return false;">Settings</a>
+      <%else%> Settings <%end%>
+    </div>
+  </div>
+  <div class="right"></div>
+</div>

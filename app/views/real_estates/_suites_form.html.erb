@@ -1,0 +1,88 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+suite_collection = @new_suite
+%>
+<script type="text/javascript">
+  form_name ="#suites_form"
+  tab = "7"
+  yield_calender('true');
+</script>
+
+
+
+
+
+			<div class="suitemidbody">
+        <div class="totalsuitesbox">
+        <div class="total">Total suites Added: <%#=@suites_collection.count%>   &nbsp; |   &nbsp; Rentable SqFt: 1200</div>
+        <div class="totalboxs">
+
+        <div class="floordiv"><a href="#">Floor</a>&nbsp;<img src="images/bulletarrowdown.png" width="7" height="5" border="0" /></div>
+        <div class="daysdiv"><a href="#">Suite No</a>&nbsp;<img src="images/bulletarrowdown.png" width="7" height="5" border="0" /></div>
+        <div class="rentdiv"><a href="#">Rentable SqFt</a>&nbsp;<img src="images/bulletarrowdown.png" width="7" height="5" border="0" /></div>
+        <div class="rentdiv"><a href="#">Usable SqFt</a>&nbsp;<img src="images/bulletarrowdown.png" width="7" height="5" border="0" /></div>
+       <div class="notediv">Note&nbsp;<img src="images/bulletarrowdown.png" width="7" height="5" border="0" /></div>
+       </div>
+
+
+
+			 <%= form_for suite_collection,:url=>{:controller=>"properties",:action=>"show_asset_docs",:data_hub=>"asset_data_and_documents",:pid=>portfolio_collection.id,:note_add_edit => "true",:property_id=>params[:property_id],:parent_delete=>params[:parent_delete],:edit_inside_asset=>params[:edit_inside_asset]}, :html=>{:target => "upload_note",:multipart=>true,:id=>"basic_details_form"} do |p| -%>
+
+       <div class="roetextfelids">
+       <div class="floordiv">
+			 <%=p.text_field :floor, :class=>"floortext" %>
+			 </div>
+       <div class="daysdiv">
+			 <%=p.text_field :suite_no, :class=>"daystext daystext2" %>
+			 </div>
+       <div class="rentdiv" style="font-family:Verdana, Geneva, sans-serif; font-size:11px;">
+			 <%=p.text_field :rentable_sqft, :class=>"renttext" %>
+			 </div>
+       <div class="rentdiv">
+				 <%=p.text_field :usable_sqft, :class=>"renttext" %>
+       </div>
+       <div class="notediv daystext3"><textarea name="textarea" rows="3" cols="27" class="expand taskfieldinput2"></textarea></div>
+       <div class="addbut" style="margin-top:0px;">
+           <div class="addpropertyrow">
+					 <a href="javascript:;" onclick="load_writter();form_txt='suites';remove_extra_space();deactivate_click('suites_onclick');set_tab(7,'suites');add_property_form_submit(form_name); <%if property_collection.valid? && !property_collection.address.nil?%>form_name='#suites_form';<%end%>load_completer();">Add</a>
+					 <span>&nbsp;</span></div>
+         </div>
+       </div>
+			 <!-- hidden fields to send  as params starts here -->
+
+			 <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+      <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+      <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+      <input type="hidden" name="pid" value = <%=params[:id]%> > </input>
+      <input type="hidden" name="note_add_edit" value = "true" > </input>
+      <input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+      <input type="hidden" name="suites_form_submit" value = "true" id="suites_form_submit" > </input>
+      <input type="hidden" name="suites_form_close" value = "false"  id ="suites_form_close"> </input>
+			<input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"> </input>
+      <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+			<input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+			<input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+			<input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+			<input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+			<input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+			<input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+			<input type="hidden" name="suite_id" value ="<%= params[:suite_id] ? params[:suite_id] : ""%>"  id ="suite_id"> </input>
+			<%#=p.text_field :id, :type=>"hidden" %>
+
+<%if property_collection && !property_collection.id.nil?%>
+        <input type="hidden" name="property_id" value = <%=property_collection.id%> > </input>
+        <input type="hidden" name="pid" value = <%=property_collection.portfolio.id%> > </input>
+      <%end%>
+      <input type="hidden" id = "tab_id" name="tab_id" value ="7" > </input>
+      <input type="hidden" id = "form_txt" name="form_txt" value ="suites" > </input>
+
+		<!-- hidden fields to send  as params ends here -->
+			 <%end%>
+
+			 <div id = "suite_partial">
+       <%= render :partial => "/real_estates/partial_suite" %>
+       </div>
+        </div>
+        </div>
+<iframe id="upload_note" name="upload_note" style="display: none"></iframe>

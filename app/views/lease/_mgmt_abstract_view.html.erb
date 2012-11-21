@@ -1,0 +1,86 @@
+<%pdf= @pdf
+portfolio_collection = @portfolio_collection
+lease = @lease
+%>
+
+<% if (!params[:lease_id].blank? && params[:lease_id] != "undefined")%>
+<%@lease_collection = Lease.find(params[:lease_id])%>
+<%if params[:param_pipeline] && (params[:param_pipeline] == "nego_pipeline" || params[:param_pipeline] == "inters_pipeline") %>
+<div id="lease_suite_details">
+<% note = params[:property_id].present? ? params[:property_id] : params[:id]%>
+<% interested_and_negotiated_leases((params[:property_id] || note),1,1)%>
+<% @property_lease_suites_all = (params[:param_pipeline] == "inters_pipeline") ? @property_lease_suites_interested : (params[:param_pipeline] == "nego_pipeline") ? @property_lease_suites_negotiated : ""%>
+</div>
+<%else%>
+<script>
+  variable = "undefined"
+</script>
+<%end%>
+<%else%>
+<script>
+  variable = "undefined"
+</script>
+<%end%>
+
+<%=render :partial=> "lease/pipeline_div_display",:locals => {:lease_collection=>@lease_collection ,:note_collection => note, :portfolio_collection => portfolio_collection}%>
+<div class="clear"></div><div class="clear"></div><div class="clear"></div>
+<div class="suitemid">
+<%unless pdf %>
+  <div class="suitetabsbox boldtxt">
+    <div class="suitetabbasicac" id= "tabactive1"><a onclick="set_tab(1,'terms');form_name='#mgmt_terms_form';mgmt_tabs_form_submit(form_name);pdf_click='false';"  style="cursor: pointer;">Terms</a></div>
+    <div class="suitetabbasicde" id= "tabactive2"><a onclick="set_tab(2,'rent');form_name='#mgmt_rent_form';mgmt_tabs_form_submit(form_name);pdf_click='false'; "  style="cursor: pointer;">Revenue</a></div>
+    <div class="suitetabbasicde" id= "tabactive3">
+      <a onclick="set_tab(3,'cap_exp');form_name='#mgmt_cap_exp_form';mgmt_tabs_form_submit(form_name);pdf_click='false'; "  style="cursor: pointer;">Cap Ex & Dep</a>
+    </div>
+   <!--
+<div class="suitetabbasicde" id= "tabactive3"><a href="#" onclick="set_tab(3,'cap_exp');form_name='#mgmt_cap_exp_form';mgmt_tabs_form_submit(form_name); "  style="cursor: pointer;">CapEx & Dep</a></div>
+<div class="suitetabbasicde" id= "tabactive4"><a href="#" onclick="set_tab(4,'insurance');form_name='#mgmt_insurance_form';mgmt_tabs_form_submit(form_name); "  style="cursor: pointer;">Insurance</a></div>
+		-->
+		<div class="suitetabbasicde2" id= "tabactive6">
+      <a onclick="set_tab(6,'projection');form_name='#mgmt_projection_form';mgmt_tabs_form_submit(form_name);pdf_click='false';"  style="cursor: pointer;">Income Projection</a>
+    </div>
+		<div class="suitetabbasicde" id= "tabactive4">
+      <a onclick="set_tab(4,'insurance');form_name='#mgmt_insurance_form';mgmt_tabs_form_submit(form_name);pdf_click='false';"  style="cursor: pointer;">Insurance</a>
+    </div>
+    <div class="suitetabbasicde" id= "tabactive5"><a onclick="set_tab(5,'clauses');form_name='#mgmt_clause_form';mgmt_tabs_form_submit(form_name);pdf_click='false';"  style="cursor: pointer;">Clauses</a></div>
+    <!--
+<div class="suitetabbasicde2" id= "tabactive6"><a href="#" onclick="set_tab(6,'projection');form_name='#mgmt_projection_form';mgmt_tabs_form_submit(form_name); "  style="cursor: pointer;">Income Projection</a></div>
+<div class="suitetabbasicde2"><a href="#">Docs</a></div>
+		-->
+
+    <div class="suitetabbasicde2" id="tabactive7" style="border-right: 1px solid #E3DFDF;">
+      <a onclick="set_tab(7,'docs');form_name='#mgmt_docs_form';mgmt_tabs_form_submit(form_name);pdf_click='false';"  style="cursor: pointer;">Docs</a>
+    </div>
+
+  </div>
+	<%end%>
+
+	<div id="lease_term_nav">
+		<%if params[:form_txt]=='terms'%>
+    <%=render :partial => "lease/mgmt_terms",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=="rent"%>
+		<%=render :partial => "lease/mgmt_rent",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=='cap_exp'%>
+		<%=render :partial => "lease/mgmt_cap_exp",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=='clauses'%>
+		<%=render :partial => "lease/mgmt_clauses",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=='insurance'%>
+		<%=render :partial => "lease/mgmt_insurance",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=='projection'%>
+		<%=render :partial => "lease/mgmt_projection",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%elsif params[:form_txt]=='docs'%>
+		<%=render :partial => "lease/mgmt_docs",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%else%>
+		<%=render :partial => "lease/mgmt_terms",:locals => {:note_collection => note, :portfolio_collection => portfolio_collection}%>
+		<%end%>
+	</div>
+</div>
+
+
+
+<script>
+<%if lease%>
+    jQuery(document).ready(function() {      update_print_pdf_link('<%=portfolio_collection.id%>','<%=params[:property_id]%>','<%=lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+    });
+<%end%>
+</script>

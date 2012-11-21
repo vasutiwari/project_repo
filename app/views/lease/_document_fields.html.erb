@@ -1,0 +1,41 @@
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<%lease_folder =  Folder.find_by_real_estate_property_id_and_name_and_is_master(params[:property_id],"Lease Files",1)%>
+<div class="insurancenamerow notesnamerow"  onmouseover="if(<%=@value%> != 0){jQuery(this).css('background-color','#f6f6f6');} this.style.width='765px'" onmouseout="jQuery(this).css('background-color','#ffffff');" >
+  <div class="close" style="float:left; width:765px;">
+    <div class="insuranceform" style="padding-left:0px;width:182px;">
+      <%unless @pdf%><%= f.file_field :uploaded_data,:value => f.object.filename,:class => "insurance_file",:onchange => "ins_document_display(this.value,this.id);"%> <%end%>
+      <%= f.hidden_field :real_estate_property_id, :value => params[:property_id]%>
+      <%= f.hidden_field :folder_id, :value => lease_folder.try(:id)%>
+			<%if f.object.filename.present?%><%=f.hidden_field :filename, :value=>f.object.filename%><%end%>
+    </div>
+    <div class="insuranceform" style="padding-left:0px;width:87px;<%if @pdf%>margin-left:291px;<%else%>margin:0 0 0 118px;<%end%>">
+      <%= f.text_field :expiration_date ,:type=>"text", :value =>(f.object && f.object.expiration_date.present?) ? lease_date_format(f.object.try(:expiration_date)) : "mm/dd/yyyy", :class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:65px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+    </div>
+    <div class="insuranceform" style="padding-left:0px;width:200px; margin:0 0 0 160px">
+      <%= f.fields_for :note do |attachment_note| %>
+        <%= attachment_note.text_field :content ,:type=>"text", :class=>"lstextfield", :style=>"width:200px;" %>
+      <%end %>
+    </div>
+    <%if @value!=0%>
+      <%if f.object.new_record?%>
+        <span class="closeme">
+          <%= link_to_remove_insurance_fields "X", f%>
+        </span>
+      <%else%>
+        <span class="closeme" id="closeme" value="1">
+          <%= link_to_remove_insurance_fields "X", f%>
+        </span>
+      <%end%>
+    <%end%>
+  </div>
+  <div class="insuranceform" style="padding-left:0px;width:182px;<%if @pdf%>margin-top:-38px;<%end%>">
+    <%if f.object.filename.present?%><a href="<%=download_doc_path(f.object.id)%>"><%=f.object.filename%></a><%end%>
+  </div>
+</div>
+<!--for attachment display start-->
+
+<!--for attachment display end-->
+<%@value+=1%>

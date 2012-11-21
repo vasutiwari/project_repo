@@ -1,0 +1,136 @@
+<script>
+click_start_upload='false';
+</script>
+
+<link href="/stylesheets/default_swf.css" rel="stylesheet" type="text/css" />
+<div id="sbox-window" style="" class="">
+    <div class="sbox-bg-wrap">
+        <div class="sbox-bg sbox-bg-n">
+        </div>
+        <div class="sbox-bg sbox-bg-ne">
+        </div>
+        <div class="sbox-bg sbox-bg-e">
+        </div>
+        <div class="sbox-bg sbox-bg-se">
+        </div>
+        <div class="sbox-bg sbox-bg-s">
+        </div>
+        <div class="sbox-bg sbox-bg-sw">
+        </div>
+        <div class="sbox-bg sbox-bg-w">
+        </div>
+        <div class="sbox-bg sbox-bg-nw">
+        </div>
+    </div>
+    <% view_chklist = (@checklist_id.nil? ? false : true) %>
+    <div id="advanced_style" style="color:#008899;<% if view_chklist %>display:none;<% end %>">
+        <form id="form1" action="<%= "/documents/upload_doc"  %>" method="post" enctype="multipart/form-data">
+            <div class="fieldset flash" id="fsUploadProgress">
+                <% fol = find_folder(params[:folder_id]) %>
+                <span class="legend" id="span_legend"><img width="16" height="16" src="/images/page_white_get.png"/>&nbsp;Upload to '<%= fol.name == "my_files" ? "My Files " :(fol.name == "my_deal_room" ? "My Deal Room" : fol.name) %>'</span>
+            </div>
+            <div id="divStatus" style="padding: 4px;">
+                Select files and click start to upload files.
+            </div>
+            <div id="divMovieContainer">
+                <span id="spanButtonPlaceHolder"></span>
+                <input type="button" value="Start Upload" onclick="return blank_file_upload_swf();" style="margin-left: 2px; font-size: 8pt; height: 29px;" id="change_but"/><span id="initiate_basic" style="color: grey;float:none;" class="basicuploadrow">&nbsp;Having problems? Try the <a style="cursor:pointer;"onclick="jQuery('#basic_style').show();jQuery('#advanced_style').hide();cancel_prev_upload_que();">Basic Uploader</a></span>
+            </div>
+        </form>
+    </div>
+    <div id="basic_style" style="display:none;width: 425px;">
+        <%is_missing_file = params[:missing_files_list] ? true : false %>
+        <%type = params[:type] == "Document" ? "Document" : params[:type] %>
+        <%types = params[:types] == "DocumentName" ? "DocumentName" : params[:types] %>
+        <%= form_tag({:action => "upload_doc",:pid=>@portfolio.id,:folder_id =>params[:folder_id],:is_missing_file=>is_missing_file,:user_id=>@user.id,:del_files=>params[:del_files],:type=>type,:d=>params[:d],:list=>params[:list],:show_past_shared=>params[:show_past_shared],:new_version=>params[:new_version],:list=>params[:list],:remove_due=>params[:remove_due],:show_missing_file=>params[:show_missing_file],:deal_room => params[:deal_room]}, :multipart => true, :target => "upload_frame", :id => "upload_form")  do %>
+        <div id="sbox-content" style="visibility: visible; opacity: 1;color:black;width: 415px;" class="sbox-content-iframe">
+            <% if type=="DocumentName" || types=="DocumentName" %><%dname=find_document(params[:d]) %><% end %>
+            <div class="uploadwrapper">
+                <div class="uploadheaderow bottompadding">
+                    <div class="uploadheadercoll">
+                        <img border="0" width="15" height="16" src="/images/datasetup_icon1.png" />Upload File to:
+                    </div>
+                    <div class="foldernamecol">
+                        <% if type!="DocumentName" && types !="DocumentName" %>
+                        <img border="0" width="16" height="16" src="/images/datasetup_icon15.png" /><%= fol.name == "my_files" ? "My Files " :  fol.name.titlecase %>
+                        <% else %>
+                        <%= dname.name %>
+                        <% end %>
+                    </div>
+                </div>
+                <div class="status_light_error" id="error_display">
+                </div>
+                <div class="uploadrow">
+                    <div class="uploadlabelrow">
+                        <div class="newfolder_fieldlabel">
+                            Select File&nbsp;
+                        </div>
+                        <div class="newfolder_fieldinput">
+                            <%=file_field "attachment", "uploaded_data", :size=>20 %>
+                            <input type="hidden" name="ref" value="<%= request.env['HTTP_REFERER'] %>"/><%= raw('<input name=bulk_upload value=true type=hidden />') if params[:bulk_upload] %>
+                        </div>
+                    </div>
+                </div>
+                <div class="uploadbutwrapper">
+                    <div style="margin-left: 98px;" class="greenbutton">
+                        <a href="javascript:;" id ="upload_basic" onclick="if(blank_file_upload()) { jQuery('#upload_form').submit(); jQuery('#upload_basic').css('cursor','none');load_writter();return false; }">Upload</a>
+                        <span>&nbsp;</span>
+                    </div>
+                    <div class="graybutton">
+                        <a href="javascript:;" id ="cancel_basic" onclick="close_control_model();">Cancel</a>
+                        <span>&nbsp;</span>
+                    </div>
+                </div>
+                <% if !view_chklist && !params[:missing_files_list] %>
+                <div class="enhanced_uploader">
+                    Having trouble? try&nbsp;&nbsp;<a href="javascript:;" onclick="jQuery('#basic_style').hide();jQuery('#advanced_style').show();">Enhanced Uploader</a>
+                </div>
+                <% end %>
+            </div>
+        </div>
+        <% end %>
+    </div>
+    <iframe id="upload_frame" name="upload_frame" style="display: none">
+    </iframe>
+    <%#= link_to_remote( {},:update=>{}, :url=>{:action=>"#{@nav_path}show_asset_docs",:id=>'@tmp_asset.id',:portfolio_id=>'@tmp_seller_portfolio.id',:folder_id=>'params[:folder_id]'},:success=>'Control.Modal.close();',:loading=>'jQuery(".advanced_close").hide();',:html=>{:id=>"sbox-btn-close",:class=>'advanced_close',:style=>'display:none;'}) %>
+    <a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+<script>
+                                                <%if params[:missing_files_list]%>
+
+                                                    jQuery('#advanced_style').hide();
+                                                    jQuery('#basic_style').show();
+                                                <%end%>
+</script>
+<script type="text/javascript">
+                                                	upload_count = 0
+
+                                                cl_url = "<%= "show_asset_files"   %>"
+                                                //if(typeof(bulk_uploader) != 'undefined')
+                                                //jQuery('#upload_form').append('<input name=bulk_upload value=true type=hidden />')
+                                                //cl_id  = "<%#= @tmp_asset.id %>"
+                                                cl_port_id = "<%= @portfolio.id %>"
+                                                cl_folder_id = "<%= params[:folder_id] %>"
+                                                cl_ajax = true;
+                                                return_path = '/properties/';
+                                                <%if params[:deal_room] == 'true'%>
+                                                  load_swf_for_deal_room('<%= "/documents/upload_doc/?pid=#{@portfolio.id}&deal_room=true"%>','<%= params[:folder_id] %>');
+                                                <% elsif params[:bulk_upload] == 'true'%>
+                                                  load_swf('<%= "/documents/upload_doc/?pid=#{@portfolio.id}"%>&bulk_upload=true','<%= params[:folder_id] %>');
+                                                <%else%>
+                                                  load_swf('<%= "/documents/upload_doc/?pid=#{@portfolio.id}"%>','<%= params[:folder_id] %>');
+                                                 <%end%>
+                                                <%if @folder && is_parsing_folder(@folder.id)%>
+                                                  inside_parsing_folder = 1;
+                                                <%else%>
+                                                  inside_parsing_folder = 0;
+                                                <%end%>
+                                                swf_file_upload_type = ''
+</script>
+<script type="text/javascript">
+    jQuery("#basic_style").click(function(){
+        upload_count = 0
+        jQuery("#fsUploadProgress").removeClass("file_upload_overflow");
+
+    })
+</script>

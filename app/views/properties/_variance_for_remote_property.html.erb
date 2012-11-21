@@ -1,0 +1,242 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script type="text/javascript">
+  comment_place = "&comment_place=inside task";
+  yield_calender('false');
+  tooltip_loaders = []
+	partial_page='variances';
+//	enable_disable_tab('variances',active_sub_call);
+	active_sub_call = 'variances'
+	</script>
+<%action_name = controller.action_name
+
+  task_value = false
+%>
+<script>
+  if (jQuery("#portfolio_dropbox_view").length>0)
+    document.getElementById('portfolio_dropbox_view').style.clear = "both"
+</script>
+  <% unless pdf_collection %>
+    <div class="pdf_link_financial" style="right:170px;top:204px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+				 <span style=" border-right-color: #000000;border-right-width: 1px;border-right-style:solid;">&nbsp;</span>
+		</div>
+		<script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+ <div class="executiveinputrow" style="z-index:22000;position:absolute;top:186px;right:0;">
+      <div class="notesalelf"></div>
+      <div class="executiveinputmid" id="id_for_variance_threshold" style="top:5px;padding-right:17px">
+        <ul class="inputcoll2" id="cssdropdown">
+          <li class="headlink3" id="id_for_modify_threshold">
+            <div class="morebutton_label">
+						<a href="/real_estates/add_property/<%=note_collection.portfolio_id%>/?property_id=<%=note_collection.id%>&call_from_variances=true" method="put" style="width:119px;*width:128px;width:128px\9;height:16px;border:0px;">Variance Thresholds</a>
+
+						<%#= link_to "Variance Thresholds", {:action =>'add_property',:controller => "real_estates",:id =>note_collection.portfolio_id,:property_id=>note_collection.id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:call_from_variances=>true,:tl_month=>params[:tl_month],:document_id=>params[:document_id],:month=>params[:month],:period=>params[:period],:tl_period=>params[:tl_period]},{:id => "edit_note_box_#{note_collection.id}"}%></div>
+					<script>//new Control.Modal($("edit_note_box_<%#=note_collection.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+					<span></span>
+          </li>
+        </ul>
+      </div>
+      <div class="notesalelf" style="z-index:-1"></div>
+    </div>
+		<%end%>
+
+<div id ="show_assets_list" class="<%= 'collab_left' if (current_user.has_role?('Asset Manager') && session[:role] == 'Asset Manager')%>">
+    <div class="collabscontentrow">
+			<%find_user_for_remote(note_collection.id)%>
+			<%if !@members.blank?%>
+			 <div class="dummy_var" onmouseover="this.className='userwrapperon_var'" onmouseout="this.className='dummy_var'">
+						<span title='<%= (@members[0].name.blank? ? @members[0].email.split(/@/)[0] : @members[0].name).titleize%>'> <%= display_prop_user%> </span>
+							<div class="userdrop_var">
+              <div class="userheader"> Property Users </div>
+              <% @members && @members.uniq.each do |u|%>
+                <div class="userheaderrow">><span title='<%=(u.name.blank? ? u.email.split(/@/)[0] : u.name).titleize%>'><%=display_truncated_chars((u.name.blank? ? u.email.split(/@/)[0] : u.name).titleize,12,true)%></span></div>
+              <%end%>
+								</div>
+								</div>
+							<%end%>
+
+
+
+									<div class="mid">
+          <%
+          params[:id] =note_collection.id
+        %>
+          <br/>
+			<%if (params[:period] != "7" && params[:tl_period] != "7" || params[:period] != "4" && params[:tl_period] != "4") && !(params[:tl_month].blank? || params[:tl_month].nil?)  %>
+          <% unless (expln_req_props_cash).count.zero? %>
+            <div class="tasks_variance_updaterow">
+              <div class="variances_headerow">
+                <div class="tablecoll1" style="font-size: 15px;width: auto;">Income & Expenses </div>
+              </div>
+              <div class="variance_tableheaderow">
+                <div class="tablecoll1">&nbsp;</div>
+                <div class="tablecoll2">Actuals $</div>
+                <div class="tablecoll3">Budget $</div>
+                <div class="tablecoll4">Variance? $</div>
+                <div class="tablecoll5">Explanation</div>
+              </div>
+              <%
+              expln_ids = expln_req_props_cash.collect{|i| i.id  if i.title != "Griffin" }
+            %>
+
+              <%tot_variance_count= expln_ids.length%>
+              <div class="variance_update_tablewrapper ie_style_class" style="<%unless pdf_collection%><%=tot_variance_count > 26 ? 'height:3071px;overflow-y:auto;overflow-x:hidden;' : ''%>				<%end%>">
+                <% (expln_req_props_cash).each do |i|
+                  prop_cal(i)
+                  current_user_type(i)
+                %>
+
+                  <%if expln_ids.include? i.id%>
+                    <div class="variance_task_tablerow">
+                      <div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>" title="<%= i.tool_tip == "Cash > Operating Summary" ? "Cash > Net Operating Income" : i.tool_tip%>" class="tablecoll1"><%=  i.title.titlecase=="Operating Summary" ? "Net Operating Income": i.title.titlecase %><span style="display:block;padding-top: 6px;color: #9aa2a2;"><%= month_options[0..2].upcase %></span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(@var_actual) %> </div>
+                      <div class="tablecoll3"><%=  display_currency_real_estate_overview(@var_budget) %> </div>
+                      <% icon_direction = up_or_down(@var_actual, @var_budget) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}" %>
+	                     <% use_color = @is_expense ? expense_color(@var_actual, @var_budget) : income_color(@var_actual, @var_budget) %>
+                      <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(@var_per) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(@var_amt) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+                      </div>
+                        <% explained = explanation_finder(i.id, note_collection.id, params[:month], false) %>
+                      <div class="tablecoll5">
+                        <textarea class="expand60-300 variance_inputfield" id="expln_<%= i.id %>" onclick="cur_textarea = jQuery(this).val();jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln('<%= i.id %>', <%= params[:month] %>,0,false,<%= request.request_uri%>,undefined,cur_textarea); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42"><%= explained.explanation if explained  %></textarea>
+                        <div id="det_<%= i.id %>" style="visibility: <%= (explained and explained.explanation?) ? "visible" : "hidden" %>" class="addedby">Added by: <span id="usr_<%= i.id %>"><%=  explained.user.user_name if (explained and explained.explanation?)  %></span> <span id="upt_<%= i.id %>"><%= "on " + explained.updated_at.strftime("%b %d,%Y") if (explained and explained.explanation?) %></span></div>
+                      </div>
+                      <% if explained && explained.explanation? %>
+                        <% @exp_item = explained
+                        @exp_type = 'explanation'
+                        @exp_cmt_for = 'cash_flow'
+                      %>
+                        <div id="<%= "explanation_comment_#{@exp_item.id}"%>">
+                          <%= render :partial =>'/explanations/comment_explanation_view' %>
+                        </div>
+                      <% else %>
+                        <div id="create_comment_<%= i.id %>"></div>
+                      <% end %>
+                    </div>
+									<%end%>
+									<script type="text/javascript">
+                    tooltip_loaders.push(<%= i.id %>);
+                  </script>
+                <%end%>
+              </div>
+							<%end%>
+            </div>
+          <br/>
+          <input type="hidden" id="all_saved_explanation_ids"/>
+          <input type="hidden" id="all_saved_comments_ids"/>
+          <input type="hidden" id="all_saved_events_ids"/>
+        </div>
+		<% end %>
+
+<%if ((params[:period] == "7" || params[:tl_period] == "7"|| params[:period] == "4" || params[:tl_period] == "4") && (params[:tl_month].blank? || params[:tl_month].nil?)) || (params[:tl_month].blank? || params[:tl_month].nil?) %>
+<% unless (expln_req_props_ytd_cash).count.zero? %>
+            <div class="tasks_variance_updaterow">
+              <div class="variances_headerow">
+                <div class="tablecoll1" style="font-size: 15px;width: auto;">Income & Expenses </div>
+              </div>
+              <div class="variance_tableheaderow">
+                <div class="tablecoll1">&nbsp;</div>
+                <div class="tablecoll2">Actuals $</div>
+                <div class="tablecoll3">Budget $</div>
+                <div class="tablecoll4">Variance? $</div>
+                <div class="tablecoll5">Explanation</div>
+              </div>
+              <%
+              expln_ytd_ids = expln_req_props_ytd_cash.collect{|i| i.id if i.title != "Griffin" }
+            %>
+              <%tot_variance_count= expln_ytd_ids.length%>
+              <div class="variance_update_tablewrapper ie_style_class" style="<%unless pdf_collection%><%=tot_variance_count>26 ? 'height:3071px;overflow-y:auto;overflow-x:hidden;' : ''%><%end%>">
+                <% (expln_req_props_ytd_cash).each do |i|
+                  prop_cal(i)
+                  current_user_type(i)
+                %>
+                  <%if expln_ytd_ids.include? i.id %>
+                    <%prop_ytd_cal(i)%>
+										<%
+												var_actual_ytd = @var_actual_ytd
+												var_budget_ytd = @var_budget_ytd
+												var_per_ytd = @var_per_ytd
+												var_amt_ytd = @var_amt_ytd
+											%>
+
+
+                    <div class="variance_task_tablerow">
+                      <div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>" title="<%= i.tool_tip == "Cash > Operating Summary" ? "Cash > Net Operating Income" : i.tool_tip %>" class="tablecoll1"><%=  i.title.titlecase=="Operating Summary" ? "Net Operating Income": i.title.titlecase %><span style="display:block;padding-top: 6px;color: #9aa2a2;">YTD</span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(var_actual_ytd) %> </div>
+                      <div class="tablecoll3"><%=  display_currency_real_estate_overview(var_budget_ytd) %> </div>
+                      <% icon_direction = up_or_down(var_actual_ytd, var_budget_ytd) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}" %>
+                      <%# use_color = @is_expense ? expense_color(@var_actual, @var_budget) : income_color(@var_actual, @var_budget) %>
+											 <% use_color = @is_expense ? expense_color(var_actual_ytd, var_budget_ytd) : income_color(var_actual_ytd, var_budget_ytd) %>
+                      <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red" %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(var_per_ytd) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(var_amt_ytd) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+                      </div>
+                        <% explained = explanation_finder(i.id, note_collection.id, params[:month], true) %>
+                      <div class="tablecoll5">
+                        <textarea class="expand60-300 variance_inputfield" id="expln_ytd_<%= i.id %>" onclick="cur_textarea = jQuery(this).val();jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln('<%= i.id %>', <%= params[:month] %>, 0, true,<%= request.request_uri%>,undefined,cur_textarea); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42"><%= explained.explanation if explained  %></textarea>
+                        <div id="det_ytd_<%= i.id %>" style="visibility: <%= (explained and explained.explanation?) ? "visible" : "hidden" %>" class="addedby">Added by: <span id="usr_ytd_<%= i.id %>"><%=  explained.user.user_name if (explained and explained.explanation?)  %></span> <span id="upt_ytd_<%= i.id %>"><%= "on " + explained.updated_at.strftime("%b %d,%Y") if (explained and explained.explanation?) %></span></div>
+                      </div>
+                      <% if explained && explained.explanation? %>
+                        <% @exp_item = explained
+                        @exp_type = 'explanation'
+                        @exp_cmt_for = 'cash_flow'
+                      %>
+                        <div id="<%= "explanation_comment_ytd_#{@exp_item.id}"%>">
+                          <%= render :partial =>'/explanations/comment_explanation_view' %>
+                        </div>
+                      <% else %>
+                        <div id="create_comment_ytd_<%= i.id %>"></div>
+                      <% end %>
+                    </div>
+										<%end%>
+									<script type="text/javascript">
+                    tooltip_loaders.push(<%= i.id %>);
+                  </script>
+                <%end%>
+              </div>
+							<%end%>
+            </div>
+          <br/>
+          <input type="hidden" id="all_saved_explanation_ids"/>
+          <input type="hidden" id="all_saved_comments_ids"/>
+          <input type="hidden" id="all_saved_events_ids"/>
+        </div>
+
+          <% end %>
+
+
+
+					<%if ((params[:period] == "7" || params[:tl_period] == "7"|| params[:period] == "4" || params[:tl_period] == "4") && (params[:tl_month].blank? || params[:tl_month].nil?)) || (params[:tl_month].blank? || params[:tl_month].nil?) %>
+					<% var_display= (expln_req_props_ytd_cash.count.zero? && expln_req_props_ytd_cash.count.zero?) ? "false" : "true"%>
+					<%elsif (params[:period] != "7" && params[:tl_period] != "7" || params[:period] != "4" && params[:tl_period] != "4") && !(params[:tl_month].blank? || params[:tl_month].nil?)  %>
+										<% var_display= (expln_req_props_cash.count.zero? && expln_req_props_cash.count.zero?) ? "false" : "true"%>
+					<%end%>
+					<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+				<% if var_display == "true"%>
+				<%unless pdf_collection%>
+            <div class="buttonswrapper2 margin_updown button_with_task_complete" style ="padding-left:1px;"><span style="float:left;padding-top:6px;padding-right:6px;">	User Notification :	</span>
+						<span>&nbsp;</span><span><div class="greenbutton">
+						<%= link_to "Send Message",{:controller=>"performance_review_property",:action=>"notification_to_prop_users",:id=>note_collection.id,:note_id=>note_collection.id},:id=>"notify_users"%>
+							<script>new Control.Modal($('notify_users'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+							<span>&nbsp;</span></div></span>
+            </div>
+						<%end%>
+						<%else%>
+						<div style="padding-left: 245px;" class="rhscontentrow rhscontentrowtime">
+						 <span style="font-size:13px;"> No item beyond variance threshold.</span>
+						<%end%>
+      </div>
+  </div>
+<!--[if IE]>
+<style tyle=""text/css>
+  body .ie_style_class{padding-left:12px;}
+</style>
+<![endif]-->
+

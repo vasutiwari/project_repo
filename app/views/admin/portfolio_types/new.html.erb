@@ -1,0 +1,31 @@
+<% content_for :title, 'AMP - Portfolio builder' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  <div class="middlewrapper2">
+	<%= form_tag(:action => "create",:method => :post)  do %>
+    <div class="sectiontitle">Portfolio Type Builder </div>
+    <div class="rowwrapper">
+        <div class="fieldiconcol"><img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/></div>
+        <div class="fieldrow">
+          <div class="fieldlabel">Portfolio Type :</div>
+          <div class="fieldinput"><%= text_field :portfolio_type, :name, :class=>"inputstyle305" %><br />
+            <span class="errorprompt"><%=error_message_on :portfolio_type,:name%></span></div>
+          <div class="fieldhint">Enter your desired portfolio type </div>
+        </div>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><%= image_submit_tag '/images/create.png', :title => "Submit", :border => "0", :width=>"117", :height=>"32" %><%#=submit_tag "Create" %></div>
+      <div class="nextbtn"><a href="<%= admin_portfolio_types_path %>"><img src="/images/btn_cancel.gif" border = "0" width="117" height="32" alt="Cancel"/></a></div>
+    </div>
+  </div>
+	<%end%>
+</div>
+
+
+
+
+

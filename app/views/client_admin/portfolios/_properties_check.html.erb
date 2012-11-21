@@ -1,0 +1,72 @@
+<%=hidden_field_tag :total_properties,:value=>properties.map(&:id) %>
+<p>
+    <span>Select Properties</span>
+</p>
+<div class="fltLeft marginZero">
+    You have Selected <span id="property_count" class="TxtBold">0</span>
+    of <span class="TxtBold"><%=properties.count %></span>
+    Properties
+</div>
+<div class="fltrt maginR20">
+    <label>
+        <input type="checkbox" id="select_all_property" class="valign" style="vertical-align:inherit;"/>Select All
+    </label>
+</div>
+<div class="clear">
+</div>
+<div class="whtBox overflow130">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <% if  properties.present? %>
+        <% properties.each_with_index do |property,i| %>
+        <%if i%5==0 %>
+        <tbody>
+            <tr>
+                <%end %>
+                <td>
+                    <label>
+                        <%=check_box_tag "property[#{i}]", "#{property.id}",false,:class=>"property_select valign", :style=>"vertical-align:inherit;" %><%=property.property_name %>
+                    </label>
+                </td>
+                <%if i%5==4 %>
+            </tr>
+        </tbody>
+        <%end %>
+        <%end %>
+        <% else %>
+		<div style="margin-left:300px;margin-top:50px;"><%= FLASH_MESSAGES['client_admin']['103'] %></div>
+        <% end %>
+    </table>
+</div>
+<script>
+            jQuery("#select_all_property").click(function(){
+            jQuery(".property_select").each( function() {
+            if (jQuery("#select_all_property").is(':checked')==true)
+            {
+            jQuery(this).attr("checked","checked");
+            }
+            	else
+            {
+            jQuery(this).attr("checked",false);
+            }
+            jQuery("#property_count").text(jQuery('.property_select:checked').size());
+            });
+            });
+
+
+            jQuery(".property_select").click( function() {
+            jQuery("#property_count").text(jQuery('.property_select:checked').size());
+            if (jQuery(this).is(':checked')==false)
+            {
+            jQuery("#select_all_property").attr("checked",false);
+            }
+            else if(jQuery('.property_select:checked').size()=="<%=properties.count%>")
+            {
+            jQuery("#select_all_property").attr("checked","checked");
+            }
+            });
+
+            	jQuery("#commercial_count").text("(<%=commercial_count%>)");
+            	jQuery("#multifamily_count").text("(<%=multifamily_count%>)");
+
+
+</script>

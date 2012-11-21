@@ -1,0 +1,62 @@
+<% note_instance = @note
+   operating_stmt_instance = @operating_statement
+%>
+<div id ="portfolio_overview_property_graph">
+  <%if !@actual.nil?  and !operating_stmt_instance.nil? and operating_stmt_instance.length > 0 %>
+
+   <%if note_instance && (find_accounting_system_type(2,note_instance) || find_accounting_system_type(3,note_instance) || (find_accounting_system_type(0,note_instance) && note_instance.leasing_type == "Commercial")) %>
+	    <%=render :partial => "properties/exe_summary",:locals=>{:operating_statement=>operating_stmt_instance,:divide=>@divide,:net_income_de=>@net_income_de,
+        :occupancy_summary=>@occupancy_summary,:note_collection=>note_instance,:graph_month=>@graph_month,:gra_year=>@gra_year,:mtyd=>@mtyd,:occupancy_graph=>@occupancy_graph,
+:capital_percent=>@capital_percent,:capital_improvement=>@capital_improvement,:captial_diff=>@captial_diff,:leasing_activity=>@leasing_activity,:percent_average=>@percent_average,net_income_detail=>@net_income_detail}%>
+  <% elsif note_instance && (find_accounting_system_type(3,note_instance) || ((find_accounting_system_type(0,note_instance)) && note_instance.leasing_type == "Multifamily"))%>
+		<%=render :partial => "properties/wres/exe_summary",:locals=>{:operating_statement=>operating_stmt_instance,:op_in=>@op_in,:op_ex=>@op_ex,:divide=>@divide,
+        :net_income_de=>@net_income_de,:property_occupancy_summary=>@property_occupancy_summary,:note_collection=>note_instance,
+        :other_income_and_expenses=>@other_income_and_expenses,:other_bar=>@other_bar,:captial_diff=>@captial_diff,:exposure_vacancy=>@exposure_vacancy,net_income_detail=>@net_income_detail}%>
+  <%end%>
+
+
+  <% else %><% req_actual_folder = fetch_excels_folder(note_instance.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_instance.id) %>
+        <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+          <% @start_date = (!@start_date.nil? ? @start_date : Time.now) %>
+          <% if note_instance.class == RealEstateProperty %>
+            <% note_name = note_instance.property_name %>
+          <% else %>
+            <% note_name = note_instance.note_id %>
+          <% end %>
+          <% if (note_instance.user_id == current_user.id || !(find_property_shared(note_instance).nil? || find_property_shared(note_instance).blank?)) %>
+            <script type="text/javascript">
+              var month_det = ["","Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+              val_det =""
+              if (active_sub_month == ""){
+                if(active_period == 4)
+                  val_det = "Year to date - "+ new Date().getFullYear()
+                else if(active_period == 5)
+                  val_det = month_det[month_arr[new Date().getMonth()]] +" - "+ (month_arr[new Date().getMonth()] == 12 ? (new Date().getFullYear() -1) : new Date().getFullYear())
+                else if(active_period == 6)
+                  val_det = "Last year"+ active_sub_month+" - "+ (new Date().getFullYear()-1)
+              }
+              else
+                val_det = month_det[parseInt(active_sub_month, 10)]+" - "+ active_sub_year
+            </script>
+            <span style="color: black;font-size: 13px;">Data Unavailable. Please add Asset Financial data <% if @property_occupancy_summary.nil? %>& Lease information <% end %>at
+
+						<!-- <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_instance.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+						<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						.</span>
+          <% else %>
+            <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+          <% end %>
+        </div>
+                <%if params[:start_date]%>
+           <%=render :partial => "properties/summary_comments_and_files"%>
+        <%end%>
+  <% end %>
+
+
+</div>

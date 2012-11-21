@@ -1,0 +1,145 @@
+<script>
+  selected_item = "<%=note_collection.id%>"
+</script>
+<div class="middleDiv leaseModule" id = "lease_container">
+  <div id="show_assets_list">
+    <div class="suitemid_rentRoll marginTop20">
+      <h1 class="page-title">Rent Roll</h1>
+      <div class="clear"></div>
+      <%if  !@pdf && !note_collection.is_getting_started_closed%>
+        <%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>note_collection,:portfolio_collection=>portfolio_collection} %>
+      <%end%>
+      <div class="alertbody-rentRoll" style="margin-top: 14px;">
+        <div id="Alerts">
+
+          <div class="lsrowwrapper_rentRoll" style="font-weight:normal !important; font-size:11px !important">View :
+            <select id="lease_rent_roll" onchange="lease_rent_filter({},this.value,'<%= params[:property_id] %>','<%=  params[:portfolio_id]%>')">
+              <option value="all_units">All Units</option>
+              <option value="vacant">Vacant Units</option>
+              <option value="expirations">Expirations</option>
+              <option value="renewals">Renewals</option>
+              <option value="new_leases">New Leases</option>
+              <option value="top_10_tenants">Top Tenants</option>
+              <option value="top_10_expirations">Upcoming Expirations</option>
+              <%year = Date.today.year%>
+              <% for i in (0 .. 4)
+                start_date = Date.new(year.to_i+i).strftime("%Y")%>
+                <option value="<%=start_date%>_expiration"><%=start_date%> Expiration Units</option>
+              <%end%>
+                <%start_date = Date.new(year.to_i+(i-1)).strftime("%Y")%>
+                <option value="<%=start_date%> and above"><%=start_date%> & above Units</option>
+            </select>
+          </div>
+
+          <div style="padding:5px 0 10px; font-size:12px; font-weight:bold;" class="lsrowwrapper">Commercial Rent Roll</div>
+          <%if rent_roll_swig.present?%>
+            <div class="tbl_lease rentroll-tbl" style="overflow: auto; width: 926px;">
+              <div class="tbl-head rentroll-head" style="padding: 0pt; width: 980px;">
+                <div class="rentname ls-th-1" style="width: 47px;">Suites</div>
+                <div class="rentname ls-th-1" style="width: 121px;">Tenant</div>
+                <div class="rentname ls-th-1" style="width: 47px;">SF</div>
+                <div class="rentname ls-th-1" style="width:auto;">  <div style="background:#4bacc6; margin:0 1px">Lease</div>
+                  <div class="clear"></div>
+                  <div class="rentname ls-sub-th-1" style="width: 49px;">Start</div>
+                  <div class="rentname ls-sub-th-1" style="width: 49px;">End</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="rentname ls-th-1" style="width:auto;"><div style="background:#4bacc6; margin:0 1px">Base Rent ($)</div>
+                  <div class="clear"></div>
+                  <div class="rentname ls-sub-th-1" style="width: 55px;">Mo Amt</div>
+                  <div class="rentname ls-sub-th-1" style="width: 63px;">Annual PSF</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="rentname ls-th-1" style="width:auto;"><div style="background:#4bacc6; margin:0 1px">Future Rent</div>
+                  <div class="clear"></div>
+                  <div class="rentname ls-sub-th-1" style="width: 39px;">Period</div>
+                  <div class="rentname ls-sub-th-1" style="width: 49px;">Rent Inc</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="rentname ls-th-1" style="width:auto;"><div style="background:#4bacc6; margin:0 1px">Per Sales</div>
+                  <div class="clear"></div>
+                  <div class="rentname ls-sub-th-1" style="width: 57px;">Floor</div>
+                  <div class="rentname ls-sub-th-1" style="width: 43px;">%</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="rentname ls-th-1" style="width:auto;"><div style="background:#4bacc6; margin:0 1px">Recoveries</div>
+                  <div class="clear"></div>
+                  <div class="rentname ls-sub-th-1" style="width: 51px;">Charge</div>
+                  <div class="rentname ls-sub-th-1" style="width: 47px;">Method</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="rentname ls-th-1" style="width: 65px;">Tl Amt ($)</div>
+                <div class="rentname ls-th-1" style="width: 65px;">LC Amt ($)</div>
+                <div class="rentname ls-th-1" style="width: 81px;">Options</div>
+                <div class="rentname ls-th-1" style="width: 51px;">SD ($)</div>
+                <div class="clear"></div>
+              </div>
+              <%rent_roll_swig.each do |rl|%>
+                <div class="tbl-row <%= cycle("rentroll-odd", "rentroll-even") %>" style="padding: 0pt; margin-top: -1px; width: 980px;">
+                  <div class="rentname ls-td-1" style="width: 47px;"><%= rl.suite_no ? rl.suite_no : raw("&nbsp;") %></div>
+                  <div class="rentname ls-td-1" style="width: 121px; text-align:left !important; text-indent:5px;">
+    <%#= rl.tenant ? rl.tenant : "Vacant" %>
+                    <%if rl.try(:tenant).present? && rl.tenant != 'Vacant'  %>
+                      <a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=rl.lease_id%>','management');load_completer();return false;"><%= truncate(rl.tenant, :length=>43) %></a>
+                    <%else%>
+                                                                                      Vacant
+                    <%end%>
+                  </div>
+                  <div class="rentname ls-td-1" style="width: 47px;"><%= rl.sqft.present? ? number_with_delimiter(rl.sqft.to_i) : raw("&nbsp;") %></div>
+                  <div class="rentname ls-td-1" style="width:auto;">
+                    <div class="rentname ls-td-1 " style="width: 49px;"><%= rl.lease_start_date.present? ? rl.lease_start_date.to_date.strftime('%m/%Y') : raw("&nbsp;")%></div>
+                    <div class="rentname ls-td-1 " style="width: 49px;">
+                      <%if rl && rl.lease && rl.lease.try(:mtm)%>
+                                                                                              MTM
+                      <%else%>
+                        <%= rl.lease_end_date ? rl.lease_end_date.to_date.strftime('%m/%Y') : raw("&nbsp;")%>
+                      <%end%>
+                    </div>
+                  </div>
+                  <div class="rentname ls-td-1" style="width:auto;">
+                    <div class="rentname ls-td-1" style="width: 55px;"><%= rl.base_rent_monthly_amount.present? ? number_with_delimiter(number_with_precision(rl.base_rent_monthly_amount, :precision => 2)) : raw("&nbsp;") %></div>
+                    <div style="width: 63px;" class="rentname ls-td-1 "><%= rl.base_rent_annual_psf.present? ? number_with_delimiter(number_with_precision(rl.base_rent_annual_psf, :precision => 2)) : raw("&nbsp;") %></div>
+                  </div>
+                  <div class="rentname ls-td-1" style="width:auto;">
+                    <div class="rentname ls-td-1" style="width: 39px;"><%=rl.escalations_period.present? ? number_with_delimiter(number_with_precision(rl.escalations_period, :precision => 2)) :  raw("&nbsp;") %></div>
+                    <div class="rentname ls-td-1" style="width: 49px;"><%= rl.escalations_monthly_amount.present? ? number_with_delimiter(number_with_precision(rl.escalations_monthly_amount, :precision => 2)) : raw("&nbsp;") %></div>
+                  </div>
+                  <div class="rentname ls-td-1" style="width:auto;">
+                    <div class="rentname ls-td-1" style="width: 57px;"><%=rl.per_sales_floor.present? ? number_with_delimiter(number_with_precision(rl.per_sales_floor, :precision => 2))  :  raw("&nbsp;") %></div>
+                    <div class="rentname ls-td-1 " style="width: 43px;"><%=  rl.per_sales_percentage.present? ? number_with_delimiter(number_with_precision(rl.per_sales_percentage, :precision => 2))  : raw("&nbsp;") %></div>
+                  </div>
+                  <div class="rentname ls-td-1" style="width:auto;">
+                    <div class="rentname ls-td-1" style="width: 51px;"><%=  rl.recoveries_charge.present? ? number_with_delimiter(number_with_precision(rl.recoveries_charge, :precision => 2)) : raw("&nbsp;") %></div>
+                    <div class="rentname  ls-td-1" style="width: 47px;"><%=  rl.recoveries_info.present? ? number_with_delimiter(number_with_precision( rl.recoveries_info, :precision => 2)) : raw("&nbsp;") %></div>
+                  </div>
+                  <% lease_collection = Lease.find(rl.lease_id) if rl.lease_id.present? %>
+                  <%mgmt_lease_details(lease_collection) if lease_collection.present? %>
+                  <div class="rentname ls-td-1" style="width: 65px;"><%= @tenant_improvements_total_amount.present? ? number_with_delimiter(number_with_precision(@tenant_improvements_total_amount, :precision => 2))  : raw("&nbsp;")%></div>
+                  <div class="rentname ls-td-1" style="width: 65px;"><%= @display_leasing_commissions_total_amount.present? ?  number_with_delimiter(number_with_precision(
+                        @display_leasing_commissions_total_amount, :precision => 2))  : raw("&nbsp;")%></div>
+                  <div class="rentname ls-td-1" style="width: 81px;"><% lease = PropertyLeaseSuite.find_by_lease_id(rl.lease_id) if rl.lease_id.present? %><%if lease.present? && lease.tenant.options.present?%><%= options_and_ti(lease.tenant).present? ?  options_and_ti(lease.tenant)  : raw("&nbsp;")%> <%end%>
+                  </div>
+                  <div class="rentname ls-td-1" style="width: 51px;"><%=rl.security_deposit_amount.present? ? number_with_delimiter(number_with_precision(rl.security_deposit_amount, :precision => 2)) : raw("&nbsp;")%></div>
+                </div>
+              <%end%>
+            </div>
+          <%else%>
+            <div class='no-data'> No Data To Display </div>
+          <%end%>
+
+        </div>
+      </div>
+      <div class="suitesavebuttbor_rentRoll" style="padding:0 0 5px">&nbsp;</div>
+    </div>
+    <%if rent_roll_swig.present? && !@pdf%>
+      <div class="paginationcol" style="margin-left:790px;">
+        <%= will_paginate  rent_roll_swig,:inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'rent_roll',:page=>params[:page],:per_page=>10, :id=>note_collection.id, :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true} %>
+      </div>
+    <%end%>
+  </div>
+</div>
+<script>
+<%if params[:rent_roll_filter].present?%>
+    jQuery('#lease_rent_roll option[value=<%=  params[:rent_roll_filter] %>]').attr('selected', 'selected');
+<%end%>
+</script>

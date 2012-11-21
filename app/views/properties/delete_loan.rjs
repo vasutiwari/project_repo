@@ -1,0 +1,8 @@
+unless params[:delete_form] == "true"
+  form = "loan_form"
+  page.replace_html "errmsg", :text=>" "
+  #~ page.replace_html "tabs",:partial =>"/real_estates/property_sub_tab",:locals=>{:tab_collection => @tab,:property_collection =>@property}
+  page.replace_html "sheet123",:partial =>"/real_estates/#{form}"
+  #~ page.call "activate_tabs","3"
+  page.call "flash_writter", FLASH_MESSAGES['properties']['401'] if params[:delete_form] != "true"
+end

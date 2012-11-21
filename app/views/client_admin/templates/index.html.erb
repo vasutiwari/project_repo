@@ -1,0 +1,65 @@
+
+
+ <%#if @templates.present?%>
+<%  user_id = current_user.id%>
+<div class="box-1col">
+  <div class="clearfloat"></div>
+ <div class="box-title fltLeft"><span class="title">Template List </span></div>
+	
+
+  <div class="fltrt">
+<!--    <%= link_to new_client_admin_template_path(params[:client_admin_id]), :class=>"button lightBlue" do %>
+      <%#= image_tag("/images/add.png",:border => "0", :width=> "16",:height => "16") %> <span>Add Template</span>
+		<% end %> -->
+   
+  </div>
+  <div class="clearfloat"></div>
+    <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+      <thead >
+        <tr class="fb-tr-head">
+          <th class="bdr-lt-gry bdr-rt-wht" style="width:100px;">Template Name</th>
+          <th class="bdr-rt-wht"style="width:300px;">Property Type</th>
+           <th class="bdr-rt-wht" style="width:60px;">Actions</th>
+        </tr>
+      </thead>
+			<%if @templates.present?%>
+			<% @templates.each do |template| %>
+			<tr>
+    <td><%= template.template_name %></td>
+    <td>Property Type <%= template.property_type_name %></td>
+  
+            <td align="center" class="bdr-rt-gry bdr-top-gry">
+     
+       <!--
+         <a href="/client_admin/<%=user_id%>/templates/<%=  template.id%>/tree_view_template?sort=<%= params[:sort] || 'edit_template' %>"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a>		
+    -->
+    
+<!--	<div class="row2">
+         <div class="iconl3"><img src="/images/moveto_icon.png"  width="15" height="16" border="0"/></div>
+        <div class="iconl3">
+                          <%= link_to "Move To",{:controller=>"client_admin/templates",:action=>"tree_view_template",:id=>user_id,:template_id=>template.id,:element_type => "document"},:id=>"share_filename_#{user_id}" %>
+        
+                        <script>new Control.Modal($('share_filename_<%=user_id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                      </div>
+                    </div>  -->
+              
+        <a href="/client_admin/<%=user_id%>/templates/<%=  template.id%>/folder_template_rename"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a> 	
+            </td>
+    </tr>
+	<%end%>
+			<%else%>
+			  <tbody><tr><td colspan="3"  style="text-align:center;">No Data To Display</td></tr></tbody>
+			<%end%>
+    </table>
+		<div class="clearfloat"></div>
+		<%if @templates.present?%>
+		<div class="paginationcol" style="margin-left:800px;">
+   
+</div>
+<%end%>
+</div>
+
+<script>
+ 
+  
+</script>

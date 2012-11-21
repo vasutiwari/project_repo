@@ -1,0 +1,1460 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<style>
+  .redbar
+  {
+    color:black;
+  }
+  .tablecol4
+  {
+    width:143px;
+  }
+
+</style>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="capital_expenditure"
+  active_call="performance_review"
+</script>
+<script>
+<%if note_collection.gross_rentable_area && note_collection.gross_rentable_area!=0%>
+    grossRent=true;
+<%else%>
+    grossRent=false;
+<%end%>
+<%if note_collection.no_of_units && note_collection.no_of_units!=0%>
+    noOfUnits=true;
+<%else%>
+    noOfUnits=false;
+<%end%>
+
+</script>
+<script type="text/javascript">
+  rem_count = 0;
+</script>
+<% color_for_bar = {'red'=>'black','green'=>'#666666'}   %>
+<div id ="portfolio_overview_property_graph">
+
+  <% acc_sys_type=AccountingSystemType.find(note_collection.accounting_system_type_id).try(:type_name)
+  if acc_sys_type=="Real Page"
+    find_financial_sub_items("maintenance projects")
+  elsif (acc_sys_type=="AMP Excel" && note_collection.leasing_type=="Multifamily")  || (acc_sys_type=="YARDI V1" && note_collection.leasing_type=="Multifamily") || (note_collection.property_capital_improvements.count==0 && !@record_list_de && acc_sys_type!="MRI, SWIG" && note_collection.leasing_type=="Commercial" && (!remote_property(note_collection.accounting_system_type_id) && note_collection.leasing_type !="Commercial") )
+    find_financial_sub_items("Capital Expenditures")
+		elsif note_collection && remote_property(note_collection.accounting_system_type_id)
+		title_value = ['REAL ESTATE UNDER DEVELOPMENT','FURNITURE, FIXTURES & EQUIPMENT']
+		asset_values = []
+		title_value.each do |title|
+			find_financial_sub_items(title)
+			asset_values << @asset_details
+			end
+		end
+%>
+
+<%asset_details = @asset_details%>
+  <% unless pdf_collection %>
+    <div class="pdf_link_financial" style="">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+      <span style=" border-right-color: #000000;border-right-width: 1px;border-right-style:solid;">&nbsp;</span>
+    </div>
+    <script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+  <%if (note_collection.class.eql?(Portfolio) ? note_collection.leasing_type  : note_collection.portfolio.leasing_type ) == "Multifamily"%>
+	<div class="sqrft_per_unit" style="top:117px;margin-right: 10px;*top:194px;"> Values :
+        <select id="per_tot_sqft" onchange="performanceReviewCalls('capital_expenditure',{},undefined,this.value)">
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><%end%>
+          <%if no_of_units_available%><option value="unit_calc"  <%='selected' if params[:unit_calc]%> >Per Unit</option><%end%>
+        </select>
+      </div>
+    <%else%>
+      <div  style="top:117px;margin-right: 10px;*top:194px;" class="sqrft_per_unit">Values :
+        <select id="per_tot_sqft" onchange="performanceReviewCalls('capital_expenditure',{},undefined,this.value)">
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><%end%>
+        </select>
+      </div>
+    <%end%>
+  <% end %>
+
+
+  <% if (note_collection.property_capital_improvements.count > 0  and !@record_list_de.nil?) || ((acc_sys_type=="Real Page" || (note_collection.property_capital_improvements.count==0 && acc_sys_type!="MRI, SWIG" && note_collection.leasing_type=="Commercial" && !@record_list_de) || (acc_sys_type=="AMP Excel" && note_collection.leasing_type=="Multifamily") ||  (acc_sys_type=="YARDI V1" && note_collection.leasing_type=="Multifamily") )  && asset_details && !asset_details.empty? || remote_property(note_collection.accounting_system_type_id)&& asset_details && !asset_details.empty? || remote_property(note_collection.accounting_system_type_id) && asset_values && asset_values.flatten.present? )%>
+				<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+					<%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id, :from=>"capital_expenditure"} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+					<script>new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+				</div>
+				<!--for notes popup-->
+				<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+					<%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"capital_expenditure"} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+					<script>new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+				</div>
+	<%end%>
+
+				<%if note_collection.accounting_system_type_id && note_collection.property_capital_improvements.count>0 && (acc_sys_type=="MRI, SWIG" || acc_sys_type=="MRI" || (acc_sys_type=="AMP Excel" && note_collection.leasing_type=="Commercial"))%>
+					<% form_hash_of_data_for_capex(cap_exp_collection) %>
+					<% capex_variance = @capex_variance%>
+					<%exp_month_ytd,exp_ytd_check,variance_task_document_id=initial_variance_calculations(cap_exp_collection,'cap_exp')%>
+					<%if cap_exp_collection.total_cap_ex_act.to_f  == 0 &&  cap_exp_collection.total_cap_ex_bud.to_f ==0%>
+						<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+						<div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+							<% start_date = (!start_date.nil? ? start_date : Time.now) %>
+							<% if note_collection.class == RealEstateProperty %>
+								<% note_name = note_collection.property_name %>
+							<% elsif note_collection.class == Portfolio  %>
+								<% note_name =  note_collection.name %>
+							<% else %>
+								<% note_name = note_collection.note_id %>
+							<% end %>
+							<% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+								<span style="font-size:13px;">Data Unavailable. Please add Asset Financial data <!--at <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>-->. </span>
+							<%elsif remote_property(note_collection.accounting_system_type_id) == true%>
+								<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+							<% else %>
+						<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+							<% end %>
+						</div>
+					<%else%>
+					<div class="tableheaderow assetview headerBlueBg">
+                      <div class="tablecol1" style="width: 140px;">&nbsp;</div>
+                      <div style="" class="tablecolcap2">
+                        <div class="tablecol2_subcol1">0%</div>
+                        <div style="width:80px" class="tablecol2_subcol2">Actuals $</div>
+                        <div class="tablecol2_subcol3">100%</div>
+                      </div>
+                      <div class="tablecol3" style="width: 75px;">Budget $</div>
+                      <div class="tablecol4" style="text-align: left; width: 130px;"><span>Var %</span><span style="padding-left: 46px;"> Var $</span></div>
+                      <div id="financexp1"  class="tablecol5"><%if params[:period] != "2" && params[:tl_period] !="2"%><%=month_ytd_explanation %> Explanation<%end%></div>
+                      <div id="financexp1" style="text-align: center; width: 83px;" class="tablecol5">Cost $</div>
+								</div>
+
+						<div class="tablerow">
+							<%if cap_exp_collection && cap_exp_collection.building_imp_actual%>
+								<% cap_exp_building_imp_actual = cap_exp_collection.building_imp_actual.nil? ? 0 : cap_exp_collection.building_imp_actual.to_f %>
+							  <% cap_exp_building_imp_budget = cap_exp_collection.building_imp_budget.nil? ? 0 : cap_exp_collection.building_imp_budget.to_f %>
+							<%unless cap_exp_building_imp_actual.to_i.eql?(0) && cap_exp_building_imp_budget.to_i.eql?(0)%>
+									<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check)%>
+									<div class="tablecontentrow">
+									<% j = 0%>
+									<% k = 0 %>
+<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(1,{});return false;" title="Building Improvements">Building Improvements</a><% else %>Building Improvements<% end %></div>
+									<div class="tablecolcap2"><% zero_b_bar = cap_exp_collection.building_imp_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% b_bar_color = capex_variance[:b_status] ? 'green' : 'red' %>
+											<div class="<%if zero_b_bar != 0 %><%= b_bar_color %>bar<% end %>" style="color:<%= color_for_bar[b_bar_color] %>;width:<%= capex_variance[:b_percent_bar].to_f.nan? ? 0 : capex_variance[:b_percent_bar]  %><%=  '%'  %>">&nbsp;<%=params[:sqft_calc] ? display_currency_variance(cap_exp_building_imp_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(cap_exp_building_imp_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_building_imp_actual))%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%=params[:sqft_calc] ? display_currency_overview(cap_exp_building_imp_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_building_imp_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(cap_exp_building_imp_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_building_imp_actual, cap_exp_building_imp_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:b_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ? display_currency_variance(capex_variance[:b_variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:b_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(capex_variance[:b_variant])) %>  </div>
+									</div>
+
+										<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.building_imp_id%>">
+										<div id="capitial_build_imp_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_build_imp_box" name="capitial_build_imp_box"  onblur="text_msg_display('capitial_build_imp');save_build_imp_exp(this.value,<%= cap_exp_collection.building_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= cap_exp_explanation(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check)%>
+												<div id= "financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.building_imp_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" disabled="<%if exp.present? %>false<%else%>true<%end%>" name="" onblur="call_to_store_cost('<%= cap_exp_collection.building_imp_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+                        </div>
+												</div>
+									<%end%>
+									<script>number = rem_count++; form_number = number + 1;</script>
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost if explain && explain.cost%>
+											<%if k == 0 %>
+											<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(1,{});return false;" title="Building Improvements">Building Improvements</a><% else %>Building Improvements<% end %></div>
+									<div class="tablecolcap2"><% zero_b_bar = cap_exp_collection.building_imp_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% b_bar_color = capex_variance[:b_status] ? 'green' : 'red' %>
+											<div class="<%if zero_b_bar != 0 %><%= b_bar_color %>bar<% end %>" style="color:<%= color_for_bar[b_bar_color] %>;width:<%= capex_variance[:b_percent_bar].to_f.nan? ? 0 : capex_variance[:b_percent_bar]  %><%=  '%'  %>">&nbsp;<%=params[:sqft_calc] ? display_currency_variance(cap_exp_building_imp_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(cap_exp_building_imp_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_building_imp_actual))%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%=params[:sqft_calc] ? display_currency_overview(cap_exp_building_imp_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_building_imp_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(cap_exp_building_imp_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_building_imp_actual, cap_exp_building_imp_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:b_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ? display_currency_variance(capex_variance[:b_variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:b_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(capex_variance[:b_variant])) %>  </div>
+									</div>
+									<%else%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;"> &nbsp;</div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_building_imp_actual, cap_exp_building_imp_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"> &nbsp;</div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp; </div>
+									</div>
+										<%end%>
+										<%k+=1%>
+
+
+									<% if cap_exp_collection.building_imp_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+										<% if explain.nil?  %>
+										<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.building_imp_id%>">
+												<div id="capitial_build_imp_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_build_imp_box" name="capitial_build_imp_box" size="5" onblur="text_msg_display('capitial_build_imp');save_build_imp_exp(this.value,<%= cap_exp_collection.building_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation if explain%></textarea>
+												</div>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.building_imp_id%>_<%=j%>"  type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost if explain%>" onblur= "call_to_store_cost('<%= cap_exp_collection.building_imp_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,'<%= request.request_uri %>')"/>
+                        </div>
+												</div>
+										<% else %>
+												<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>">
+													<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_build_imp_box" name="capitial_build_imp_box" size="5" onblur="text_msg_display('capitial_build_imp');save_build_imp_exp_val(this.value,<%= cap_exp_collection.building_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%=explain.id if explain%>,'capital')"><%= explain.explanation if explain%></textarea>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.building_imp_id%>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost%>" onblur= "call_to_store_cost(<%= cap_exp_collection.building_imp_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id%>,'<%= request.request_uri %>');"/>
+                        </div>
+										<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+										<% end %>
+									<% end %>
+									<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.building_imp_id%>"></div>
+								<% end %>
+							<div>
+				<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:b_variant],cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check)%>
+				<%document = @doc%>
+						<% if  (val) and !explanation_doc_id.nil? %>
+
+											<span style="float: right; margin: 5px 89px 0pt 0pt; font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check)%>
+													<%value = exp.comments_finder.count if exp.present? %>
+													<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present? %>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()"%>
+														<% end %>
+													</span>
+													<%end%>
+														<% if !cap_exp_explanation(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+											<span  id="add_more_<%= cap_exp_collection.building_imp_id%>"style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.building_imp_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'build_imp','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span>	<%end%>
+												</div>
+											<% if !cap_exp_explanation(cap_exp_collection.building_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<div id="totalVariance_<%=cap_exp_collection.building_imp_id%>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.building_imp_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+														<%end%>
+                      </div>
+								<% end %>
+							<% end %>
+
+							<!-- --------------------------------------------------------------------------------------------------Net Lease Cost & Loan Cost Start------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+								<%if cap_exp_collection.net_lease_act%>
+								<% net_lease_actual = cap_exp_collection.net_lease_act.nil? ? 0 : cap_exp_collection.net_lease_act.to_f %>
+								<% net_leasing_budget = cap_exp_collection.net_lease_bud.nil? ? 0 : cap_exp_collection.net_lease_bud.to_f %>
+								<%unless net_lease_actual.to_i.eql?(0) && net_leasing_budget.to_i.eql?(0)%>
+									<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check)%>
+									<div class="tablecontentrow">
+									<% j = 0%>
+									<% k = 0 %>
+<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(5,{});return false;">Net Lease Costs</a><% else %>Net Lease Costs<% end %></div>
+									<div class="tablecolcap2"><% zero_net_lease_bar = cap_exp_collection.net_lease_act.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% net_lease_bar_color = capex_variance[:net_lease_status] ? 'green' : 'red' %>
+
+											<div class="<%if zero_net_lease_bar != 0 %><%= net_lease_bar_color %>bar<% end %>" style="color:<%= color_for_bar[net_lease_bar_color] %>;width:<%= capex_variance[:net_lease_percent_bar].to_f.nan? ? 0 : capex_variance[:net_lease_percent_bar]%><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_real_estate_overview(net_lease_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_real_estate_overview(net_lease_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_real_estate_overview(net_lease_actual))%></div>
+										</div>
+									</div>
+
+									<div class="tablecol3" style="width:75px;"> <%=  params[:sqft_calc] ? display_currency_overview(net_leasing_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(net_leasing_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(net_leasing_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(net_lease_actual, net_leasing_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:net_lease_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:net_lease_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:net_lease_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:net_lease_variant]))%> </div>
+									</div>
+									<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.net_lease_id%>">
+										<div id="capitial_net_lease_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_net_lease_box" name="capitial_net_lease_box"  onblur="text_msg_display('capitial_net_lease');save_build_imp_exp(this.value,<%= cap_exp_collection.net_lease_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= cap_exp_explanation(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check)%>
+												<div id= "financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.net_lease_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" disabled="<%if exp.present? %>false<%else%>true<%end%>" name="" onblur="call_to_store_cost('<%= cap_exp_collection.net_lease_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+                        </div>
+												</div>
+									<%end%>
+									<script>number = rem_count++; form_number = number + 1;</script>
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost if explain && explain.cost%>
+											<%if k == 0 %>
+											<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(5,{});return false;">Net Lease Costs</a><%else %>Net Lease Costs<% end %></div>
+									<div class="tablecolcap2"><% zero_net_lease_bar = cap_exp_collection.net_lease_act.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% net_lease_bar_color = capex_variance[:net_lease_status] ? 'green' : 'red' %>
+
+											<div class="<%if zero_net_lease_bar != 0 %><%= net_lease_bar_color %>bar<% end %>" style="color:<%= color_for_bar[net_lease_bar_color] %>;width:<%= capex_variance[:net_lease_percent_bar].to_f.nan? ? 0 : capex_variance[:net_lease_percent_bar]%><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_real_estate_overview(net_lease_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_real_estate_overview(net_lease_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_real_estate_overview(net_lease_actual))%></div>
+										</div>
+									</div>
+
+									<div class="tablecol3" style="width: 75px;"> <%=  params[:sqft_calc] ? display_currency_overview(net_leasing_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(net_leasing_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(net_leasing_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(net_lease_actual, net_leasing_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:net_lease_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:net_lease_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:net_lease_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:net_lease_variant]))%> </div>
+									</div>
+									<%else%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;"> &nbsp;</div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(net_lease_actual, net_leasing_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"> &nbsp;</div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp; </div>
+									</div>
+										<%end%>
+										<%k+=1%>
+
+										<% if cap_exp_collection.net_lease_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+									<% if explain.nil?  %>
+										<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.net_lease_id%>">
+												<div id="capitial_net_lease_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_net_lease_box" name="capitial_net_lease_box" size="5" onblur="text_msg_display('capitial_net_lease');save_build_imp_exp(this.value,<%= cap_exp_collection.net_lease_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation if explain%></textarea>
+												</div>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.net_lease_id%>_<%=j%>"  type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost if explain%>" onblur= "call_to_store_cost('<%= cap_exp_collection.net_lease_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,'<%= request.request_uri %>')"/>
+                        </div>
+												</div>
+										<% else %>
+												<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>">
+													<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_net_lease_box" name="capitial_net_lease_box" size="5" onblur="text_msg_display('capitial_net_lease');save_build_imp_exp_val(this.value,<%= cap_exp_collection.net_lease_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%=explain.id if explain%>,'capital')"><%= explain.explanation if explain%></textarea>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.net_lease_id%>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost%>" onblur= "call_to_store_cost(<%= cap_exp_collection.net_lease_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id%>,'<%= request.request_uri %>');"/>
+                        </div>
+										<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+										<% end %>
+									<% end %>
+									<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.net_lease_id%>"></div>
+								<% end %>
+													<div>
+				<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:b_variant],cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check)%>
+				<%document= @doc%>
+						<% if  (val) and !explanation_doc_id.nil? %>
+
+											<span style="float: right; margin: 5px 89px 0pt 0pt; font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check)%>
+													<%value = exp.comments_finder.count if exp.present? %>
+													<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present? %>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()"%>
+														<% end %>
+													</span>
+													<%end%>
+														<% if !cap_exp_explanation(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check).blank? %>
+											<span  id="add_more_<%= cap_exp_collection.net_lease_id%>"style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.net_lease_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'net_lease','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span>	<%end%>
+												</div>
+											<% if !cap_exp_explanation(cap_exp_collection.net_lease_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<div id="totalVariance_<%=cap_exp_collection.net_lease_id%>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.net_lease_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+														<%end%>
+								</div>
+								<%end%>
+							<%end%>
+
+							<%if cap_exp_collection.loan_cost_act%>
+								<% loan_cost_actual = cap_exp_collection.loan_cost_act.nil? ? 0 : cap_exp_collection.loan_cost_act.to_f %>
+								<% net_leasing_budget = cap_exp_collection.loan_cost_bud.nil? ? 0 : cap_exp_collection.loan_cost_bud.to_f %>
+								<%unless loan_cost_actual.to_i.eql?(0) && net_leasing_budget.to_i.eql?(0)%>
+									<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check)%>
+									<div class="tablecontentrow">
+									<% j = 0%>
+									<% k = 0 %>
+									<%sum = 0%>
+
+									<%if cap_exp_expln.empty?%>
+										<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(6,{});return false;">Loan Costs</a><% else %>Loan Costs<% end %></div>
+										<div class="tablecolcap2"><% zero_loan_cost_bar = cap_exp_collection.loan_cost_act.nil? ? 0 : 1 %>
+											<div class="tablegreenbarowcap"><% loan_cost_bar_color = capex_variance[:loan_cost_status] ? 'green' : 'red' %>
+
+												<div class="<%if zero_loan_cost_bar != 0 %><%= loan_cost_bar_color %>bar<% end %>" style="color:<%= color_for_bar[loan_cost_bar_color] %>;width:<%= capex_variance[:loan_cost_percent_bar].to_f.nan? ? 0 : capex_variance[:loan_cost_percent_bar] %><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_real_estate_overview(loan_cost_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_real_estate_overview(loan_cost_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_real_estate_overview(loan_cost_actual))%></div>
+											</div>
+										</div>
+										<div class="tablecol3"  style="width: 75px;"> <%=  params[:sqft_calc] ? display_currency_overview(net_leasing_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(net_leasing_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(net_leasing_budget))%></div>
+										<div class="tablecol4"  style="width: 130px;">
+											<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(loan_cost_actual, net_leasing_budget)%>
+											<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:loan_cost_percent]) %> </div>
+											<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:loan_cost_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:loan_cost_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:loan_cost_variant]))%> </div>
+										</div>
+
+										<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.loan_cost_id%>">
+										<div id="capitial_loan_cost_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_loan_cost_box" name="capitial_loan_cost_box"  onblur="text_msg_display('capitial_loan_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.loan_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= cap_exp_explanation(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check)%>
+												<div id= "financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.loan_cost_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" disabled="<%if exp.present? %>false<%else%>true<%end%>" name="" onblur="call_to_store_cost('<%= cap_exp_collection.loan_cost_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+                        </div>
+												</div>
+									<%end%>
+									<script>number = rem_count++; form_number = number + 1;</script>
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost if explain && explain.cost%>
+											<%if k == 0 %>
+										<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(6,{});return false;">Loan Costs</a><% else %>Loan Costs<%end%></div>
+										<div class="tablecolcap2"><% zero_loan_cost_bar = cap_exp_collection.loan_cost_act.nil? ? 0 : 1 %>
+											<div class="tablegreenbarowcap"><% loan_cost_bar_color = capex_variance[:loan_cost_status] ? 'green' : 'red' %>
+											<div class="<%if zero_loan_cost_bar != 0 %><%= loan_cost_bar_color %>bar<% end %>" style="color:<%= color_for_bar[loan_cost_bar_color] %>;width:<%= capex_variance[:loan_cost_percent_bar].to_f.nan? ? 0 : capex_variance[:loan_cost_percent_bar] %><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_real_estate_overview(loan_cost_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_real_estate_overview(loan_cost_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_real_estate_overview(loan_cost_actual))%></div>
+											</div>
+										</div>
+										<div class="tablecol3"  style="width: 75px;"> <%=  params[:sqft_calc] ? display_currency_overview(net_leasing_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(net_leasing_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(net_leasing_budget))%></div>
+										<div class="tablecol4"  style="width: 130px;">
+											<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(loan_cost_actual, net_leasing_budget)%>
+											<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:loan_cost_percent]) %> </div>
+											<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:loan_cost_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:loan_cost_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:loan_cost_variant]))%> </div>
+										</div>
+									<%else%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;"> &nbsp;</div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(loan_cost_actual, net_leasing_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"> &nbsp;</div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp; </div>
+									</div>
+										<%end%>
+										<%k+=1%>
+
+									<% if cap_exp_collection.loan_cost_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+										<% if explain.nil?  %>
+										<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.loan_cost_id%>">
+												<div id="capitial_loan_cost_text" >
+												<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_loan_cost_box" name="capitial_loan_cost_box" size="5" onblur="text_msg_display('capitial_loan_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.loan_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation if explain%></textarea>
+												</div>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.loan_cost_id%>_<%=j%>"  type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost if explain%>" onblur= "call_to_store_cost('<%= cap_exp_collection.loan_cost_id %>',<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,'<%= request.request_uri %>')"/>
+                        </div>
+												</div>
+										<% else %>
+												<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>">
+													<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_loan_cost_box" name="capitial_loan_cost_box" size="5" onblur="text_msg_display('capitial_loan_cost');save_build_imp_exp_val(this.value,<%= cap_exp_collection.loan_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%=explain.id if explain%>,'capital')"><%= explain.explanation if explain%></textarea>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.loan_cost_id%>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost%>" onblur= "call_to_store_cost(<%= cap_exp_collection.loan_cost_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id%>,'<%= request.request_uri %>');"/>
+                        </div>
+										<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+										<% end %>
+									<% end %>
+									<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.loan_cost_id%>"></div>
+								<% end %>
+							<div>
+				<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:b_variant],cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check)%>
+				<%document = @doc%>
+						<% if  (val) and !explanation_doc_id.nil? %>
+
+											<span style="float: right; margin: 5px 89px 0pt 0pt; font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check)%>
+													<%value = exp.comments_finder.count if exp.present? %>
+													<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present? %>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()"%>
+														<% end %>
+													</span>
+													<%end%>
+														<% if !cap_exp_explanation(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+											<span  id="add_more_<%= cap_exp_collection.loan_cost_id%>"style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.loan_cost_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'loan_cost','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span>	<%end%>
+												</div>
+											<% if !cap_exp_explanation(cap_exp_collection.loan_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+														<div id="totalVariance_<%=cap_exp_collection.loan_cost_id%>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.loan_cost_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+														<%end%>
+												</div>
+								<%end%>
+							<%end%>
+
+							<!-- --------------------------------------------------------------------------------------------------Net Lease Cost & Loan Cost End------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+
+
+
+							<%if cap_exp_collection.tenant_imp_actual%>
+								<% cap_exp_tenant_imp_actual = cap_exp_collection.tenant_imp_actual.nil? ? 0 : cap_exp_collection.tenant_imp_actual.to_f %>
+								<% cap_exp_tenant_imp_budget = cap_exp_collection.tenant_imp_budget.nil? ? 0 : cap_exp_collection.tenant_imp_budget.to_f %>
+								<%unless cap_exp_tenant_imp_actual.to_i.eql?(0) && cap_exp_tenant_imp_budget.to_i.eql?(0)%>
+									<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check)%>
+								<div class="tablecontentrow">
+								<% j = 0%>
+									<% k = 0 %>
+<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+
+									<div class="tablecol1"style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(2,{});return false;">Tenant Improvements</a><% else %>Tenant Improvements<% end %></div>
+									<div class="tablecolcap2"><% zero_t_bar = cap_exp_collection.tenant_imp_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% t_bar_color = capex_variance[:t_status] ? 'green' : 'red' %>
+											<div class="<%if zero_t_bar != 0 %><%= t_bar_color %>bar<% end %>" style="color:<%=  color_for_bar[t_bar_color] %>;width:<%=capex_variance[:t_percent_bar].to_f.nan? ? 0 : capex_variance[:t_percent_bar]  %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_tenant_imp_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(cap_exp_tenant_imp_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_tenant_imp_actual) )%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%= params[:sqft_calc] ? display_currency_overview(cap_exp_tenant_imp_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_tenant_imp_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(cap_exp_tenant_imp_budget))%></div>
+									<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_tenant_imp_actual, cap_exp_tenant_imp_budget)%>
+									<div class="tablecol4" style="width: 130px;" >
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:t_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:t_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(capex_variance[:t_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:t_variant]))  %>  </div>
+									</div>
+										<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.tenant_imp_id%>">
+										<div id="capitial_tenant_imp_text" >
+												<div class= "tablecol5">
+														<textarea  class="expand40-300 " style="; width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_tenant_imp_box" name="capitial_tenant_imp_box" onblur="text_msg_display('capitial_tenant_imp');save_build_imp_exp(this.value,<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= cap_exp_explanation(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check)%>
+												 <div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+                          <input id="financexp_<%=cap_exp_collection.tenant_imp_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" disabled="<%if exp.present? %>false<%else%>true<%end%>" value="" onblur= "call_to_store_cost(<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+                        </div>
+												</div>
+											<%end%>
+
+										<script>number = rem_count++; form_number = number + 1;</script>
+
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost  if explain && explain.cost%>
+									<%if k == 0 %>
+										<div class="tablecol1"style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(2,{});return false;">Tenant Improvements</a><% else %>Tenant Improvements<% end %></div>
+									<div class="tablecolcap2"><% zero_t_bar = cap_exp_collection.tenant_imp_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% t_bar_color = capex_variance[:t_status] ? 'green' : 'red' %>
+											<div class="<%if zero_t_bar != 0 %><%= t_bar_color %>bar<% end %>" style="color:<%=  color_for_bar[t_bar_color] %>;width:<%=capex_variance[:t_percent_bar].to_f.nan? ? 0 : capex_variance[:t_percent_bar]  %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_tenant_imp_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(cap_exp_tenant_imp_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_tenant_imp_actual) )%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%= params[:sqft_calc] ? display_currency_overview(cap_exp_tenant_imp_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_tenant_imp_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(cap_exp_tenant_imp_budget))%></div>
+									<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_tenant_imp_actual, cap_exp_tenant_imp_budget)%>
+									<div class="tablecol4" style="width: 130px;" >
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:t_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:t_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(capex_variance[:t_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:t_variant]))  %>  </div>
+									</div>
+									<%else%>
+									<div class="tablecol1"style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;">&nbsp;</div>
+									<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_tenant_imp_actual, cap_exp_tenant_imp_budget)%>
+									<div class="tablecol4" style="width: 130px;" >
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4">&nbsp;</div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp;</div></div>
+									<%end%>
+									<%k += 1%>
+
+									<% if cap_exp_collection.tenant_imp_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+										<% if explain.nil?  %>
+										<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.tenant_imp_id%>">
+										<div id="capitial_tenant_imp_text" >
+												<div class= "tablecol5">
+														<textarea  class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_tenant_imp_box" name="capitial_tenant_imp_box" onblur="text_msg_display('capitial_tenant_imp');save_build_imp_exp(this.value,<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%=explain.explanation if explain %></textarea>
+												</div>
+												</div>
+												 <div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+												  <input id="financexp_<%=cap_exp_collection.tenant_imp_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" value="" onblur= "call_to_store_cost(<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+                        </div>
+												</div>
+										<% else %>
+												<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>" >
+														<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_tenant_imp_box" name="capitial_tenant_imp_box" onblur="text_msg_display('capitial_tenant_imp');save_build_imp_exp_val(this.value,<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%= explain.id if explain%>,'capital')"><%=explain.explanation if explain %>		</textarea>
+
+												</div>
+												 <div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+												  <input id="financexp_<%=cap_exp_collection.tenant_imp_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" value="<%= explain.cost if explain%>" onblur= "call_to_store_cost(<%= cap_exp_collection.tenant_imp_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/></div>
+													<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+												<% end %>
+									<% end %>
+									<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.tenant_imp_id%>"></div>
+								<% end %>
+								<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:t_variant],cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check)%>
+									<%document= @doc%>
+									<div>
+											<% if  (val) and !explanation_doc_id.nil? %>
+											<span style="float: right; margin: 5px 89px 0pt 0pt;font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+															<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check)%>
+															<%value = exp.comments_finder.count if exp.present? %>
+															<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present?%>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+														<% end %>
+														</span>
+															<% end %>
+															<% if !cap_exp_explanation(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<span  id="add_more_<%= cap_exp_collection.tenant_imp_id%>" style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.tenant_imp_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'tenant_imp','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span>
+
+									<%end%>
+									</div>
+									<% if !cap_exp_explanation(cap_exp_collection.tenant_imp_id,exp_month_ytd,exp_ytd_check).blank? %>
+											<div id="totalVariance_<%=cap_exp_collection.tenant_imp_id %>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.tenant_imp_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+	<%end%>
+								</div>
+								<% end %>
+							<% end %>
+
+
+
+							<%if cap_exp_collection.leasing_comm_actual%>
+								<% cap_exp_leasing_comm_actual = cap_exp_collection.leasing_comm_actual.nil? ? 0 : cap_exp_collection.leasing_comm_actual.to_f %>
+								<% cap_exp_leasing_comm_budget = cap_exp_collection.leasing_comm_budget.nil? ? 0 : cap_exp_collection.leasing_comm_budget.to_f %>
+								<%unless cap_exp_leasing_comm_actual.to_i.eql?(0) && cap_exp_leasing_comm_budget.to_i.eql?(0)%>
+								<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check)%>
+								<div class="tablecontentrow">
+								<% j = 0%>
+									<% k = 0 %>
+<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+									<div class="tablecol1"  style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(3,{});return false;">Leasing Commissions</a><% else %>Leasing Commissions<% end %></div>
+									<div class="tablecolcap2"><% zero_l_cos_bar = cap_exp_collection.leasing_comm_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% l_com_bar_color = capex_variance[:l_com_status] ? 'green' : 'red' %>
+											<div class="<%if zero_l_cos_bar != 0 %><%= l_com_bar_color %>bar<% end %>" style="color:<%= color_for_bar[l_com_bar_color] %>;width:<%=capex_variance[:l_com_percent_bar].to_f.nan? ? 0 : capex_variance[:l_com_percent_bar] %><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_variance(cap_exp_leasing_comm_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(cap_exp_leasing_comm_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_leasing_comm_actual))%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%=  params[:sqft_calc] ? display_currency_overview(cap_exp_leasing_comm_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_leasing_comm_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(cap_exp_leasing_comm_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_leasing_comm_actual, cap_exp_leasing_comm_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:l_com_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:l_com_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:l_com_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:l_com_variant]))%> </div>
+									</div>
+
+										<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.leasing_comm_id%>">
+										<div id="capitial_lease_comm_text" >
+											<div class= "tablecol5">
+											<textarea  class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);"  id="capitial_lease_comm_box" name="capitial_lease_comm_box" onblur="text_msg_display('capitial_lease_comm');save_build_imp_exp(this.value,<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= cap_exp_explanation(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check)%>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											  <input id="financexp_<%=cap_exp_collection.leasing_comm_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" disabled="<%if exp.present? %>false<%else%>true<%end%>"  value="" onblur= "call_to_store_cost(<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+												</div>
+											</div>
+									<%end%>
+
+										<script>number = rem_count++; form_number = number + 1;</script>
+
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost  if explain && explain.cost%>
+									<%if k == 0 %>
+									<div class="tablecol1"  style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(3,{});return false;">Leasing Commissions</a><% else %>Leasing Commissions<% end %></div>
+									<div class="tablecolcap2"><% zero_l_cos_bar = cap_exp_collection.leasing_comm_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% l_com_bar_color = capex_variance[:l_com_status] ? 'green' : 'red' %>
+											<div class="<%if zero_l_cos_bar != 0 %><%= l_com_bar_color %>bar<% end %>" style="color:<%= color_for_bar[l_com_bar_color] %>;width:<%=capex_variance[:l_com_percent_bar].to_f.nan? ? 0 : capex_variance[:l_com_percent_bar] %><%= '%' %>">&nbsp;<%= params[:sqft_calc] ?  display_currency_variance(cap_exp_leasing_comm_actual / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(cap_exp_leasing_comm_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp_leasing_comm_actual))%></div>
+										</div>
+									</div>
+									<div class="tablecol3" style="width: 75px;"> <%=  params[:sqft_calc] ? display_currency_overview(cap_exp_leasing_comm_budget / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(cap_exp_leasing_comm_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(cap_exp_leasing_comm_budget))%></div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_leasing_comm_actual, cap_exp_leasing_comm_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:l_com_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=  params[:sqft_calc] ? display_currency_variance(capex_variance[:l_com_variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:l_com_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:l_com_variant]))%> </div>
+									</div>
+									<%else%>
+									<div class="tablecol1"  style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;"> &nbsp;</div>
+									<div class="tablecol4" style="width: 130px;">
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_leasing_comm_actual, cap_exp_leasing_comm_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4">&nbsp; </div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp;</div></div>
+									<%end%>
+									<%k += 1%>
+									<% if cap_exp_collection.leasing_comm_id != 0 && (params[:period] != "2" && params[:tl_period] != "2")  %>
+										<% if explain.nil?  %>
+											<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.leasing_comm_id%>">
+										<div id="capitial_lease_comm_text" >
+											<div class= "tablecol5">
+															<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);"  id="capitial_lease_comm_box" name="capitial_lease_comm_box"  onblur="text_msg_display('capitial_lease_comm');save_build_imp_exp(this.value,<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation %></textarea>
+												</div>
+												</div>
+													<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											  <input id="financexp_<%=cap_exp_collection.leasing_comm_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="" onblur= "call_to_store_cost(<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+												</div>
+												</div>
+										<% else %>
+												<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>" >
+															<textarea  class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);"  id="capitial_lease_comm_box" name="capitial_lease_comm_box" onblur="text_msg_display('capitial_lease_comm');save_build_imp_exp_val(this.value,<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%= explain.id if explain%>,'capital')"><%= explain.explanation %></textarea>															</div>
+													<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											  <input id="financexp_<%=cap_exp_collection.leasing_comm_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="<%= explain.cost if explain%>" onblur= "call_to_store_cost(<%= cap_exp_collection.leasing_comm_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+												</div>
+										<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+										<% end %>
+									<% end %>
+									<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.leasing_comm_id%>"></div>
+								<% end %>
+								<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:l_com_variant],cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check)%>
+								<%document = @doc%>
+								<div>
+											<% if  (val) and !explanation_doc_id.nil? %>
+											<span style="float: right; margin: 5px 89px 0pt 0pt; font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check).blank? %>
+													<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check)%>
+															<%value = exp.comments_finder.count if exp.present? %>
+															<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present?%>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+														<% end %>
+													</span>
+											<%end%>
+											<% if !cap_exp_explanation(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<span  id="add_more_<%= cap_exp_collection.tenant_imp_id%>"style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.leasing_comm_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'leasing_comm','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span><%end%>
+									</div>
+									<% if !cap_exp_explanation(cap_exp_collection.leasing_comm_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<div id="totalVariance_<%=cap_exp_collection.leasing_comm_id%>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.leasing_comm_id%>"><%=sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+													<%end%>
+								</div>
+								<%end%>
+							<%end%>
+
+
+
+
+							<%if cap_exp_collection.lease_cost_actual%>
+								<% cap_exp_lease_cost_actual = cap_exp_collection.lease_cost_actual.nil? ? 0 : cap_exp_collection.lease_cost_actual.to_f %>
+								<% cap_exp_lease_cost_budget = cap_exp_collection.lease_cost_budget.nil? ? 0 : cap_exp_collection.lease_cost_budget.to_f %>
+								<%unless cap_exp_lease_cost_actual.to_i.eql?(0) && cap_exp_lease_cost_budget.to_i.eql?(0)%>
+								<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check)%>
+
+									<div class="tablecontentrow">
+									<% j = 0%>
+									<% k = 0 %>
+									<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(4,{});return false;">Lease Costs</a><% else %>Lease Costs<% end %></div>
+									<div class="tablecolcap2"><% zero_l_com_bar = cap_exp_collection.lease_cost_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% l_cos_bar_color = capex_variance[:l_cos_status] ? 'green' : 'red' %>
+
+											<div class="<%if zero_l_com_bar != 0 %><%= l_cos_bar_color %>bar<% end %>" style="color:<%= color_for_bar[l_cos_bar_color] %>;width:<%=capex_variance[:l_cos_percent_bar].to_f.nan? ? 0 : capex_variance[:l_cos_percent_bar]  %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_lease_cost_actual  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1))  : (params[:unit_calc] ?  display_currency_variance(cap_exp_lease_cost_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) :  display_currency_variance(cap_exp_lease_cost_actual))%></div>
+										</div>
+									</div>
+
+									<div class="tablecol3" style="width: 75px;"> <%=params[:sqft_calc] ?  display_currency_overview(cap_exp_lease_cost_budget  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : ( params[:unit_calc] ? display_currency_overview(cap_exp_lease_cost_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(cap_exp_lease_cost_budget)) %></div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_lease_cost_actual, cap_exp_lease_cost_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4" ><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:l_cos_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%= params[:sqft_calc] ? display_currency_variance(capex_variance[:l_cos_variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1))  : ( params[:unit_calc] ? display_currency_variance(capex_variance[:l_cos_variant]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:l_cos_variant]) )%> </div>
+									</div>
+
+									<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.lease_cost_id%>">
+										<div id="capitial_lease_cost_text" >
+											<div class= "tablecol5">
+													<textarea  class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_lease_cost_box" name="capitial_lease_cost_box" onblur="text_msg_display('capitial_lease_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"> <%= cap_exp_explanation(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check)%>
+											<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.lease_cost_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" disabled="<%if exp.present? %>false<%else%>true<%end%>"  value="" onblur= "call_to_store_cost(<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+												</div>
+												</div>
+									<%end%>
+
+										<script>number = rem_count++; form_number = number + 1;</script>
+
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost  if explain && explain.cost%>
+									<%if k == 0 %>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;"><% if note_collection.class != Portfolio %><a href="" onclick="capitalSubCalls(4,{});return false;">Lease Costs</a><% else %>Lease Costs<%end%></div>
+									<div class="tablecolcap2"><% zero_l_com_bar = cap_exp_collection.lease_cost_actual.nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap"><% l_cos_bar_color = capex_variance[:l_cos_status] ? 'green' : 'red' %>
+
+											<div class="<%if zero_l_com_bar != 0 %><%= l_cos_bar_color %>bar<% end %>" style="color:<%= color_for_bar[l_cos_bar_color] %>;width:<%=capex_variance[:l_cos_percent_bar].to_f.nan? ? 0 : capex_variance[:l_cos_percent_bar]  %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_lease_cost_actual  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1))  : (params[:unit_calc] ?  display_currency_variance(cap_exp_lease_cost_actual / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) :  display_currency_variance(cap_exp_lease_cost_actual))%></div>
+										</div>
+									</div>
+
+									<div class="tablecol3" style="width: 75px;"> <%=params[:sqft_calc] ?  display_currency_overview(cap_exp_lease_cost_budget  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : ( params[:unit_calc] ? display_currency_overview(cap_exp_lease_cost_budget / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(cap_exp_lease_cost_budget)) %></div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_lease_cost_actual, cap_exp_lease_cost_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4" ><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(capex_variance[:l_cos_percent]) %> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%= params[:sqft_calc] ? display_currency_variance(capex_variance[:l_cos_variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1))  : ( params[:unit_calc] ? display_currency_variance(capex_variance[:l_cos_variant]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:l_cos_variant]) )%> </div>
+									</div>
+									<%else%>
+									<div class="tablecol1" style="color: rgb(0, 0, 0); width: 140px;">&nbsp;</div>
+									<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3" style="width: 75px;">&nbsp; </div>
+									<div class="tablecol4" style="width: 130px;">
+										<%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp_lease_cost_actual, cap_exp_lease_cost_budget)%>
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4" >&nbsp;</div>
+										<div class="tablecol4_sub<%= color_flag %>col2">&nbsp;</div>
+									</div>
+									<%end%>
+									<%k += 1%>
+									<% if cap_exp_collection.lease_cost_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+										<% if explain.nil?  %>
+											<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.lease_cost_id%>">
+										<div id="capitial_lease_cost_text" >
+											<div class= "tablecol5">
+													<textarea  class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_lease_cost_box" name="capitial_lease_cost_box" onblur="text_msg_display('capitial_lease_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation%></textarea>
+												</div>
+												</div>
+													<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.lease_cost_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="" onblur= "call_to_store_cost(<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+												</div>
+												</div>
+										<% else %>
+													<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %> <%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>" >
+													<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="capitial_lease_cost_box" name="capitial_lease_cost_box" onblur="text_msg_display('capitial_lease_cost');save_build_imp_exp_val(this.value,<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%= explain.id if explain%>,'capital')"><%= explain.explanation%></textarea>
+												</div>
+													<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.lease_cost_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="<%= explain.cost if explain%>" onblur= "call_to_store_cost(<%= cap_exp_collection.lease_cost_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+												</div>
+										<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+										<% end %>
+									<% end %>
+										<%j+=1%>
+
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.lease_cost_id%>"></div>
+								<% end %>
+								<div>
+										<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:l_cos_variant],cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check)%>
+										<%document = @doc%>
+											<% if  (val) and !explanation_doc_id.nil? %>
+												<span style="float: right; margin: 5px 89px 0pt 0pt; font-size:11px;">
+														<% if !cap_exp_explanation(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+							<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check)%>
+												        <%value = exp.comments_finder.count if exp.present? %>
+															<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present? %>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+														<% end %>
+														</span>
+														<%end%>
+														<% if !cap_exp_explanation(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<span  id="add_more_<%= cap_exp_collection.lease_cost_id%>"style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.lease_cost_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'lease_cost','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span>	<%end%>
+									</div>
+						<% if !cap_exp_explanation(cap_exp_collection.lease_cost_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<div id="totalVariance_<%= cap_exp_collection.lease_cost_id%>">
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id ="total_<%=cap_exp_collection.lease_cost_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+															<%end%>
+								</div>
+								<% end %>
+							<% end %>
+
+
+
+							<div class="tablecontentgrayrow tablecontentrow2 " style="background-image: none;">
+							<%cap_exp_expln = CapitalExpenditureExplanation.find_all_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check)%>
+							<% j = 0%>
+									<% k = 0 %>
+									<%sum = 0%>
+									<%if cap_exp_expln.empty?%>
+								<div class="tablecol1"  style="width: 140px;">Total</div>
+								<% use_color = expense_color(total_cap_ex_actual(cap_exp_collection), total_cap_ex_budget(cap_exp_collection)) %>
+								<div class="tablecolcap2">
+									<% zero_total_capex_bar = cap_exp_collection.total_cap_ex_act.nil? ? 0 : 1 %>
+									<div class="tablegreenbarowcap">
+										<% cap_ex_total_bar_color = use_color %>
+										<% cap_exp_total_cost_actual = cap_exp_collection.total_cap_ex_act.nil? ? 0 : cap_exp_collection.total_cap_ex_act.to_f %>
+										<div class="<%if zero_total_capex_bar != 0 %><%= cap_ex_total_bar_color %>bar<% end %>" style="color:<%= color_for_bar[cap_ex_total_bar_color] %>;width:<%=capex_variance[:l_tot_percent_bar].to_f.nan? ? 0 : capex_variance[:l_tot_percent_bar] %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_total_cost_actual  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(cap_exp_total_cost_actual  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(cap_exp_total_cost_actual)) %></div>
+									</div>
+								</div>
+								<% cap_exp_total_cost_budget = cap_exp_collection.total_cap_ex_bud.nil? ? 0 : cap_exp_collection.total_cap_ex_bud.to_f %>
+								<div class="tablecol3"  style="width: 75px;"><%#= display_currency_real_estate_overview(cap_exp_total_cost_budget) %>
+
+					<%#= "$#{number_with_delimiter(total_cap_ex_budget(cap_exp_collection).round )}" %>
+
+									<% if params[:sqft_calc] %>
+										<%=display_currency_overview(!total_cap_ex_budget(cap_exp_collection).nil? ? total_cap_ex_budget(cap_exp_collection)/(note_collection.gross_rentable_area ? note_collection.gross_rentable_area : 1): 0 )%>
+									<%else%>
+										<%if (params[:unit_calc])%>
+											<%=display_currency_overview(!total_cap_ex_budget(cap_exp_collection).nil? ? total_cap_ex_budget(cap_exp_collection)/note_collection.no_of_units : 0 )%>
+										<%else%>
+											<%=display_currency_overview(total_cap_ex_budget(cap_exp_collection))%>
+										<%end%>
+									<%end%>
+								</div>
+								<div class="tablecol4" style="width: 130px;">
+									<% icon_direction = up_or_down(total_cap_ex_actual(cap_exp_collection), total_cap_ex_budget(cap_exp_collection)) %>
+									<% color_flag = (use_color == 'green') ? '' : 'red' %>
+									<% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+									<div class="tablecol4_sub<%= color_flag %>col1 captablecol4">
+										<span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+										<%= display_currency_real_estate_overview_for_percent(total_cap_ex_percent(cap_exp_collection)) %>
+									</div>
+									<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ?  display_currency_variance(total_cap_ex_variant(cap_exp_collection) / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(total_cap_ex_variant(cap_exp_collection)  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(total_cap_ex_variant(cap_exp_collection)))  %></div>
+								</div>
+								<div id="exp_cost<%=j+1%>_<%=cap_exp_collection.total_cap_ex_id%>">
+										<div id="capitial_lease_cost_text" >
+											<div class= "tablecol5">
+														<textarea class="expand40-300 " style=" width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="total_cap_ex_cost_box" name="total_cap_ex_cost_box" size="5" onblur="text_msg_display('total_cap_ex_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"> <%= cap_exp_explanation(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+												</div>
+									<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check)%>
+											<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.total_cap_ex_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name="" disabled="<%if exp.present? %>false<%else%>true<%end%>" value="" onblur= "call_to_store_cost(<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>');"/>
+												</div>
+												</div>
+											<%end%>
+
+										<script>number = rem_count++; form_number = number + 1;</script>
+
+									<%cap_exp_expln.each do |explain|%>
+									<%sum = sum + explain.cost  if explain && explain.cost%>
+									<%if k == 0 %>
+										<div class="tablecol1"  style="width: 140px;">Total</div>
+								<% use_color = expense_color(total_cap_ex_actual(cap_exp_collection), total_cap_ex_budget(cap_exp_collection)) %>
+								<div class="tablecolcap2">
+									<% zero_total_capex_bar = cap_exp_collection.total_cap_ex_act.nil? ? 0 : 1 %>
+									<div class="tablegreenbarowcap">
+										<% cap_ex_total_bar_color = use_color %>
+										<% cap_exp_total_cost_actual = cap_exp_collection.total_cap_ex_act.nil? ? 0 : cap_exp_collection.total_cap_ex_act.to_f %>
+										<div class="<%if zero_total_capex_bar != 0 %><%= cap_ex_total_bar_color %>bar<% end %>" style="color:<%= color_for_bar[cap_ex_total_bar_color] %>;width:<%=capex_variance[:l_tot_percent_bar].to_f.nan? ? 0 : capex_variance[:l_tot_percent_bar] %><%= '%' %>">&nbsp;<%=params[:sqft_calc] ?  display_currency_variance(cap_exp_total_cost_actual  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(cap_exp_total_cost_actual  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(cap_exp_total_cost_actual)) %></div>
+									</div>
+								</div>
+								<% cap_exp_total_cost_budget = cap_exp_collection.total_cap_ex_bud.nil? ? 0 : cap_exp_collection.total_cap_ex_bud.to_f %>
+								<div class="tablecol3"  style="width: 75px;"><%#= display_currency_real_estate_overview(cap_exp_total_cost_budget) %>
+
+					<%#= "$#{number_with_delimiter(total_cap_ex_budget(cap_exp_collection).round )}" %>
+
+									<% if params[:sqft_calc] %>
+										<%=display_currency_overview(!total_cap_ex_budget(cap_exp_collection).nil? ? total_cap_ex_budget(cap_exp_collection)/(note_collection.gross_rentable_area ? note_collection.gross_rentable_area : 1): 0 )%>
+									<%else%>
+										<%if (params[:unit_calc])%>
+											<%=display_currency_overview(!total_cap_ex_budget(cap_exp_collection).nil? ? total_cap_ex_budget(cap_exp_collection)/note_collection.no_of_units : 0 )%>
+										<%else%>
+											<%=display_currency_overview(total_cap_ex_budget(cap_exp_collection))%>
+										<%end%>
+									<%end%>
+								</div>
+								<div class="tablecol4" style="width: 130px;">
+									<% icon_direction = up_or_down(total_cap_ex_actual(cap_exp_collection), total_cap_ex_budget(cap_exp_collection)) %>
+									<% color_flag = (use_color == 'green') ? '' : 'red' %>
+									<% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+									<div class="tablecol4_sub<%= color_flag %>col1 captablecol4">
+										<span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+										<%= display_currency_real_estate_overview_for_percent(total_cap_ex_percent(cap_exp_collection)) %>
+									</div>
+									<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ?  display_currency_variance(total_cap_ex_variant(cap_exp_collection) / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(total_cap_ex_variant(cap_exp_collection)  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(total_cap_ex_variant(cap_exp_collection)))  %></div>
+								</div>
+						<%else%>
+							<div class="tablecol1"  style="width: 140px;">&nbsp;</div>
+								<div class="tablecolcap2">&nbsp;</div>
+									<div class="tablecol3"  style="width: 75px;">&nbsp;</div>
+								<div class="tablecol4" style="width: 130px;">
+									<div class="tablecol4_sub<%= color_flag %>col1 captablecol4">&nbsp;</div>
+									<div class="tablecol4_sub<%= color_flag %>col2">&nbsp;</div>
+								</div>
+									<%end%>
+									<%k += 1%>
+
+								<% if cap_exp_collection.total_cap_ex_id != 0 && (params[:period] != "2" && params[:tl_period] != "2") %>
+									<% if cap_exp_explanation(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check).nil?  %>
+										<div id="exp_cost<%=j+2%>_<%=cap_exp_collection.total_cap_ex_id%>">
+										<div id="total_cap_ex_cost_text" >
+											<div class= "tablecol5">
+													<textarea class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="total_cap_ex_cost_box" name="total_cap_ex_cost_box" onblur="text_msg_display('total_cap_ex_cost');save_build_imp_exp(this.value,<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>','capital',<%=j%>)"><%= explain.explanation if explain%></textarea>
+												</div>
+												</div>
+											<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.total_cap_ex_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="" onblur= "call_to_store_cost(<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+												</div>
+												</div>
+									<% else %>
+											<div class= "tablecol5" title="Added by: <%=  explain.user.user_name.titleize if (explain and explain.explanation?)  %><%= "on " + explain.updated_at.strftime("%b %d,%Y") if (explain and explain.explanation?) %>" >
+													<textarea  class="expand40-300 " style="width: 178px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="total_cap_ex_cost_box" name="total_cap_ex_cost_box" onblur="text_msg_display('total_cap_ex_cost');save_build_imp_exp_val(this.value,<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>',<%= explain.id if explain%>,'capital')"><%= explain.explanation if explain%></textarea>
+												</div>
+												<div id="financexp1" style="color: rgb(102, 102, 102); text-align: right; width: 80px;margin-top: 0px;" class="tablecol5">
+											 <input id="financexp_<%=cap_exp_collection.total_cap_ex_id %>_<%=j%>" type="text" style="text-align: right; width: 76px;" name=""  value="<%= explain.cost if explain%>" onblur= "call_to_store_cost(<%= cap_exp_collection.total_cap_ex_id %>,<%= exp_month_ytd %>,<%= variance_task_document_id %>,<%= exp_ytd_check %>,'capital',<%=j%>,this.value,<%= explain.id if explain%>,'<%= request.request_uri %>');"/>
+											 </div>
+									<div class="tablecoll5" style="margin-left: 515px; width:180px; padding:8px 0 0"></div>
+									<% end %>
+								<% end %>
+								<%j+=1%>
+
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= cap_exp_collection.total_cap_ex_id%>"></div>
+								<% end %>
+								<div>
+									<%variance_thres,exp_ytd_check,explanation_doc_id,and_or,val = find_variance_threshold(capex_variance[:cap_ex_total_variant],cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check)%>
+										<% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+										<% if exp_ytd_check == false %>
+											<% val = (capex_variance[:cap_ex_total_variant] < -(variance_thres.cap_exp_variance.to_i) or capex_variance[:cap_ex_total_variant] > variance_thres.cap_exp_variance.to_i) %>
+										<% else %>
+											<% val = (capex_variance[:cap_ex_total_variant] < -(variance_thres.cap_exp_variance_ytd.to_i) or capex_variance[:cap_ex_total_variant] > variance_thres.cap_exp_variance_ytd.to_i) %>
+										<% end %>
+										<% explanation_doc_id = cap_exp_explanation_doc(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check) %>
+										<% doc = find_document_id(explanation_doc_id) %>
+
+										<% if  (val) and !explanation_doc_id.nil? %>
+											<span style="float: right; margin: 5px 89px 0pt 0pt;font-size:11px;">
+													<% if !cap_exp_explanation(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check).blank? %>
+													<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check)%>
+															<%value = exp.comments_finder.count if exp.present? %>
+															<%comment_id = exp.comments_finder.first.commentable_id if exp.present? && exp.comments_finder.first.present?%>
+															<%= link_to "Comments" + '(' +"#{value}"+ ')',(variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cap_exp', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>comment_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+													<% end %>
+													</span>
+												<%end%>
+												<% if !cap_exp_explanation(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check).blank? %>
+									<span  id="add_more_<%= cap_exp_collection.total_cap_ex_id%>" style="margin: 5px 0pt 0pt 515px; float: left;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=cap_exp_collection.total_cap_ex_id%>,form_number,<%= exp_month_ytd %>, <%= variance_task_document_id %>, <%= exp_ytd_check %>, 'total_cap_ex','cap_exp','capital','<%= request.request_uri%>')">+ Add More</a></span><%end%>
+									</div>
+									<% if !cap_exp_explanation(cap_exp_collection.total_cap_ex_id,exp_month_ytd,exp_ytd_check).blank? %>
+										<div id="totalVariance_<%=cap_exp_collection.total_cap_ex_id %>" >
+                                <div style="font-weight: bold; margin-left: 505px; width:170px;" class="tablecoll5"> Total Variance
+                                </div>
+                                <div style="text-align: right; font-weight: bold; width: 76px; padding: 5px 0pt 5px 8px;" class="tablecoll5"><span id="total_<%=cap_exp_collection.total_cap_ex_id%>"><%= sum%></span></div>
+                                <div class="clear"></div>
+                              </div>
+											<%end%>
+								</div>
+							</div>
+						 </div>
+						 </div>
+					<%end%>
+
+
+
+
+			<%elsif note_collection.accounting_system_type_id && (acc_sys_type=="Real Page" || (acc_sys_type=="AMP Excel" && note_collection.leasing_type=="Multifamily") || (acc_sys_type=="YARDI V1" && note_collection.leasing_type=="Multifamily")|| (acc_sys_type!="MRI, SWIG" && note_collection.property_capital_improvements.count==0 && note_collection.leasing_type=="Commercial") || remote_property(note_collection.accounting_system_type_id))%>
+
+					<%if asset_details.present? ||  (remote_property(note_collection.accounting_system_type_id) && asset_values.flatten.present?)%>
+						<div class="tableheaderow assetview headerBlueBg">
+							<div class="tablecol1" style="left:2px;">&nbsp;</div>
+							<div class="tablecolcap2">
+								<div class="tablecol2_subcol1">0%</div>
+								<div class="tablecol2_subcol2" style = "width:80px">Actuals $</div>
+								<div class="tablecol2_subcol3">100%</div>
+							</div>
+							<div class="tablecol3" style="">Budget $</div>
+							<div class="tablecol4" style="text-align:left; width:146px"><span>Variance?</span><span style="padding-left:70px;"> $ </span></div>
+							<div class="tablecol5" style="" id ="financexp1" ><%if params[:period] != "2" && params[:tl_period] !="2"%><%=month_ytd_explanation %> Explanation<%end%></div>
+						</div>
+
+
+
+		 <div class="tablerow" style="background-image:url(/images/real_capital_tablebg_2.png)">
+			 <div class="tablecontentrow">
+					 <%
+						operating_statement={}
+						explanation=@explanation
+						asset_details=@asset_details
+
+						if note_collection && remote_property(note_collection.accounting_system_type_id)
+						asset_values && asset_values.each do |asset_value|
+						if asset_value[0] && asset_value[0].Title == 'WIP-FOR RENT RESIDENTIAL'
+							vari_per = form_hash_of_data_for_occupancy(asset_value[0].Actuals.to_f,asset_value[0].Budget.to_f)
+							vari_per[:record_id]=asset_value[0].Record_id
+							operating_statement[asset_value[0].Title]=vari_per
+							end
+						end
+							asset_details && asset_details.each do |asset_detail|
+								 if asset_detail.Title == 'LEASEHOLD IMPROVEMENTS'  || asset_detail.Title == 'A/D-TENANT/LEASEHOLD IMPROVEMENTS'  || asset_detail.Title == 'TENANT IMPROVEMENTS'  || asset_detail.Title == 'LAND IMPROVEMENTS'  || asset_detail.Title == 'A/D-LAND IMPROVEMENTS'
+							vari_per = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)
+							vari_per[:record_id]=asset_detail.Record_id
+							operating_statement[asset_detail.Title]=vari_per
+							end
+						end
+						else
+						asset_details && asset_details.each do |asset_detail|
+							vari_per = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)
+							vari_per[:record_id]=asset_detail.Record_id
+							operating_statement[asset_detail.Title]=vari_per
+						end
+						end
+					%>
+
+
+
+
+						<%exp_month_ytd,exp_ytd_check,variance_task_document_id=initial_variance_calculations(@current_time_period,"financials")%>
+
+						<!-------------------------------------------------------------------------------------------------------Maintenance Projects --------------------------------------------------------------------------------------->
+
+						<!--
+				<div class="tablecontentrow">
+				<div class="tablecol1" style="color:#777777" id='maintenance_projects_other'>
+				<%#=display_truncated_chars("Maintenance Projects",20,true)%></div>
+				<div class="tablecolcap2">
+				<div class="tablegreenbarow" style="border:none;background-color:white;">
+				<div>&nbsp;
+				</div>
+				</div>
+				</div>
+				<div class="tablecol3"></div>
+				<div class="tablecol4">
+				</div>
+				</div>
+						-->
+						<!-- Overall Maintenance Projects-->
+						<%index=0%>
+						<%operating_statement && operating_statement.each do |title,values| %>
+							<%if values[:budget] != 0 || values[:actuals] !=0 %>
+								<%index+=1%>
+								<div class="tablecontentrow">
+									<div class="tablecol1" style="color:#000000" title="<%=title.titleize%>">
+										&nbsp;&nbsp;<%=display_truncated_chars(title.titleize,30,true)%></div>
+									<div class="tablecolcap2">
+										<%per,col = find_other_income_and_expense_percentage(values[:actuals],values[:budget])%>
+										<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(values[:actuals], values[:budget]) %>
+										<% zero_b_bar = values[:actuals].nil? ? 0 : 1 %>
+										<div class="tablegreenbarowcap">
+											<% b_bar_color = find_bar_color(use_color,values[:actuals],values[:budget])%>
+											<div class="<%if zero_b_bar != 0 %><%= b_bar_color %>bar<% end %>" style="color:<%=color_for_bar[:b_bar_color]%>;width:<%=per.to_f.nan? ? 0 : per%><%=  '%'  %>">
+												<%=params[:sqft_calc] ? display_currency_real_estate_overview(values[:actuals]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1) ) : (params[:unit_calc] ?  display_currency_real_estate_overview(values[:actuals] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) :  display_currency_real_estate_overview(values[:actuals]))%></div>
+
+										</div>
+									</div>
+									<div class="tablecol3"> <%=params[:sqft_calc] ? display_currency_overview(values[:budget] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_overview(values[:budget] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) :  display_currency_overview(values[:budget])) %></div>
+									<div class="tablecol4">
+										<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+											<%=display_currency_real_estate_overview_for_percent(values[:percent])%> </div>
+										<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ? display_currency_variance(values[:variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_variance(values[:variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) :  display_currency_variance(values[:variant]))%>  </div>
+									</div>
+									<% if explanation == true && (params[:period] != "2" && params[:tl_period] != "2") %>
+										<% if financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check).nil? || financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check).blank? %>
+											<div onclick="show_explanation('explain_marketing_leases_<%=index%>');" onmouseover="document.getElementById('non_explain_marketing_leases_<%=index%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_explain_marketing_leases_<%=index%>').style.backgroundColor='';" class="tablecol5" style="width:178px;" >
+												<span id="non_explain_marketing_leases_<%=index%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+													<%= truncate_extra_chars_for_expl(financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+												</span>
+												<div class="more ie_7_empty_div" id="explain_marketing_leases_<%=index%>_more">
+												</div>
+												<div id="explain_marketing_leases_<%=index%>_text"  style="display:none" >
+													<textarea id="explain_marketing_leases_<%=index%>_box" name="explain_marketing_leases_<%=index%>_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('explain_marketing_leases_<%=index%>');save_financial_exp(this.value,<%= values[:record_id] %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>')"><%= financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check) %></textarea>
+												</div>
+											</div>
+										<% else %>
+											<% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+											<% explanation_doc_id = financial_explanation_doc(values[:record_id],exp_month_ytd,exp_ytd_check) %>
+											<% doc_collection = find_document_id(explanation_doc_id) %>
+											<% and_or = variance_thres.and_or %>
+								<%# val = "(variance_thres.variance_percentage.to_i < (values[:percent]).to_i) #{and_or} (variance_thres.variance_amount.to_i < (values[:variant]).to_i) "%>
+								<%# val = "(values[:percent].to_i < -(variance_thres.variance_percentage.to_i) or values[:percent].to_i >  variance_thres.variance_percentage.to_i) #{and_or} (values[:variant] < -(variance_thres.variance_amount.to_i) or values[:variant] > variance_thres.variance_amount.to_i)" %>
+											<% if exp_ytd_check == false %>
+												<% val = "(values[:percent].to_f < -(variance_thres.variance_percentage.to_f) or values[:percent].to_f >  variance_thres.variance_percentage.to_f) #{variance_thres.and_or} (values[:variant] < -(variance_thres.variance_amount.to_f) or values[:variant] > variance_thres.variance_amount.to_f)" %>
+											<% else %>
+												<% val = "(values[:percent].to_f< -(variance_thres.variance_percentage_ytd.to_f) or values[:percent].to_f >  variance_thres.variance_percentage_ytd.to_f) #{variance_thres.and_or_ytd} (values[:variant] < -(variance_thres.variance_amount_ytd.to_f) or values[:variant] > variance_thres.variance_amount_ytd.to_f)" %>
+											<% end %>
+											<% if eval(val) and !explanation_doc_id.nil? %>
+												<div class="tablecol5" style="width:178px;">
+													<span id="non_explain_marketing_leases_<%=index%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+														<%= truncate_extra_chars_for_expl(financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+													</span>
+													<div class="more <% if financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check).blank? %>ie_7_empty_div<% end %>" id="explain_marketing_leases_<%=index%>_more">
+														<% if !financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check).blank? %>
+															<%= link_to "More", (variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>values[:record_id],:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+														<% end %>
+													</div>
+												</div>
+											<% else %>
+												<div  class="tablecol5" style="width:178px;">
+													<span id="non_explain_marketing_leases_<%=index%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+														<%= truncate_extra_chars_for_expl(financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+													</span>
+													<div class="more" id="explain_marketing_leases_<%=index%>_more">
+														<a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+title+'&actual_explanation='+"#{values[:actuals]}"+'&budget_explanation='+"#{values[:budget]}"+'&text_explanation='+URI.encode(financial_explanation(values[:record_id],exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+"#{(values[:percent])}"+'&var_amt_explanation='+"#{(values[:variant])}"+'&id_explanation='+values[:record_id].to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(values[:record_id],exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="explain_marketing_leases_task_<%=index%>" >More</a>
+														<script> new Control.Modal($('explain_marketing_leases_task_<%=index%>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+													</div>
+												</div>
+											<% end%>
+										<% end %>
+									<% end %>
+								</div>
+							<% end %>
+						<%end%>
+						<!-- Overall Maintenance Projects-->
+
+						<%if note_collection && remote_property(note_collection.accounting_system_type_id)%>
+						<%sum_act = 0
+						sum_bud = 0
+						%>
+							<%	asset_values && asset_values.each do |asset_value|
+						if asset_value[0] && asset_value[0].Title == 'WIP-FOR RENT RESIDENTIAL'
+						vari_per = form_hash_of_data_for_occupancy(asset_value[0].Actuals.to_f,asset_value[0].Budget.to_f)
+							vari_per[:record_id]=asset_value[0].Record_id
+							operating_statement[asset_value[0].Title]=vari_per
+						sum_act = sum_act + asset_value[0].Actuals.to_f
+						sum_bud = sum_bud + asset_value[0].Budget.to_f
+						@var_per  =  (sum_bud.to_f - sum_act.to_f)
+						@percent = ((@var_per * 100) /sum_bud.to_f).abs rescue ZeroDivisionError
+						if sum_bud.to_f == 0
+						@percent = sum_act.to_f == 0 ? 0 : -100
+						end
+							end
+						end%>
+
+							<%asset_details && asset_details.each do |asset_detail|
+							 if asset_detail.Title == 'LEASEHOLD IMPROVEMENTS'  || asset_detail.Title == 'A/D-TENANT/LEASEHOLD IMPROVEMENTS'  || asset_detail.Title == 'TENANT IMPROVEMENTS'  || asset_detail.Title == 'LAND IMPROVEMENTS'  || asset_detail.Title == 'A/D-LAND IMPROVEMENTS' || asset_detail.Title == 'WIP-FOR RENT RESIDENTIAL'
+							vari_per = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)
+							vari_per[:record_id]=asset_detail.Record_id
+							operating_statement[asset_detail.Title]=vari_per
+						sum_act = sum_act + asset_detail.Actuals.to_f
+						sum_bud = sum_bud + asset_detail.Budget.to_f
+						@var_per  =  (sum_bud.to_f - sum_act.to_f)
+						@percent = ((@var_per * 100) /sum_bud.to_f).abs rescue ZeroDivisionError
+						if sum_bud.to_f == 0
+						@percent = sum_act.to_f == 0 ? 0 : -100
+						end
+						end
+						end
+					 %>
+<%if sum_act.to_f !=0 ||  sum_bud.to_f != 0%>
+<%total_array ={:actuals => sum_act.to_f ,:budget => sum_bud.to_f,:variant=>@var_per,:percent=>@percent }%>
+<%title = "Total Capital Expenditures" %>
+     <div class="tablecontentrow2">
+								<div class="tablecol1" style="color:#000000">
+									<span title= "<%= title%>"  >
+										<%=display_truncated_chars("#{title}",30,true)%>
+									</span>
+								</div>
+								<div class="tablecolcap2">
+									<%per,col = find_other_income_and_expense_percentage(total_array[:actuals],total_array[:budget])%>
+									<% zero_b_bar = total_array[:actuals].nil? ? 0 : 1 %>
+									<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(total_array[:actuals],total_array[:budget]) %>
+									<div class="tablegreenbarowcap">
+										<% b_bar_color = find_bar_color(use_color,total_array[:actuals],total_array[:budget]) %>
+										<div class="<%if zero_b_bar != 0 %><%= b_bar_color %>bar<% end %>" style="color:<%=color_for_bar[:b_bar_color]%>;width:<%=per.to_f.nan? ? 0 : per%><%=  '%'  %>">
+											<%=params[:sqft_calc] ? display_currency_real_estate_overview(total_array[:actuals] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_real_estate_overview(total_array[:actuals] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_real_estate_overview(total_array[:actuals]))%>
+										</div>
+									</div>
+								</div>
+								<div class="tablecol3"> <%=params[:sqft_calc] ? display_currency_overview(total_array[:budget] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?   display_currency_overview(total_array[:budget]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(total_array[:budget])) %></div>
+								<div class="tablecol4">
+									<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+										<%=display_currency_real_estate_overview_for_percent(total_array[:percent])%> </div>
+									<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ? display_currency_variance(total_array[:variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) :  (params[:unit_calc] ? display_currency_variance(total_array[:variant]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(total_array[:variant]))%>  </div>
+								</div>
+							</div>
+							<%end%>
+
+						<%else%>
+						<%total_array=@total %>
+						<%if total_array && !total_array.empty?
+							vari_per = form_hash_of_data_for_occupancy(total_array[0].Actuals.to_f,total_array[0].Budget.to_f)
+							vari_per[:record_id]=total_array[0].Record_id
+							operating_statement[total_array[0].Title]=vari_per
+						end%>
+						<!-- maintenance projects start-->
+						<% if total_array &&  !total_array.empty?%>
+							<div class="tablecontentrow2">
+								<div class="tablecol1" style="color:#000000">
+									<span title="Total <%=total_array[0].Title.titleize %>">
+										<%=display_truncated_chars("Total #{total_array[0].Title.titleize}",30,true)%>
+									</span>
+								</div>
+								<div class="tablecolcap2">
+									<%per,col = find_other_income_and_expense_percentage(operating_statement["#{total_array[0].Title}"][:actuals],operating_statement["#{total_array[0].Title}"][:budget])%>
+									<% zero_b_bar = operating_statement["#{total_array[0].Title}"][:actuals].nil? ? 0 : 1 %>
+									<% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(operating_statement["#{total_array[0].Title}"][:actuals], operating_statement["#{total_array[0].Title}"][:budget]) %>
+									<div class="tablegreenbarowcap">
+										<% b_bar_color = find_bar_color(use_color,operating_statement["#{total_array[0].Title}"][:actuals],operating_statement["#{total_array[0].Title}"][:budget]) %>
+										<div class="<%if zero_b_bar != 0 %><%= b_bar_color %>bar<% end %>" style="color:<%=color_for_bar[:b_bar_color]%>;width:<%=per.to_f.nan? ? 0 : per%><%=  '%'  %>">
+											<%=params[:sqft_calc] ? display_currency_real_estate_overview(operating_statement["#{total_array[0].Title}"][:actuals] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_real_estate_overview(operating_statement["#{total_array[0].Title}"][:actuals] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_real_estate_overview(operating_statement["#{total_array[0].Title}"][:actuals]))%>
+
+										</div>
+									</div>
+								</div>
+								<div class="tablecol3"> <%=params[:sqft_calc] ? display_currency_overview(operating_statement["#{total_array[0].Title}"][:budget] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?   display_currency_overview(operating_statement["#{total_array[0].Title}"][:budget]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(operating_statement["#{total_array[0].Title}"][:budget])) %></div>
+								<div class="tablecol4">
+									<div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+										<%=display_currency_real_estate_overview_for_percent(operating_statement["#{total_array[0].Title}"][:percent])%> </div>
+									<div class="tablecol4_sub<%= color_flag %>col2"><%=params[:sqft_calc] ? display_currency_variance(operating_statement["#{total_array[0].Title}"][:variant] / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) :  (params[:unit_calc] ? display_currency_variance(operating_statement["#{total_array[0].Title}"][:variant]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(operating_statement["#{total_array[0].Title}"][:variant]))%>  </div>
+								</div>
+								<% if explanation == true && (params[:period] != "2" && params[:tl_period] != "2") %>
+									<% if financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).nil? || financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).blank? %>
+										<div onclick="show_explanation('explain_maintenance_projects');" onmouseover="document.getElementById('non_explain_maintenance_projects').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_explain_maintenance_projects').style.backgroundColor='';" class="tablecol5" style="width:178px;">
+											<span id="non_explain_maintenance_projects" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+												<%= truncate_extra_chars_for_expl(financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+											</span>
+											<div class="more ie_7_empty_div" id="explain_maintenance_projects_more">
+												<!--
+							<%# if !financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).blank? %>
+																<a href="javascript:;">More</a>
+							<%# end %>
+												-->
+											</div>
+											<div id="explain_maintenance_projects_text"  style="display:none" >
+												<textarea id="explain_maintenance_projects_box" name="explain_maintenance_projects_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('explain_maintenance_projects');save_financial_exp(this.value,<%= operating_statement["#{total_array[0].Title}"][:record_id] %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>')"><%= financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check) %></textarea>
+											</div>
+										</div>
+									<% else %>
+										<% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+										<% explanation_doc_id = financial_explanation_doc(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check) %>
+										<% doc_collection = find_document_id(explanation_doc_id) %>
+										<% and_or = variance_thres.and_or %>
+							<%# val = "(variance_thres.variance_percentage.to_i < (operating_statement["#{total_array[0].Title}"][:percent]).to_i) #{and_or} (variance_thres.variance_amount.to_i < (operating_statement["#{total_array[0].Title}"][:variant]).to_i) "%>
+							<%# val = "(operating_statement["#{total_array[0].Title}"][:percent].to_i < -(variance_thres.variance_percentage.to_i) or operating_statement["#{total_array[0].Title}"][:percent].to_i >  variance_thres.variance_percentage.to_i) #{and_or} (operating_statement["#{total_array[0].Title}"][:variant] < -(variance_thres.variance_amount.to_i) or operating_statement["#{total_array[0].Title}"][:variant] > variance_thres.variance_amount.to_i)" %>
+										<% if exp_ytd_check == false %>
+											<% val = "(operating_statement['#{total_array[0].Title}'][:percent].to_f < -(variance_thres.variance_percentage.to_f) or operating_statement['#{total_array[0].Title}'][:percent].to_f >  variance_thres.variance_percentage.to_f) #{variance_thres.and_or} (operating_statement['#{total_array[0].Title}'][:variant] < -(variance_thres.variance_amount.to_f) or operating_statement['#{total_array[0].Title}'][:variant] > variance_thres.variance_amount.to_f)" %>
+										<% else %>
+											<% val = "(operating_statement['#{total_array[0].Title}'][:percent].to_f < -(variance_thres.variance_percentage_ytd.to_f) or operating_statement['#{total_array[0].Title}'][:percent].to_f >  variance_thres.variance_percentage_ytd.to_f) #{variance_thres.and_or_ytd} (operating_statement['#{total_array[0].Title}'][:variant] < -(variance_thres.variance_amount_ytd.to_f) or operating_statement['#{total_array[0].Title}'][:variant] > variance_thres.variance_amount_ytd.to_f)" %>
+										<% end %>
+										<% if  eval(val) and !explanation_doc_id.nil? %>
+											<div class="tablecol5" style="width:178px;">
+												<span id="non_explain_maintenance_projects" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+													<%= truncate_extra_chars_for_expl(financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+												</span>
+												<div class="more <% if financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).blank? %>ie_7_empty_div<% end %>" id="explain_maintenance_projects_more">
+												<%document = @doc%>
+													<% if !financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).blank? %>
+														<%= link_to "More", (variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>operating_statement["#{total_array[0].Title}"][:record_id],:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year])),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+
+													<% end %>
+												</div>
+											</div>
+										<% else %>
+											<div  class="tablecol5" style="width:178px;">
+												<span id="non_explain_maintenance_projects" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+													<%= truncate_extra_chars_for_expl(financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+												</span>
+												<div class="more" id="explain_maintenance_projects_more">
+													<a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Total Maintenance Projects'+'&actual_explanation='+"#{operating_statement["#{total_array[0].Title}"][:actuals]}"+'&budget_explanation='+"#{operating_statement["#{total_array[0].Title}"][:budget]}"+'&text_explanation='+URI.encode(financial_explanation(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+"#{(operating_statement["#{total_array[0].Title}"][:percent])}"+'&var_amt_explanation='+"#{(operating_statement["#{total_array[0].Title}"][:variant])}"+'&id_explanation='+operating_statement["#{total_array[0].Title}"][:record_id].to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(operating_statement["#{total_array[0].Title}"][:record_id],exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="explain_maintenance_projects_task" >More</a>
+													<script> new Control.Modal($('explain_maintenance_projects_task'),{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+												</div>
+											</div>
+										<% end%>
+									<% end %>
+								<% end %>
+							</div>
+							<%end%>
+						<%end%>
+						<!-- maintenance projects end-->
+						<!-------------------------------------------------------------------------------------------------------Maintenance Projects --------------------------------------------------------------------------------------->
+				</div>
+				</div>
+				<%else%>
+							<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+				<div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+					<% start_date = (!start_date.nil? ? start_date : Time.now) %>
+					<% if note_collection.class == RealEstateProperty %>
+						<% note_name = note_collection.property_name %>
+					 <% elsif note_collection.class == Portfolio  %>
+							<% note_name =  note_collection.name %>
+					<%else%>
+							<% note_name =  note_collection.note_id %>
+					<% end %>
+					<% if ((note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) && !remote_property(note_collection.accounting_system_type_id)) %>
+						<span style="font-size:13px;">Data Unavailable. Please add Asset Financial data at
+
+						<!--
+						<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>','hide_del');return false;">'Excel Uploads'</a>
+						-->
+
+						<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						.</span>
+					<%elsif remote_property(note_collection.accounting_system_type_id) == true%>
+						<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+					<% else %>
+						<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+					<% end %>
+				</div>
+				<%end%>
+				<%# commented as the div is closed properly%>
+				 <%#= raw('</div>') if pdf_collection and (acc_sys_type=="Real Page" or acc_sys_type=="AMP Excel") %>
+			<%else%>
+				<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+				<div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+					<% start_date = (!start_date.nil? ? start_date : Time.now) %>
+					<% if note_collection.class == RealEstateProperty %>
+						<% note_name = note_collection.property_name %>
+					 <% elsif note_collection.class == Portfolio  %>
+      <% note_name =  note_collection.name %>
+			<%else%>
+		<% note_name =  note_collection.note_id %>
+    <% end %>
+					<% if ((note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) && !remote_property(note_collection.accounting_system_type_id)) %>
+						<span style="font-size:13px;">Data Unavailable. Please add Asset Financial data at
+
+						<!--
+						<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>','hide_del');return false;">'Excel Uploads'</a>
+						-->
+						<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						.</span>
+					<%elsif remote_property(note_collection.accounting_system_type_id) == true%>
+						<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+					<% else %>
+						<span style="color: black; padding-left: 230px;font-size:13px;">Data Unavailable.</span>
+					<% end %>
+				</div>
+		<%end%>
+
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').show();
+  jQuery('#weekly_display').hide();
+
+<% if (params[:tl_period] =="8" || params[:period] =="8" || ((params[:period] =="3" || params[:tl_period] =="3") && params[:tl_year].to_i >= Date.today.year ) ) %>
+    jQuery('#yrForecast').show();
+<%end%>
+  jQuery('#quarterly').show();
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+      if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+      {
+        document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+      }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+  //changeExplanantionText(last_renderer,active_sub_month)
+</script>

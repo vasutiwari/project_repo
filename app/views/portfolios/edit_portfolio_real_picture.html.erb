@@ -1,0 +1,35 @@
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="basic_style" style="width: 530px;">
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+      <div class="dialog_light_center">
+        <div class="dialog_second_center">
+          <%= form_tag '/portfolio_real/update_picture?id='+params[:id]+'&note_id='+params[:note_id]+'&last_selected_item='+params[:last_selected_item], :target=>'new_frame', :multipart => true do%>
+            <div class="status_light">
+              <span class="simple_light_text">
+                Choose  an image : <br/>
+                <%=file_field :portfolio_image,:uploaded_data,:size=>20%>
+              </span>
+              <br/>
+              <span style="float: right; margin-right: 70px; margin-top: -33px;border-width:0;margin-bottom:0;padding:0;" >
+                <input class="button" type="image" src="/images/step4btn_upload.jpg" alt="UPLOAD" title="UPLOAD" onclick="return check_picture_empty('portfolio')" />
+              </span>
+            </div>
+            <div>
+              <center><font size="2" color="red"><span id="err_upload"></span></font></center>
+              <% unless flash.now[:error].blank? -%>
+                <center><font size="2" color="red"><%=flash.now[:error]%></font></center>
+              <% end -%>
+            </div>
+          <%end%>
+          <br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+<iframe id="upload_frame" name="new_frame" style="display: none"></iframe>

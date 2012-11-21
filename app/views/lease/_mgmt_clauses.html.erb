@@ -1,0 +1,295 @@
+<link rel="stylesheet" href="/stylesheets/DatePicker/input_datepicker.css">
+<script type="text/javascript">
+  form_name ="#mgmt_clauses_form"
+  form_txt ="clauses"
+  tab = "5"
+  activive_tab(form_txt);
+  pdf_click= 'false';
+  add_service = <%=@lease.clause.items.count%>;
+  //add_select_item =0;
+  //yield_calender('true');
+  trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+</script>
+<%  prop_lease_suite,total_added_suites = params_formation %>
+<style>
+  textarea {
+    clear: both;
+    display: block;
+    font-family: arial;
+    font-size: 1em;
+    width:40em;
+    padding: 2px 4px;
+  }
+</style>
+<%if @pdf && !params[:partial_pages].split(',').index('1')%>
+  <%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+<%end%>
+<div class="alertbody" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+  <%= form_for @lease,:url=>{:controller=>"lease",:action=>"update",:portfolio_id=>portfolio_collection.id,:property_id=>params[:property_id]}, :html=>{:target => "lease_clause_frame",:id=>"mgmt_clauses_form"} do |lease_form| -%>
+    <div class="lebredcomseow2" style="float:right;padding:10px 0 0;"></div>
+    <%= lease_form.fields_for :clause do |clause_form| %>
+      <%= clause_form.fields_for :hour do |hour| %>
+        <div class="lsrowwrapper">Hours</div>
+        <div class="lssectionwrapper">
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst">Building</div>
+            <div class="clausesform" style="padding-left:5px;">
+             <!-- <input id = "building_hours" name="building_hours" type="text" value ="<%=params[:building_hours]%>" style="width:278px" class="lstextfield" />-->
+      <%#= hour.text_field :building_hours , :id=>"building_hours", :value => lease_date_format(hour.object.try(:building_hours)), :type=>"text", :class=>"lstextfield datepicker",:readonly=>true, :style=>"width:278px;"%>
+              <%= hour.text_field :building_hours , :id=>"building_hours", :type=>"text", :class=>"lstextfield", :style=>"width:278px;",:precision => 2%>
+            </div>
+            <div class="clausesnames">Business</div>
+            <div class="clausesform" style="padding-left:5px;">
+             <!-- <input name="business_hours" type="text" value ="<%=params[:business_hours]%>" style="width:278px" class="lstextfield" /> -->
+      <%#= hour.text_field :business_hours ,:type=>"text", :value => lease_date_format(hour.object.try(:business_hours)), :class=>"lstextfield datepicker", :style=>"width:278px;", :readonly=>true%>
+              <%= hour.text_field :business_hours, :type=>"text", :class=>"lstextfield", :style=>"width:278px;",:precision => 2%>
+            </div>
+            <div class="clausesnames" style="<%if @lease.try(:clause).try(:hour).try(:note).try(:content).present?%>display:none;<%else%>display:block;<%end%>float:right"  id="notes_link_2">
+              <%unless @pdf%>
+                <a onclick="jQuery('#notes_link_2').hide();colExp('NotesHrs');return false;" onmouseover="focusDivOver('NotesHrs')" onmouseout="focusDivOut('NotesHrs')" >+ Notes</a>
+              <%end%>
+            </div>
+            <div class="clear"></div>
+          </div>
+
+<%puts @lease.try(:clause).try(:hour).try(:note).try(:content).present?.inspect%>
+          <%= hour.fields_for :note do |note| %>
+            <div class="notesnamerow" id="NotesHrs" onmouseover="focusDivOver('NotesHrs')" onmouseout="focusDivOut('NotesHrs')" <%if note.object.id.nil? || note.object.content.nil? %> style="display:none"<%else%> style="display:block"<%end%>>
+              <div class="lsrowwrapper" style="padding-top: 0px;">
+                <%unless @pdf%>
+                  <span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){colExp('NotesHrs');jQuery('#lease_clause_attributes_hour_attributes_note_attributes_content').val('');jQuery('#NotesHrs').hide();jQuery('#notes_link_2').show();return false;}">X</span>Notes
+                <%end%>
+              </div>
+              <div class="termsform" style="padding-left:0px;">
+                <!--textarea  id="textarea5" name="textarea5" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2" value="<%#=params[:textarea5]%>"></textarea-->
+                <%if @lease.clause && @lease.clause.hour && @lease.clause.hour.note && @lease.clause.hour.note.content.present?%>
+                  <%= note.text_area :content, :type=>"text", :class=>"expand25-300 taskfieldinput2", :cols => "27", :rows => "3", :style=>"width:748px;", :value => @lease.clause.hour.note.content%>
+                <%else%>
+                  <%= note.text_area :content, :type=>"text", :class=>"expand25-300 taskfieldinput2", :cols => "27", :rows => "3", :style=>"width:748px;", :value => ""%>
+                <%end%>
+              </div>
+            </div>
+          <%end%>
+
+
+
+
+        </div>
+      <%end%>
+
+      <div class="lsrowwrapper"> Services</div>
+      <div class="lssectionwrapper">
+        <div class="clausesnamesrow">
+          <div class="clausesnames namefirst boldtxt" style="width:110px">Category</div>
+          <div class="clausesnames boldtxt" style="width:170px">Item Name</div>
+          <div class="clausesnames boldtxt" style="width:50px">L.Para</div>
+          <div class="clausesnames boldtxt" style="width:349px;">Notes</div>
+        </div>
+        <%@index=0%>
+        <%= clause_form.fields_for :services do |service_form| %>
+          <%= render 'service_fields', :f => service_form, :@index => (@index + 1)%>
+        <%end%>
+        <div class="clausesnamesrow" id = "link">
+          <%unless @pdf%>
+            <!-- <a href="#"  id="hide_link" onclick="add_select_item++; add_service_items(add_select_item); return false;">+ Add Services Item</a>-->
+            <%= link_to_add_service_fields "+ Add Services Item", clause_form, :services,"service_item", @index=(@index+1) %>
+          <%end%>
+        </div>
+      </div>
+
+      <%= clause_form.fields_for :legal_provision do |legal| %>
+        <div class="lsrowwrapper">Legal Provisions</div>
+        <div class="lssectionwrapper" style="<%if (@lease.clause.nil? || !@lease.clause.items.present?) && @pdf%>border-bottom:none;<%end%>">
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst" style="text-align:left; width:250px;">Arbitration Clause</div>
+            <div class="clausesform">
+              <!-- <input id = "arbitration_clause" name="arbitration_clause" type="text" value ="<%#=params[:arbitration_clause]%>"  style="width:483px" class="lstextfield" />-->
+              <%= legal.text_field :arbitration_clause , :id=>"arbitration_clause", :type=>"text", :class=>"lstextfield", :style=>"width:483px;"%>
+            </div>
+          </div>
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst" style="text-align:left; width:250px;">Mediation clause</div>
+            <div class="clausesform">
+             <!-- <input id = "mediation_clause" name="mediation_clause" type="text" value ="<%#=params[:mediation_clause]%>"  style="width:483px" class="lstextfield" />-->
+              <%= legal.text_field :mediation_clause , :id=>"mediation_clause", :type=>"text", :class=>"lstextfield", :style=>"width:483px;"%>
+            </div>
+          </div>
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst" style="text-align:left; width:250px;">Recording of Lease</div>
+            <div class="clausesform">
+              <!--<input id = "recording_of_clause" name="recording_of_clause" type="text" value ="<%#=params[:recording_of_clause]%>"  style="width:483px" class="lstextfield" />-->
+              <%= legal.text_field :recording_of_clause , :id=>"recording_of_clause", :type=>"text", :class=>"lstextfield", :style=>"width:483px;"%>
+            </div>
+          </div>
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst" style="text-align:left; width:250px;">Release/Indemnification</div>
+            <div class="clausesform">
+              <!--<input id = "release_clause" name="release_clause" type="text" value ="<%#=params[:release_clause]%>"  style="width:483px" class="lstextfield" />-->
+              <%= legal.text_field :release_clause , :id=>"release_clause", :type=>"text", :class=>"lstextfield", :style=>"width:483px;"%>
+            </div>
+          </div>
+          <div class="clausesnamesrow">
+            <div class="clausesnames namefirst" style="text-align:left; width:250px; line-height:18px; padding-top:2px !important">Surrender of premises, Ownership &amp; Removal of<br />
+              Trade Fixtures</div>
+            <div class="clausesform">
+             <!-- <input id = "ownership_and_removal" name="ownership_and_removal" type="text" value ="<%#=params[:ownership_and_removal]%>"  style="width:483px" class="lstextfield" />-->
+              <%= legal.text_field :ownership_and_removal , :id=>"ownership_and_removal", :type=>"text", :class=>"lstextfield", :style=>"width:483px;"%>
+            </div>
+          </div>
+        </div>
+      <%end%>
+
+
+      <%if @lease.clause && @lease.clause.items.present? && @pdf%>
+        <div class="lsrowwrapper">Others</div>
+        <div id="item_name" style="display:none;">
+          <div class="clausesnames namefirst boldtxt" style="width:222px">Item name</div>
+          <div class="clausesnames boldtxt" style="width:512px">Description</div>
+        </div>
+      <%elsif !@pdf%>
+        <div class="lsrowwrapper">Others</div>
+        <div id="item_name" style="display:none;">
+          <div class="clausesnames namefirst boldtxt" style="width:222px">Item name</div>
+          <div class="clausesnames boldtxt" style="width:512px">Description</div>
+        </div>
+      <%end%>
+
+      <%@item_index=0%>
+      <%= clause_form.fields_for :items do |item_form| %>
+        <%= render 'item_fields', :f => item_form, :@item_index => (@item_index + 1)%>
+      <%end%>
+
+
+      <div class="lssectionwrapper" id ="item_link"  style="<%if (@lease.clause.nil? || !@lease.clause.items.present?) && @pdf%>border-bottom:none;<%end%>" >
+        <div class="clausesnamesrow" id="add_item_link">
+          <%unless @pdf%>
+            <!--a href="#"  id="hide_link1" onclick="add_other_item++; add_other_items(add_other_item); return false;">+ Add Item</a> -->
+            <%= link_to_add_item_fields "+ Add Item", clause_form, :items,"item_item", @item_index=(@item_index+1) %>
+          <%end%>
+        </div>
+      </div>
+
+
+    <%end%>
+    <input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="5" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="clauses" > </input>
+    <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" > </input>
+    <input type="hidden" id = "clause_form" name="clause_form" value ="false" > </input>
+    <input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>" > </input>
+    <%= render "tmp_params", :params => params %>
+    <input type="hidden" id = "service_count" name="service_count" value ="<%= @services_count ? @services_count.count : 3%>" > </input>
+    <input type="hidden" id = "item_count" name="service_count" value ="<%= @items_count ? @items_count.count : 0%>" > </input>
+    <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+
+
+      <div class="button-box" style="margin-left:-16px">
+			<%unless @pdf || @lease.is_archived%>
+        <input type="button" class="button-green" value="Save" onclick="jQuery('#mgmt_clauses_form').submit();" />
+        <%if !@lease.try(:id).blank? %>
+          <% @lease_collection = Lease.find(@lease.id)%>
+
+          <span style="display:none" id ="approve_id">
+            <input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_clauses_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');}return false;}else{flash_writter('<%=FLASH_MESSAGES['leases']['115']%>');return false;}"/>
+          </span>
+
+          <%unless is_leasing_agent%>
+            <span style="display:none" id ="execute_id">
+              <%lease = @lease_collection%>
+              <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+              <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+              <%if expiration!= 'false' && commencement != 'false'%>
+                <%vars = expiration < Date.today ? 'status_inactive' : 'execute' %>
+              <%else%>
+                <%vars = 'false'%>
+              <%end%>
+              <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+							<%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline")%>
+              <input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="<%if check_status%> alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){jQuery('#mgmt_clauses_form').submit(); mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}<%end%>"/>
+            </span>
+          <%end%>
+        <%end%>
+			 <%end%>
+      </div>
+
+  <%end%>
+
+  <iframe id="lease_clause_frame" name="lease_clause_frame" style="display: none"></iframe>
+</div>
+
+<script type="text/javascript">
+
+  function yield_calender(type){
+    Date.firstDayOfWeek = 0;
+    Date.format = 'dd mmm yyyy';
+    jQuery(function()
+    {
+      if(type == 'false')
+      {
+        jQuery('.date-pick').datePicker();
+      }
+      else
+      {
+        jQuery('.date-pick').datePicker({startDate:'01/01/2000'});
+      }
+      jQuery('#start-date').bind(
+      'dpClosed',
+      function(e, selectedDates)
+      {
+        var d = selectedDates[0];
+        if ( d ) {
+          d = new Date(d);
+          jQuery('#end-date').dpSetStartDate(d.addDays(1).asString());
+        }
+      }
+    );
+    });
+  }
+  yield_calender('true');
+
+
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+
+    if (jQuery("#service_count").val() >= 5)
+    {jQuery("#link").hide();}
+    add_select_item = parseInt(jQuery("#service_count").val());
+
+    if (jQuery("#item_count").val() >= 5)
+    {jQuery("#item_link").hide();}
+    add_other_item = parseInt(jQuery("#item_count").val());
+
+
+  });
+
+</script>
+<script>
+<%if @lease%>
+    jQuery(document).ready(function() {
+      update_print_pdf_link('<%=portfolio_collection.id%>','<%=params[:property_id]%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+    });
+<%end%>
+
+  jQuery(function() {
+    jQuery( ".datepicker" ).datepicker();
+  });
+
+  if(variable == "nego_pipeline")
+  {
+    jQuery('#execute_id').show();
+  }
+  if(variable == "inters_pipeline")
+  {
+    jQuery('#approve_id').show();
+  }
+  jQuery('#add_item_link').click(function(){
+    jQuery('#item_name').show();
+  });
+  jQuery(document).ready(function() {
+    if(add_service>0)
+    {
+      jQuery('#item_name').show();
+    }
+  });
+</script>
+

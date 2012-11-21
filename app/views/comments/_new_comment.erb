@@ -1,0 +1,20 @@
+<div class="commentcontainer2" id="comment_view_<%= comment.id %>" onmouseover="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','visible');" onmouseout="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','hidden');">
+	<div class="imgcol5"><img src="<%=display_image_for_user(comment.user.id)%>" width="26" height="26" /></div>
+	<div class="rowwrapper" id="edit_comment_<%= comment.id %>">
+		<div class="commentwrapper">
+                  <div class="commentedrow" style="white-space:normal;width:652px;"><span style="color: #025B8D;font-weight: bold;"><% if current_user.id == comment.user_id %>You<% else %> <%= comment.user.user_name %> <% end %></span>&nbsp;
+						<%comment_str=comment.comment.gsub(/\n/, ',') %>
+						<%comment_arr=comment_str.split(',') %>
+									<span  id="act_comment_<%= comment.id %>" class="commentcol2" style="float:none;"><%comment_arr.each do |comnt| %><%=comnt%><%unless comment_arr.last == comnt%><br/><%end %><%end %></span></div>
+			<div class="time_date_row">
+				<div class="timercol"><%= comment.created_at.strftime('%b %d, %Y at  %I:%M %p') %></div>
+				<% if current_user.id == comment.user_id %>
+				<div class="commenteditrow" id="comment_view_<%= comment.id %>_options" style="visibility: hidden;">
+					<div class="labell2"><a href="javascript:;" onclick="if(confirm('Are you sure to delete the comment?')){call_to_comment('<%= params[:id] %>','<%= params[:type] %><%= "&comment_id=#{comment.id}" %>&delete=true');} return false;"> Delete <img src="/images/del_icon_green.png" width="7" height="7" border="0" /></a></div>
+					<div class="labell2"><a href="javascript:;" onclick="edit_comment('<%= params[:id] %>','<%= params[:type] %>','<%= comment.id %>'); return false;">Edit <img src="/images/edit_icon.png"  width="8" height="8" border="0"/></a></div>
+				</div>
+				<%end%>
+			</div>
+		</div>
+	</div>
+</div>

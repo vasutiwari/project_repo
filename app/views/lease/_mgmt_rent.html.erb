@@ -1,0 +1,663 @@
+<%  prop_lease_suite,total_added_suites = params_formation %>
+<script type="text/javascript">
+  pdf_click= 'false';
+  form_name ="#mgmt_rent_form"
+  form_txt='rent'
+  tab = "2"
+  add_suite = 0;
+  yield_calender('true');
+  activive_tab(form_txt)
+  lse_id = <%=@lease.try(:id)%>
+  tnt_id = <%=@lease.tenant.try(:id)%>
+  real_prop_id = '<%=params[:property_id]%>';
+  port = '<%=params[:portfolio_id]%>';
+  add_suite_count = <%=calculate_enabled_suites%>;
+  rent_sch_count = <%=@lease.try(:rent).try(:rent_schedules).present? ? (@lease.rent.rent_schedules.count.eql?(0) ? 1 : @lease.rent.rent_schedules.count) : 1%>
+  rent_cpi_count = <%=@lease.try(:rent).try(:cpi_details).present? ? (@lease.rent.cpi_details.count.eql?(0) ? 1 : @lease.rent.cpi_details.count) : 1%>
+  rent_other_rev_count = <%=@lease.try(:rent).try(:other_revenues).present? ? (@lease.rent.other_revenues.count.eql?(0) ? 1 : @lease.rent.other_revenues.count) : 1%>
+  rent_per_count = <%=@lease.try(:rent).try(:percentage_sales_rents).present? ? (@lease.rent.percentage_sales_rents.count.eql?(0) ? 1 : @lease.rent.percentage_sales_rents.count) : 1%>
+  rent_parking_count = <%=@lease.try(:rent).try(:parkings).present? ? (@lease.rent.parkings.count.eql?(0) ? 1 : @lease.rent.parkings.count) : 1%>
+  rent_recovery_count = <%=@lease.try(:rent).try(:recoveries).present? ? (@lease.rent.recoveries.count.eql?(0) ? 1 : @lease.rent.recoveries.count) : 1%>
+  var rent_schedule_type = <%= @lease.try(:rent).try(:is_all_suites_selected)%>
+  if(add_suite_count >= 5)
+    jQuery('.suite_count').hide();
+  if(rent_schedule_type && rent_sch_count>=10)
+    jQuery('.sch_rent').hide();
+  if(rent_schedule_type && jQuery("#cpi_escalations").attr('checked') == true && rent_sch_count >= 2)
+    jQuery('.sch_rent').hide();
+  if(rent_cpi_count>=5)
+    jQuery('#cpi_add').hide();
+  if(rent_other_rev_count>=5)
+    jQuery('#other_rev_add').hide();
+  if(rent_per_count>=5)
+    jQuery('#sales_per_add').hide();
+  if(rent_parking_count>=5)
+    jQuery('#parking_per_add').hide();
+  if(rent_recovery_count>=10)
+    jQuery('.recovery_count').hide();
+	if(variable == "nego_pipeline")
+      jQuery('#execute_id').show();
+  if(variable == "inters_pipeline")
+    jQuery('#approve_id').show();
+  if('<%=prop_lease_suite.try(:suite_ids)%>' == '')
+  jQuery('.rent_sch_drop_down').attr('disabled', true);
+  else
+    jQuery('.rent_sch_drop_down').removeAttr('disabled');
+</script>
+<%if @pdf && !params[:partial_pages].split(',').index('1')%>
+  <%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+<%end%>
+<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update1",:portfolio_id=>portfolio_collection.id,:property_id=>params[:property_id]}, :html=>{:target => "lease_rent_frame",:id=>"mgmt_rent_form"} do |lease_form| -%>
+  <%= lease_form.fields_for :rent do |rent_form| %>
+    <div class="alertbody" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+      <div class="lebredcomseow2" style="float:right;padding:10px 0 0;">
+        <%unless @pdf%><a href="#"></a><%end%>
+      </div>
+      <div id="Suites">
+        <div class="lsrowwrapper"> Suites </div>
+        <div class="lssectionwrapper">
+          <div class="rentnamerow boldtxt">
+            <div class="rentname namefirst" style="width:85px;">Suite</div>
+            <div class="rentname" style="width:140px;">Rentable SF</div>
+            <div class="rentname" style="width:50px;">Floor</div>
+            <div class="rentname" style="width:130px;">Move In</div>
+            <div class="rentname" style="width:130px;">Move Out</div>
+            <div class="rentname" style="width:140px;">Usable SF</div>
+          </div>
+          <%= render 'suite_added_fields' %>
+          <div class="add_suites_here"></div>
+          <%= hidden_field_tag "real_estate_property_id", :value => params[:property_id] %>
+          <%= hidden_field_tag "user_id", :value => current_user.id %>
+          <%= hidden_field_tag "status", :value => 'occupied' %>
+          <div class="rent_suite rentnamerow rentnamerowtotal boldtxt" style="padding:5px 0;">
+            <div class="rent_suite_amt rentname namefirst" style="width:85px;"><%=display_added_suites('suites')%></div>
+            <div class="rentable_sqft_amt rentname" style="width:140px;"><%=display_added_suites(nil,'rent')%></div>
+            <div class="rentname" style="width:50px;">&nbsp;</div>
+            <div class="rentname" style="width:130px;">&nbsp;</div>
+            <div class="rentname" style="width:130px;">&nbsp;</div>
+            <div class="usable_sqft_amt rentname" style="width:140px;"><%=display_added_suites(nil,nil,'usable')%></div>
+          </div>
+          <div class="rentnamerow" style="padding:5px 0;">
+            <%unless @pdf%>
+              <span class="suite_count suiteversion rentnamelinklt">
+                + <a onclick="dyanamic_suite_add()">Add Suite</a>
+              </span>
+            <%end%>
+            <%note_for_suite = display_rent_scheldule_note('suite_note')%>
+            <div class="notesnamerow" id="NotesSuites" onmouseover="focusDivOver('NotesSuites')" onmouseout="focusDivOut('NotesSuites')" style="<%=(note_for_suite.present? && note_for_suite != 'Edit this text to see the text area expand and contract.') ? 'display : block': 'display : none'%>">
+              <div class="lsrowwrapper" id ="notes1" style="padding-top:0;">
+                <%unless @pdf%>
+                  <span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesSuites').hide();jQuery('#suite_note').show();jQuery('#rent_suites_note').val('');return false;}">X</span>Notes
+                <%end%>
+              </div>
+              <div class="termsform" style="padding-left:0px;">
+                <textarea id="rent_suites_note" name="rent_suite_note" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2"><%=(display_rent_scheldule_note('suite_note') != 'Edit this text to see the text area expand and contract.' && display_rent_scheldule_note('suite_note').present?) ? display_rent_scheldule_note('suite_note') : ''%></textarea>
+              </div>
+            </div>
+            <%unless @pdf%>
+              <span id="suite_note" class="version rentnamelinkrt" style="<%=(note_for_suite.present? && note_for_suite != 'Edit this text to see the text area expand and contract.') ? 'display : none': 'display : block'%>">+ <a onclick="jQuery('#suite_note').hide();jQuery('#NotesSuites').show();return false;" onmouseover="focusDivOver('NotesSuites')" onmouseout="focusDivOut('NotesSuites')" >Notes</a></span>
+            <%end%>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div id="RentSchedule">
+        <div class="lsrowwrapper">Rent Schedule</div>
+        <div class="lssectionwrapper">
+          <!--added the radio button for Use Fixed Escalations start -->
+          <div style="float:right; margin-top:-30px; height:20px;">
+            <span style="border-right: 1px solid rgb(222, 222, 222); padding: 5px 10px;"><%= rent_form.select :is_all_suites_selected, options_for_select( RentSchedule::SUITES_SELECTION,rent_form.object.is_all_suites_selected), {},:class=>'rent_sch_drop_down',:onchange => "if(confirm('#{FLASH_MESSAGES['leases']['124']}')){change_rent_type_for_suites(jQuery(this).val(),#{@lease.try(:id)},#{portfolio_collection.try(:id)},#{params[:property_id]}, jQuery('#is_cpi_escalation_name').val(),true);return false;} else { if(jQuery(this).val() == 'true'){jQuery(this).val('false');} else{jQuery(this).val('true');}}"  %></span>
+            <%if @lease.present? && @lease.rent.present? && @lease.rent.cpi_details.present? && !rent_form.object.new_record? && params[:is_cpi_escalation] !='false' && @lease.rent.is_cpi_escalation == true || (rent_form.object.new_record? && params[:is_cpi_escalation] !='false' && !params[:is_cpi_escalation].blank?)%>
+              <label style="margin-right:16px;"><input id="fixed_escalations" name="radio" type="radio" value=""/> Use Fixed Escalations</label>
+              <label><input id="cpi_escalations" type="radio" value="" name="radio"  checked="checked"/> Use CPI Escalations</label>
+            <%else%>
+              <label style="margin-right:16px;"><input id="fixed_escalations" name="radio" type="radio" value="" checked="checked"/> Use Fixed Escalations</label>
+              <label><input id="cpi_escalations" type="radio" value="" name="radio"/> Use CPI Escalations</label>
+            <%end%>
+          </div>
+          <!--added the radio button for Use Fixed Escalations end-->
+
+          <div class="rentnamerow boldtxt">
+            <div class="rentname namefirst" style="width:70px">Suite</div>
+            <div class="rentname" style="width:57px;">Type</div>
+
+            <div class="rentname" style="width:70px;">From</div>
+            <div class="rentname" style="width:80px;"> No. of months</div>
+            <div class="rentname" style="width:70px;">To</div>
+            <div class="rentname" style="width:73px;">PSF/Mo($)</div>
+            <div class="rentname" style="width:73px;">Tot Amt/Mo($)</div>
+            <div class="rentname"style="width:66px;">Billed</div>
+            <div class="rentname" style="width:70px;">Base year</div>
+          </div>
+          <%@rent_sch_cnt = 1%>
+          <% if @lease.rent.try(:is_all_suites_selected) %>
+            <%= rent_form.fields_for :rent_schedules do |builder| %>
+              <%= render 'rent_schedule_fields', :f => builder %>
+            <%end%>
+            <%unless @pdf%>
+              <span class="sch_rent version rentnamelinklt rent_sch" id="add_rent_item_id">
+                <%= link_to_add_fields "+ Add Rent Item", rent_form, :rent_schedules,'rent_sch' %>
+              </span>
+            <%end%>
+          <%else%>
+           <%rent_sch_coll = rent_sch_build(@lease,prop_lease_suite)%>
+            <%@rent_sch_suite_ids =  rent_sch_coll.map(&:suite_id)%>
+            <%@rent_arr_count = 0%>
+            <%= rent_form.fields_for :rent_schedules, rent_sch_coll do |builder| %>
+              <%suite_no = Suite.find_by_id(builder.object.try(:suite_id)).try(:suite_no)%>
+              <div class="blockRent blockRent_<%=suite_no%>">
+                <%= render 'rent_schedule_fields', :f => builder %>
+                <div class="clear"></div>
+                <%if @rent_sch_suite_ids[@rent_arr_count] != @rent_sch_suite_ids[@rent_arr_count+1]%>
+                  <%unless @pdf%>
+                    <span class="sch_rent version rentnamelinklt addrowBdr rent_sch" id="add_rent_item_id">
+                      <%= link_to_add_fields_new "+ Add Rent Item", rent_form, :rent_schedules,'new_rent_sch',suite_no,builder.object.try(:suite_id) %>
+                    </span>
+                  <%end%>
+                  <div class="clear"></div>
+                <%end%>
+              </div>
+              <%@rent_arr_count += 1%>
+            <%end%>
+          <%end%>
+          <div class=" rentnamerow" style="padding:5px 0;">
+            <%rent_sch_note = display_rent_scheldule_note('rnt_sch')%>
+            <%unless @pdf%>
+              <span id="rent_schedule1" class="version rentnamelinkrt" style="<%=(rent_sch_note.present? && rent_sch_note != 'Edit this text to see the text area expand and contract.') ? 'display : none' : 'display : block'%>">+ <a onclick="jQuery('#NotesRent').show();jQuery('#rent_schedule1').hide();return false;" onmouseover="focusDivOver('NotesRent')" onmouseout="focusDivOut('NotesRent')" >Notes</a></span>
+            <%end%>
+            <div class="notesnamerow" id="NotesRent" onmouseover="focusDivOver('NotesRent')" onmouseout="focusDivOut('NotesRent')" style="<%=(rent_sch_note.present? && rent_sch_note != 'Edit this text to see the text area expand and contract.') ? 'display : block' : 'display : none'%>">
+              <div class="lsrowwrapper" style="padding-top:0;">
+                <%unless @pdf%>
+                  <span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#rent_schedule1').show();jQuery('#NotesRent').hide();jQuery('#rent_scheldules_note').val('');return false;}">X</span>Notes
+                <%end%>
+              </div>
+              <div class="termsform" style="padding-left:0px;">
+                <textarea id="rent_scheldules_note" name="rent_scheldule_note" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2"><%=(display_rent_scheldule_note('rnt_sch') != 'Edit this text to see the text area expand and contract.' && display_rent_scheldule_note('rnt_sch').present?) ? display_rent_scheldule_note('rnt_sch') : ''%></textarea>
+              </div>
+            </div>
+            <div class="clear"></div>
+            <div id="CPIDetail" style="<%if @pdf && ((@lease.present? && @lease.rent.present? && @lease.rent.is_cpi_escalation == true) || ( params[:is_cpi_escalation] !='false' && !params[:is_cpi_escalation].blank?))%>display:block;<%else%>display:none;<%end%>">
+              <div class="lsrowwrapper">CPI Detail</div>
+              <div class="lssectionwrapper noborder">
+                <div class="rentnamerow">
+                  <div class="rentname namefirst boldtxt" style="width:80px;line-height:14px">Suites</div>
+                  <div class="rentname boldtxt" style="width:82px;line-height:14px">Annual CPI<br />
+                    Est %</div>
+                  <div class="rentname boldtxt" style="width:80px;line-height:14px">Adjustment Month</div>
+                  <div class="rentname boldtxt" style="width:80px;line-height:14px">Adjustment Freq(mos)</div>
+                  <div class="rentname boldtxt" style="width:80px;line-height:14px">Index Used</div>
+                  <div class="rentname boldtxt" style="width:80px;line-height:14px">Annual<br />
+                    Min %
+                  </div>
+                  <div class="rentname boldtxt" style="width:80px;line-height:14px">Annual<br />
+                    Max %
+                  </div>
+                  <div class="rentname boldtxt" style="width:83px;line-height:14px">Lease Term<br />
+                    Max %
+                  </div>
+                </div>
+                <%= rent_form.fields_for :cpi_details do |builder| %>
+                  <%= render 'cpi_detail_fields', :f => builder %>
+                <%end%>
+                <input type="hidden" id = "is_cpi_escalation_name" name="is_cpi_escalation" value ="<%=@lease.try(:rent).try(:is_cpi_escalation) %>" > </input>
+                <div class="rent_cpi"></div>
+                <!--added for cpi escalations notes start-->
+                <div class="clear"></div>
+                <%cpi_esc_note = display_rent_scheldule_note('cpi_escal')%>
+                <div class="notesnamerow" id="NotesRentCpiEsc" onmouseover="jQuery(this).css('background-color','#f6f6f6');" onmouseout="jQuery(this).css('background-color','#ffffff');" style="<%=(cpi_esc_note.present? && cpi_esc_note != 'Edit this text to see the text area expand and contract.') ? 'display : block' : 'display : none'%>">
+                  <div class="lsrowwrapper" style="padding-top:0pt;">
+                    <%unless @pdf%>
+                      <span class="closeme" style="margin:0px;" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#cpi_esc').show();jQuery('#NotesRentCpiEsc').hide();jQuery('#rent_scheldules_cpi_esc_note').val('');return false;}">X</span>Notes
+                    <%end%>
+                  </div>
+                  <div class="termsform" style="padding-left:0px;">
+                    <textarea id="rent_scheldules_cpi_esc_note" name="cpi_escalation_note" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2"><%=(display_rent_scheldule_note('cpi_escal') != 'Edit this text to see the text area expand and contract.' && display_rent_scheldule_note('cpi_escal').present?) ? display_rent_scheldule_note('cpi_escal') : ''%></textarea>
+                  </div>
+                </div>
+                <span id="cpi_esc" class="version rentnamelinkrt" style="<%=(cpi_esc_note.present? && cpi_esc_note != 'Edit this text to see the text area expand and contract.') ? 'display : none' : 'display : block'%>">+ <a onclick="jQuery('#NotesRentCpiEsc').show();jQuery('#cpi_esc').hide();return false;">Notes</a></span>
+                <!--added for cpi escalations notes end-->
+              </div>
+              <div class="clear"></div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div id="CPIEscalationDetails"  style="<%if !@pdf%>display:block;<%elsif @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.other_revenues.present? && (@lease.rent.other_revenues.count > 1 || !@lease.rent.other_revenues.first.new_record?))%>display:block;<%elsif @pdf%> display:none;<%end%>">
+        <div class="lsrowwrapper">Other &amp; Per Sales Revenue</div>
+        <div class="lssectionwrapper">
+          <div class="rentnamerow" style="padding:5px 0;">
+            <div id="AddOtherRevenue" style="<%if @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.other_revenues.present? && (@lease.rent.other_revenues.count > 1 || !@lease.rent.other_revenues.first.new_record?)) ? true : false%>display:block;<%else%> display:none;<%end%>" >
+              <div class="lsrowwrapper">
+    <%#*<span class="closeme" onclick="jQuery('#AddOtherRevenue').hide();jQuery('#other_rev_add').hide();jQuery('#other_rev_add_link').show();return false;">X</span>%>
+                Other Revenue</div>
+              <div class="lssectionwrapper noborder">
+                <div class="rentnamerow boldtxt">
+                  <div class="rentname" style="width:82px; line-height:14px">Type/Suite<br />
+                    <small>Ex. Storage</small></div>
+                  <div class="rentname" style="width:80px; line-height:14px">Billable SF</div>
+                  <div class="rentname" style="width:92px; line-height:14px">From</div>
+                  <div class="rentname" style="width:92px; line-height:14px">To</div>
+                  <div class="rentname" style="width:80px; line-height:14px">PSF/Mo($)</div>
+                  <div class="rentname" style="width:80px; line-height:14px">Tot Amt/Mo($)</div>
+                  <div class="rentname" style="width:68px; line-height:14px">Billing Freq</div>
+                </div>
+                <%= rent_form.fields_for :other_revenues do |builder| %>
+                  <%= render 'other_revenue_fields',:f => builder%>
+                <%end%>
+                <div class="rent_other_rev"></div>
+              </div>
+              <div class="clear"></div>
+            </div>
+            <span class="version rentnamelinklt">
+              <div id="other_rev_add" style="display:none;" >
+                <%= link_to_add_fields "+ Add Other Revenue (storage, mall, etc..)", rent_form, :other_revenues,'other_rev' %>
+              </div>
+              <div id="other_rev_add_link">
+                <%unless @pdf%>
+                  + <a onclick="if(take_count('other_rev_suite_class') < 5) jQuery('#other_rev_add').show(); jQuery('#AddOtherRevenue').show();jQuery('#other_rev_add_link').hide();jQuery('#other_rev_field').show();return false;" onmouseover="focusDivOver('AddOtherRevenue')" onmouseout="focusDivOut('AddOtherRevenue')" >Add Other Revenue (storage, mall, etc..)</a>
+                <%end%>
+              </div>
+            </span>
+            <div class="clear"></div>
+
+            <div style="<%if !@pdf %>display:block; <%elsif @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.percentage_sales_rents.present? && (@lease.rent.percentage_sales_rents.count > 1 || !@lease.rent.percentage_sales_rents.first.new_record?))%>display:block;<%else%>display:none;<%end%>">
+              <br /><div style="font-weight:bold !important; font-size:12px !important; color:#000000 !important;">Percentage Sales Rent</div><br />
+              <%@percentage_sales_rent = 1%>
+              <div id="PercentageSalesRent" style=" <%if @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.percentage_sales_rents.present? && (@lease.rent.percentage_sales_rents.count > 1 || !@lease.rent.percentage_sales_rents.first.new_record?))%>display:block;<%else%>display:none;<%end%>" >
+                <%= rent_form.fields_for :percentage_sales_rents do |builder| %>
+                  <%= render 'percentage_sales_rent_fields',:f => builder%>
+                <%end%>
+                <div class="rent_sales"></div>
+                <div class="clear"></div>
+              </div>
+            </div>
+            <span class="version rentnamelinklt">
+              <div id="sales_per_add" style="display:none;" >
+                <%unless @pdf%>
+                  <%= link_to_add_fields "+ Add Percentage Sales Rent", rent_form, :percentage_sales_rents,'per_sales' %>
+                <%end%>
+              </div>
+              <div id="sales_per_add_link">
+                <%unless @pdf%>
+                  + <a onclick="if(take_count('per_sales_rent_class') < 5) jQuery('#sales_per_add').show(); jQuery('#PercentageSalesRent').show();jQuery('#sales_per_add_link').hide();return false;" onmouseover="focusDivOver('PercentageSalesRent')" onmouseout="focusDivOut('PercentageSalesRent')" >Add Percentage Sales Rent</a>
+                <%end%>
+              </div>
+            </span>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div id="Parking"  style="<%if !@pdf %>display:block;<%elsif @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.parkings.present? && (@lease.rent.parkings.count > 1 || !@lease.rent.parkings.first.new_record?))%>display:block;<%elsif @pdf%>display:none;<%end%>">
+        <div class="lsrowwrapper">Parking</div>
+        <%@rent_parking_charges = 1%>
+        <div class="lssectionwrapper">
+          <div class="rentnamerow" style="padding:5px 0;">
+            <div id="Parking-1" style="<%if @pdf && (@lease.present? && @lease.rent.present? && @lease.rent.parkings.present? && (@lease.rent.parkings.count > 1 || !@lease.rent.parkings.first.new_record?))%>display:block;<%else%>display:none;<%end%>" >
+              <%= rent_form.fields_for :parkings do |builder| %>
+                <%= render 'parking_fields',:f => builder%>
+              <%end%>
+              <div class="add_rent_parking"></div>
+            </div>
+            <span class="version rentnamelinklt">
+              <div id="parking_per_add" style="display:none;" >
+                <%= link_to_add_fields "+ Add Parking Charges", rent_form, :parkings,'rent_parking' unless @pdf%>
+              </div>
+              <div id="parking_per_add_link">
+                <%unless @pdf%>
+                  + <a onclick="jQuery('#Parking-1').show();jQuery('#parking_per_add').show();jQuery('#parking_per_add_link').hide();return false;">Add Parking Charges</a>
+                <%end%>
+              </div>
+            </span>
+            <%rent_parking_note = display_rent_scheldule_note('parking_note')%>
+            <div class="notesnamerow" id="NotesParking" onmouseover="focusDivOver('NotesParking')" onmouseout="focusDivOut('NotesParking')" style="<%=(rent_parking_note.present? && rent_parking_note != 'Edit this text to see the text area expand and contract.') ? 'display : block': 'display : none'%>">
+              <div class="lsrowwrapper" style="padding-top:0;">
+                <%unless @pdf%>
+                  <span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#parking_rent_note').show();jQuery('#NotesParking').hide();jQuery('#rent_parkings_note').val('');return false;}">X</span>Notes
+                <%end%>
+              </div>
+              <div class="termsform" style="padding-left:0px;">
+                <textarea id="rent_parkings_note" name="rent_parking_note" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2"><%=(display_rent_scheldule_note('parking_note') != 'Edit this text to see the text area expand and contract.' && display_rent_scheldule_note('parking_note').present?) ? display_rent_scheldule_note('parking_note') : ''%></textarea>
+              </div>
+            </div>
+            <%unless @pdf%>
+              <span id="parking_rent_note" class="version rentnamelinkrt" style="<%=(rent_parking_note.present? && rent_parking_note!='Edit this text to see the text area expand and contract.') ? 'display : none': 'display : block'%>">
+                + <a onclick="jQuery('#parking_rent_note').hide();jQuery('#NotesParking').show();return false;" onmouseover="focusDivOver('NotesParking')" onmouseout="focusDivOut('NotesParking')" >Notes</a>
+              </span>
+            <%end%>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div id="lssectionwrapper">
+        <div id="Recoveries">
+          <div class="lsrowwrapper">Recoveries</div>
+          <%@rent_recovery_option = 1%>
+          <div class="lssectionwrapper">
+            <%= rent_form.fields_for :recoveries do |builder| %>
+              <%= render 'recovery_fields',:f => builder%>
+            <%end%>
+            <div class="rent_recovery rentnamerow" style="padding:5px 0;">
+              <%unless @pdf%>
+                <span class="recovery_count version rentnamelinklt">
+                  <%= link_to_add_fields "+ Add Recovery", rent_form, :recoveries,'rent_recovery' %>
+                </span>
+              <%end%>
+              <%rent_recovery_note = display_rent_scheldule_note('rent_recovery')%>
+              <div class="notesnamerow" id="NotesRecovery" onmouseover="focusDivOver('NotesRecovery')" onmouseout="focusDivOut('NotesRecovery')" style="<%=(rent_recovery_note.present? && rent_recovery_note != 'Edit this text to see the text area expand and contract.') ? 'display : block': 'display : none'%>">
+                <div class="lsrowwrapper" style="padding-top:0;"><%unless @pdf%><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesRecovery').hide();jQuery('#recovery_rent_notes').show();jQuery('#rent_recoveries_note').val('');return false;}">X</span>Notes<%end%></div>
+                <div class="termsform" style="padding-left:0px;">
+                  <textarea id="rent_recoveries_note" name="rent_recovery_note" rows="3" cols="27"  style="width:748px;" class="expand25-300 taskfieldinput2"><%=(display_rent_scheldule_note('rent_recovery') != 'Edit this text to see the text area expand and contract.' && display_rent_scheldule_note('rent_recovery').present?) ? display_rent_scheldule_note('rent_recovery') : ''%></textarea>
+                </div>
+              </div>
+              <%unless @pdf%>
+                <span id="recovery_rent_notes" class="version rentnamelinkrt" style="<%=(rent_recovery_note.present? && rent_recovery_note != 'Edit this text to see the text area expand and contract.') ? 'display : none': 'display : block'%>">
+                  + <a onclick="jQuery('#NotesRecovery').show();jQuery('#recovery_rent_notes').hide();return false;" onmouseover="focusDivOver('NotesRecovery')" onmouseout="focusDivOut('NotesRecovery')" >Notes</a>
+                </span>
+              <%end%>
+            </div>
+          </div>
+          <div class="clear"></div>
+          <div class="lssectionwrapper" id="Budgeted">
+            <div class="lsrowwrapper">Budgeted Net Cash Flow Psf </div>
+            <div class="rentnamerow" style="margin-bottom:10px;">
+              <div class="rentname namefirst" style="text-align:right;">Budgeted PSF for Lease Term</div>
+              <div class="rentform" style="padding-left:5px;">
+                <%= rent_form.text_field :budget_psf ,:type=>"text", :class=>"lstextfield", :style=>"width:100px;",:precision => 2%>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="2" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="rent" > </input>
+    <input type="hidden" id = "frm_name" name="frm_name" value ="rent_form" > </input>
+    <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" > </input>
+    <input type="hidden" id = "term_form" name="term_form" value ="true" > </input>
+    <input type="hidden" id = "legal_name" name="legal_name" value ="<%=params[:legal_name]%>" > </input>
+    <input type="hidden" id = "dba_name" name="dba_name" value ="<%=params[:dba_name]%>" > </input>
+    <input type="hidden" id = "tax_id" name="tax_id" value ="<%=params[:tax_id]%>" > </input>
+    <%= rent_form.hidden_field :lease_id, :value => @lease.try(:id) %>
+    <input type="hidden" id = "lease_id" name="lease_id" value ="<%=@lease.try(:id)%>" > </input>
+    <input type="hidden" id = "lease_start_date" name="lease_start_date" value ="<%=@lease.commencement.strftime('%m/%d/%Y') rescue nil%>"></input>
+    <input type="hidden" id = "lease_end_date" name="lease_end_date" value ="<%=@lease.try(:expiration).strftime('%m/%d/%Y') rescue nil%>"></input>
+    <input type="hidden" id = "rent_schedule_ids" name="rent_schedule_ids" value = []></input>
+    <input type="hidden" id = "stored_lease_suites" name="stored_lease_suites" value ="<%= total_added_suites.present? ? true : false%>" > </input>
+    <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+    <input type="hidden" id = "on_change_cpi" name="on_change_cpi" value ="false" > </input>
+
+		<div class="button-box">
+			<%unless @pdf || @lease.is_archived%>
+        <input type="button" class="button-green" value="Save" onclick="jQuery('#mgmt_rent_form').submit();"/>
+        <%if !@lease.try(:id).blank? %>
+          <% @lease_collection = Lease.find(@lease.id)%>
+          <span style="display:none" id ="approve_id">
+            <input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="jQuery.ajax({type: 'POST',data:  jQuery(this.form).serialize(),url:  jQuery(this.form).attr('action'),success: function(data){if(data.text == true){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_rent_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');return false;}}else{flash_writter(data.text);}}});return false;"/>
+          </span>
+          <%unless is_leasing_agent%>
+            <span style="display:none" id ="execute_id">
+              <%lease = @lease_collection%>
+              <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+              <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+              <%if expiration!= 'false' && commencement != 'false'%>
+                <%vars = expiration < Date.today ? 'status_inactive' : 'execute' %>
+              <%else%>
+                <%vars = 'false'%>
+              <%end%>
+              <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+							<%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline")%>
+              <input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="<%if check_status%> alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){jQuery('#mgmt_rent_form').submit(); mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}<%end%>"/>
+            </span>
+          <%end%>
+        <%end%>
+			 <%end%>
+      </div>
+
+    <iframe id="lease_term_frame" name="lease_rent_frame" style="display:none"></iframe>
+    <script>
+      yield_calender('true');
+      jQuery(document).ready(function() {
+        jQuery("textarea[class*=expand]").TextAreaExpander();
+        jQuery("textarea1[class*=expand]").TextAreaExpander();
+      });// JavaScript Document
+      jQuery("#suite_note1").click(function () {
+        jQuery("#suite_note").show();
+        jQuery("#suite_note1").hide();
+      });
+      jQuery("#closeimg_note").click(function () {
+        jQuery("#suite_note").hide();
+        jQuery("#suite_note1").show();
+      });
+      jQuery("#rent_schedule1").click(function () {
+        jQuery("#rent_schedule").show();
+        jQuery("#rent_schedule1").hide();
+      });
+      jQuery("#closeimg_rent").click(function () {
+        jQuery("#rent_schedule").hide();
+        jQuery("#rent_schedule1").show();
+      });
+      jQuery("#recov_note1").click(function () {
+        jQuery("#recov_note").show();
+        jQuery("#recov_note1").hide();
+      });
+      jQuery("#closeimg_recov").click(function () {
+        jQuery("#recov_note").hide();
+        jQuery("#recov_note1").show();
+      });
+      jQuery("#park_note1").click(function () {
+        jQuery("#park_note").show();
+        jQuery("#park_note1").hide();
+      });
+      jQuery("#closeimg_park").click(function () {
+        jQuery("#park_note").hide();
+        jQuery("#park_note1").show();
+      });
+      function adding_link(){
+        if(rent_cpi_count<5)
+          jQuery('#cpi_add').show();
+        jQuery('#CPIDetail').show();jQuery('#cpi_add_link').hide();return false;
+      }
+
+
+   jQuery('#cpi_escalations').click(function() {
+        if(confirm('Do you want to delete previously entered Rent and change the Rent Type ?'))
+        {
+          jQuery("#cpi_escalations").attr('checked', true);
+          jQuery('#is_cpi_escalation_name').attr('value', 'true');
+          change_rent_type_for_suites(jQuery(this).val(),<%=@lease.try(:id)%>,<%=portfolio_collection.try(:id)%>,<%=params[:property_id]%>, jQuery('#is_cpi_escalation_name').val(),true);
+          return false;
+        }
+        else{
+           jQuery("#fixed_escalations").attr('checked', true);
+        }
+      });
+
+      jQuery('#fixed_escalations').click(function() {
+     //   if(jQuery('#lease_rent_attributes_cpi_details_attributes_0_adjustment_start_month').val() != ''){
+        if(confirm('Do you want to delete previously entered Rent and change the Rent Type ?'))
+        {
+            jQuery("#fixed_escalations").attr('checked', true);
+           jQuery('#is_cpi_escalation_name').attr('value', 'false');
+           jQuery('#CPIDetail').remove();
+          change_rent_type_for_suites(jQuery(this).val(),<%=@lease.try(:id)%>,<%=portfolio_collection.try(:id)%>,<%=params[:property_id]%>, jQuery('#is_cpi_escalation_name').val(),true);
+          return false;
+        }
+        else{
+           jQuery("#cpi_escalations").attr('checked', true);
+        }
+       /* }
+        else{
+         jQuery("#cpi_escalations").attr('checked', true);
+        flash_writter("<%#=FLASH_MESSAGES['leases']['117']%>");
+        } */
+       });
+
+
+  rent_sch_count = <%=@lease.try(:rent).try(:rent_schedules).present? ? (@lease.rent.rent_schedules.count.eql?(0) ? 1 : @lease.rent.rent_schedules.count) : 1%>
+
+      //For Use CPI Escalations in rent schedule added
+
+   /*   jQuery("#cpi_escalations").click(function(){
+        var current_count = 0
+        jQuery(".rent_schedule_fields").each(function(i){
+          var display_value = jQuery(this).closest('.fields').css('display')
+          if (display_value == "block")
+            current_count = current_count + 1;
+        })
+
+        if (current_count > 1)
+          var flag = confirm("Are you sure want to delete present rent schedules?");
+        else
+          flag = true;
+
+
+        if (flag) {
+          jQuery('#is_cpi_escalation_name').attr('value', 'true');
+          jQuery(".rent_schedule_fields").each(function(i){
+            if (i == 0) {
+              from_date = jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_from_date").val();
+              make_rent_schedule_fields_blank(i)
+              jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_from_date").val(from_date);
+            }
+            else {
+              jQuery(this).hide();
+              /* jQuery(this).siblings("input[type=hidden]").val("1");*/
+
+     /*         make_rent_schedule_fields_blank(i)
+            }
+          })
+
+
+          rent_schedule_ids = []
+          jQuery(".rent_schedule_id").each(function(){
+            var rent_schedule_id = jQuery(this).val();
+            rent_schedule_ids.push(rent_schedule_id);
+          })
+          jQuery("#rent_schedule_ids").val(rent_schedule_ids);
+
+          jQuery("#CPIDetail").show();
+        }
+        else
+          jQuery("#fixed_escalations").attr('checked', true);
+      });
+      //For Use Fixed Escalations in rent schedule added
+      jQuery("#fixed_escalations").click(function(){
+
+        var current_count = 0
+        jQuery(".rent_schedule_fields").each(function(i){
+          var display_value = jQuery(this).closest('.fields').css('display')
+          if (display_value == "block")
+            current_count = current_count + 1;
+        })
+
+        if (current_count > 1)
+          var flag = confirm("Are you sure want to delete present rent schedules?");
+        else
+          flag = true;
+
+        if (flag) {
+          jQuery('#is_cpi_escalation_name').attr('value', 'false');
+          jQuery(".rent_schedule_fields").each(function(i){
+            if (i == 0) {
+              from_date = jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_from_date").val();
+              make_rent_schedule_fields_blank(i)
+              jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_from_date").val(from_date);
+            }
+            else {
+              jQuery(this).hide();
+              /*jQuery(this).siblings("input[type=hidden]").val("1");*/
+       /*       make_rent_schedule_fields_blank(i)
+            }
+          })
+          rent_schedule_ids = []
+          jQuery(".rent_schedule_id").each(function(){
+            var rent_schedule_id = jQuery(this).val();
+            rent_schedule_ids.push(rent_schedule_id);
+          })
+          jQuery("#rent_schedule_ids").val(rent_schedule_ids);
+          jQuery("#CPIDetail").hide();
+          jQuery("#add_rent_item_id").show();
+        }
+        else
+          jQuery("#cpi_escalations").attr('checked', true);
+      });
+
+
+      function make_rent_schedule_fields_blank(i){
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_rent_schedule_type").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_from_date").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_no_of_months").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_to_date").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_rent_schedule_amount_per_sqft").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_amount_per_month_per_sqft").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_amount_per_month").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_billing_freq").val("");
+        jQuery("#lease_rent_attributes_rent_schedules_attributes_" + i + "_base_year").val("");
+      } */
+
+    </script>
+    <script>
+    <%if @lease%>
+      jQuery(document).ready(function() {
+      update_print_pdf_link('<%=params[:portfolio_id]%>','<%=params[:property_id]%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+      });
+    <%end%>
+    //cpi_rent = <%#=(@lease.present? && @lease.rent.present? && @lease.rent.cpi_details.present? && !rent_form.object.new_record? && params[:is_cpi_escalation] !='false' && @lease.rent.is_cpi_escalation == true || (rent_form.object.new_record? && params[:is_cpi_escalation] !='false' && !params[:is_cpi_escalation].blank?)) ? true : false%>
+    cpi_rent = <%=((@lease.present? && @lease.rent.present?  && params[:is_cpi_escalation] !='false' && @lease.rent.is_cpi_escalation == true) || ( params[:is_cpi_escalation] !='false' && !params[:is_cpi_escalation].blank?)) ? true : false%>
+    if(cpi_rent == true)
+    jQuery('#CPIDetail').show();
+    else
+    jQuery('#CPIDetail').hide();
+    other_rev_rent = <%=(@lease.try(:rent).try(:other_revenues).present? && (@lease.rent.other_revenues.count > 1 || !@lease.rent.other_revenues.first.new_record?)) ? true : false%>
+    if(other_rev_rent == true){
+    jQuery('#AddOtherRevenue').show();
+    jQuery('#other_rev_add_link').hide();
+    if(<%=@lease.rent.other_revenues.count < 5%>){
+      jQuery('#other_rev_add').show();
+    }
+    }
+    else{
+    jQuery('#AddOtherRevenue').hide();
+    jQuery('#other_rev_add_link').show();
+    jQuery('#other_rev_add').hide();
+    }
+    percentage_sales_rev_rent = <%=(@lease.try(:rent).try(:percentage_sales_rents).present? && (@lease.rent.percentage_sales_rents.count > 1 || !@lease.rent.percentage_sales_rents.first.new_record?)) ? true : false%>
+    if(percentage_sales_rev_rent == true){
+    jQuery('#PercentageSalesRent').show();
+    jQuery('#sales_per_add_link').hide();
+    if(<%=@lease.rent.percentage_sales_rents.count < 5%>){
+      jQuery('#sales_per_add').show();
+    }
+    }
+    else{
+    jQuery('#PercentageSalesRent').hide();
+    jQuery('#sales_per_add_link').show();
+    jQuery('#sales_per_add').hide();
+    }
+    parking_rent = <%=(@lease.try(:rent).try(:parkings).present? && (@lease.rent.parkings.count > 1 || !@lease.rent.parkings.first.new_record?)) ? true : false%>
+    if(parking_rent == true){
+    jQuery('#Parking-1').show();
+    jQuery('#parking_per_add_link').hide();
+    if(<%=@lease.rent.parkings.count < 5%>){
+      jQuery('#parking_per_add').show();
+    }
+    }
+    else{
+    jQuery('#Parking-1').hide();
+    jQuery('#parking_per_add_link').show();
+    jQuery('#parking_per_add').hide();
+    }
+    if(variable == "nego_pipeline")
+    jQuery('#execute_id').show();
+    if(variable == "inters_pipeline")
+    jQuery('#approve_id').show();
+    </script>
+
+  <%end%>
+<%end%>

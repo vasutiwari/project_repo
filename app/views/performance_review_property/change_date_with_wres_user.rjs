@@ -1,0 +1,10 @@
+if params[:partial_page] == "leases_and_occupancy"
+  @time_line = RentRoll.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+  @time_line_actual = Actual.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+  @time_line_rent_roll = @time_line if !@time_line.nil?
+  page.replace_html "head_for_titles", :partial => "/properties/head_for_titles/",:locals=>{:portfolio_collection => @portfolio,:note_collection => @note}
+  page.replace_html "overview", :partial => "/properties/leases_and_occupancy/",:locals=>{:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:timeline_selector =>@timeline_selector,:period=>@period,:note_collection=>@note,:time_line_start_date=>@time_line_start_date,:time_line_end_date=>@time_line_end_date,:rent_roll=>@rent_roll,:end_date=>@end_date,:portfolio_collection=>@portfolio,:user_id_graph=>@user_id_graph,:navigation_start_position=>@navigation_start_position,:rent_area=>@rent_area,:prop_collection=>@prop,:rent_sum=>@rent_sum,:aged_recievables=>@aged_recievables,:start_date =>@start_date}
+  page[:current_note].innerHTML = @note.property_name
+else
+  page.replace_html "portfolio_overview_property_graph", :partial =>"/properties/wres/portfolio_overview_property_graph/"
+end	

@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+    <link href="/stylesheets/amp.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/br_results.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/sprites.css" rel="stylesheet" type="text/css" />
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag :defaults %>
+    <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+    <%= javascript_include_tag "control.modal" %>
+    <%= javascript_include_tag "client_admin" %>
+    <%= stylesheet_link_tag 'nyroModal' %>
+    <%= stylesheet_link_tag 'amp_rf' %>
+    <script type="text/javascript">
+		window.onunload = load_completer();
+      jQuery.noConflict();
+      function flash_writter(msg){
+        jQuery('#success_msg').html(msg);
+				jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+        jQuery('#msg_writter').show();
+        msg_t = setTimeout('flash_completer();', 3000);
+      }
+			function load_writter(){
+            jQuery('#success_msg').html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif; '><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+						jQuery('#msg_writter').css('background','none');
+            jQuery('#msg_writter').show();
+			}
+
+			function load_completer() {
+					jQuery('#msg_writter').fadeOut(1000);
+			}
+      function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+      function rewritter(txt){ clearTimeout(msg_t); flash_writter(txt);}
+    </script>
+  </head>
+ <script>
+ window.onunload = load_completer();
+     function dragndrop(){
+      jQuery("#dnd-example .filename, #dnd-example .folder,#dnd-example .file ").draggable({
+        helper: "clone",
+        opacity: .75,
+        revert: "invalid",
+        revertDuration: 300,
+        scroll: true,
+        stop: function(e, ui) {
+          jQuery(prev_id).css('border','');
+        }
+      });
+
+      jQuery("#dnd-example .folder").each(function() {
+        jQuery(jQuery(this).parents("tr")[0]).droppable({
+          accept: ".filename, .folder, .file",
+          drop: function(e, ui) {
+            if (jQuery(ui.draggable).parents("tr")[0].id != this.id )
+            {
+              moved_elements_to_folder(jQuery(ui.draggable).parents("tr")[0].id,this.id,"folder");
+            }
+            jQuery(prev_id).css('border','');
+          },
+          hoverClass: "accept",
+          over: function(e, ui) {
+            high_lighter(this.id);
+          }
+        });
+      });
+
+      jQuery(" .fileheadparent").each(function() {
+        jQuery(jQuery(this).parents("tr")[0]).droppable({
+          accept: ".filename, .folder, .file",
+          drop: function(e, ui) {
+            if (jQuery(ui.draggable).parents("tr")[0].id != this.id )
+            {
+              moved_elements_to_folder(jQuery(ui.draggable).parents("tr")[0].id,this.id,"parent");
+            }
+            jQuery(prev_id).css('border','');
+          },
+          hoverClass: "accept",
+          over: function(e, ui) {
+            high_lighter(this.id);
+          }
+        });
+      });
+    }
+  prev_id = "";
+    jQuery(document).ready(function(){
+		window.onunload = load_completer();
+ dragndrop();
+ });
+
+  function high_lighter(curr_id){
+    jQuery(prev_id).css('border','');
+    curr_id = curr_id.replace('-','_');
+    tmp_id = '#tmp_'+curr_id;
+    prev_id = tmp_id
+    jQuery(tmp_id).css('border','2px solid #66EE00');
+  }
+function moved_elements_to_folder(drag_ele,drop_ele,folder_iden)
+{
+        if (confirm('Are u sure want to move the item?')){
+    new Ajax.Request("/admin/master_folders/master_folder_dragndrop?drag_ele="+drag_ele+"&drop_ele="+drop_ele+"&fdr_de="+folder_iden,{
+        asynchronous:true,
+        evalScripts:true,
+        onComplete:function(request){
+            load_completer();
+        },
+        onLoading:function(request){
+            load_writter();
+        },
+        insertion:Insertion.Top
+        });
+    return false;
+        }
+    }
+</script>
+  <body>
+	<!--
+    <div style="z-index:99999;height:24px;overflow: visible;width: 100%; left: 0; top:-1px; *top:-6px; position:fixed;display: none;padding-top:6px;*padding-bottom:6px" id="msg_writter">
+      <center>
+        <span id="success_msg" style="*display:inline-block; border: 1px solid rgb(223, 223, 223); padding: 7px; font-size: 13px; background-color: rgb(255, 255, 255); background-image: none;">&nbsp;<img border="0" width="83" height="15" src="/images/loading_amp.gif">&nbsp;&nbsp;Loading&nbsp;</span>
+      </center>
+    </div>
+		-->
+		
+  <div style="background:none;height: 84px;left: 0;opacity: 1;overflow: visible;padding-top: 6px;position: fixed;top: -1px;width: 100%;z-index: 99999;" id="msg_writter">
+  <div id="success_msg" style="border: 1px solid #CCCCCC; display: table; padding: 10px; white-space: nowrap;background: #ffffff; margin: 21px auto;">
+    <div style="float:left; font:11px/14px Arial, Helvetica, sans-serif;"><img src="/images/loading_amp.gif" height="15" width="83" border="0" align="absmiddle" style="padding:0; margin:0;" />&nbsp;&nbsp;<strong>Loading...</strong></div>
+  </div>
+</div>
+
+
+    <div class="headerwrapper">
+      <div class="header">
+        <div class="logo"><a href="<% if !current_user.nil? %><%= admin_asset_managers_path %><% else %><%= login_path %><% end %>" title="AMP"><img src="/images/logo.gif" alt="AMP" border="0" /></a></div>
+        <div class="toptabwrapper" style="margin-left:40px;">
+          <% if current_user %>
+                  <!--<div class="tabdeactive" style="font-size:12px;padding-left:5px;padding-right:5px;"><a href="<%= admin_admins_path %>">Admins</a></div>-->
+            <div class="<% if controller.controller_name == 'asset_managers' %>tabactive<% else %>tabdeactive<% end %>" style="font-size:12px;padding-left:5px;padding-right:5px;"> <a href="<%=admin_asset_managers_path %>">Asset Managers</a></div>
+            <div class="<% if controller.controller_name == 'accounting_system_types' %>tabactive<% else %>tabdeactive<% end %>" style="font-size:12px;padding-left:5px;padding-right:5px;"> <a href="<%= admin_accounting_system_types_path %>">Accounting System Types</a></div>
+            <div class="<% if controller.controller_name == 'logos' %>tabactive<% else %>tabdeactive<% end %>" style="font-size:12px;padding-left:5px;padding-right:5px;"> <a href="<%= admin_logos_path %>">Client Settings</a></div>
+            <div class="<% if controller.controller_name == 'collaborators' %>tabactive<% else %>tabdeactive<% end %>" style="font-size:12px;padding-left:5px;padding-right:5px;"> <a href="<%= admin_collaborators_path %>">Collaborators</a></div>
+						<% end %>
+        </div>
+        <div class="topnav" style = 'width:330px;'>
+          <% if current_user %>
+            <div class="navi">Welcome, <span title=<%=current_user.login.titleize%> ><%=truncate(current_user.login.titleize,:lenght=>10) %></span> </div>
+            <div class="line">|</div>
+            <div class="navi"><a href="<%= logout_path %>">Logout</a></div>
+          <% else %>
+            <div class="navi"></div>
+            <div class="line"></div>
+            <div class="navi"></div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="mainwrapper">
+      <%=yield %>
+      <div class="footerwrapper">
+        <div class="footerrow">AMP Technologies LLC 2010. All Rights Reserved.</div>
+      </div>
+    </div>
+  </body>
+</html>

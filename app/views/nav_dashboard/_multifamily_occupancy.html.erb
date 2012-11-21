@@ -1,0 +1,60 @@
+ <%if params[:property_id]%>
+ <%@note=RealEstateProperty.find(params[:property_id])%>
+ <%@real_estate_property=@note%>
+ <%leasing_type=@note.leasing_type%>
+ <%elsif params[:portfolio_id]%>
+ <%@note=Portfolio.find(params[:portfolio_id])%>
+<%@real_estate_property_records=@note.real_estate_properties.uniq%>
+<%@real_estate_property_ids=@real_estate_property_records.map(&:id)%>
+ <%leasing_type=@note.leasing_type%>
+ <%end%>		
+<%params[:tl_period] = "4"%> 
+
+   	<div class="width478">
+            	<div class="occupbox">
+         			<h4>Occupancy</h4>
+							 <%financial_ytd_occupancy_display%>
+										<h1><%=((@occupied_percentage.present? && @occupied_percentage.to_i!=0) ? @occupied_percentage : "-")%>%</h1>
+											<%if params[:property_id]%>	
+										<%final_calc_multifamily = calculations_multifamily(@note)%>
+										<%total_units_val=(final_calc_multifamily.present? && final_calc_multifamily.to_i != 0) ? "#{number_with_delimiter(final_calc_multifamily.to_i)}" : "-"%>
+										<%else%>
+										<%total_units_val=mega_dd_sqft_cals(@note)%>
+										<%end%>
+										<%multifamily_property_vacant_notice_avail%>
+									<%	ytd_units=total_units_val.to_i-@vacant_net_total.to_i%>
+										<%if ytd_units !=0%>
+                    <span><%=((total_units_val.to_i !=0 && ytd_units.present?) ? ytd_units : "-")%> Units</span>
+										<%end%>
+            		<h4 class="marginT10">YTD NOI</h4>
+								<%calc_for_financial_data_display%>
+								<%params[:tl_year] = @financial_year%>
+								<%store_income_and_cash_flow_statement%>
+								<%ytd_noi = find_ytd_noi(@operating_statement) if @operating_statement.present?%>	
+                    <h1>$<%= ( ytd_noi.nil? || ytd_noi[:actuals].nil? ? "-" : dashboard_currency_display(ytd_noi[:actuals],'false')) %></h1>
+										<%if ytd_noi%>
+                   <span class="<%if ytd_noi[:actuals] > ytd_noi[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(ytd_noi[:percent])%>, $<%= dashboard_currency_display(ytd_noi[:variant])%><%if ytd_noi[:actuals] > ytd_noi[:budget]%> above<%else%> below<%end%> budget</span>
+									 <%end%>
+                </div>
+                <div class="totalsfbox">
+                	<div class="">
+                    <div class="totalhed">
+                		<span class="floatL font14">Total Units</span><span class="greentext30 floatR">
+										<%=total_units_val%>
+										</span>
+                    </div>
+										<%multifamily_property_vacant_notice_avail%>
+                    <div class="height30">
+                   		<span>Net Vacant</span><span class="floatR"><%=((total_units_val.to_i !=0 && @vacant_net_total.present? && @vacant_net_total.to_i!=0) ? @vacant_net_total : "-")%> Units</span>
+                    </div>
+                    <div class="height30">
+                    	<span>Net Notice</span><span class="floatR"><%=((total_units_val.to_i !=0 && @notice_net_total.present? && @notice_net_total.to_i!=0)? @notice_net_total : "-") %> Units</span>
+                    </div>
+                    <div class="height30">
+                    	<span>Net Avail</span><span class="floatR"><%=((total_units_val.to_i !=0 && @netunits_avail_crnt_total.present? && @netunits_avail_crnt_total.to_i!=0) ? @netunits_avail_crnt_total : "-")%> Units</span>
+                    </div>
+                    </div>
+                </div>
+            </div> 
+      
+            

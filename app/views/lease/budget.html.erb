@@ -1,0 +1,8 @@
+<div id="leasing_budget">
+    <%= render :partial => "lease/budget" %>
+</div>
+<script>
+<%if @success_budget && @success_budget.present?%>
+flash_writter("<%=@success_budget%>")
+<%end%>
+</script>

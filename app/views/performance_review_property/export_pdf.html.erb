@@ -1,0 +1,87 @@
+<div class="lightbox_container2">
+  <div class="lightbox_threshold">
+    <div class="lightbox_headerow">
+      <div class="headerow_coll1"><img width="16" height="16" src="/images/tab_selection_pdf_icon.jpg"/> Select Tab to Export to a PDF Report									     </div>
+    </div>
+    <div class="lightbox_contentrow">		
+      <div class="add_contentwrapper">
+        <!--<div class="propertylistrow">
+          <div class="propertylistcoll2" style="width: 315px;"> <input id="gen_pdf1" type="checkbox" checked disabled value="1"/>
+            Summary<span id="pdfMsg" style="padding-left: 5px;visibility: hidden;font-size: 9px;">(Please navigate to summary tab to export)</span></div>
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf5" type="checkbox" checked value="5"/>
+            Rent Roll</div>
+        </div>-->
+        <script>
+          if(partial_page == 'portfolio_partial')
+            jQuery('#gen_pdf1').attr('disabled', false);
+          else{
+            jQuery('#gen_pdf1').attr('checked', false);
+            jQuery('#pdfMsg').css('visibility','visible');
+          }
+        </script>
+				<div class="propertylistrow">
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf3" type="checkbox" checked value="3"/>
+            Operating Statement</div>
+						 <%if @note && !find_accounting_system_type(3,@note)%>
+          <div class="propertylistcoll2" style="width: 275px;">
+              <input id="gen_pdf8" type="checkbox" checked value="8"/> Receivables
+          </div>
+					<%end%>
+        </div>
+        <div class="propertylistrow">
+          <!--<div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf2" type="checkbox" checked value="2"/>
+            Physical Details</div>-->
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf6" type="checkbox" checked value="6"/>
+            <%if @note && find_accounting_system_type(3,@note)%>Maintenance Expenditures<%else%>Capital Expenditures<%end%></div>
+        </div>
+        <div class="propertylistrow">
+          <!--<div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf4" type="checkbox" checked value="4"/>
+            Leasing</div>-->
+						<%if @note && @note.try(:class).eql?(RealEstateProperty) &&  @note.accounting_type != "Cash"%>
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf7" type="checkbox" checked value="7"/>
+            Cash</div>
+						 <%end%>
+						 <%if @note && @note.try(:class).eql?(Portfolio) &&  @note.real_estate_properties.first.accounting_type != "Cash"%>
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf7" type="checkbox" checked value="7"/>
+            Cash</div>
+						 <%end%>
+        </div>
+				
+					<div class="propertylistrow">
+					<%if @note.try(:class).eql?(RealEstateProperty)%>
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf9" type="checkbox" checked value="9"/>
+            Variances</div>
+					<%end%>
+					<%if @note && remote_property(@note.accounting_system_type_id) && @note.accounting_type == "Cash"%>
+						<div class="propertylistcoll2"  style="width: 275px; margin-top: -30px;">
+            <input id="gen_pdf10" type="checkbox" checked value="10"/>
+            Balance Sheet</div>	
+					<%elsif @note && remote_property(@note.accounting_system_type_id)%>
+						<div class="propertylistcoll2"  style="width: 275px;">
+            <input id="gen_pdf10" type="checkbox" checked value="10"/>
+            Balance Sheet</div>	
+					<%end%>
+							</div>
+        <div class="propertylistrow"></div>
+      </div>
+    </div>
+  </div>
+  <div class="butwrapper"  style="width:715px;">
+    <div style="margin-left:250px" class="greenbutton"><a onclick="pdfConv(true,'<%=params[:start_date]%>');return false;" href="javascript:;">Print PDF</a><span>&nbsp;</span></div>
+    <div class="graybutton"><a onclick="Control.Modal.close();return false;" href="javascript:;">Cancel</a><span>&nbsp;</span></div>
+  </div>	
+	<%if request.env["HTTP_USER_AGENT"].downcase.match(/safari/) && !request.env["HTTP_USER_AGENT"].downcase.match(/chrome/)%>
+		 <span style="font-size:11px;padding:10px;"><img width="16" height="16" src="/images/1332349563_warning_16.png"/>  We recommend using Chrome, Internet Explorer or Firefox for a better print report.</span>
+    <%end%>
+		
+  <div class="bot"></div>
+</div>
+<a style="cursor: pointer;" onclick="Control.Modal.close();return false;" id="sbox-btn-close"></a>

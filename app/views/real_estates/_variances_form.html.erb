@@ -1,0 +1,17 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<script type="text/javascript">
+  form_name ="#variances_form";
+  tab = "6";
+  share  = false;
+	file = false;
+	folder = false;
+</script>
+
+<%@folder = find_by_real_estate_property_id(property_collection.id)%>
+<%@prop = @property%>
+
+
+         <%=render :partial=>"/explanations/new_threshold"%>

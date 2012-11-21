@@ -1,0 +1,97 @@
+<style>
+.exec_class {
+    cursor: pointer;
+    min-height: 70px;
+}
+</style>
+<%= javascript_include_tag :ckeditor %>
+
+<%#if @note.class.name.eql?("RealEstateProperty") %>
+<!-- executive summary html integration starts here-->
+  <div class="clearfloat"></div>
+	<%port_or_prop_financial_info = (params[:action].eql?("financial_info") && session[:portfolio__id].present?) ? portfolio_financial_info_path(:portfolio_id=>params[:portfolio_id].to_i,:ckeditor=>true) : (params[:action].eql?("financial_info") && session[:property__id].present?) ? financial_info_path(:property_id=>params[:property_id].to_i , :portfolio_id=>params[:portfolio_id].to_i,:ckeditor=>true) : params[:action].eql?("portfolio_multifamily_leasing_info") ? portfolio_multifamily_leasing_info_path(:portfolio_id=>params[:portfolio_id],:ckeditor=>true) : params[:action].eql?("portfolio_commercial_leasing_info") ? portfolio_commercial_leasing_info_path(:portfolio_id=>params[:portfolio_id],:ckeditor=>true) : ""%>	
+	
+	
+<%url = port_or_prop_financial_info.present? ? port_or_prop_financial_info : params[:action].eql?("property_commercial_leasing_info") ? property_commercial_leasing_info_path(:property_id=>params[:property_id] , :portfolio_id=>params[:portfolio_id],:ckeditor=>true) : params[:action].eql?("property_multifamily_leasing_info") ? property_multifamily_leasing_info_path(:property_id=>params[:property_id] , :portfolio_id=>params[:portfolio_id],:ckeditor=>true)  : financial_info_path(:property_id=>params[:property_id] , :portfolio_id=>params[:portfolio_id],:ckeditor=>true)
+%>
+<div class="box-1col" id="exec_summar_id">
+    		 <div class="exbtn"> <a href="#12"></a></div>
+          <div class="highlightTitle"> Executive Summary</div>
+          <div class="clearfloat"></div>
+          	<div class="margin10LR_rf">
+            <%= form_for :page, :url=> url do |form| %>
+						Select Period &nbsp;
+						<%month = params[:month].present? ? params[:month] : @financial_month%>
+						<%year = params[:year].present? ? params[:year] : @financial_year%>
+						<%= form.select :month, options_for_select( RealEstateProperty::MONTH,month ), html_options = {:class => "inptSelcted"}, :onchange => "load_writter(); onchange_handler_for_executive_summary_month_and_year(this.value, jQuery('#page_year').val(),'#{params[:portfolio_id]}','#{params[:property_id].present? ? params[:property_id] : nil}')"%>
+            &nbsp;
+            <%= form.select :year, options_for_select( RealEstateProperty::YEAR,year ), html_options = {:class => "inptSelcted"}, :onchange => "load_writter(); onchange_handler_for_executive_summary_month_and_year(jQuery('#page_month').val(),this.value,'#{params[:portfolio_id]}','#{params[:property_id].present? ? params[:property_id] : nil}')"%>
+        <span class="btnEX aEXM"><%if @page && !@page.new_record?%>Updated by <%=@last_updated_user && @last_updated_user.try(:name).titleize%> on <%=@page && @page.updated_at.strftime('%m/%d/%Y')%> at <%=@page && @page.updated_at.strftime('%I:%M%p')%><%end%></span><br />
+					<div style="display:none;" id="ckeditor_form">
+							<%= form.cktext_area :notes, :toolbar=>'Basic', :width=>'924', :height=>'200px'%>
+							<%=form.hidden_field  :user_id, :value=> current_user.try(:id) %>
+					  	<div class="clearfloat"></div>
+							<div class="button" align="center">
+					  		<%= form.submit "Save", :class=>"blue_buttom_ex loader_event", :onclick=>"return validation_for_exec_summary();"%>
+					  		&nbsp; &nbsp;
+					  	  <input type="button" value="Cancel" onclick="clear_text();" class="whit_buttom_ex"/>
+					  	</div>
+            <% end %>
+					</div>
+          <div class="clickH contenEx" id="textarea_div" style="border:1px solid #dedede;padding:10px;" onclick="enable_disable_ckeditor();" title="<%if @page.try(:notes).present?%>Click to edit<%end%>">
+<%= @page.try(:notes).present? ? raw(@page.try(:notes)).strip : "Click here to Enter Executive Summary"%></div>
+          <div class="clearfloat"></div>
+        </div>
+        <span class="font12 margin10LR_rf" id="comments_exec_id"><%if @page && !@page.new_record?%>Comments on Executive Summary (<%=(@page.try(:month) <= 9) ? "0#{@page.try(:month)}" : @page.try(:month)%>/<%=@page.try(:year)%>)<%end%></span>
+
+
+    <!--
+		<div class="commetDivEven padBzero">
+    <img width="32" height="32" align="left" class="maginR5" src="/images/contact-default.png">
+    <div class="fltlft"><textarea class="textAWH"></textarea></div>
+    <div class="fltLeft marginL10"><input type="button" value="Save" class="btn-Com-save"/> <input type="button" value="Cancel" class="btn-Com-save marginL5"/></div>
+    <div class="clear"></div>
+    </div> -->
+
+		 <div id="comments_div">
+			<%=render:partial => 'comments_form', :locals=>{:comment => @comment,:page=>@page}%>
+		 </div>
+
+
+  </div>
+
+	<div class="clearfloat"></div>
+    </div>
+
+<!-- executive summary html integration ends here-->
+<%# end %>
+
+
+<script>
+			jQuery(document).ready(function() {
+			if (jQuery('#textarea_div').html().trim() != 'Click here to Enter Executive Summary')
+      {
+  			jQuery('#textarea_div').removeClass('clickH');
+        jQuery('#textarea_div').addClass('exec_class');
+			}
+      else
+      {
+			  jQuery('#textarea_div').removeClass('exec_class');
+        jQuery('#textarea_div').addClass('clickH');
+			}
+
+			if (jQuery('#textarea_div').html().indexOf('<li>') == -1 && jQuery('#textarea_div').html().trim() != 'Click here to Enter Executive Summary')
+      {
+  			jQuery('#textarea_div').css('padding-top','12px');
+        jQuery('#textarea_div').css('padding-left','0px');
+			}
+
+			<%if params[:ckeditor].present? ? params[:ckeditor] : false%>
+			  jQuery(window).scrollTop(1400);
+			<%end%>
+if (<%=params[:ckeditor].present? ? params[:ckeditor] : false%>)
+<%months = {1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December"}%>
+// flash_writter('Executive Summary is saved for <%=(params[:month].to_i <= 9) ? "0#{params[:month]}" : params[:month]%>/<%=params[:year]%>');
+flash_writter('Executive Summary is saved for <%=months[params[:month].to_i]%>, <%=params[:year]%>');
+       });
+</script>

@@ -1,0 +1,2 @@
+page.replace_html  "overview",:partial=>"/collaboration_hub/profile",:locals=>{:user_collection=> @user,:portfolios_collection => @portfolios}
+page.call "flash_writter",'Password was successfully updated.' if 	@password_updated

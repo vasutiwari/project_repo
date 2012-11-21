@@ -1,0 +1,6 @@
+<div class="box-1col">
+    <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/users">User List</a> > Edit User </div>
+	 <%=form_for(@user, :url => client_admin_user_path(current_user.id),:method=>:put, :html=>{:id=>"edit_users_submit"}) do |f| %>
+<%=render :partial=>"form",:locals=>{:f=>f, :form_name=>"edit_users_submit"}%>
+			<%end%>
+    </div>

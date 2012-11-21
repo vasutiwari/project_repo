@@ -1,0 +1,13 @@
+unless (params[:value].strip()).blank?
+  if @new_portfolio.valid?
+    page.call("portfolio_do_update","#{params[:id]}","#{lengthy_word_simplification(@new_portfolio.name,15,5)}",@new_portfolio.name)
+    page.call "flash_writter", "Portfolio name updated..."
+    page[:pname_err_msg].innerHTML = ""
+  else
+    page.call "edit_portfolio_name_err", @new_portfolio.id
+    page.call "display_pname_err_msg", "#{@new_portfolio.errors['name']}"
+  end
+else
+  page.call "edit_portfolio_name_err", @new_portfolio.id
+  page.call "display_pname_err_msg", "Please provide portfolio name"
+end

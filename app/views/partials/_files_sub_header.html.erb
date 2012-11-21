@@ -1,0 +1,36 @@
+<%if !current_user.has_role?('Asset Manager') && !is_leasing_agent && !current_user.has_role?("Client Admin")%>
+	<div class="navSubmenu fileSubMenu" style="margin-left:-86px !important; visibility:hidden;" id="files_sub_tab">
+			<a href='/shared_users' class="<%= (controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] != 'true' ? 'selected' : '' %>">Other Files</a>|<a href="/transaction?deal_room=true" class="<%= (controller_name == 'transaction' || controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] == 'true' ? 'selected' : '' %> ">Deal Rooms</a>
+	</div>
+<%else%>
+	<div class="navSubmenu fileSubMenu" style="<%if is_leasing_agent %> position: relative;margin-right: -95px;margin-top:-31px;padding-top:8px;<%end%>visibility:hidden;" id="files_sub_tab">
+			<%if (params[:open_portfolio] || params[:nid].present? || params[:property_id].present? || (params[:id].present? && ((params[:controller].eql?("properties") && params[:action].eql?("show")) || params[:action].eql?("show_pipeline")))) && (session[:property__id].present? || params[:action].eql?("show_pipeline") || (params[:property_id].present? && params[:action].eql?("news")))%>	
+				<a  <%if controller_name == 'properties' && action_name == 'show_asset_files'%>class='selected'<%end%> href='/files/<%=portfolio_obj.id%>/<%=property_obj.id%>'><%=property_obj.property_name%></a>|<a href="/collaboration_hub?portfolio_id=<%=portfolio_obj.id%>&property_id=<%=property_obj.id%>&folder_id=<%=Folder.folder_of_a_portfolio(portfolio_obj.id).try(:id)%>" <%if controller_name == 'collaboration_hub' && action_name != "my_profile"%>class='selected'<%end%>>Other Files</a>|<a href="/transaction?deal_room=true&portfolio_id=<%=portfolio_obj.id%>&property_id=<%=property_obj.id%>" <%if params[:deal_room] == 'true'%>class='selected'<%end%>>Deal Rooms</a>
+			<%else%>
+			<%if (current_user.has_role?("Client Admin") && check_shared_documents && (portfolio_obj.name=="portfolio_created_by_system" || portfolio_obj.name == "portfolio_created_by_system_for_bulk_upload" || portfolio_obj.name == "portfolio_created_by_system_for_deal_room"))%>
+			<a href='/shared_users' class="<%= (controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] != 'true' ? 'selected' : '' %>">Other Files</a>|<a href="/transaction?deal_room=true" class="<%= (controller_name == 'transaction' || controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] == 'true' ? 'selected' : '' %> ">Deal Rooms</a>
+	<%else%>
+				<a  <%if controller_name == 'properties' && action_name == 'show_asset_files'%>class='selected'<%end%> href='/files/<%=portfolio_obj.id%>?folder_id=<%=Folder.folder_of_a_portfolio(portfolio_obj.id).try(:id)%>&hide_var=true'><%=portfolio_obj.name%></a>|<a href="/collaboration_hub?portfolio_id=<%=portfolio_obj.id%>&folder_id=<%=Folder.folder_of_a_portfolio(portfolio_obj.id).try(:id)%>" <%if controller_name == 'collaboration_hub' && action_name != "my_profile"%>class='selected'<%end%>>Other Files</a>|<a href="/transaction?deal_room=true&portfolio_id=<%=portfolio_obj.id%>" <%if params[:deal_room] == 'true'%>class='selected'<%end%>>Deal Rooms</a>
+			<%end%>
+			<%end%>
+	</div>
+<%end%>
+
+<script>
+jQuery(document).ready(function()
+	{
+	 if (jQuery('#files_id').attr('class').indexOf('selected') !== -1)
+	 { jQuery('#files_sub_tab').css('visibility','visible');
+		jQuery('#show_assets_list').show(); }
+	}
+	);
+	
+	 jQuery('#files_sub_tab').mouseover(function()
+	{
+    mousehover('files_id','files')
+	});
+	
+	jQuery('#files_sub_tab').mouseout(function(){
+    delayed_mouseout('files_id');
+});
+</script>

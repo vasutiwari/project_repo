@@ -1,0 +1,23 @@
+<div class="box-1col fontcol">
+    <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/templates">Template List</a> > Edit Template </div>
+		<div class="mandatryDiv" align="right" style="margin:-30px 0 10px 762px;">( <span class="txtRed">*</span> )<small> Mandatory Fields is required</small> </div>
+		<%@property_types = find_property_types%>
+		<%=form_for(@template,:url => client_admin_template_path(current_user.id), :method => :put,:html=>{:multipart=>true, :id=>"edit_template_submit"}) do |p| %>
+				<%=render "form",:p=>p, :template_collection => @template, :property_types => @property_types, :form_name=>"edit_template_submit"%>
+		<%end%>
+		<div class="clearfloat"></div>
+</div>
+<script>
+<%if params[:delete_picture].eql?('true')%>
+	
+	flash_writter();
+	function flash_writter(){
+	
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+</script>

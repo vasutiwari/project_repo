@@ -1,0 +1,169 @@
+<script>
+  prev_id = "";
+  jQuery(document).ready(function(){
+    dragndrop();
+  });
+  function high_lighter(curr_id){
+    jQuery(prev_id).css('border','');
+    curr_id = curr_id.replace('-','_');
+    tmp_id = '#tmp_'+curr_id;
+    prev_id = tmp_id
+    jQuery(tmp_id).css('border','2px solid #66EE00');
+  }
+  function moved_elements_to_folder(drag_ele,drop_ele)
+  {
+    new Ajax.Request("/admin/master_folders/master_folder_dragndrop?drag_ele="+drag_ele+"&drop_ele="+drop_ele+"&fdr_de="+folder_iden,{
+      asynchronous:true,
+      evalScripts:true,
+      onComplete:function(request){
+        load_completer();
+      },
+      onLoading:function(request){
+        load_writter();
+      },
+      insertion:Insertion.Top
+    });
+    return false;
+  }
+</script><br />
+<div class="filergtwrap">
+  <div class="filergtgraytop">
+    <div class="fileicon">
+      &nbsp;<!-- <input type="checkbox" name="checkbox12" id="upload_file_check_box" value="checkbox" onclick="toggle_select(this.id)" /> -->
+    </div>
+    <div class="fileheadtitlefilename" style="color:#333333;font-weight:bold;font-size:11px;">Name <!--<img src="/images/downarrow_collapse.gif" width="20" height="10" />--> </div>
+    <div class="fileheadtitle" style="color:#333333;font-weight:bold;font-size:11px;"></div>
+    <div class="fileheadtitlemod" style="color:#333333;font-weight:bold;font-size:11px;"><% if !portfolio_files.blank? || !portfolio_folder.blank? %> Days Count(For Files/File
+        Name) <% end %></div>
+  </div>
+  <% if !parent_record.nil? %>
+    <table style="float:left;">
+      <tr id="folder-<%=parent_record.parent_id%>" ><td>
+          <% style = (parent_record.parent_id.to_s == "0") ? "fileheadparent_master" : "fileheadparent" %>
+          <div class="<%=style%>">
+            <span style="padding:0 5px;display:inline-block !important;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;font-weight:normal;color:#1F75CC;"><img class="sprite s_arrow_turn_up" alt="" style="vertical-align: bottom;" src="/images/icon_spacer.gif"/>
+              <a href="javascript:;" onclick="show_folder_content(<%= parent_record.parent_id  %>,<%= portfolio_type.id %>);return false;">Parent Folder</a></span>
+          </div>
+        </td></tr>
+    </table>
+  <% end %>
+  <div class="filedataborder"><!-- --></div>
+  <% if !(portfolio_folder.empty? && portfolio_files.empty? && portfolio_filename.empty?) %>
+    <div class="filedatacontainer">
+      <table class="example" id="dnd-example" cellpadding="0" cellspacing="0" boder="0">
+        <% if !portfolio_folder.blank? %>
+          <% portfolio_folder.each do |t| %>
+            <tr id="folder-<%=t.id%>">
+              <td>
+                <div class="folder">
+                  <div class="filedataborder" id="tmp_folder_<%= t.id %>" onmouseover="this.className='filedataborderactive'" onmouseout="this.className='filedataborder'">
+                    <div class="fileicon">
+                      <input type="checkbox" id="asset_doc_<%= t.id %>" value="<%= t.id %>" name="asset_folders[]" oncheck="change_rowclass(this.value,'tmp_folder_')" />
+                      <img src="/images/new_icon_folder.gif" width="16" height="16" />
+                    </div>	<!-- fileicon ends here -->
+                    <div class="fileheadtitlefilenamelink">
+                      <span id="<%=  't_foldername_'+t.id.to_s %>">
+                        <% no_of_files = no_of_files_of_folder(t.id, true) %>
+                        <a href=""  id="<%='folder_name_a_id'+t.id.to_s%>"  onclick="show_folder_content(<%= t.id %>,<%= t.portfolio_type_id %>);return false;" class="bluecolor" title="Click here to view files of <%= t.name %>"><%= t.name %> [<%= no_of_files %>] </a>
+                      </span>
+                    </div> <!-- fileheadtitlefilenamelink ends here -->
+                    <div class="rowdropwrapper">
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_cancel icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"><a href="javascript:;" onclick="delete_doc_or_folder_admin('folder',<%= portfolio_type.id %>,<%= t.id %>);return false;" class="bluecolor">Delete</a></div>
+                      </div>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_folder_edit icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"> <a href="javascript:;" onclick="edit_folder_name(document.getElementById('t_foldername_<%=  t.id.to_s %>'),<%=  t.parent_id.to_s %>,<%=  t.portfolio_type_id.to_s %>);return false;" class="bluecolor">Rename</a></div>
+                      </div>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_download_arrow icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"><%= link_to 'Download', folder_download_admin_master_folders_path(:id =>t.id) %></div>
+                      </div>
+                    </div> <!-- rowdropwrapper ends here -->
+                  </div> <!-- file data border ends here -->
+                </div> <!-- folder ends here -->
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+        <% if !portfolio_files.blank? %>
+          <% portfolio_files.each do |t| %>
+            <tr id="file-<%=t.id%>">
+              <td>
+                <div class="file">
+                  <div class="filedataborder" id="tmp_doc_<%= t.id %>" onmouseover="this.className='filedataborderactive'" onmouseout="this.className='filedataborder'">
+                    <div class="fileicon">
+                      <input type="checkbox" id="asset_doc_<%= t.id %>" value="<%= t.id %>" name="asset_docs[]" oncheck="change_rowclass(this.value,'tmp_doc_')" />
+                      <img src="/images/<%= find_content_type(t,'','') %>" width="16" height="16" />
+                    </div> <!-- fileicon ends here -->
+                    <div class="fileheadtitlefilenamelink">
+                      <span id="<%=  't_file_'+t.id.to_s %>"><%= t.filename %></span>
+                    </div>
+                    <div class="details-size" style="width:350px;"><span id="<%=  't_due_date_file_'+t.id.to_s %>"><%= t.due_days %></span></div>
+                    <div class="rowdropwrapper">
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_cancel icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"><a href="javascript:;" onclick="delete_doc_or_folder_admin('file',<%= portfolio_type.id %>,<%= t.id %>);return false;" class="bluecolor">Delete</a></div>
+                      </div>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_folder_edit icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"> <a href="javascript:;" onclick="edit_file_name(document.getElementById('t_file_<%=  t.id.to_s %>'),<%=  t.master_folder_id.to_s %>,<%=  t.master_folder.portfolio_type.id.to_s %>, 0);return false;" class="bluecolor">Rename</a></div>
+                      </div>
+                      <% if t.filename != 'Cash_Flow_Template.xlsx' && t.filename != 'Cash_Flow_Template.xls' && t.filename != 'Rent_Roll_Template.xlsx' && t.filename != 'Rent_Roll_Template.xls'%>
+                        <div class="row">
+                          <div class="icon"><img class="icon_no_hover sprite s_folder_edit icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                          <div class="label"> <a href="javascript:;" onclick="edit_master_file_due_date(document.getElementById('t_due_date_file_<%=  t.id.to_s %>'),<%=  t.master_folder_id.to_s %>,<%=  t.master_folder.portfolio_type.id.to_s %>);return false;" class="bluecolor">Set Due Days</a></div>
+                        </div>
+                      <% end %>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_download_arrow icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"><%= link_to 'Download', download_master_file_admin_master_folders_path(:id =>t.id) %></div>
+                      </div>
+                    </div> <!-- rowdropwrapper ends here -->
+                  </div> <!-- file data border ends here -->
+                </div> <!-- file ends here -->
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+        <% if !portfolio_filename.blank? %>
+          <% portfolio_filename.each do |t| %>
+            <tr id="filename-<%=t.id%>">
+              <td>
+                <div class="filename">
+                  <div class="filedataborder" id="tmp_doc_<%= t.id %>" onmouseover="this.className='filedataborderactive'" onmouseout="this.className='filedataborder'">
+                    <div class="fileicon">
+                      <input type="checkbox" id="asset_doc_<%= t.id %>" value="<%= t.id %>" name="asset_docs[]" oncheck="change_rowclass(this.value,'tmp_doc_')" />
+                      <img src="/images/icon_file_active.gif" width="16" height="16" />
+                    </div> <!-- fileicon ends here -->
+                    <div class="fileheadtitlefilenamelink">
+                      <span id="<%=  't_filename_'+t.id.to_s %>"><%= t.name %></span>
+                    </div>
+                    <div class="details-size" style="width:350px;"><span id="<%=  't_due_date_'+t.id.to_s %>"><%= t.due_days %></span></div>
+                    <div class="rowdropwrapper">
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_cancel icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"><a href="javascript:;" onclick="delete_doc_or_folder_admin('filename',<%= portfolio_type.id %>,<%= t.id %>);return false;" class="bluecolor">Delete</a></div>
+                      </div>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_folder_edit icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"> <a href="javascript:;" onclick="edit_file_name(document.getElementById('t_filename_<%=  t.id.to_s %>'),<%=  t.master_folder_id.to_s %>,<%=  t.portfolio_type_id.to_s %>, 1);return false;" class="bluecolor">Rename</a></div>
+                      </div>
+                      <div class="row">
+                        <div class="icon"><img class="icon_no_hover sprite s_folder_edit icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                        <div class="label"> <a href="javascript:;" onclick="edit_due_date(document.getElementById('t_due_date_<%=  t.id.to_s %>'),<%=  t.master_folder_id.to_s %>,<%=  t.portfolio_type_id.to_s %>);return false;" class="bluecolor">Change Due Days Count</a></div>
+                      </div>
+                    </div> <!-- rowdropwrapper ends here -->
+                  </div> <!-- file data border ends here -->
+                </div> <!-- file ends here -->
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </table>
+    </div>
+  <%else%>
+    <div class="filedatacontainer"><span style="color:#666666;font-size:13px;font-style:italic;"><center>This folder is empty.</center></span></div>
+  <% end %>
+</div>

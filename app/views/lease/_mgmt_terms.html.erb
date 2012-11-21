@@ -1,0 +1,401 @@
+<%  prop_lease_suite,total_added_suites = params_formation if params[:from_mgmt].eql?('true') %>
+<script type="text/javascript">
+	flash_msg = "<%=FLASH_MESSAGES['leases']['101']%>";
+  form_name ="#mgmt_terms_form"
+  form_txt = 'terms'
+  tab = "1"
+  rem_count = 0;
+  term_option_count = <%=@lease.try(:tenant).try(:options).present? ? @lease.tenant.options.count : 1%>
+  activive_tab(form_txt);
+  pdf_click= 'false';
+  if(term_option_count >= 10)
+    jQuery('#add_option_link').hide();
+  //yield_calender('true');
+
+  if(variable == "nego_pipeline")
+  {
+    jQuery('#execute_id').show();
+    if(term_mark_form == true)
+      jQuery('#trm_mark_exec').trigger('click');
+  }
+  if(variable == "inters_pipeline")
+  {
+    jQuery('#approve_id').show();
+  }
+  trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+  pro_com_and_date = '<%=FLASH_MESSAGES['leases']['118']%>';
+  pro_comm = '<%=FLASH_MESSAGES['leases']['119']%>';
+  pro_exp = '<%=FLASH_MESSAGES['leases']['120']%>';
+  comm_shd_les_exp = '<%=FLASH_MESSAGES['leases']['121']%>';
+</script>
+<style>
+  textarea {
+    clear: both;
+    display: block;
+    font-family: arial;
+    font-size: 1em;
+    width:40em;
+    padding: 2px 4px;
+  }
+</style>
+<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update1",:portfolio_id=>portfolio_collection.id,:property_id=>params[:property_id]}, :html=>{:target => "lease_term_frame",:id=>"mgmt_terms_form"} do |lease_form| -%>
+  <div class="alertbody" id="lease_term_nav" <%if @pdf%> style='border:1px solid #E3DFDF' <%end%>>
+    <%= lease_form.fields_for :property_lease_suite do |prop_lease_form| %>
+      <%= prop_lease_form.fields_for :tenant do |tenant_form| %>
+        <%unless @pdf%><div class="lebredcomseow2 marked"> Marked fields required for sending alerts </div><%end%>
+        <div class="lsrowwrapper"> Tenant </div>
+        <div class="lssectionwrapper">
+          <div class="termsnamerow">
+            <%= tenant_form.label "Legal Name" ,:type=>"text", :class=>"termsname namefirst", :style=>"width:100px; text-align:left;"%>
+            <div class="termsform" style="padding-left:5px;">
+              <%= tenant_form.text_field :tenant_legal_name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+            </div>
+            <div class="termsname" style="width:100px; text-align:left; margin-left:48px">DBA Name</div>
+            <div class="termsform" style="padding-left:5px;">
+              <%= tenant_form.text_field :dba_name ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+            </div>
+            <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Tax ID</div>
+            <div class="termsform" style="padding-left:5px;">
+              <%= tenant_form.text_field :tax_id ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+            </div>
+          </div>
+          <%= tenant_form.fields_for :lease_contact do |contact_form| %>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Contact Name</div>
+              <div class="termsform" style="padding-left:5px;">
+                <%= contact_form.text_field :name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Email</div>
+              <div class="termsform" style="padding-left:5px;">
+                <%= contact_form.text_field :email ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Ph</div>
+              <div class="termsform" style="padding-left:5px;">
+                <%= contact_form.text_field :phone ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+              </div>
+            </div>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Tenant Address</div>
+              <div class="termsform" style="padding-left:5px;">
+                <%= contact_form.text_field :address ,:type=>"text", :class=>"lstextfield", :style=>"width:377px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Fax</div>
+              <div class="termsform" style="padding-left:5px;">
+                <%= contact_form.text_field :fax ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+              </div>
+            </div>
+          <%end%>
+          <%unless @pdf%>
+            <div class="termsnamerow" style="padding:5px 0;"> <span id="assignee_contact1" class="version rentnamelinkrt">+ <a  href="#" onclick="jQuery('#Subiesee').show();jQuery('#assignee_contact1').hide();return false;" onmouseover="focusDivOver('Subiesee')" onmouseout="focusDivOut('Subiesee')">Sublessee/Assignee Contact</a></span><span id="notice_name1" class="version rentnamelinkrt" style="padding-right:15px;">+ <a onclick="jQuery('#DifferentNotice').show();jQuery('#notice_name1').hide();return false;" onmouseover="focusDivOver('DifferentNotice')" onmouseout="focusDivOut('DifferentNotice')">Different Notice Name, Address</a></span><span class="version rentnamelinkrt" id="billing_name1" style="padding-right:15px;">+ <a onclick="jQuery('#DifferentBilling').show();jQuery('#billing_name1').hide();return false;" onmouseover="focusDivOver('DifferentBilling')" onmouseout="focusDivOut('DifferentBilling')">Different Billing Name, Address</a></span>
+              <div class="clear"></div>
+            </div>
+          <%end%>
+          <div class="termsnamerow" style="padding:5px 0;">
+            <%unless @pdf%>
+              <span id ="term_note" class="version rentnamelinkrt">+ <a onclick="jQuery('#term_note').hide();jQuery('#NotesTenent').show();return false;" onmouseover="focusDivOver('NotesTenent')" onmouseout="focusDivOut('NotesTenent')" >Notes</a></span><span id="naics_code" class="version rentnamelinkrt" style="padding-right:15px;">+ <a onclick="jQuery('#naics_code').hide();jQuery('#NAICS').show();return false;" onmouseover="focusDivOver('NAICS')" onmouseout="focusDivOut('NAICS')">NAICS Code</a></span>
+            <%end%>
+          </div>
+          <div class="clear"></div>
+          <div id="DifferentBilling" class="close" onmouseover="focusDivOver('DifferentBilling')" onmouseout="focusDivOut('DifferentBilling')" style="<%if @pdf && @lease.present? && @lease.tenant.present? && (@lease.tenant).billing_contact_name.present?%>display:block;<%else%>display:none<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#DifferentBilling').hide();jQuery('#billing_name1').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_billing_contact_name').val('');jQuery('#lease_property_lease_suite_attributes_tenant_attributes_billing_contact_address').val('');return false;}">X</span>Different Billing Name, Address</div>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Contact Name</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :billing_contact_name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left;">Tenant Address</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :billing_contact_address ,:type=>"text", :class=>"lstextfield", :style=>"width:377px"%>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div id="DifferentNotice" class="close" onmouseover="focusDivOver('DifferentNotice')" onmouseout="focusDivOut('DifferentNotice')" style="<%if @pdf && @lease.present? && @lease.tenant.present? && (@lease.tenant).notice_contact_name.present?%>>display:block;<%else%>display:none;<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#DifferentNotice').hide();jQuery('#notice_name1').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_notice_contact_name').val('');jQuery('#lease_property_lease_suite_attributes_tenant_attributes_notice_contact_address').val('');return false;}">X</span>Different Notice Name, Address</div>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Contact Name</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :notice_contact_name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left;">Tenant Address</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :notice_contact_address ,:type=>"text", :class=>"lstextfield", :style=>"width:377px"%>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div id="Subiesee" class="close" onmouseover="focusDivOver('Subiesee')" onmouseout="focusDivOut('Subiesee')" style="<%if @pdf && @lease.present? && @lease.tenant.present? && (@lease.tenant).sublease_or_assignee_contact_name.present?%>display:block;<%else%>display:none<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#Subiesee').hide();jQuery('#assignee_contact1').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_sublease_or_assignee_contact_name').val('');jQuery('#lease_property_lease_suite_attributes_tenant_attributes_sublease_or_assignee_contact_address').val('');return false;}">X</span>Sublessee/Assignee Contact</div>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Contact Name</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :sublease_or_assignee_contact_name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+              <div class="termsname" style="width:100px; text-align:left;">Tenant Address</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :sublease_or_assignee_contact_address ,:type=>"text", :class=>"lstextfield", :style=>"width:377px"%>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div id="NAICS" class="close" onmouseover="focusDivOver('NAICS')" onmouseout="focusDivOut('NAICS')" style="<%if @pdf && @lease.present? && @lease.tenant.present? && (@lease.tenant).naics_code.present?%>display:block;<%else%>display:none<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NAICS').hide();jQuery('#naics_code').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_naics_code').val('');return false;}">X</span>NAICS Code</div>
+            <div class="termsnamerow">
+              <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">NAICS Code</div>
+              <div class="termsform" style="padding-left:10px;">
+                <%= tenant_form.text_field :naics_code ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="notesnamerow" id="NotesTenent" onmouseover="focusDivOver('NotesTenent')" onmouseout="focusDivOut('NotesTenent')" style="<%if !@pdf.nil? && @lease.present? && @lease.tenant.present? && @lease.tenant.note.present? && @lease.tenant.note.content.present? && @lease.tenant.note.content != 'Edit this text to see the text area expand and contract.'%>display:block;<%else%>display:none;<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesTenent').hide();jQuery('#term_note').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_note_attributes_content').val('');return false;}">X</span>Notes</div>
+            <div class="termsform" style="padding-left:0px;">
+              <%= tenant_form.fields_for :note do |note_form| %>
+                <%= note_form.text_area :content, :type=>"text", :class=>"expand25-300 taskfieldinput2", :cols=>"27", :rows=>"3", :style=>"width:748px;", :value =>!note_form.object.content.nil? ?  note_form.object.content : ''%>
+							<%end%>
+            </div>
+          </div>
+        </div>
+        <div class="lsrowwrapper">Dates</div>
+        <div class="lssectionwrapper">
+          <div class="termsnamerow">
+            <div class="termsname namefirst" style="text-align: right ! important; width: 100px;">Commencement</div>
+            <div class="termsform" style="padding-left:10px;">
+              <%= lease_form.text_field :commencement ,:type=>"text", :value => (@lease && @lease.commencement.present?) ? lease_date_format(@lease.try(:commencement)) : "mm/dd/yyyy", :class=>"terms_commencement lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:80px", :size=>12,  :onchange => "if(jQuery.trim(jQuery('#lease_commencement').val()) != ''){if(custom_validation_for_date(jQuery('#lease_commencement').val(),'terms_commencement'))month_change(jQuery('#lease_commencement').val(),jQuery('#lease_expiration').val())}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+              <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+            </div>
+            <div class="termsname" style="margin-left:106px">Expiration</div>
+            <div class="termsform" style="padding-left:10px;">
+              <%= lease_form.text_field :expiration ,:type=>"text", :value => (@lease && @lease.expiration.present?) ?  lease_date_format(@lease.try(:expiration)) : "mm/dd/yyyy", :class=>"terms_expiration lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:80px", :size=>12, :onchange => "if(jQuery.trim(jQuery('#lease_expiration').val()) != ''){if(custom_validation_for_date(jQuery('#lease_expiration').val(),'terms_expiration'))month_change(jQuery('#lease_commencement').val(),jQuery('#lease_expiration').val())}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+              <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+            </div>
+            <div class="termsname" style="margin-left:106px"><%= lease_form.check_box :mtm,{:class =>"mtm"},lease_form.object.mtm%>Month to Month</div>
+          </div>
+          <div class="termsnamerow"><%lease_id = @lease.try(:id)%>
+            <div class="termsname namefirst" style="text-align: left; width: 192px;">Term(auto calculated)
+              <span id="lease_month_calc"><%=lease_month_calculation(@lease)%></span>
+            </div>
+            <div class="termsname" style="margin-left: 126px;">Execution</div>
+            <div class="termsform" style="padding-left:10px;">
+              <%= lease_form.text_field :execution ,:type=>"text", :value => (@lease && @lease.execution.present?) ? lease_date_format(@lease.try(:execution)) : "mm/dd/yyyy" , :class=>"terms_execution lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:80px", :size=>12, :onblur => "if(jQuery.trim(jQuery('#lease_execution').val()) != ''){custom_validation_for_date(jQuery('#lease_execution').val(),'terms_execution');}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+              <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+            </div>
+            <div class="termsname" style="<%unless @pdf%>margin-left:110px<%else%>margin-left:80px<%end%>">Activity Status</div>
+            <div class="termsform" style="<%unless @pdf%>padding-left:10px;<%end%>">
+              <%= lease_form.text_field :activity_status ,:type=>"text", :class=>"lstextfield", :style=>"width:80px"%>
+            </div>
+          </div>
+          <div class="termsnamerow" style="padding:5px 0;">
+            <%unless @pdf%><span id= 'dates_note' class="version rentnamelinkrt">+ <a onclick="jQuery('#dates_note').hide();jQuery('#NotesDate').show();return false;" onmouseover="focusDivOver('NotesDate')" onmouseout="focusDivOut('NotesDate')" >Notes</a></span><%end%>
+            <div class="notesnamerow" id="NotesDate" onmouseover="focusDivOver('NotesDate')" onmouseout="focusDivOut('NotesDate')" style="<%if @pdf && @lease.present? && @lease.note.present? && @lease.note.content.present?%>display:block;<%else%>display:none;<%end%>">
+              <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesDate').hide();jQuery('#dates_note').show();jQuery('#lease_note_attributes_content').val('');return false;}">X</span>Notes</div>
+              <div class="termsform" style="padding-left:0px;">
+                <%= lease_form.fields_for :note do |note_form| %>
+                  <%= note_form.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px", :value =>!note_form.object.content.nil? ?  note_form.object.content : '' %>
+                <%end%>
+              </div>
+            </div>
+          </div>
+          <div class="termsnamerow version"></div>
+        </div>
+        <%= tenant_form.fields_for :info do |info_form| %>
+          <%= render "terms_info", :info_form => info_form, :lease_form => lease_form %>
+        <%end%>
+        <%@count_options = 1%>
+        <div class="lssectionwrapper">
+          <%= tenant_form.fields_for :options do |builder| %>
+            <%= render 'option_fields', :f => builder %>
+          <%end%>
+          <div class="termsnamerow" style="padding:5px 0;"  id= "add_option_link">
+            <span class="version rentnamelinklt">
+              <%unless @pdf%>
+                <%= link_to_add_fields "+ Add Options", tenant_form, :options,"term_option" %>
+              <%end%>
+            </span>
+          </div>
+        </div>
+      <%end%>
+    <%end%>
+  </div>
+  <%= lease_form.hidden_field :real_estate_property_id, :value => params[:property_id] %>
+  <%if params[:lease_id] == "undefined"%>
+    <%= lease_form.hidden_field :is_executed, :value => true %>
+    <%= lease_form.hidden_field :is_archived, :value => false %>
+  <%else%>
+    <%= lease_form.hidden_field :is_executed, :value => @lease.try(:is_executed) %>
+    <%= lease_form.hidden_field :is_archived, :value => @lease.try(:is_archived) %>
+  <%end%>
+  <%= lease_form.hidden_field :user_id, :value => current_user.id %>
+  <%= lease_form.hidden_field :is_detailed_view, :value => true %>
+  <input type="hidden" id = "tab_id" name="tab_id" value ="1" > </input>
+  <input type="hidden" id = "form_txt" name="form_txt" value ="terms" > </input>
+  <input type="hidden" id = "frm_name" name="frm_name" value ="term_form" > </input>
+  <input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" > </input>
+  <input type="hidden" id = "lease_id" name="lease_id" value ="<%=@lease.try(:id)%>" > </input>
+  <input type="hidden" id = "term_form" name="term_form" value ="false" > </input>
+  <input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>" > </input>
+  <input type="hidden" id = "" name="param_pipeline" value ="<%=params[:param_pipeline]%>" > </input>
+  <input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>" > </input>
+  <input type="hidden" id = "trm_exec" name="trm_exec" value = 0 > </input>
+  <%= render "tmp_params", :params => params %>
+    <div class="button-box">
+		<%unless @pdf || @lease.is_archived%>
+      <input type="button" class="button-green" value="Save" onclick="if(lease_expiration_validation_for_navigation()){set_tab(1,'terms');jQuery('#mgmt_terms_form').submit();}else{term_comm_and_exp_validation()}"/>
+      <%if !@lease.try(:id).blank? %>
+        <% @lease_collection = Lease.find(@lease.id)%>
+        <span style="display:none" id ="approve_id">
+          <input type="submit" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(jQuery.trim(jQuery('#lease_property_lease_suite_attributes_tenant_attributes_tenant_legal_name').val()).length != 0){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_terms_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');}return false;}else{flash_writter(flash_msg);return false;}}else{flash_writter('<%=FLASH_MESSAGES['leases']['115']%>');return false;}"/>
+        </span>
+        <%unless is_leasing_agent%>
+          <span style="display:none" id ="execute_id">
+            <%lease = @lease_collection%>
+            <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+            <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+            <%if expiration!= 'false' && commencement != 'false'%>
+              <%vars = expiration < Date.today  ? 'status_inactive' : 'execute' %>
+            <%else%>
+              <%vars = 'false'%>
+            <%end%>
+            <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? (lease.commencement < lease.expiration ? 'true' : 'false') : 'false'%>
+						<%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline")%>
+            <input type="button" id="trm_mark_exec" class="button-gray" value="Save &amp; Mark as Executed" onclick="  if(term_mark_form == false){term_mark_form = true;jQuery('#trm_exec').val(1);jQuery('#mgmt_terms_form').submit();}else{<%if check_status%>term_mark_form = false; alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%>  && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} term_mark_form = false;return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); term_mark_form = false;return false;}<%end%>}"/>
+          </span>
+        <%end%>
+      <%end%>
+		<%end%>
+    </div>
+<%end%>
+<iframe id="lease_term_frame" name="lease_term_frame" style="display: none"></iframe>
+<script type="text/javascript">
+  function yield_calender(type){
+    Date.firstDayOfWeek = 0;
+    Date.format = 'mm/dd/yyyy';
+    jQuery(function()
+    {
+      jQuery('.date-pick').datePicker();
+      jQuery('#start-date').bind(
+      'dpClosed',
+      function(e, selectedDates)
+      {
+        var d = selectedDates[0];
+        if ( d ) {
+          d = new Date(d);
+          jQuery('#end-date').dpSetStartDate(d.addDays(1).asString());
+        }
+      }
+    );
+    });
+  }
+  yield_calender('true');
+  var flip = 0;
+  jQuery(document).ready(function() {
+   	jQuery("textarea[class*=expand]").TextAreaExpander();
+    jQuery("dates_note_txt[class*=expand]").TextAreaExpander();
+    jQuery("info_note_txt[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+	
+	jQuery(document).ready(function()
+{
+jQuery(window).scrollTop(0);
+});
+	
+</script>
+<script>
+<%if @lease%>
+    jQuery(document).ready(function() {
+      update_print_pdf_link('<%=portfolio_collection.id%>','<%=params[:property_id]%>','<%=@lease.id%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>')
+    });
+<%end%>
+  var bill_con = <%=@lease.present? && @lease.tenant.present? && (@lease.tenant).billing_contact_name.present? ? true : false%>
+  if(bill_con == true){
+    jQuery('#DifferentBilling').show();
+    jQuery('#billing_name1').hide();
+  }
+  else{
+    jQuery('#DifferentBilling').hide();
+    jQuery('#billing_name1').show();
+  }
+  notice_con = <%=@lease.present? && @lease.tenant.present? && (@lease.tenant).notice_contact_name.present? ? true : false%>
+  if(notice_con == true){
+    jQuery('#DifferentNotice').show();
+    jQuery('#notice_name1').hide();
+  }
+  else{
+    jQuery('#DifferentNotice').hide();
+    jQuery('#notice_name1').show();
+  }
+  var sub_con = <%=@lease.present? && @lease.tenant.present? && (@lease.tenant).sublease_or_assignee_contact_name.present? ? true : false%>
+  if(sub_con == true){
+    jQuery('#Subiesee').show();
+    jQuery('#assignee_contact1').hide();
+  }
+  else{
+    jQuery('#Subiesee').hide();
+    jQuery('#assignee_contact1').show();
+  }
+  var naics_code = <%=@lease.present? && @lease.tenant.present? && (@lease.tenant).naics_code.present? ? true : false%>
+  if(naics_code == true){
+    jQuery('#naics_code').hide();
+    jQuery('#NAICS').show();
+  }
+  else{
+    jQuery('#naics_code').show();
+    jQuery('#NAICS').hide();
+  }
+  var lease_note = <%=@lease.present? && @lease.note.present? && @lease.note.content.present? && @lease.note.content != 'Edit this text to see the text area expand and contract.' ? true : false%>
+  if(lease_note == true){
+    jQuery('#dates_note').hide();
+    jQuery('#NotesDate').show();
+  }
+  else{
+    jQuery('#dates_note').show();
+    jQuery('#NotesDate').hide();
+  }
+  var tenant_note = <%=@lease.present? && @lease.tenant.present? && @lease.tenant.note.present? && @lease.tenant.note.content.present? && @lease.tenant.note.content != 'Edit this text to see the text area expand and contract.' ? true : false%>
+  if(tenant_note == true){
+    jQuery('#term_note').hide();
+    jQuery('#NotesTenent').show();
+  }
+  else{
+    jQuery('#term_note').show();
+    jQuery('#NotesTenent').hide();
+  }
+  var info_note = <%=@lease.present? && @lease.tenant.present? && @lease.tenant.info.present? && @lease.tenant.info.note.present? && @lease.tenant.info.note.content.present? && @lease.tenant.info.note.content != 'Edit this text to see the text area expand and contract.' ? true : false%>
+  if(info_note == true){
+    jQuery('#NotesInfo').show();
+    jQuery('#info_note').hide();
+  }
+  else{
+    jQuery('#NotesInfo').hide();
+    jQuery('#info_note').show();
+  }
+</script>
+<script type="text/javascript">
+  date_mtm_check();
+  jQuery('#lease_commencement').live('change', function() {
+    date_mtm_check();
+  });
+  function date_mtm_check()
+  {
+    comm = jQuery('#lease_commencement').val();
+    exp = jQuery('#lease_expiration').val();
+    if( ((comm == '' || comm == 'mm/dd/yyyy') && exp != 'mm/dd/yyyy' ) ||  ((comm == '' || comm == 'mm/dd/yyyy') && exp == 'mm/dd/yyyy' ))
+    {
+      jQuery('#lease_mtm').attr('disabled','disabled');
+    }
+    else
+    {
+      jQuery('#lease_mtm').removeAttr("disabled");
+    }
+  }
+  jQuery('.mtm').click(function () {
+    if(this.value == '0' || this.value == 'on' || this.value == 'false') {
+      jQuery(this).attr('value','1');
+    }
+    else
+    {
+      jQuery(this).attr('value','0');
+    }
+  });
+</script>

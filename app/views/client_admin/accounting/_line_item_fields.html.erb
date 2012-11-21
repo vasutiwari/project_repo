@@ -1,0 +1,14 @@
+<div class="line_fields" >
+ <div id="operating">
+             	<div id="operating_item" class="tblDiv">
+                    <div class="titleRow">Item:</div>
+                    <div class="contentRow"><%=f.select :account_id,@income_statement_value%>
+									<%= link_to_remove_line_fields ("Remove", f )%>
+										</div>
+										<%=f.hidden_field :item_name,:value=>"Item_#{@count}"%>
+										<%=f.hidden_field :client_id,:value=>current_user.client_id%> </div>
+
+<div class="clear"></div>
+		</div>
+ </div>
+

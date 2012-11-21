@@ -1,0 +1,29 @@
+xml.instruct!
+
+if(Rails.cache.read("stack_#{current_user.id}_#{params[:portfolio_id]}_#{params[:property_id]}").nil?)
+xml.FloorPlan do  
+  @floors.each do |floor|
+		if (floor != "" || floor.nil?)
+        find_leases_in_floor(floor, params[:property_id]) 
+				num = floor == nil ? '-' : floor
+        xml.floor :num => num,:total=>find_total_rentable_sqft(floor),:vacant=>@vacant_area do
+	        @suites_collection.each do |suite|
+		@displayed_suites = @displayed_suites.flatten
+        	  if @displayed_suites.index(suite).nil?
+		   collect_lease_data(suite,floor)
+              	  @value= xml.suite :lessee=>@lease_details['tenant_name'],:suites=>@lease_details['suite_numbers'],:lease_end_date=>@lease_details['ending_date'],:lease_expire=>@lease_details['lease_expire'],:lease_terms=>@lease_details['terms'],:area=>@lease_details['area'],:options=>@lease_details['options'],:abstract_view_url=>"url" ,:view_target=>"_blank",:portfolio_id => params[:portfolio_id],:property_id => params[:property_id],:lease_id=> @lease_details['lease_id']		   
+		 end 
+	 end
+	 end
+	end
+end
+end
+
+Rails.cache.write("stack_#{current_user.id}_#{params[:portfolio_id]}_#{params[:property_id]}", @value)
+else
+Rails.cache.read("stack_#{current_user.id}_#{params[:portfolio_id]}_#{params[:property_id]}")
+return Rails.cache.read("stack_#{current_user.id}_#{params[:portfolio_id]}_#{params[:property_id]}")
+end
+
+
+

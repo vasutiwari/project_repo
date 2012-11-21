@@ -1,0 +1,4 @@
+#~ return page.replace 'property_performance_noi', :partial => 'real_estate_properties',:locals=>{:periods=>@period,:real_properties=>@real_properties,:portfolio_collection=>@portfolio,:graph_period=>@graph_period,:hash_portfolio_occupancy=>@hash_portfolio_occupancy,:operating_statement=>@operating_statement,:net_income_de=>@net_income_de,
+        #~ :year_to_date=>@year_to_date,:divide=>@divide} if params[:sort] && params[:partial_page] == "portfolio_real_overview"
+#~ page.replace 'show_assets_list', :partial => 'portfolio_real_overview' ,:locals=>{:periods=>@period,:real_properties=>@real_properties,:portfolio_collection=>@portfolio,:graph_period=>@graph_period,:hash_portfolio_occupancy=>@hash_portfolio_occupancy,:operating_statement=>@operating_statement,:net_income_de=>@net_income_de,
+        #~ :year_to_date=>@year_to_date,:divide=>@divide}

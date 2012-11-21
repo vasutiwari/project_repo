@@ -1,0 +1,10 @@
+<style>
+body div.content {
+    min-height: 210px;
+}
+</style>
+<%  if @note && (find_accounting_system_type(3,@note) || ((find_accounting_system_type(0,@note) || find_accounting_system_type(4,@note) || remote_property(@note.accounting_system_type_id) ) && is_multifamily(@note))) %>
+  <%=  render :partial => "/properties/wres/prop_summary/" %>
+<%  elsif @note && ((remote_property(@note.accounting_system_type_id) && @note.leasing_type == "Commercial")|| find_accounting_system_type(2,@note) || find_accounting_system_type(1,@note) || (find_accounting_system_type(0,@note) && @note.leasing_type == "Commercial"))%>
+  <%=  render :partial => "/properties/prop_summary/" %>
+<% end%>

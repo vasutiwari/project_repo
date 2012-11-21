@@ -1,0 +1,3 @@
+table_name = "#exp_cost#{@form_number.to_i}"+'_'+ "#{@exp_id.to_i}"
+generate_explanation(page,table_name)
+@n = @form_number.to_i + 1

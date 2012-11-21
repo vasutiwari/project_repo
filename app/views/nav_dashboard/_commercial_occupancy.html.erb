@@ -1,0 +1,64 @@
+<%if params[:property_id]%>
+ <%@note=RealEstateProperty.find(params[:property_id])%>
+ <%@real_estate_property=@note%>
+ <%leasing_type=@note.leasing_type%>
+ <%elsif params[:portfolio_id]%>
+ <%@note=Portfolio.find(params[:portfolio_id])%>
+<%@real_estate_property_records=@note.real_estate_properties.uniq%>
+<%@real_estate_property_ids=@real_estate_property_records.map(&:id)%>
+ <%leasing_type=@note.leasing_type%>
+ <%end%>	
+							<%params[:tl_period] = "4"%>
+            	<div class="occupbox">
+         			<h4>Occupancy</h4>
+											 <%financial_ytd_occupancy_display%>
+                    <h1><%=((@occupied_percentage.present? && @occupied_percentage.to_i!=0) ? @occupied_percentage : "-")%>%</h1>
+										<%if @rent_sqft.to_i !=0%>
+                    <span><%=(@rent_sqft && @rent_sqft.include?("SF")) ? @rent_sqft : @rent_sqft.to_s+" SF"%></span>
+										<%end%>
+            		<h4 class="marginT10">YTD NOI</h4>
+								<%calc_for_financial_data_display%>
+								<%params[:tl_year] = @financial_year%>
+								<%store_income_and_cash_flow_statement%>
+								<%ytd_noi = find_ytd_noi(@operating_statement) if @operating_statement.present?%>								
+                    <h1>$<%= ( ytd_noi.nil? || ytd_noi[:actuals].nil? ? "-" : dashboard_currency_display(ytd_noi[:actuals],'false')) %></h1>
+										<%if ytd_noi%>
+                   <span class="<%if ytd_noi[:actuals] > ytd_noi[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(ytd_noi[:percent])%>, $<%= dashboard_currency_display(ytd_noi[:variant])%><%if ytd_noi[:actuals] > ytd_noi[:budget]%> above<%else%> below<%end%> budget</span>
+									 <%end%>
+                </div>
+                <div class="totalsfbox">
+                	<div class="">
+                    <div class="totalhed">
+                		<span class="floatL font14">Total SF</span><span class="greentext30 floatR"><%if params[:property_id]%><%=calculations_commercial(@note).present? && calculations_commercial(@note) != 0  ? "#{number_with_delimiter(calculations_commercial(@note).to_i)}" : "-"%><%else%><%portf_value=number_with_delimiter(mega_dd_sqft_cals(@note).to_i)%><%=(portf_value.present? && portf_value.to_i !=0)? portf_value : "-" %><%end%></span>
+										<%if params[:property_id]%>
+										<%interested_and_negotiated_leases(params[:property_id],nil,nil)%>
+										<%vac_suite_calcs(params[:property_id])%>
+										<%rent_sqft_value=@rent_sqft%>
+										<%find_pending_approval(@property_lease_suites_negotiated,@note.id)%>
+										<%find_active_prospects(@property_lease_suites_interested,@note)%>
+										<%pipeline_sqft_value=number_with_delimiter((@pending_sqft.gsub(",","").to_f+@prospect_sqft.gsub(",","").to_f).to_i)%>
+										<% occupied_suite_total_calcs(params[:property_id])%>
+										<%sqft_value=@sqft_value%>
+										<%else%>
+										<%prop_ids=@real_estate_property_records.map(&:id)%>
+										<%suites_count,rent_sqft_value,vacant_display = vac_suite_calcs(prop_ids)%>
+										<%property_lease_suites_negotiated,property_lease_suites_interested = find_nego_and_inter(@real_estate_property_records)%>
+										 <%find_pending_approval(property_lease_suites_negotiated,prop_ids)%>
+										<%find_active_prospects(property_lease_suites_interested,prop_ids)%>
+										<%pipeline_sqft_value=number_with_delimiter((@pending_sqft.gsub(",","").to_f+@prospect_sqft.gsub(",","").to_f).to_i)%>
+										<%sqft_value,occ_percent,leases_exp = occupied_suite_total_calcs(prop_ids,true)%>
+										<%end%>
+                    </div>
+                    <div class="height30">
+                   		<span>Vacancy</span><span class="floatR"><%=((rent_sqft_value.present? && rent_sqft_value.to_i!=0) ? rent_sqft_value : "- SF")%></span>
+                    </div>
+                    <div class="height30">
+										  
+                    	<span>Pipeline</span><span class="floatR"><%=((pipeline_sqft_value.present? && pipeline_sqft_value.to_i!=0) ? pipeline_sqft_value : "-")%> SF</span>
+                    </div>
+                    <div class="height30">
+                    	<span>6-months Expiration</span><span class="floatR"><%=((sqft_value.present? && sqft_value.to_i!=0) ? sqft_value : "- SF")%></span>
+                    </div>
+                    </div>
+                </div>
+            

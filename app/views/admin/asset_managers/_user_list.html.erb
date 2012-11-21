@@ -1,0 +1,51 @@
+<div class="adpsectiontitle" id >Asset Managers :</div>
+<div class="adprowwrapper">
+  <%unless users_collection.empty?%>
+    <div class="tabulardataborder">
+      <div class="adpsectionheadblue" style="background-image: none">
+        <div class="adptabularcol1" style="width: 50px">S.No</div>
+        <div class="adptabularcol1" style="width: 100px">Name</div>
+        <div class="adptabularcol1">Company</div>
+        <div class="adptabularcol1" style="width: 200px">Email ID</div>
+        <div class="adptabularcol1">Phone</div>
+        <div class="adptabularcol1">Job Title</div>
+        <div class="adptabularcol1">Department</div>
+        <div class="adptabularcol1" style="width: 50px">Action</div>
+        <div class="adptabularcol1" style="width: 50px">Approval Status</div>
+      </div>
+      <% users_collection.each_with_index do |p, count| %>
+        <div class="<%=cycle('adpsectionheadwhite', 'adpsectionheadlightgray') %>" style="background-image: none" >
+          <div class="adptabularcol1" style="width: 50px"><%= params[:page] ? (10*(params[:page].to_i-1)+count+1) : (count+1)%></div>
+          <div class="adptabularcol1" style="width: 100px" title="<%=p.name %>"><%=display_truncated_chars(p.name, 10, true)   if p.name %></div>
+          <div class="adptabularcol1" title="<%=p.company_name %>"><%=display_truncated_chars(p.company_name, 10, true) if p.company_name %></div>
+          <div class="adptabularcol1" style="width: 200px" title="<%=p.email%>"><%=  display_truncated_chars(p.email, 30, true) if p.email %></div>
+          <div class="adptabularcol1" title="<%=p.phone_number%>"><%=  display_truncated_chars(p.phone_number,12, true) if  p.phone_number %></div>
+          <div class="adptabularcol1" title="<%=p.designation%>"><%=display_truncated_chars(p.designation, 10, true) if p.designation %></div>
+          <div class="adptabularcol1" title="<%=p.department%>"><%=display_truncated_chars(p.department, 10, true) if p.department %></div>
+          <div class="adptabularcol1"  style="width: 50px"><%=link_to image_tag("/images/edit.png", :alt=>"Edit",:border=>"0", :title=>'Edit'),edit_admin_asset_manager_path(:id=>p, :from=>params[:page])%>&nbsp;&nbsp;
+
+					<a onclick="if(confirm('Are you sure want to delete this asset manager?')){admin_destroy_asset_manager(<%=p.id%>)}"><img src="/images/new_icon_delete.gif" alt= "Delete" title='Delete' border = '0'></a>
+
+
+
+					</div>
+          <%if p.approval_status==false%>
+
+            <div class="adptabularcol1"  style="width: 50px">
+              <a href="<%=approve_admin_asset_manager_path(p.id)%>" id="Approve<%=count+1%>">Approve</a>
+              <script>new Control.Modal($('Approve<%=count+1%>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          <%elsif p.approval_status==true%>
+            <div class="adptabularcol1"  style="width: 50px"><%=link_to 'Disapprove',disapprove_admin_asset_manager_path(p.id),:confirm => 'Are you sure want to disapprove the user?' %></div>
+          <% end %>
+        </div>
+      <%end%>
+    </div>
+    <div class="bottomrow" style="background-image: none; float: right">
+      <%=will_paginate users_collection , :renderer => PaginationListLinkRenderer,:previous_label => "Previous",:next_label => "Next",:class => "bottomcol" %>
+
+    </div>
+  <%else%>
+    <h3>There is no asset manager in the list...add one now !!</h3>
+  <%end%>
+</div>

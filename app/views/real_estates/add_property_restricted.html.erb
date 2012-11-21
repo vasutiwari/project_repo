@@ -1,0 +1,31 @@
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+    jQuery("#tabs").tabs();
+  });
+</script>
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+    <div class="dialog_light_center">
+      <div class="dialog_second_center">
+        <div class="uploadwrapper">
+          <div class="uploadrow">
+            <div class="uploadlabelrow">
+              <div class="newfolder_fieldlabel" style="font-weight:normal;">
+                Only owner can add property.
+                <br/><br/>
+                Contact owner <b><%= find_user_name_without_lengthy_word(@portfolio.user.id) %></b>
+              </div>
+            </div>
+          </div>
+            <br/><br/><br/><br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <iframe id="upload_frame" name="new_frame" style="display: none"></iframe>
+  <a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>

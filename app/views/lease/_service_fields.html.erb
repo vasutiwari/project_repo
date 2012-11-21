@@ -1,0 +1,50 @@
+<script type="text/javascript" src="/javascripts/jquery.textarea-expander.js"></script>
+<script>
+  function colExp(objid){
+    var obj = document.getElementById(objid);
+    obj.style.display=obj.style.display=="block"?"none":"block";
+  }
+  function addDivRow(objid){
+    var obj = document.getElementById(objid);
+    obj.style.display="block";
+  }
+</script>
+
+<div class="clausesnamesrow" style="display:block" id ="ClausesSer-<%=@index%>" onmouseout="jQuery(this).css('background-color','#ffffff');this.style.width='750px'" onmouseover="jQuery(this).css('background-color','#f6f6f6');this.style.width='765px'">
+  <div class="close" style="float:left; width:765px;">
+    <div class="capexform namefirst">
+      <%selectd_val = (f.object.category.nil? && @index == 1) ? "HVAC" : (f.object.category.nil? && @index == 2) ? "Utilities" : (f.object.category.nil? && @index == 3) ? "Janitorial" :  f.object.category%>
+      <%if @pdf%>
+        <span style="width:99px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=selectd_val%></span>
+      <%else%>
+        <%=f.select :category, options_for_select({ "HVAC" => "HVAC", "Utilities" => "Utilities", "Janitorial" => "Janitorial"}, selectd_val), {}, :style=>'width:110px; text-align:left;', :class=>"daystext"%>
+      <%end%>
+    </div>
+    <div class="clausesform">
+      <%= f.text_field :item_name, :type=>"text", :class=>"lstextfield", :style=>"width:168px;"%>
+    </div>
+    <div class="clausesform">
+      <%= f.text_field :l_para , :type=>"text", :class=>"lstextfield", :style=>"width:48px;"%>
+    </div>
+    <div class="clausesform">
+      <%= f.fields_for :note do |builder| %>
+      <%if @pdf%>
+        <%= builder.text_area :content, :type=>"text", :class=>"expand25-300", :cols => "27",:rows => "20" ,:style=>"width: 371px; height: 25px; overflow: hidden; padding-top: 0px; padding-bottom: 0px;", :value => (f.object.note.present? && f.object.note.content.present?) ? f.object.note.content : ""%>
+      <%else%>
+        <%= builder.text_area :content, :type=>"text", :class=>"expand25-300", :cols => "27", :style=>"width:371px;", :value => (f.object.note.present? && f.object.note.content.present?) ? f.object.note.content : ""%>
+      <%end%>
+      <% end %>
+    </div>
+    <%if @index >3%>
+      <%if f.object.new_record?%>
+        <span class="closeme">
+          <%= link_to_remove_service_fields "X", f %>
+        </span>
+      <%else%>
+        <span class="closeme" id="closeme" value="1">
+          <%= link_to_remove_service_fields "X", f%>
+        </span>
+      <%end%>
+    <%end%>
+  </div>
+</div>

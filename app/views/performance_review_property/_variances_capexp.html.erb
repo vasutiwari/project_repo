@@ -1,0 +1,330 @@
+<script type="text/javascript">
+  rem_count = 0;
+</script>
+<div class="mid">
+          <%
+          params[:id] = note_collection.id
+          params[:type] = 'document'
+        %>
+          <br/>
+				<%if (params[:period] != 7 && params[:tl_period] != 7 || params[:period] != "4" && params[:tl_period] != "4") && !(params[:tl_month].blank? || params[:tl_month].nil?) %>
+          <% unless (expln_req_props_cap_exp).count.zero? %>
+            <div class="tasks_variance_updaterow" style="margin-top:0px;">
+              <div class="variances_headerow">
+                <div class="tablecoll1" style="font-size: 15px;width: auto;">Capital Expenditures </div>
+              </div>
+              <div class="variance_tableheaderow">
+                <div class="tablecoll1" style="width:110px;">&nbsp;</div>
+                <div class="tablecoll2">Actuals $</div>
+                <div class="tablecoll3" style="width:75px;">Budget $</div>
+                <div class="tablecoll4">Variance? $</div>
+                <div class="tablecoll5" style="width:181px;">Explanation</div>
+								<div class="tablecoll5" style="width: 70px; text-align:right !important;">Cost $</div>
+              </div>
+              <%
+              expln_ids = expln_req_props_cap_exp.collect{|i| i.id }
+            %>
+              <%tot_variance_count= expln_ids.length%>
+              <div class="variance_update_tablewrapper ie_style_class" style="<%unless pdf_collection%><%=tot_variance_count > 26 ? 'height:3071px;overflow-y:auto;overflow-x:hidden;' : ''%><%end%>">
+								<% (expln_req_props_cap_exp).each do |i|
+                  prop_cal(i)
+										k = 0
+									@is_expense = true
+                %>
+                  <%if expln_ids.include? i.id%>
+                   <div class="variance_task_tablerow">
+										<% j = 0%>
+<%sum =0%>
+										<script>number = rem_count++; form_number = number + 1;</script>
+										<%explain = cap_explanation_finder(i.id, note_collection.id, params[:month], false) %>
+										<%if explain.empty?%>
+										<div>
+                      <div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>" title="<%= i.tool_tip%>" class="tablecoll1"  style="width:110px;"><%= (i.tenant_name.include?('CAPITAL EXPENDITURES') ? i.tenant_name.titlecase : i.tenant_name.gsub('TOTAL ','').titlecase) %><span style="display:block;padding-top: 6px;color: #9aa2a2;"><%= month_options[0..2].upcase %></span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(@var_actual) %> </div>
+                      <div class="tablecoll3" style="width:75px;"><%=  display_currency_real_estate_overview(@var_budget) %> </div>
+                      <% icon_direction = up_or_down(@var_actual, @var_budget) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}"%>
+                      <% use_color = expense_color(@var_actual, @var_budget)  %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(@var_per) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(@var_amt) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+                      </div>
+												<div id="exp_cost<%=j+1%>_<%=i.id%>">
+											<div class="tablecoll5" style="width:181px;overflow:hidden;line-height:16px;">
+                        <textarea class="variance_inputfield expand40-300 " style="width: 179px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_cap('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,'<%= request.request_uri %>',this.value); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"></textarea>
+                      </div>
+										<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(i.id,params[:month],false)%>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" disabled="<%if exp.present? %>false<%else%>true<%end%>" value=""onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+											</div>
+									<%end%>
+
+									<%explain && explain.each do |explained|%>
+								<%sum = sum + explained.cost if explained && explained.cost%>
+									<div>
+											<%if k == 0 %>
+												<div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+												<div id="iDetail_<%= i.id %>" title="<%= i.tool_tip%>" class="tablecoll1"  style="width:110px;"><%= (i.tenant_name.include?('CAPITAL EXPENDITURES') ? i.tenant_name.titlecase : i.tenant_name.gsub('TOTAL ','').titlecase) %><span style="display:block;padding-top: 6px;color: #9aa2a2;"><%= month_options[0..2].upcase %></span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(@var_actual) %> </div>
+                      <div class="tablecoll3" style="width:75px;"><%=  display_currency_real_estate_overview(@var_budget) %> </div>
+                      <% icon_direction = up_or_down(@var_actual, @var_budget) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}"%>
+                      <% use_color = expense_color(@var_actual, @var_budget)  %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(@var_per) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(@var_amt) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+                      </div>
+											<%else%>
+											<div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+												<div id="iDetail_<%= i.id %>" title="<%= i.tool_tip%>" class="tablecoll1"  style="width:110px;"></div>
+                      <div class="tablecoll2"></div>
+                      <div class="tablecoll3" style="width:75px;"> </div>
+                      <% icon_direction = up_or_down(@var_actual, @var_budget) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}"%>
+                      <% use_color = expense_color(@var_actual, @var_budget)  %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"></div>
+                        <div class="collabs_<%= use_color %>coll"> </div>
+                      </div>
+										<%end%>
+									<%k+=1%>
+									<%if explained.nil?%>
+									<div id="exp_cost<%=j+2%>_<%=i.id%>">
+											<div class="tablecoll5" style="width:181px; overflow:hidden; line-height:16px;">
+                        <textarea class="variance_inputfield expand40-300" style="width: 179px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_cap('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"><%= explained.explanation if explained  %></textarea>
+                      </div>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield  check" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" disabled="<%if explained.present? %>false<%else%>true<%end%>" value="<%= explained.cost if explained%>"onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,this.value,<%=explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+											</div>
+											<%else%>
+											<div class="tablecoll5" style="width:181px; overflow:hidden; line-height:16px;" title="Added by: <%=  explained.user.user_name.titleize if (explained and explained.explanation?) %> <%= "on " + explained.updated_at.strftime("%b %d,%Y") if (explained and explained.explanation?) %>">
+                        <textarea class="variance_inputfield expand40-300" style="width: 179px; overflow: auto; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_val('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,<%= explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"><%= explained.explanation if explained  %></textarea>                       </div>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield  check" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" value="<%= explained.cost if explained%>"onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp',<%=j%>,this.value,<%=explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+										<%end%>
+								<%j+=1%>
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= i.id%>"></div>
+								<% end %>
+
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(i.id,params[:month],false)%>
+																<span id="add_more_<%= i.id%>" style="visibility: <%= (exp and exp.explanation?) ? "visible" : "hidden" %>;float: right; margin: 0 218px 0 0;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=i.id%>,form_number,<%= params[:month] %>, <%= note_collection.id %>, false, 'cap_exp','variances','var','<%= request.request_uri%>')">+ Add More</a></span>
+                              <div class="clear"></div>
+
+															<%if exp && exp.explanation? || exp && exp.cost?  %>
+															<%@sum = 0%>
+
+															<div style="border-top: 1px solid #efefef; border-bottom: 1px solid #efefef; margin: 5px 2px;padding-bottom: 2px;" id="totalVariance_<%=i.id%>">
+                                <div class="tablecoll5" style="font-weight: bold; margin-left: 410px;width:181px;"> Total Variance
+                                </div>
+                                <div class="tablecoll5" style="width: 70px;text-align:right; font-weight:bold"><span id="total_<%=i.id%>"> <%= sum%></span></div>
+
+                                <div class="clear"></div>
+                              </div>
+															<%end%>
+                    </div>
+
+                      <% if exp && exp.explanation? %>
+                        <% @exp_item = exp
+                        @exp_type = 'explanation'
+                        @exp_cmt_for = 'cap_exp'
+                      %>
+                        <div id="<%= "explanation_comment_#{@exp_item.id}"%>">
+                          <%= render :partial =>'/explanations/comment_explanation_view' %>
+                        </div>
+                      <% else %>
+                        <div id="create_comment_<%= i.id %>"></div>
+                      <% end %>
+                    </div>
+                  <%end%>
+									<script type="text/javascript">
+                    tooltip_loaders.push(<%= i.id %>);
+                  </script>
+                <%end%>
+              </div>
+            </div>
+          <% end %>
+          <br/>
+          <input type="hidden" id="all_saved_explanation_ids"/>
+          <input type="hidden" id="all_saved_comments_ids"/>
+          <input type="hidden" id="all_saved_events_ids"/>
+        </div>
+			<% end %>
+
+	<%if ((params[:period] == "7" || params[:tl_period] == "7"|| params[:period] == "4" || params[:tl_period] == "4") && (params[:tl_month].blank? || params[:tl_month].nil?) )|| (params[:tl_month].blank? || params[:tl_month].nil?)  %>
+	<%if params[:period] == "4" || params[:tl_period] == "4"%>
+	<%calc_for_financial_data_display%>
+	<%params[:month] = @financial_month%>
+	<%elsif params[:period] == "8" || params[:tl_period] == "8" || params[:period] == "3" || params[:tl_period] == "3" %>
+	<%params[:month] = 12%>
+	<%end%>
+						<% unless (expln_req_props_ytd_cap_exp).count.zero? %>
+            <div class="tasks_variance_updaterow" style="margin-top:0px;">
+              <div class="variances_headerow">
+                <div class="tablecoll1" style="font-size: 15px;width: auto;">Capital Expenditures </div>
+              </div>
+              <div class="variance_tableheaderow">
+                <div class="tablecoll1" style="width:110px;">&nbsp;</div>
+                <div class="tablecoll2">Actuals $</div>
+                <div class="tablecoll3"  style="width:75px;">Budget $</div>
+                <div class="tablecoll4">Variance? $</div>
+                <div class="tablecoll5"  style="width:181px;">Explanation</div>
+								<div class="tablecoll5" style="width: 70px; text-align:right !important;">Cost $</div>
+              </div>
+              <%
+              expln_ytd_ids = expln_req_props_ytd_cap_exp.collect{|i| i.id }
+            %>
+              <%tot_variance_count= expln_ytd_ids.length%>
+              <div class="variance_update_tablewrapper ie_style_class" style="<%unless pdf_collection%><%=tot_variance_count > 26 ? 'height:3071px;overflow-y:auto;overflow-x:hidden;' : ''%><%end%>">
+								<% (expln_req_props_ytd_cap_exp).each do |i|
+										k = 0
+                  prop_cal(i)
+									@is_expense = true
+                %>
+										<%if expln_ytd_ids.include? i.id%>
+                    <%prop_ytd_cal(i)%>
+										<%
+												var_actual_ytd = @var_actual_ytd
+												var_budget_ytd = @var_budget_ytd
+												var_per_ytd = @var_per_ytd
+												var_amt_ytd = @var_amt_ytd
+											%>
+
+                   <div class="variance_task_tablerow">
+									 <% j = 0%>
+<%sum = 0%>
+										<script>number = rem_count++; form_number = number + 1;</script>
+									<%explain = cap_explanation_finder(i.id, note_collection.id, params[:month], true) %>
+										<%if explain.empty?%>
+										<div>
+										<div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>" title="<%= i.tool_tip %>" class="tablecoll1"  style="width:110px;"><%= (i.tenant_name.include?('CAPITAL EXPENDITURES') ? i.tenant_name.titlecase : i.tenant_name.gsub('TOTAL ','').titlecase) %> <span style="display:block;padding-top: 6px;color: #9aa2a2;">YTD</span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(var_actual_ytd) %> </div>
+                      <div class="tablecoll3" style="width:75px;"><%=  display_currency_real_estate_overview(var_budget_ytd) %> </div>
+                      <% icon_direction = up_or_down(var_actual_ytd, var_budget_ytd) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}" %>
+                      <% use_color = expense_color(var_actual_ytd, var_budget_ytd) %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(var_per_ytd) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(var_amt_ytd) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+									</div>
+
+									<div id="exp_cost<%=j+1%>_<%=i.id%>">
+											<div class="tablecoll5" style="width:181px;overflow:hidden; line-height:16px;">
+                        <textarea class="expand40-300 variance_inputfield" style="width: 179px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_ytd_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_cap('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,'<%= request.request_uri %>',this.value); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"></textarea>
+                      </div>
+										<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(i.id,params[:month],true)%>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_ytd_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" disabled="<%if exp.present? %>false<%else%>true<%end%>" value=""onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,this.value,<%= exp.id if exp%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+											</div>
+									<%end%>
+
+										<%explain && explain.each do |explained|%>
+										<%sum = sum + explained.cost if explained && explained.cost%>
+									<div>
+											<%if k == 0 %>
+												<div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>" title="<%= i.tool_tip %>" class="tablecoll1"  style="width:110px;"><%= (i.tenant_name.include?('CAPITAL EXPENDITURES') ? i.tenant_name.titlecase : i.tenant_name.gsub('TOTAL ','').titlecase) %> <span style="display:block;padding-top: 6px;color: #9aa2a2;">YTD</span></div>
+                      <div class="tablecoll2"><%=  display_currency_real_estate_overview(var_actual_ytd) %> </div>
+                      <div class="tablecoll3" style="width:75px;"><%=  display_currency_real_estate_overview(var_budget_ytd) %> </div>
+                      <% icon_direction = up_or_down(var_actual_ytd, var_budget_ytd) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}" %>
+                      <% use_color = expense_color(var_actual_ytd, var_budget_ytd) %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(var_per_ytd) %> </div>
+                        <div class="collabs_<%= use_color %>coll"> <%=  display_currency_real_estate_overview(var_amt_ytd) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+									</div>
+									<%else%>
+									<div>
+										<div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+                      <div id="iDetail_<%= i.id %>"class="tablecoll1"  style="width:110px;"></div>
+                      <div class="tablecoll2"> </div>
+                      <div class="tablecoll3" style="width:75px;"> </div>
+                      <% icon_direction = up_or_down(var_actual_ytd, var_budget_ytd) %>
+                      <% txt = (icon_direction == 'up') ? "above budget" : "below #{TEXT_CHANGE_CONFIG['budjet']['1']}" %>
+                      <% use_color = expense_color(var_actual_ytd, var_budget_ytd) %>
+                      <%  color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrow_red"  %>
+                      <div class="tablecoll4">
+                        <div class="collabs_<%= use_color %>coll">&nbsp;</div>
+                        <div class="collabs_<%= use_color %>coll">&nbsp; </div>
+									</div>
+									<%end%>
+
+									<%k+=1%>
+									<%if explained.nil? %>
+									<div id="exp_cost<%=j+2%>_<%=i.id%>">
+											<div class="tablecoll5" style="width:181px;overflow:hidden; line-height:16px;">
+                        <textarea class="variance_inputfield expand40-300" style="width: 179px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_ytd_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_cap('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"><%= explained.explanation if explained  %></textarea>
+                      </div>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_ytd_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield  check" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" disabled="<%if explained.present? %>false<%else%>true<%end%>" value="<%= explained.cost if explained%>"onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,this.value,<%=explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+											</div>
+									<%else%>
+<div class="tablecoll5" style="width:181px;overflow:hidden; line-height:16px;" title="Added by: <%=  explained.user.user_name.titleize if (explained and explained.explanation?) %> <%= "on " + explained.updated_at.strftime("%b %d,%Y") if (explained and explained.explanation?) %>">
+                        <textarea class="expand40-300 variance_inputfield " style="width: 179px; overflow: hidden; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238);" id="expln_ytd_<%= i.id %>_<%=j%>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln_val('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,<%= explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42[<%=j%>]"><%= explained.explanation if explained  %></textarea>
+                      </div>
+											<div class="tablecoll5" style="width: 70px;">
+													<input id="cost_ytd_<%= i.id %>_<%=j%>" type="text" name="costfield[<%=j%>]" class="variance_inputfield  check" style="height: 60px; padding-top: 0px; padding-bottom: 0px; border-color: rgb(238, 238, 238); width: 65px; text-align:right !important" value="<%= explained.cost if explained%>"onblur="call_to_store_cost('<%= i.id %>', <%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp',<%=j%>,this.value,<%=explained.id if explained%>,'<%= request.request_uri %>'); jQuery(this).css('borderColor', '#EEEEEE');" ></input>
+                      </div>
+									<%end%>
+								<%j+=1%>
+
+							<%end%>
+								<% (j..15).each do |f| %>
+										<div id ="exp_cost<%=f+1%>_<%= i.id%>"></div>
+								<% end %>
+
+
+												<%exp = CapitalExpenditureExplanation.find_by_property_capital_improvement_id_and_month_and_ytd(i.id,params[:month],true)%>
+																<span id="add_more_<%= i.id%>" style="visibility: <%= (exp and exp.explanation?) ? "visible" : "hidden" %>;float: right; margin: 0 218px 0 0;"><a style="font-size: 11px;" onclick="add_more_expln(number,<%=i.id%>,form_number,<%= params[:month] %>, <%= note_collection.id %>, true, 'cap_exp','variances','var','<%= request.request_uri%>')">+ Add More</a></span>
+                              <div class="clear"></div>
+
+															<%if exp && exp.explanation? || exp && exp.cost?  %>
+															<div style="visibility: <%= (exp and exp.explanation?) ? "visible" : "hidden" %>;border-top: 1px solid #efefef; border-bottom: 1px solid #efefef; margin: 5px 2px;padding-bottom: 2px;" id="totalVariance_<%= i.id%>">
+                                <div class="tablecoll5" style="font-weight: bold; margin-left: 410px;width:181px;"> Total Variance
+                                </div>
+
+																<div class="tablecoll5" style="width: 70px;text-align:right; font-weight:bold"><span id="total_<%=i.id%>"> <%= sum.to_f%></span></div>
+                                <div class="clear"></div>
+                              </div>
+															<%end%>
+                    </div>
+
+                      <% if exp && exp.explanation? %>
+                        <% @exp_item = exp
+                        @exp_type = 'explanation'
+                        @exp_cmt_for = 'cap_exp'
+                      %>
+                        <div id="<%= "explanation_comment_ytd_#{@exp_item.id}"%>">
+                          <%= render :partial =>'/explanations/comment_explanation_view' %>
+                        </div>
+                      <% else %>
+                        <div id="create_comment_ytd_<%= i.id %>"></div>
+                      <% end %>
+                    </div>
+									<%end%>
+                  <script type="text/javascript">
+                    tooltip_loaders.push(<%= i.id %>);
+                  </script>
+                <%end%>
+              </div>
+            </div>
+					<% end %>
+          <br/>
+          <input type="hidden" id="all_saved_explanation_ids"/>
+          <input type="hidden" id="all_saved_comments_ids"/>
+          <input type="hidden" id="all_saved_events_ids"/>
+        </div>
+	<% end %>

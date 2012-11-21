@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>Untitled Document</title>
+    <style>
+      body{
+        background-color: #000000;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="createfolder_container">
+      <div class="lightbox_headerow">
+        <div class="headerow_coll1"><img src="/images/collaboration_hub_new_datashare.png" width="16" height="16" /> Share Folder by Copying this Secure Link    </div>
+      </div>
+      <div class="createfolder_contentrow">
+        <div class="createfolder_wrapper">
+          <div class="add_users_headercol">
+            <input name="textfield" type="text"  class="create_fieldinput iefix7" value="<%=APP_CONFIG[:site_url]%><%=display_perma_link(params[:id],'folder')%>" readonly="readonly"  onclick="jQuery('.create_fieldinput').select();"/>
+            <%text = "#{APP_CONFIG[:site_url]}#{display_perma_link(params[:id],'folder')}"%>
+            <div class="copylink iefix"><a href="#"><%=raw(clippy(text, bgcolor='#FFFFFF'))%></a></div>
+            <!-- <div class="copybtn"><a href="#">Copy</a><span>&nbsp;</span></div>-->
+          </div>
+          <div class="add_users_headercol">
+            <div class="creatfolder2_label2">You can copy this link and paste it into an email or other communication/document.</div>
+          </div>
+        </div>
+      </div>
+      <div class="createfolder_butwrapper">
+        <div class="graybutton" style="margin-left:250px;"><a href="javascript:;" onclick='Control.Modal.close();return false;' style="cursor: pointer;" >Close</a><span>&nbsp;</span></div>
+      </div>
+      <div class="bot"></div>
+    </div></body>
+  <script>jQuery('.create_fieldinput').select();</script>
+</html>
+<!--[if IE 7]>
+<style type="text/css">
+body .iefix { margin-top:5px;margin-right:11px;}
+body .iefix7 {width:445px;}
+</style>
+<![endif]-->

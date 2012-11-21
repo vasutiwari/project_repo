@@ -1,0 +1,29 @@
+<%= form_for(@template_folder_collab) do |f| %>
+  <% if @template_folder_collab.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@template_folder_collab.errors.count, "error") %> prohibited this template_folder_collab from being saved:</h2>
+
+      <ul>
+      <% @template_folder_collab.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :shared_by %><br />
+    <%= f.text_field :shared_by %>
+  </div>
+  <div class="field">
+    <%= f.label :shared_to %><br />
+    <%= f.text_field :shared_to %>
+  </div>
+  <div class="field">
+    <%= f.label :folder_id %><br />
+    <%= f.text_field :folder_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

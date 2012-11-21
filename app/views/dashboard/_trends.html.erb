@@ -1,0 +1,83 @@
+<script type="text/javascript">
+  jQuery(function() {
+    jQuery('#sampleTree1').jstree();
+    jQuery('#sampleTree2').jstree({plugins : ["themes", "html_data", "ui", "hotkeys"]});
+
+    jQuery(".jstree-closed > a").attr("aria-expanded", "false");
+    jQuery(".jstree-open > a").attr("aria-expanded", "true");
+  });
+  function gotoUrl (url){
+    window.location.href = url;
+  }
+</script>
+<script>
+  // This script was hideded because it remove the class name in  performance analysis and  metrices display
+  //  var rows = jQuery('tr');
+  //  for (i=0;i<rows.length;i++) {z
+  //    rows[i].onmouseover = highlight;
+  //    rows[i].onmouseout = dehighlight;
+  //  }
+  //  function highlight() { this.className = "highlight"; }
+  //  function dehighlight() { this.className = ""; }
+</script>
+<div class="content">
+  <div class="megaDdHeadertree4"> <a href="javascript:void(0)" id="ddBtn5" class="ddBtnOpen5" onclick="changeMegaBtn5();"></a>
+    <div id="trend_breadcrum"><%= raw @bread_crumb%></div>
+    <div class="highlightTitle"></div>
+    <div id="mega-menu5" class="ddOutertree treeDN treeM">
+      <div class="treemenubodr4"></div>
+      <div id="sampleTree2">
+        <ul>
+          <li>
+            <%if (session[:property__id].present? && session[:portfolio__id].blank?)%>
+              <%=  link_to "Operating Revenues", property_trends_path(@portfolio.try(:id), @property_id, :selected_link => "Operating Revenue",:tl_period => params[:tl_period],:parent_title => 'income'), :remote => true,:onclick => "close_nodes(this)" %>
+            <%else%>
+              <%=  link_to "Operating Revenues", portfolio_trends_path(@portfolio.try(:id),:selected_link => "Operating Revenue",:tl_period => params[:tl_period],:parent_title => 'income'), :remote => true,:onclick => "close_nodes(this)" %>
+            <%end%>
+            <ul>
+              <%@op_rev_sub.each do |sub_items|%>
+                <%= trend_drop_down(sub_items,params[:portfolio_id],@property_id,'income') %>
+              <%end%>
+            </ul>
+          </li>
+          <li>
+            <%if (session[:property__id].present? && session[:portfolio__id].blank?)%>
+              <%=  link_to "Operating Expenses", property_trends_path(@portfolio.try(:id), @property_id, :selected_link => "Operating Expenses",:tl_period => params[:tl_period],:parent_title => 'expense'), :remote => true,:onclick => "close_nodes(this)" %>
+            <%else%>
+              <%=  link_to "Operating Expenses", portfolio_trends_path(@portfolio.try(:id), :selected_link => "Operating Expenses",:tl_period => params[:tl_period],:parent_title => 'expense'), :remote => true,:onclick => "close_nodes(this)" %>
+            <%end%>
+            <ul>
+              <%@op_ex_sub.each do |sub_items|%>
+                <%= trend_drop_down(sub_items,params[:portfolio_id],@property_id,'expense') %>
+              <%end%>
+            </ul>
+          </li>
+          <li>
+            <%if (session[:property__id].present? && session[:portfolio__id].blank?)%>
+              <%if is_commercial(@note)%>
+                <%=  link_to "Non Operating Expense", property_trends_path(@portfolio.try(:id), @property_id, :selected_link => "net operating income",:tl_period => params[:tl_period],:parent_title => 'non_expense'), :remote => true,:onclick => "close_nodes(this)" %>
+              <%else%>
+                <%=  link_to "Non Operating Expense", property_trends_path(@portfolio.try(:id), @property_id, :selected_link => "other income and expense",:tl_period => params[:tl_period],:parent_title => 'non_expense'), :remote => true,:onclick => "close_nodes(this)" %>
+              <%end%>
+            <%else%>
+              <%if is_commercial(@note)%>
+                <%=  link_to "Non Operating Expense", portfolio_trends_path(@portfolio.try(:id), :selected_link => "net operating income",:tl_period => params[:tl_period],:parent_title => 'non_expense'), :remote => true,:onclick => "close_nodes(this)" %>
+              <%else%>
+                <%=  link_to "Non Operating Expense", portfolio_trends_path(@portfolio.try(:id), :selected_link => "other income and expense",:tl_period => params[:tl_period],:parent_title => 'non_expense'), :remote => true,:onclick => "close_nodes(this)" %>
+              <%end%>
+            <%end%>
+            <ul>
+              <%@non_op_ex_sub.each do |sub_items|%>
+                <%= trend_drop_down(sub_items,params[:portfolio_id],@property_id,'non_expense') %>
+              <%end%>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="clear"></div>
+  <%=render :partial => "trends_sub", :locals => {:operating_statement => @current_op_st,:graph_property_id=>@graph_property_id,:graph_portfolio_id=>@graph_portfolio_id,:first_two_digit_year=>@first_two_digit_year,:property_id=>@property_id}%>
+  <div class="clearfloat"></div>
+  <div class="clearfloat"></div>
+</div>

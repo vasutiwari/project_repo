@@ -1,0 +1,15 @@
+#~ page.replace_html 'folder_title', :partial => '/properties/folder_title'  if @folder.real_estate_property_id?
+
+if params[:dashboard_update].eql?('true')
+  page << "jQuery('.navactive').attr('class','navdeactive')"
+  page << "jQuery('#profiledeactive').attr('class','navactive')"
+  page << "jQuery('#show_assets_list').addClass('collab_profile_mainrow my_files_head_icons')"
+  page.replace_html "show_assets_list",:partial=>'/collaboration_hub/my_files_assets_list'
+  page.replace_html "head_for_del_icons", :partial => '/properties/head_for_del_icons_for_events' if @folder.real_estate_property_id?
+  page.replace_html "stored_assets_docs_display",:partial => '/events/list_of_shared_users',:locals=>{:folder_collection =>@folder,:shared_users =>@shared_users,:event_ids =>@event_ids}
+  page << "jQuery('.setupiconrow, .breadcrumblabel').css({'padding-left':'0px'});jQuery('.breadcrumblabel').css({'padding-left':'6px'});jQuery('.collab_hub_navbar').css({'margin-top':'-11px'});jQuery(' folder_title').css({'padding-left':'6px','margin-top':'2px'});"
+else
+  page.replace_html "head_for_del_icons", :partial => '/properties/head_for_del_icons_for_events' if @folder.real_estate_property_id?
+  page.replace_html "stored_assets_docs_display",:partial => '/events/list_of_shared_users',:locals=>{:folder_collection =>@folder,:shared_users =>@shared_users,:event_ids =>@event_ids}
+  page << "jQuery('.setupiconrow, .breadcrumblabel').css({'padding-left':'0px'});jQuery('.breadcrumblabel').css({'padding-left':'6px'});jQuery('.collab_hub_navbar').css({'margin-top':'-11px'});jQuery(' folder_title').css({'padding-left':'6px','margin-top':'2px'});"
+end

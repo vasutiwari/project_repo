@@ -1,0 +1,18 @@
+	<%= form_for note_collection,:url=> lease_suites_create_path(params[:portfolio_id],params[:property_id]), :html=>{:target => "lease_suites_frame_form_two", :multipart => true,:id=>"mgmt_suites_#{suiteformid}"} do |f| -%>
+			<div class="note attach-file" id="attach_file_for_edit<%=suiteformid%>" style="width:103px; padding:4px; margin-left: 593px;word-wrap:break-word;<%if !is_leasing_agent%> margin-top: -55px;<%else%>margin-top: -55px;<%end%>">
+					<span><%if suite_data.document.present? %>
+							<div title="<%=suite_data.document.filename%>">
+									<a href="<%=download_doc_path(suite_data.document.id)%>" title="<%=suite_data.document.filename%>"><%=truncate(suite_data.document.filename,:length=>42) %></a>
+							</div>
+							<%else %>
+							<div class="add_file_parent">
+								<div id="add_file_suite_each<%=i%>">
+										<span><a href="javascript:;" id="suite_file_up" onclick="add_attachment_suite_file(<%=i%>); return false;">Attach File</a></span>
+								</div>
+								<div class='suite_data_up' id='suite_data_up<%=i%>' style="display:none;">
+									<div style="float: left; padding: 4px 14px 4px 4px;overflow: hidden;width: 96px;margin-left: -8px;">
+										<input type="hidden" id = "suiteid" name="suiteid" value ="<%=suiteformid%>" /><input type="hidden" id = "suitefiledisplay" name="suitefiledisplay" value ="true" /><input type='file' name='suite_file_up' id='suitefilefield<%=i%>' size='2' onchange='document.forms.mgmt_suites_<%=suiteformid%>.submit();'/>
+								</div></div></div><%end %>
+					</span>
+			</div><input type="hidden" id = "tab_id" name="tab_id" value ="10" /><input type="hidden" id = "form_txt" name="form_txt" value ="suites" /><input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" /><input type="hidden" id = "suites_form" name="suites_form" value ="false" /><%if params[:page].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:page]%>" /><%end%><input type="hidden" id = "per_page" name="per_page" value ="25" /><input type="hidden" id = "sort" name="sort" value ="<%=params[:sort]%>" /><input type="hidden" id = "from_pag" name="from_pag" value ="true" />
+			<%end %>

@@ -1,0 +1,128 @@
+<div class="rhs leaseModule"  id="lease_container">
+
+<div id="mgmt_lease_suite_id">
+  <div class="suitemid marginTop20">
+    <h1 class="page-title">Suite</h1>
+    <div class="clear"></div>
+    <script type="text/javascript">
+      form_name = "#mgmt_suites_form"
+      tab = "10"
+      active_call = 'suites_form'
+    </script>
+    <script>
+      function colExp(objid){
+        var obj = document.getElementById(objid);
+        obj.style.display = obj.style.display == "" ? "none" : "";
+      }
+    </script>
+    <%portid=portfolio_collection.id %>
+    <%propid=params[:property_id] %>
+    <!--for get start--><%if  !@pdf && !note_collection.is_getting_started_closed %>
+      <%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>@note,:portfolio_collection=>portfolio_collection} %>
+    <%end %>
+    <!--form1 start--><%= form_for note_collection,:url=> lease_suites_create_path(portid,propid), :html=>{:target => "lease_suites_frame", :multipart => true,:id=>"mgmt_suites_form"} do |p| -%>
+      <div id="ApprovalUnderNegotiationLeases">
+        <div class="leadditem" style="padding-top:20px;">
+          <div class="lebredcomsleft boldtxt" style="color:#000 !important; font-size:12px !important">
+            Enter Suite Details &amp; Click Add
+          </div>
+        </div>
+        <div class="margin-btm suite-tbl" style="z-index:100">
+          <div class="tbl-head suite-head" style="">
+            <div class="suiteno" style="width:70px">
+              Floor
+            </div>
+            <div class="suiteno" style="width:70px">
+              Suite
+            </div>
+            <div class="sqft" style="width:95px">
+              Rentable SF
+            </div>
+            <div class="tenant" style="width:95px">
+              Usable SF
+            </div>
+            <div style="width: 70px;" class="activity">
+                                                                                                  Status
+            </div>
+            <div style="width: 70px;" class="activity">
+                                                                                                  Days Vac
+            </div>
+            <div style="width: 125px;" class="note">
+                                                                                                  Notes
+            </div>
+            <div style="width:115px" class="note">
+                                                                                                  Attach Flr Plan
+            </div>
+            <div style="width: 70px;" class="note">Action</div>
+          </div>
+          <div class="tbl-row suite-odd">
+            <div class="suiteno" style="width:62px; padding:4px">
+              <input id = "suite_floor" name="floor" type="text" class="lstextfield" style="width:58px"/>
+            </div>
+            <div class="suiteno" style="width:62px; padding:4px; text-align:left;">
+              <input name="suite_no" type="text" class="lstextfield" style="width:58px" onblur="get_suite_details(jQuery(this).val(), '<%=propid %>', '<%=portid%>')"/>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px">
+              <input id= "suite_rentable_sqft" name="rentable_sqft" type="text" class="lstextfield" style="width:83px;"/>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px">
+              <input id = "suite_usable_sqft" name="usable_sqft" type="text" class="lstextfield" style="width:83px;"/>
+            </div>
+            <div style="width: 62px; padding: 4px;" class="sqft">
+              <div id="detail_suite" class="suithelpbox" style="display:none">
+                <img src="/images/helpbox_arrow.png" width="11" height="12" align="texttop" class="helparrow" />Add lease for this suite to change the status to Occupied.
+              </div><a onMouseOver="jQuery('.suithelpbox').hide();colExp('detail_suite')" onMouseOut="document.getElementById('detail_suite').style.display='none'">Vacant</a>
+              <input type="hidden" id = "suite_status" name="status" value ="Vacant" > </input>
+            </div>
+            <div style="width:62px; padding:4px" class="sqft">
+              <input type="text" style="width:60px;" class="lstextfield" name="days_vaccant">
+            </div>
+            <div style="padding: 4px; width: 117px;" class="sqft">
+              <textarea name="suite_note" style="width:115px;" class="expand20-300 taskfieldinput2" value = "" onclick="if(this.value == ''){this.value = ''}" onblur="if(this.value == ''){this.value = '';this.style.color='gray';}"></textarea>
+            </div>
+						
+            <div class="note attach-file" style="float: left; padding: 4px; width: 104px;">
+              <div id="add_attach_file_suite">
+                <span><a href="<%=lease_suite_attach_files_path(portid,propid)%>" id="add_files_suites" onclick="add_attachment_suite_docs(); return false;">Attach File</a></span>
+              </div>
+              <div class='suite_data_upload' id='suite_data_upload' style="display:none;">
+                <div style="overflow:hidden">
+                  <input type='file' name='suite_file_upload' id='suitefilefield' value = "<%=params[:suite_file_upload]%>" style="" size="2"/>
+                </div>
+              </div>
+            </div>
+
+            <div id="savefield88 "style="width: 70px; float: left;">
+              <div class="graybutton" style="margin:0 0 0 8px;;">
+                <a href="javascript:;" onclick="jQuery('#mgmt_suites_form').submit();" style="cursor: pointer; padding: 0pt 13px;">Add</a><span>&nbsp;</span>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id = "tab_id" name="tab_id" value ="10" /><input type="hidden" id = "form_txt" name="form_txt" value ="suites" /><input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" /><input type="hidden" id = "suites_form" name="suites_form" value ="false" />
+      <div id="hiddensuitedata">
+      </div>
+    <%end %>
+    <!--form1 end-->
+    <%params[:suite_filter] =="Vacant" ? find_vacant_suite(params[:property_id],params[:suite_filter]) : params[:suite_filter] =="Occupied" ? find_vacant_suite(params[:property_id],params[:suite_filter]) : find_suite_all(params[:property_id]) %>
+    <%if @suite_data.present? %>
+      <div style="float:right;margin-top:8px;"><span style="line-height:22px; float:left; padding-right:5px">Show</span>
+        <select name="select" id="select" class="rentselect" style="width:57px;" onchange="lease_suite_filter({},this.value,'<%=propid %>','<%=portid%>')">
+          <option value="All">All</option>
+          <option value="Vacant">Vacant</option>
+          <option value="Occupied">Occupied</option>
+        </select>
+      </div>
+    <%end%>
+    <div id="suite_filter_display">
+      <%= render 'partial_suite',:note_collection => note_collection%>
+    </div>
+  </div>
+</div>
+
+
+</div>

@@ -1,0 +1,29 @@
+<br/>
+<%unless @settings.empty?%>
+<table cellpadding = "4" cellspacing = "1" class ="tblNormal" width="100%">
+  <tr class="head" style="background-color: #b9bfc2">
+    <td><h4>S.No </h4></td>
+    <td><h4>Name </h4></td>
+    <td><h4>Value </h4></td>
+    <td><h4>Action</h4></td>
+</tr>
+<% @settings.each_with_index do |setting, count| %>
+  <tr style="background-color: #d2d5d7;">
+    <td><%= count + 1 %></td>
+    <td><%= setting.name %></td>
+    <td><%= h(setting.value) %></td>
+    <td><a id="<%= count+1 %>setting" href="<%= edit_admin_setting_path(setting.id) %>">Edit</a>
+    <script>new Control.Modal($('<%= count+1 %>setting'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script></td>
+</tr>
+<% end %>
+<tr>
+        <td colspan="5">
+<br class="spacer" />
+    </td>
+</tr>
+</table>
+</div>
+<%else%>
+<div align="center"><table style="background:gray"><tr><td style="width:100px;"></td><td style="width:300px;"><p style="color:white;font-size:15px;text-align='center';font-weight:bold;">No Settings to display</p></td></tr></div>
+<%end%>
+</div>

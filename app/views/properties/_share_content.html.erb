@@ -1,0 +1,31 @@
+<div class="dialog_light_center">
+<div class="dialog_second_center">
+<div class="status_light_error" id="error_display"></div>
+<div class="status_light">
+<span class="simple_light_text">
+<% if params[:folder_revoke] %>
+Invite Collaborators to this folder. Enter their email addresses in the box below.
+<%elsif params[:revoke_fn]%>
+Invite Collaborators to this checklist item. Enter their email addresses in the box below.
+<%else%>
+Invite Collaborators to this file. Enter their email addresses in the box below.
+<%end%>
+<div id="error_msg" style='color:red;font-size:11px;'></div>
+<textarea rows="3" cols="50" id="shared_email_ids" name="shared_email_ids"></textarea>
+</span><br/>
+<span class="simple_light_text">
+(Optional) Send a personal message with your invitation
+<textarea rows="3" cols="50"  name="comment" maxlength="250" id="msg"></textarea>
+</span><br/>
+<%= hidden_field :is_editable, true %>
+<%= hidden_field :is_editable, true %>
+<br/>
+<span style="text-align:right">
+<%= image_submit_tag("/images/share.png",:style=>"border:none;", :onClick=>"return load_writter();blank_email_address();") %>
+</span>
+</div>
+<div class="status">
+</div>
+<%= render :partial=>'member_list' %>
+</div>
+</div>

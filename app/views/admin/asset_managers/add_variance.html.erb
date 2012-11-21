@@ -1,0 +1,24 @@
+<div id="sbox-window" style="height:332px;width:300px;overflow:none;" class="" >
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <%= form_tag(:url=>{:action => "add_variance_content",:id=>@portfolio_type.id}, :remote=>true, :loading=>"$('show_spinner').show();",:complete=>"$('show_spinner').hide();")  do %>
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+      <h3 class="light_head">
+        <%if @portfolio_type.variance_percentage == nil%> 	Add Variance <%else%> Edit Variance <%end%>
+        <span id="show_spinner" style="display:none;"><img src="/images/spinner.gif" border="0" alt="spinner" /></span></h3>
+      Variance Percentage : <input type="text" name= "variance_percentage" size="10" value="<%= number_with_precision(@portfolio_type.variance_percentage, :precision=>2) %>" id="variance_percentage"></input>% <br/><br/>
+      &nbsp; <input type="radio" name="variance_and_or" <% if @portfolio_type.and_or == 'and' %> checked <%  end %> value="and">And</input>
+      <input type="radio" name="variance_and_or" <% if @portfolio_type.and_or == 'or' %> checked <%  end %> value="or">Or</input><br/><br/>
+      Variance amount : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$<input type="text" name= "variance_amount" size="10" value="<%= number_with_precision(@portfolio_type.variance_amount, :precision=>2) %>" id="variance_amount"></input> <br/><br/> <br/><br/>
+      <h3 class="light_head"> <%if @portfolio_type.cap_exp_variance == nil%> Add <%else%> Edit <%end%> capital variance</h3>
+      Cap exp variance : $<input type="text" name= "cap_exp_variance" size="10" value="<%= number_with_precision(@portfolio_type.cap_exp_variance, :precision=>2) %>" id="cap_exp_variance"></input>
+      <br/><br/>
+    </div>
+    <span id="error_msg" style="color:red;" place="admin"></span><br/><br/>
+    <div style="padding-left:120px;">
+      <%=image_submit_tag("/images/submit.jpg",:style=>"border:none;", :onclick=>"return validateThreshold($('variance_percentage').value,$('variance_amount').value,$('cap_exp_variance').value);") %>
+    </div>
+  <% end %>
+  <a id="sbox-btn-close" onclick="Control.Modal.close();" style="cursor: pointer;"></a></div>

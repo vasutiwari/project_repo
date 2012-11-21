@@ -1,0 +1,30 @@
+<%
+comm = @comm_count
+comm_leases_count = @comm_leases_count
+portfolio = @portfolio_count
+%>
+<%unless comm_leases_count.eql?(0)%>
+<div class="legendAB">Legend: &nbsp; <span class="above">Above Budget</span>&nbsp; &nbsp;<span class="below">Below Budget</span></div>
+  <table cellspacing="0" cellpadding="6" border="0" width="100%" style="table-layout: fixed; position:relative; float:left;" class="tablefb">
+    <thead>
+      <tr class="fb-tr-head">
+        <th style="width: 31px;" class="bdr-lt-gry bdr-rt-wht">Rank</th>
+        <th style="width: 153px;" class="bdr-rt-wht">Property</th>
+        <th style="width: 99px;" class="bdr-rt-wht">Vacancy %, SF</th>
+        <th style="width: 106px;" class="bdr-rt-wht">Renewals </th>
+        <th style="width: 105px;" class="bdr-rt-wht">New Leases</th>
+        <th style="width: 105px;" class="bdr-rt-wht">Pipeline</th>
+        <th style="width: 89px;" class="bdr-rt-wht">Pending Approvals</th>
+        <th style="width: 131px;" class="bdr-rt-wht">Expiration <select onChange="commercial_display_values(this.value)"> <option value="6" selected >6M</option>
+            <option value="12" >12M</option>
+            <option value="24" >24M</option></select></th>
+      </tr>
+    </thead>
+  </table>
+  <div id="tbloverflow"> <%=render :partial =>"/users/commercial_display_leases" %> </div>
+<%else%>
+  <div id="multi_table">
+    <div class="multbodybox"><center>No Data to Display</center>
+    </div>
+  </div>
+<%end%>

@@ -1,0 +1,25 @@
+	<h2>Recover your password</h2>
+            <h3>Let’s get started!</h3>
+            <p>We will send you an e-mail containing instructions for how you can recover your password.</p>
+            <div class="loginForm">
+	    <%= form_for @password do |f| %>
+            	<div class="label">Email ID:</div>
+                <div class="inputBox">
+		<% classname = flash[:error].nil? ? 'input' : 'inputError' %>
+		<%= f.text_field :email,:class=>"#{classname}" %>
+		</div>
+                <div class="clearfix"></div>
+
+                <div class="clearfix"></div>
+
+                <div class="label">&nbsp;</div>
+                <div class="inputBox">
+                	<div class="left"><!--<a class="button orange alignleft" href="login.html">Reset Password</a>--><%= submit_tag 'Reset Password',:class => "button_login orange alignleft" %></div>
+                    <div class="clearfix"></div>
+                </div>
+		<%end%>
+                <div class="errormessage"><%= flash[:error].nil? ? ' ' : flash[:error] %></div>
+                <div class="successmessage"><%= flash[:error].nil? && !flash[:notice].nil?  ? flash[:notice] : '' %></div>
+                <div class="clearfix"></div>
+            </div>
+

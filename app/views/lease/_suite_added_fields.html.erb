@@ -1,0 +1,178 @@
+<script>
+  st_no1 = '<%=params[:suite_no1]%>'
+  st_no2 = '<%=params[:suite_no2]%>'
+  st_no3 = '<%=params[:suite_no3]%>'
+  st_no4 = '<%=params[:suite_no4]%>'
+  st_no5 = '<%=params[:suite_no5]%>'
+	variable = variable;
+</script>
+<%
+cur_suites = Suite.where(:real_estate_property_id=>params[:property_id])
+added_suites = cur_suites || []
+#added_suites_floor = added_suites.select {|n| n.floor.present?} || []
+added_suites_floor = Suite.where(:real_estate_property_id=>params[:property_id]).select('DISTINCT floor').select {|n| n.floor.present?}
+pdf = @pdf
+pdf_convn_path = @pdf_convn_path
+%>
+<div class="rentnamerow" id="rent_suite1">
+  <div class="suite_add">
+    <div class="rentform namefirst">
+      <%if pdf%>
+        <span style="width:81px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:suite_no1] != '' ? params[:suite_no1] : ''%></span>
+      <%else%>
+        <%= select_tag(:suite_no1, "<option value=''> </option>".html_safe + options_from_collection_for_select(added_suites, :suite_no, :suite_no,params[:suite_no1]),{:class=>"lstextfield suite_tmp", :style=>"width:83px",:onchange=>"if(jQuery.trim(jQuery('#suite_no1').val()) != ''){ jQuery('.rent_sch_drop_down').removeAttr('disabled');if(check_rent_suite_select_status(jQuery(this).val(),1)){store_suites(st_no1,jQuery(this).val(),real_prop_id,port,lse_id,tnt_id,'1');replace_suite_ids(jQuery(this).val());}else{jQuery(this).val('#{params[:suite_no1].eql?('') ? '': params[:suite_no1]}');alert('This suite was already taken');}}"}) %>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'rentable_sqft1','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:rentable_sqft1]) if params[:rentable_sqft1].present? }"%>
+    </div>
+    <div class="rentform">
+      <%if pdf%>
+        <span style="width:48px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:floor1] != '' ? params[:floor1] : ''%></span>
+      <%else%>
+        <%=text_field_tag 'floor1','',:class=>"rentselect", :style=>"width:50px",:readonly=>true, :value=>"#{ params[:floor1] if params[:floor1].present? }"%>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_in1','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12 , :value=>(params[:move_in1].present?) ? "#{params[:move_in1]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_out1','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px", :size=>12, :value=>(params[:move_out1].present?) ? "#{ params[:move_out1]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'usable_sqft1','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:usable_sqft1]) if params[:usable_sqft1].present? }"%>
+    </div>
+  </div>
+</div>
+<div class="rentnamerow close" id="rent_suite2" style="<%=params[:suite_no2].present? ? 'display : block': 'display : none'%>" onmouseout="focusDivOut('rent_suite2'); this.style.width='750px'" onmouseover="focusDivOver('rent_suite2'); this.style.width='765px'">
+  <div class="suite_add">
+    <div class="rentform namefirst">
+      <%if pdf%>
+        <span style="width:81px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:suite_no2] != '' ? params[:suite_no2] : ''%></span>
+      <%else%>
+        <%= select_tag(:suite_no2, "<option value=''> </option>".html_safe + options_from_collection_for_select(added_suites, :suite_no, :suite_no,params[:suite_no2]),{:class=>"lstextfield suite_tmp", :style=>"width:83px",:onchange=>"if(jQuery.trim(jQuery('#suite_no2').val()) != ''){if(check_rent_suite_select_status(jQuery(this).val(),2)){store_suites(st_no2,jQuery(this).val(),real_prop_id,port,lse_id,tnt_id,'2', variable);replace_suite_ids(jQuery(this).val());}else{jQuery(this).val(st_no2);alert('This suite was already taken');}}"}) %>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'rentable_sqft2','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:rentable_sqft2]) if params[:rentable_sqft2].present? }"%>
+    </div>
+    <div class="rentform">
+      <%if pdf%>
+        <span style="width:48px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:floor2] != '' ? params[:floor2] : ''%></span>
+      <%else%>
+        <%=text_field_tag 'floor2','',:class=>"rentselect", :style=>"width:50px",:readonly=>true, :value=>"#{ params[:floor2] if params[:floor2].present? }"%>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_in2','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12, :value=>(params[:move_in2].present?) ? "#{params[:move_in2]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_out2','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12, :value=>(params[:move_out2].present?) ? "#{params[:move_out2]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'usable_sqft2','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:usable_sqft2]) if params[:usable_sqft2].present? }"%>
+    </div>
+  </div>
+  <span onclick="if(confirm('Are you sure you want to delete?')){delete_suite_in_rent(jQuery('#suite_no2').val(),real_prop_id,port,lse_id,2);jQuery('#rent_suite2').hide();jQuery('#suite_no2').val('');jQuery('#rentable_sqft2').val('');jQuery('#floor2').val('');jQuery('#usable_sqft2').val('');return false;}" class="closeme" style="margin-top:-25px">X</span>
+</div>
+<div class="rentnamerow close" id="rent_suite3" style="<%=params[:suite_no3].present? ? 'display : block': 'display : none'%>" onmouseout="focusDivOut('rent_suite3'); this.style.width='750px'" onmouseover="focusDivOver('rent_suite3'); this.style.width='765px'">
+  <div class="suite_add">
+    <div class="rentform namefirst">
+      <%if pdf%>
+        <span style="width:81px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:suite_no3] != '' ? params[:suite_no3] : ''%></span>
+      <%else%>
+        <%= select_tag(:suite_no3, "<option value=''> </option>".html_safe + options_from_collection_for_select(added_suites, :suite_no, :suite_no,params[:suite_no3]),{:class=>"lstextfield suite_tmp", :style=>"width:83px",:onchange=>"if(jQuery.trim(jQuery('#suite_no3').val()) != ''){if(check_rent_suite_select_status(jQuery(this).val(),3)){store_suites(st_no3,jQuery(this).val(),real_prop_id,port,lse_id,tnt_id,'3', variable);replace_suite_ids(jQuery(this).val());}else{jQuery(this).val(st_no3);alert('This suite was already taken');}}"}) %>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'rentable_sqft3','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:rentable_sqft3]) if params[:rentable_sqft3].present? }"%>
+    </div>
+    <div class="rentform">
+      <%if pdf%>
+        <span style="width:48px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:floor3] != '' ? params[:floor3] : ''%></span>
+      <%else%>
+        <%=text_field_tag 'floor3','',:class=>"rentselect", :style=>"width:50px",:readonly=>true, :value=>"#{ params[:floor3] if params[:floor3].present? }"%>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_in3','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12 , :value=>(params[:move_in3].present?) ? "#{params[:move_in3]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_out3','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px", :size=>12, :value=>(params[:move_out3].present?) ? "#{params[:move_out3]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'usable_sqft3','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:usable_sqft3]) if params[:usable_sqft3].present? }"%>
+    </div>
+  </div>
+  <span onclick="if(confirm('Are you sure you want to delete?')){delete_suite_in_rent(jQuery('#suite_no3').val(),real_prop_id,port,lse_id,3);jQuery('#rent_suite3').hide();jQuery('#suite_no3').val('');jQuery('#rentable_sqft3').val('');jQuery('#floor3').val('');jQuery('#usable_sqft3').val('');return false;}" class="closeme" style="margin-top:-25px">X</span>
+</div>
+<div class="rentnamerow close" id="rent_suite4" style="<%=params[:suite_no4].present? ? 'display : block': 'display : none'%>" onmouseout="focusDivOut('rent_suite4'); this.style.width='750px'" onmouseover="focusDivOver('rent_suite4'); this.style.width='765px'">
+  <div class="suite_add">
+    <div class="rentform namefirst">
+      <%if pdf%>
+        <span style="width:81px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:suite_no4] != '' ? params[:suite_no4] : ''%></span>
+      <%else%>
+        <%= select_tag(:suite_no4, "<option value=''> </option>".html_safe + options_from_collection_for_select(added_suites, :suite_no, :suite_no,params[:suite_no4]),{:class=>"lstextfield suite_tmp", :style=>"width:83px",:onchange=>"if(jQuery.trim(jQuery('#suite_no4').val()) != ''){if(check_rent_suite_select_status(jQuery(this).val(),4)){store_suites(st_no4,jQuery(this).val(),real_prop_id,port,lse_id,tnt_id,'4', variable);replace_suite_ids(jQuery(this).val());}else{jQuery(this).val(st_no4);alert('This suite was already taken');}}"}) %>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'rentable_sqft4','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:rentable_sqft4]) if params[:rentable_sqft4].present? }"%>
+    </div>
+    <div class="rentform">
+      <%if pdf%>
+        <span style="width:48px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:floor4] != '' ? params[:floor4] : ''%></span>
+      <%else%>
+        <%=text_field_tag 'floor4','',:class=>"rentselect", :style=>"width:50px",:readonly=>true, :value=>"#{ params[:floor4] if params[:floor4].present? }"%>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_in4','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12 , :value=>(params[:move_in4].present?) ? "#{params[:move_in4]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_out4','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px", :size=>12, :value=>(params[:move_out4].present?) ? "#{params[:move_out4]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+      <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'usable_sqft4','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:usable_sqft4]) if params[:usable_sqft4].present? }"%>
+    </div>
+  </div>
+  <span onclick="if(confirm('Are you sure you want to delete?')){delete_suite_in_rent(jQuery('#suite_no4').val(),real_prop_id,port,lse_id,4);jQuery('#rent_suite4').hide();jQuery('#suite_no4').val('');jQuery('#rentable_sqft4').val('');jQuery('#floor4').val('');jQuery('#usable_sqft4').val('');return false;}" class="closeme" style="margin-top:-25px">X</span>
+</div>
+<div class="rentnamerow close" id="rent_suite5" style="<%=params[:suite_no5].present? ? 'display : block': 'display : none'%>" onmouseout="focusDivOut('rent_suite5'); this.style.width='750px'" onmouseover="focusDivOver('rent_suite5'); this.style.width='765px'">
+  <div class="suite_add">
+    <div class="rentform namefirst">
+      <%if pdf%>
+        <span style="width:81px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:suite_no5] != '' ? params[:suite_no5] : ''%></span>
+      <%else%>
+        <%= select_tag(:suite_no5, "<option value=''> </option>".html_safe + options_from_collection_for_select(added_suites, :suite_no, :suite_no,params[:suite_no5]),{:class=>"lstextfield suite_tmp", :style=>"width:83px",:onchange=>"if(jQuery.trim(jQuery('#suite_no5').val()) != ''){if(check_rent_suite_select_status(jQuery(this).val(),5)){store_suites(st_no5,jQuery(this).val(),real_prop_id,port,lse_id,tnt_id,'5', variable);replace_suite_ids(jQuery(this).val());}else{jQuery(this).val(st_no5);alert('This suite was already taken');}}"}) %>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'rentable_sqft5','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:rentable_sqft5]) if params[:rentable_sqft5].present? }"%>
+    </div>
+    <div class="rentform">
+      <%if pdf%>
+        <span style="width:48px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:floor5] != '' ? params[:floor5] : ''%></span>
+      <%else%>
+        <%=text_field_tag 'floor5','',:class=>"rentselect", :style=>"width:50px",:readonly=>true, :value=>"#{ params[:floor5] if params[:floor5].present? }"%>
+      <%end%>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_in5','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12, :value=>(params[:move_in5].present?) ? "#{params[:move_in5]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'move_out5','',:class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:108px",:size=>12, :value=>(params[:move_out5].present?) ? "#{params[:move_out5]}" : "mm/dd/yyyy",:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+    </div>
+    <div class="rentform">
+      <%=text_field_tag 'usable_sqft5','',:class=>"lstextfield", :style=>"width:138px",:readonly=>true, :value=>"#{ convert_to_integer(params[:usable_sqft5]) if params[:usable_sqft5].present? }"%>
+    </div>
+  </div>
+  <span onclick="if(confirm('Are you sure you want to delete?')){delete_suite_in_rent(jQuery('#suite_no5').val(),real_prop_id,port,lse_id,5);jQuery('#rent_suite5').hide();jQuery('#suite_no5').val('');jQuery('#rentable_sqft5').val('');jQuery('#floor5').val('');jQuery('#usable_sqft5').val('');return false;}" class="closeme" style="margin-top:-25px">X</span>
+</div>

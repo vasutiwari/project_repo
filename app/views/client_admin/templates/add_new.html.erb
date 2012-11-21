@@ -1,0 +1,13 @@
+<div class="box-1col fontcol">
+    <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/templates">Template List</a> > Add Template </div>
+		<div class="mandatryDiv" align="right" style="margin:-30px 0 10px 762px;">( <span class="txtRed">*</span> )<small> Mandatory Fields is required</small> </div>
+		
+<%=form_for(@template1, :method => :post, :url =>"/client_admin/#{current_user.id}/templates/#{params[:template_id]}/add_new_folder_template",:html=>{:multipart=>true,:id=>"folder1_submit"}) do |p| %>
+<%=render "add_new_folder_template",:p=>p, :template_collection => @template1, :form_name=>"folder1_submit"%>
+	<%end%>
+			<div class="clearfloat"></div>
+	</div>
+
+
+
+

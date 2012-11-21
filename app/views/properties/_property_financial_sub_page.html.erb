@@ -1,0 +1,318 @@
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+
+  partial_page="financial_subpage"
+  active_call="performance_review"
+  financial_sub = "<%=params[:financial_sub]%>"
+  financial_subid = "<%=params[:financial_subid]%>"
+</script>
+<script>
+<%if note_collection.gross_rentable_area && note_collection.gross_rentable_area!=0%>
+    grossRent=true;
+<%else%>
+    grossRent=false;
+<%end%>
+<%if note_collection.no_of_units && note_collection.no_of_units!=0%>
+    noOfUnits=true;
+<%else%>
+    noOfUnits=false;
+<%end%>
+</script>
+<%exp_month_ytd,exp_ytd_check,variance_task_document_id=initial_variance_calculations(@current_time_period,"financials")%>
+<%if  (note_collection.try(:class).eql?(Portfolio) ? note_collection.leasing_type  : note_collection.portfolio.leasing_type ) == "Multifamily"%>
+<div class="sqrft_per_unit" style="color: black;font-size: 11px;margin-right: 10px;position: absolute;right: 0;top: 137px;*top: 195px;z-index: 111111111;">Values :
+    <select id="per_tot_sqft" onchange="performanceReviewCalls('financial_subpage',{financial_sub:'<%= params[:financial_sub].gsub("'","?")%>', financial_subid: '<%=params[:financial_subid]%>' },undefined,this.value)">
+      <option value="total_sqft">Total SqFT</option>
+      <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><% end %>
+      <%if no_of_units_available%><option value="unit_calc"  <%='selected' if params[:unit_calc]%> >Per Unit</option><% end %>
+    </select>
+  </div>
+<%else%>
+ <div class="sqrft_per_unit" style="color: black;font-size: 11px;margin-right: 10px;position: absolute;right: 0;top: 137px;*top: 195px;z-index: 111111111;">Values :
+    <select id="per_tot_sqft" onchange="performanceReviewCalls('financial_subpage',{financial_sub:'<%= params[:financial_sub].gsub("'","?")%>', financial_subid: '<%=params[:financial_subid]%>' },undefined,this.value)">
+      <option value="total_sqft">Total SqFT</option>
+      <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><% end %>
+    </select>
+  </div>
+<%end%>
+<%if params[:financial_sub] == "transactions"%>
+    <%=render :partial=>"/properties/transactions.html.erb"%>
+<%else%>
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id, :from=>"financial_subpage",:financial_sub=>params[:financial_sub],:financial_subid =>params[:financial_subid]} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"financial_subpage",:financial_sub=>params[:financial_sub],:financial_subid =>params[:financial_subid]} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+<div id ="portfolio_overview_property_graph">
+  <% if !asset_details_collection.nil? and !asset_details_collection.empty?%>
+    <div class="financials_tablewrapper" style="background-image: url(/images/asset_financials_tablebg_opstmt.png);">
+      <div style="z-index: 1450;" class="renttableheaderow headerBlueBg">
+        <div class="financials_tablelabel" style="text-align:left;left:11px;">&nbsp;</div>
+        <div class="financials_tablelabel2">Actuals $</div>
+        <div class="financials_tablelabel3">Budget $</div>
+        <div class="financials_tablelabel4"><span>Variance?</span><span style="padding-left:70px;"> $ </span></div>
+        <div class="financials_tablelabel5" id ="financexp1"><%if params[:period] != "2" && params[:tl_period] !="2"%><%=month_ytd_explanation %> Explanation<%end%></div>
+      </div>
+      <% for asset_detail in asset_details_collection%>
+				  <%if color_display.nil?
+					 breadcrumb_in_financial(asset_detail.Title,asset_detail.Record_id)
+				   color_display =  @color_display
+					 end
+  			%>
+        <% if color_display && color_display == "income"
+          use_color = income_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+        else
+          use_color = expense_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+        end
+      %>
+        <div style="z-index: 1300;" class="tablecontentrow">
+          <div class="financials_tablelabel hovehide"><%=raw "<img border=0 src=/images/asset_listicon.png ><span id='color_display' title=#{color_display}></span>"+subpages_in_financial_review(asset_detail.Title,asset_detail.Record_id)%></div>
+
+
+          <div class="financials_tablelabel2"><%= params[:sqft_calc] ? display_currency_overview(asset_detail.Actuals.to_f / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1 ) ) : (params[:unit_calc] ? display_currency_overview(asset_detail.Actuals.to_f / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1 ) ) : display_currency_overview(asset_detail.Actuals.to_f))%></div>
+
+          <div class="financials_tablelabel3"><%=params[:sqft_calc] ? display_currency_overview(asset_detail.Budget.to_f  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1 ) )  : (params[:unit_calc] ?   display_currency_overview(asset_detail.Budget.to_f / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1 ) )  :  display_currency_overview(asset_detail.Budget.to_f))%></div>
+          <div class="financials_tablelabel4">
+            <% icon_direction = up_or_down(asset_detail.Actuals.to_f,asset_detail.Budget.to_f) %>
+            <% vari = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)%>
+            <% color_flag = (use_color == 'green') ? '' : 'red' %>
+    <%# color_icon = (vari[:variant] > 0) ? 'downarrow_red' : 'greenarrowup' %>
+            <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+            <div class="tablelabel4_sub<%= color_flag %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(vari[:percent])%> </div>
+            <div class="tablelabel4_sub<%= color_flag %>coll2"><%=params[:sqft_calc] ? display_currency_variance(vari[:variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1) ) : (params[:unit_calc] ? display_currency_variance(vari[:variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(vari[:variant]))%></div>
+          </div>
+          <div class="financials_tablelabel5"><!--Explanation goes here --></div>
+          <% explan = "financial_sub_#{asset_detail.Title.gsub(" ","_").gsub(/'/,"")}" %>
+          <% if @explanation == true && (params[:period] != "2" && params[:tl_period] != "2") %>
+            <% if financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).nil? || financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).blank?  %>
+              <div onclick="show_explanation('<%=explan%>');" onmouseover="document.getElementById('non_<%=explan%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_<%=explan%>').style.backgroundColor='';"  class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                <div class="more ie_7_empty_div" id="<%=explan%>_more">
+                </div>
+                <div id="<%=explan%>_text"  style="display:none" >
+                  <textarea id="<%=explan%>_box" name="<%=explan%>_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('<%=explan%>');save_financial_exp(this.value,<%= asset_detail.Record_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>')"><%= financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check) %></textarea>
+                </div>
+              </div>
+            <% else %>
+              <% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+              <% explanation_doc_id = financial_explanation_doc(asset_detail.Record_id,exp_month_ytd,exp_ytd_check) %>
+              <% @doc = find_document_id(explanation_doc_id) %>
+              <% and_or = variance_thres.and_or %>
+        <%# val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{and_or}        (vari[:variant] < -(variance_thres.variance_amount.to_i) or vari[:variant] > variance_thres.variance_amount.to_i)" %>
+              <% if exp_ytd_check == false %>
+                <% val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{variance_thres.and_or}        (vari[:variant] < -(variance_thres.variance_amount.to_i) or vari[:variant] > variance_thres.variance_amount.to_i)" %>
+              <% else %>
+                <% val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{variance_thres.and_or}        (vari[:variant] < -(variance_thres.variance_amount_ytd.to_i) or vari[:variant] > variance_thres.variance_amount_ytd.to_i)" %>
+              <% end %>
+							<%if note_collection && remote_property(note_collection.accounting_system_type_id)%>
+
+								 <% if  eval(val) %>
+                  <div class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                    <div class="more <% if (financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank? %>ie_7_empty_div<% end %>" id="<%=explan%>_more">                           <% if !(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank?%>
+												<%= link_to "More", (note_collection.user_id == current_user.id  ?  variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year]) : variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year]) ), :onclick=>"act_page='variances';deact_page='financial';enable_disable_tab(act_page,deact_page);",:loading=>"load_writter()",:remote=>true, :complete=>"load_completer()" %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% else %>
+                  <div  class="tablecol5">
+                    <span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                      <%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                    </span>
+                    <div class="more" id="<%=explan%>_more" style="width: 180px;">
+                      <a href = "<%= '/tasks/check_variance_task?doc_id='+note_collection.id.to_s+'&title_explanation='+asset_detail.Title.to_s+'&actual_explanation='+asset_detail.Actuals.to_s+'&budget_explanation='+asset_detail.Budget.to_s+'&text_explanation='+URI.encode(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+display_currency_real_estate_overview_for_percent_for_exp(vari[:percent]).to_s+'&var_amt_explanation='+display_currency_real_estate_variance_for_exp(vari[:variant])+'&id_explanation='+asset_detail.Record_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="<%=explan%>_task" >
+                        More</a>
+                      <script> new Control.Modal($('<%=explan%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <% end%>
+							<%else%>
+              <% if  eval(val) and !explanation_doc_id.nil? and  !check_if_doc_variance_task(explanation_doc_id).nil? && !(subpages_in_financial_review(asset_detail.Title,asset_detail.Record_id)).include?('Amortization') %>
+                <div class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                  <div class="more <% if (financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank? %>ie_7_empty_div<% end %>" id="<%=explan%>_more">
+                    <% if !(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank?%>
+											<%= link_to "More", (exp_comment_display_performance_review_property_index_path(:document_id=>explanation_doc_id,:portfolio_id=>portfolio_collection.id,:folder_id=>@doc.folder_id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id) ), :onclick=>"act_page='variances';deact_page='financial';enable_disable_tab(act_page,deact_page);", :loading=>"load_writter()",:remote=>true, :complete=>"load_completer()" %>
+                    <% end %>
+                  </div>
+                </div>
+          <%#= link_to_remote "#{display_text}",:url => edit_task_tasks_path(:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file]),:class=>"bluecolor",:id=>"add_task#{t.id}", :loading=>"load_writter()", :complete=>"load_completer()"  %>
+              <% else %>
+                <div  class="tablecol5">
+                  <span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                    <%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                  </span>
+                  <div class="more" id="<%=explan%>_more" style="width: 180px;">
+                    <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+asset_detail.Title.to_s+'&actual_explanation='+asset_detail.Actuals.to_s+'&budget_explanation='+asset_detail.Budget.to_s+'&text_explanation='+URI.encode(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+display_currency_real_estate_overview_for_percent_for_exp(vari[:percent]).to_s+'&var_amt_explanation='+display_currency_real_estate_variance_for_exp(vari[:variant])+'&id_explanation='+asset_detail.Record_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="<%=explan%>_task" >
+                      More</a>
+                    <script> new Control.Modal($('<%=explan%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                  </div>
+                </div>
+              <% end%>
+            <% end %>
+          <% end %>
+					<% end %>
+        </div>
+      <% end %>
+      <%if @total%>
+        <% for asset_detail in @total%>
+          <% if color_display && color_display == "income"
+            use_color = income_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+          else
+            use_color = expense_color(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)
+          end
+        %>
+          <div style="z-index: 1300;color:black" class="tablecontentrow">
+            <div class="financials_subhead3">Total <%=asset_detail.Title.gsub(/\sdetail/,'').titleize %></div>
+            <div class="financials_tablelabel2"><%=params[:sqft_calc] ? display_currency_overview(asset_detail.Actuals.to_f  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_overview(asset_detail.Actuals.to_f  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(asset_detail.Actuals.to_f))%></div>
+            <div class="financials_tablelabel3"><%=params[:sqft_calc] ? display_currency_overview(asset_detail.Budget.to_f  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ?  display_currency_overview(asset_detail.Budget.to_f  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_overview(asset_detail.Budget.to_f))%></div>
+            <div class="financials_tablelabel4">
+              <% icon_direction = up_or_down(asset_detail.Actuals.to_f,asset_detail.Budget.to_f) %>
+              <% vari = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)%>
+              <% color_flag = (use_color == 'green') ? '' : 'red' %>
+      <%# color_icon = (vari[:variant] > 0) ? 'downarrow_red' : 'greenarrowup' %>
+              <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+              <div class="tablelabel4_sub<%= color_flag %>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(vari[:percent])%> </div>
+              <div class="tablelabel4_sub<%= color_flag %>coll2"><%=params[:sqft_calc] ? display_currency_variance(vari[:variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1) ) : (params[:unit_calc] ?  display_currency_variance(vari[:variant]  / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)  ) : display_currency_variance(vari[:variant]))%></div>
+            </div>
+            <div class="financials_tablelabel5"><!--Explanation goes here --></div>
+            <% explan = "financial_sub_#{asset_detail.Title.gsub(" ","_")}" %>
+            <% if @explanation == true && (params[:period] != "2" && params[:tl_period] != "2") %>
+              <% if  financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).nil? || financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).blank?  %>
+                <div onclick="show_explanation('<%=explan%>');" onmouseover="document.getElementById('non_<%=explan%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_<%=explan%>').style.backgroundColor='';"  class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                  <div class="more ie_7_empty_div" id="<%=explan%>_more"></div>
+                  <div id="<%=explan%>_text"  style="display:none" >
+                    <textarea id="<%=explan%>_box" name="<%=explan%>_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('<%=explan%>');save_financial_exp(this.value,<%= asset_detail.Record_id %>,<%= exp_month_ytd %>,<%= exp_ytd_check %>,<%= variance_task_document_id %>,'<%= request.request_uri %>')"><%= financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check) %></textarea>
+                  </div>
+                </div>
+              <% else %>
+                <% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+                <% explanation_doc_id = financial_explanation_doc(asset_detail.Record_id,exp_month_ytd,exp_ytd_check) %>
+                <% @doc = find_document_id(explanation_doc_id) %>
+                <% and_or = variance_thres.and_or %>
+          <%# val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{and_or}        (vari[:variant] < -(variance_thres.variance_amount.to_i) or vari[:variant] > variance_thres.variance_amount.to_i)" %>
+                <% if exp_ytd_check == false %>
+                  <% val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{variance_thres.and_or}        (vari[:variant] < -(variance_thres.variance_amount.to_i) or vari[:variant] > variance_thres.variance_amount.to_i)" %>
+                <% else %>
+                  <% val = "(display_currency_real_estate_overview_for_percent(vari[:percent]).to_i < -(variance_thres.variance_percentage.to_i) or display_currency_real_estate_overview_for_percent(vari[:percent]).to_i >  variance_thres.variance_percentage.to_i) #{variance_thres.and_or}        (vari[:variant] < -(variance_thres.variance_amount_ytd.to_i) or vari[:variant] > variance_thres.variance_amount_ytd.to_i)" %>
+                <% end %>
+								<%if note_collection && remote_property(note_collection.accounting_system_type_id)%>
+								 <% if  eval(val) %>
+                  <div class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                    <div class="more <% if (financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank? %>ie_7_empty_div<% end %>" id="<%=explan%>_more">
+                          <% if !(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank? %>
+												<%= link_to "More", (note_collection.user_id == current_user.id  ?  variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year]) : variances_display_for_remote_prop_performance_review_property_index_path(:id=>note_collection.id,:portfolio_id=>portfolio_collection.id,:folder_id=>note_collection.id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id,:tl_year=>params[:tl_year]) ), :onclick=>"act_page='variances';deact_page='financial';enable_disable_tab(act_page,deact_page);",:loading=>"load_writter()",:remote=>true, :complete=>"load_completer()" %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% else %>
+                  <div  class="tablecol5">
+                    <span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                      <%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                    </span>
+                    <div class="more" id="<%=explan%>_more" style="width: 180px;">
+                      <a href = "<%= '/tasks/check_variance_task?doc_id='+note_collection.id.to_s+'&title_explanation='+asset_detail.Title.to_s+'&actual_explanation='+asset_detail.Actuals.to_s+'&budget_explanation='+asset_detail.Budget.to_s+'&text_explanation='+URI.encode(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+display_currency_real_estate_overview_for_percent_for_exp(vari[:percent]).to_s+'&var_amt_explanation='+display_currency_real_estate_variance_for_exp(vari[:variant])+'&id_explanation='+asset_detail.Record_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="<%=explan%>_task" >
+                        More</a>
+                      <script> new Control.Modal($('<%=explan%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <% end%>
+								<%else%>
+                <% if  eval(val) and !explanation_doc_id.nil? and  !check_if_doc_variance_task(explanation_doc_id).nil? && !(subpages_in_financial_review(asset_detail.Title,asset_detail.Record_id)).include?('Amortization') %>
+                  <div class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;</span>
+                    <div class="more <% if (financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank? %>ie_7_empty_div<% end %>" id="<%=explan%>_more">
+                      <% if !(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check)).blank?%>
+												<%= link_to "More", (exp_comment_display_performance_review_property_index_path(:document_id=>explanation_doc_id,:portfolio_id=>portfolio_collection.id,:folder_id=>@doc.folder_id,:from_assign_task=>'cash_flow', :month=>exp_month_ytd,:performance_review_path=>request.request_uri,:highlight_id=>asset_detail.Record_id,:highlight_period=>exp_ytd_check.to_s,:from_performance_review=>'true',:period=>params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:note_id=>note_collection.id) ), :onclick=>"act_page='variances';deact_page='financial';enable_disable_tab(act_page,deact_page);",:loading=>"load_writter()",:remote=>true, :complete=>"load_completer()" %>
+                      <% end %>
+                    </div>
+                  </div>
+            <%#= link_to_remote "#{display_text}",:url => edit_task_tasks_path(:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file]),:class=>"bluecolor",:id=>"add_task#{t.id}", :loading=>"load_writter()", :complete=>"load_completer()"  %>
+                <% else %>
+                  <div  class="tablecol5">
+                    <span id="non_<%=explan%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                      <%= truncate_extra_chars_for_expl(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                    </span>
+                    <div class="more" id="<%=explan%>_more" style="width: 180px;">
+                      <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+asset_detail.Title.to_s+'&actual_explanation='+asset_detail.Actuals.to_s+'&budget_explanation='+asset_detail.Budget.to_s+'&text_explanation='+URI.encode(financial_explanation(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+display_currency_real_estate_overview_for_percent_for_exp(vari[:percent]).to_s+'&var_amt_explanation='+display_currency_real_estate_variance_for_exp(vari[:variant])+'&id_explanation='+asset_detail.Record_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(asset_detail.Record_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true' %>"  id="<%=explan%>_task" >
+                        More</a>
+                      <script> new Control.Modal($('<%=explan%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+									 <% end %>
+                <% end%>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<%else%>
+  <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+  <div  class="rhscontentrow rhscontentrowtime">
+    <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+    <% if note_collection.class == RealEstateProperty %>
+      <% note_name = note_collection.property_name %>
+    <% elsif note_collection.class == Portfolio  %>
+      <% note_name =  note_collection.name %>
+			<%else%>
+		<% note_name =  note_collection.note_id %>
+    <% end %>
+		<% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+      <span style="font-size:13px;">Data Unavailable. Please add Asset Financial data at
+
+			<!-- <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+			<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+			.</span>
+    <% else %>
+      <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+    <% end %>
+  </div>
+<%end%>
+
+<%end%>
+
+
+
+<script>
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+
+
+//changeExplanantionText(last_renderer,active_sub_month
+jQuery(".hovehide").hover(
+  function () {
+    if (jQuery('a',this).attr('title')== undefined)
+      {
+        title_val= jQuery('#title_id',this).attr('trend_value')
+      }
+      else
+        {
+           title_val= jQuery('a',this).attr('trend_value')
+        }
+<%if session[:portfolio__id].present?  && session[:property__id].blank?%>
+	 href_val ='/dashboard/<%=session[:portfolio__id]%>/trends?parent_title='+jQuery('#color_display',this).attr('title')+'&tl_period=<%=params[:period].present? ? params[:period] : params[:tl_period]%>&trend_value='+title_val+'&tl_year=<%=params[:tl_year]%>';
+<%	else%>
+		href_val ='/dashboard/<%=params[:real_estate_id].present? ? params[:real_estate_id] : portfolio_collection.id%>/trends/<%=params[:id]%>?parent_title='+jQuery('#color_display',this).attr('title')+'&tl_period=<%=params[:period].present? ? params[:period] : params[:tl_period]%>&trend_value='+title_val+'&tl_year=<%=params[:cur_year].present? ? params[:cur_year] : params[:tl_year]%>';
+	<%end%>
+    jQuery(this).append(jQuery("<div class='trendsHover'><label><a class='loader_event' href='"+href_val+"'><span class='iconTrend'>&nbsp;</span></a></label></div>"));
+  },
+  function () {
+    jQuery(this).find("div:last").remove();
+  }
+);
+</script>
+
+

@@ -1,0 +1,128 @@
+<script>
+  chart_count = <%= @client.try(:chart_of_accounts).present? ? @client.chart_of_accounts.count : 0 %>
+  selected_acc_ids = '<%= client_form.object.try(:accounting_system_type_ids).present? ? client_form.object.accounting_system_type_ids.join(',') : AccountingSystemType.all.map(&:id).join(',') %>'
+  delete_acc_sys_type = '<%= FLASH_MESSAGES['client_admin']['110']  %> '
+</script>
+<%
+real_props = @user.present? && @client.try(:id).present? ? RealEstateProperty.where(:user_id => @user.try(:id),:client_id => @client.try(:id)) : []
+portfolios = @user.present? && @client.try(:id).present? ? Portfolio.where(:user_id => @user.try(:id),:client_id => @client.try(:id)) : []
+%>
+<script>
+  var alert_msg = '<%=  real_props.present? && portfolios.present? ? FLASH_MESSAGES['client_admin']['107'] : (real_props.present? && !portfolios.present? ? FLASH_MESSAGES['client_admin']['108'] : (!real_props.present? && portfolios.present? ? FLASH_MESSAGES['client_admin']['109'] : ""))%>'
+</script>
+<div class="sectiontitle">
+  <span style="float:left;">Add New Client</span>
+  <span style="float:right;"><%=link_to "<<< Back <<<",admin_logos_path %></span>
+</div>
+<span style="float:right;font-size:12px;">
+  <font color=red>
+    *
+  </font>
+  Mandatory Fields
+</span>
+<%#= client_form.fields_for :users do |user_form| %>
+
+<div class="rowwrapper">
+  <div class="fieldiconcol">
+    <img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/>
+  </div>
+  <%=fields_for @user do |user_form|%>
+    <div class="fieldrow">
+      <div class="fieldlabel">
+        Company Name :
+        <font color=red>
+          *
+        </font>
+      </div>
+      <div class="fieldinput">
+        <%company_name = @user.present? && @user.company_name.present? ? @user.company_name : '' %>
+        <%=  user_form.text_field :company_name, :value => company_name %><span style="color:red;font-size:12px;"><%= error_message_on :user, :company_name %></span>
+      </div>
+    </div>
+    <div class="fieldrow">
+      <div class="fieldlabel">
+        Admin Name :
+        <font color=red>
+          *
+        </font>
+      </div>
+      <div class="fieldinput">
+        <%name = @user.present? && @user.name.present? ? @user.name : '' %>
+        <%= user_form.text_field  :name, :value => name%><span style="color:red;font-size:12px;"><%= error_message_on :user, :name,  'Admin ' %></span>
+      </div>
+    </div>
+    <div class="fieldrow">
+      <div class="fieldlabel">
+        Admin Email :
+        <font color=red>
+          *
+        </font>
+      </div>
+      <div class="fieldinput">
+        <%email = @user.present? && @user.email.present? ? @user.email : '' %>
+        <%= user_form.text_field :email,:value => email %><span style="color:red;font-size:12px;"><%= error_message_on :user, :email, 'Admin ' %></span>
+      </div>
+    </div>
+  <%end%>
+  <div class="fieldrow">
+    <div class="fieldlabel">
+      Host :
+    </div>
+    <div class="fieldinput">
+      <%= client_form.text_field :host %>
+    </div>
+  </div>
+  <div class="fieldrow">
+    <div class="fieldlabel">
+      Contact Person:
+    </div>
+    <div class="fieldinput">
+      <%= client_form.text_field :contact_person %>
+    </div>
+  </div>
+  <%=fields_for :portfolio_image do |image_form|%>
+  <%#= user_form.fields_for :portfolio_image do |image_form| %>
+    <div class="fieldrow">
+      <div class="fieldlabel myclass">
+        Browse Logo :
+        <font color=red>
+          *
+        </font>
+      </div>
+      <div class="fieldinput myclass">
+        <%= image_form.file_field :uploaded_data ,:size =>24 %>
+        <br/>
+        <span style="color:red;font-size:12px;"><%= @error if @error.present?  %></span>
+      </div>
+    </div>
+    <div class="fieldrow"><img src="<%=  @portfolio_image.public_filename(:thumb) if @portfolio_image.present? && @portfolio_image.try(:id).present?%>" alt="" title="" height="67" width="108px"/></div>
+  <%end%>
+  <div class="fieldrow">
+    <div class="fieldlabel myclass">
+      Accounting System Type :
+    </div>
+    <div class="fieldinput myclass">
+<%#= select_tag 'client_type[accounting_system_types]', options_for_select(AccountingSystemType.all.map{|x| [x.type_name,x.id]}, AccountingSystemType.all.map(&:id)), { :multiple => true, :size =>4, :id => "client_type_accounting_system_types",:style=>"width:270px;"} %>
+      <%= client_form.select :accounting_system_type_ids, options_for_select( AccountingSystemType.all.map{|x| [x.type_name,x.id]}, client_form.object.try(:accounting_system_type_ids).present? ? client_form.object.accounting_system_type_ids : AccountingSystemType.all.map(&:id)),{},html_options = {:multiple => true, :size =>4, :id => "client_type_accounting_system_types",:style=>"width:270px;", :onchange =>"onchange_acc_ids(alert_msg)"} %>
+    </div>
+  </div>
+  <%@chart_count = 1%>
+  <%@accounting_system_type_ids = client_form.object.present? && client_form.object.accounting_system_type_ids.present? ? client_form.object.accounting_system_type_ids : []%>
+  <%= client_form.fields_for :chart_of_accounts do |chart_form| %>
+    <%= render 'chart_of_account_fields', :f => chart_form %>
+  <% end %>
+  <div class="fieldlabel myclass" id="chart_of_account">
+    <%= link_to_add_chart "Add", client_form, :chart_of_accounts %>
+  </div>
+</div>
+<div class="buttonswrapper">
+  <div class="buttonscontainer">
+    <div class="previousbtn">
+      <%= image_submit_tag '/images/create.png', :title => "Submit", :border => "0", :width=>"117", :height=>"32" %><%#=submit_tag "Create" %>
+    </div>
+  </div>
+</div>
+<script>
+  if(chart_count >= 20)
+    jQuery('#chart_of_account').hide();
+</script>

@@ -1,0 +1,26 @@
+if params[:from_performance_review] == "true"
+  page << "jQuery('#time_line_selector').show();"
+  page << "jQuery('.subheaderwarpper').show();"
+else
+  page << "jQuery('#time_line_selector').show();"
+  page << "jQuery('.subheaderwarpper').show();"
+  page.assign "active_sub_call", "financial_subpage"
+  bread_crumb = breadcrumb_in_financial(params[:financial_sub],params[:financial_subid])
+  if bread_crumb.include?("Operating income")
+    bread_crumb =  bread_crumb.gsub('Operating income','Total Operating Revenues')
+  elsif bread_crumb.include?("Operating expenses")
+    bread_crumb = bread_crumb.gsub('Operating expenses','Total Expenses')
+  end
+  if bread_crumb.match(/Operating revenue/) or bread_crumb.match(/Net operating income/)
+    @color_display = "income"
+  elsif bread_crumb.match(/Operating Expenses/) or bread_crumb.match(/Capital expenditures/)
+    @color_display = "expense"
+  end
+  page << "jQuery('.executiveheadcol_for_title').html('#{bread_crumb}')"
+end
+page << "jQuery('#id_for_variance_threshold').html('<ul class=inputcoll2 id=cssdropdown><li class=headlink3 id=id_for_modify_threshold><div class=morebutton_label><a id=modify_threshold_#{@note.id} href=#{new_threshold_explanation_path(@note.id)}>Variance Thresholds</a></div><span></span></li></ul>');"
+page << "new Control.Modal($('modify_threshold_#{@note.id}'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'post'});"
+page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/wres/property_financial_sub_page",:locals=>{:color_display=>@color_display,
+:time_line_actual=>@time_line_actual,:explanation=>@explanation,:totals=>@totals,:current_time_period=>@current_time_period,:note_collection=>@note,:revenue_act=>@revenue_act,
+:revenue_bud=>@revenue_bud,:revenue_var=>@revenue_var,:total_var_ope_expense_act=>@total_var_ope_expense_act,:total_var_ope_expense_bud=>@total_var_ope_expense_bud,:total_var_ope_expense_var=>@total_var_ope_expense_var,:total_var_ope_expense_per=>@total_var_ope_expense_per,:asset_details=>@asset_details,:start_date=>@start_date,
+:year_collection=>@year,:revenue_percentage=>@revenue_percentage,:portfolio_collection => @portfolio,:v_collection=>@v,:doc_collection=>@doc}

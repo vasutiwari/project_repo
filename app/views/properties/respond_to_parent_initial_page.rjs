@@ -1,0 +1,15 @@
+page.hide 'modal_container'
+page.hide 'modal_overlay'
+if params[:note_add_edit] == 'true' && params[:edit_inside_asset] != 'true' && params[:from_property_details] != 'true' && params[:from_debt_summary] != 'true' && params[:is_property_folder] != 'true'
+  page.replace_html "show_assets_list",:partial=>'/properties/properties_and_files'
+  page.call "update_asset_view_path", "#{@portfolio.id}", "#{@portfolio.real_estate_properties.last.id}"
+else
+  if params[:edit_inside_asset] == "true"
+    @realestate =  RealEstateProperty.find_real_estate_property(params[:property_id])
+    page.replace_html "#{@property.id}_li",:partial => "properties/property_list",:locals => {:p => @realestate , :portfolio_collection => @portfolio}
+  end
+  page.replace_html "show_assets_list",:partial=>'/properties/assets_list'
+end
+page.replace_html "edit_count_#{@portfolio.id}", :text=>"#{property_count(@portfolio.real_estate_properties.length)}" if !@portfolio.nil? && params[:edit_inside_asset] != "true"  && params[:is_property_folder] != 'true' && @portfolio.user_id == current_user.id
+page.call 'highlight_datahub' if params[:highlight] == '1' || params[:spms_form_submit] == 'false'
+page.call "flash_writter", FLASH_MESSAGES['properties']['406']

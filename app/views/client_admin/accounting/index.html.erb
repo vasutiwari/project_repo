@@ -1,0 +1,49 @@
+	<%# if @chart_accounts.present?%>
+<div class="box-1col">
+    <div class="box-title"><span class="title">Chart of Accounts (<%=@chart_accounts_count%>)</span></div>
+    <div>&nbsp;</div>
+    	<table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+        	<thead >
+            	<tr class="fb-tr-head">
+            	<th class="bdr-lt-gry bdr-rt-wht" style="width:60px;">S.No</th>
+                <th class="bdr-rt-wht"style="width:300px;">Server Name</th>
+                <th class="bdr-rt-wht" style="width:60px;">Server Type</th>
+                </tr>
+            </thead>
+						<%if @chart_accounts.present?%>
+						<%@chart_accounts && @chart_accounts.each_with_index do |account,i|%>
+            <tbody>
+						<%class_name=(i%2==0 ? "tablefbAlternate" : "")%>
+            	<tr class="<%=class_name%>">
+                	<td align="center" class="bdr-rt-gry bdr-top-gry"><%=i+1%></td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry"><a class="loader_event" href="/client_admin/accounting/edit/<%=account.id%>"><%=account.try(:name).present? ? account.try(:name) : "-"%></a></td>
+                    <td align="center" class="bdr-rt-gry bdr-top-gry"><%=account.try(:accounting_system_type).try(:type_name).present? ? account.try(:accounting_system_type).try(:type_name) : "-"%></td>
+              </tr>
+              </tbody>
+							<%end%>
+							<%else%>
+							<tbody><tr><td colspan="3"  style="text-align:center;">No Data To Display</td></tr></tbody>
+							<%end%>
+							
+        </table>
+    <div class="clearfloat"></div>
+		<%if @chart_accounts.present?%>
+		<div class="paginationcol" style="margin-left:800px;">
+		<%=will_paginate @chart_accounts %>
+		</div>
+		<%end%>
+		</div>
+<%#else%>
+<!--
+  <div class="box-1col">
+			<div class="nopropertyDiv">
+    	<p><span class="iconNotificaton">No chart of account is available.</span> </p>
+		<p>Please contact your client admin <code><a href="mailto:admin@theam.com">&lt;admin email as link&gt;</a></code> to request access.</p>
+        </div>
+    <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+		</div> -->
+<%#end%>
+		
+		  	

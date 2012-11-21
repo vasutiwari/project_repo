@@ -1,0 +1,437 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="cash_and_receivables"
+  active_call="performance_review"
+</script>
+<script>
+  grossRent='undefined';
+  noOfUnits='undefined';
+</script>
+<%property_name = note_collection.try(:class).eql?(Portfolio) ? note_collection.try(:name) : note_collection.try(:property_name)%>
+<script>jQuery(".executiveiconcol").after("Cash");jQuery('#tot_per_val').hide();</script>
+<% unless pdf_collection %>
+  <div class="pdf_link_financial_end" style="right: 47px;top:124px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %> </div>
+  <script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+<% end %>
+<% if notes_collection.length > 0 %>
+  <%# if !(time_line_actual.nil? || time_line_actual.blank?) || !(time_line_rent_roll.nil? || time_line_rent_roll.blank?) %>
+  <%# end %>
+  <%if note_collection.accounting_type == 'Accrual' and !cash_flow_statement.nil? and cash_flow_statement.length>0%>
+    <div class="rhscontentrow">
+      <div class="fieldinputcol">
+      </div>
+    </div>
+    <div class="tableheaderow assetview headerBlueBg">
+      <div class="cashtablecol1" style="text-align:left;left:11px;">&nbsp;</div>
+      <div class="cashtablecol3"> Actuals $</div>
+      <div class="cashtablecol3"> Budget  $</div>
+      <div class="cashtablecol4 padleft50M" style="text-align:left;"><span>Variance?</span><span style="padding-left:70px;"> $ </span> </div>
+      <div class="tablecol5"></div>
+    </div>
+
+   <%if remote_property(note_collection.accounting_system_type_id)%>
+    <div class="cashtablerow">
+        <%find_cash_account_code%>
+				<%flag = 0%>
+				<%total_cash_actuals = 0%>
+				<%total_cash_budget = 0%>
+        <%@cash_sub_items_account_code.each do |account_code| %>
+						<%item_total_actuals = 0%>
+						<%item_total_budget = 0%>
+
+          <div class="tablecontentrow">
+            <%cash_item = find_income_and_cash_flow_item(account_code)%>
+            <%title =  (cash_item.nil? || cash_item.account_code == 0) ? "ADJUSTMENTS" : cash_item.title%>
+            <div class="cashtablecol1"><%if flag > 0%>+<%end%><%=title%></div>
+            <div class="cashtablecol3"></div>
+						<div class="cashtablecol3"></div>
+						<div class="cashtablecol4 padleft50M"></div>
+						</div>
+
+          <%find_financial_sub_items(title)%>
+          <%if @asset_details && !@asset_details.empty?%>
+            <%flag = 0%>
+            <%@asset_details = @asset_details.compact.sort_by(&:Record_id) if @asset_details%>
+            <% for asset_detail in @asset_details%>
+						<%if (cash_item.nil? || cash_item.account_code == 0) && asset_detail.InormalBalance == '0'%>
+						 <%asset_actuals = ((asset_detail.Actuals.to_f) * (-1)).to_f%>
+						<%else%>
+						 <%asset_actuals = (asset_detail.Actuals.to_f).to_f%>
+						<%end%>
+              <div class="tablecontentrow">
+                <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;<img border="0" src="<%= pdf_conv_path%>/images/asset_listicon.png"><%=raw find_link_to(asset_detail.Title,asset_detail.Record_id)%></div>
+                <div class="cashtablecol3"><%= display_currency_overview(asset_actuals)%></div>
+                <div class="cashtablecol3"><%= display_currency_overview(asset_detail.Budget.to_f )%></div>
+                <div class="cashtablecol4">
+                  <% icon_direction,use_color,color_flag,color_icon =  asset_detail.Title.downcase.include?('net income') && !asset_detail.Title.downcase.include?('non cash items in net income') ? find_color_direction_and_icon_income(asset_actuals,asset_detail.Budget.to_f) : find_color_direction_and_icon(asset_actuals, asset_detail.Budget.to_f)%>
+                  <% vari = form_hash_of_data_for_occupancy(asset_actuals,asset_detail.Budget.to_f)%>
+                  <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=   display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+                  <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%> </div>
+                </div>
+              </div>
+							<%item_total_actuals = item_total_actuals + asset_actuals%>
+							<%item_total_budget = item_total_budget + asset_detail.Budget.to_f%>
+							<%item_total_variance = asset_detail.Budget.to_f - asset_actuals%>
+							<%item_total_variance_per = ((item_total_variance) * 100) / asset_detail.Budget.to_f%>
+           <%end%>
+          <%end%>
+
+					<%if item_total_actuals && item_total_budget && item_total_variance && item_total_variance_per%>
+              <div class="tablecontentrow">
+                <div class="cashtablecol1" style="font-family:Verdana,Arial,sans-serif;color:black;">Total <%=title%></div>
+                <%flag+=1%>
+                <div class="cashtablecol3"><%= display_currency_overview(item_total_actuals)%></div>
+                <div class="cashtablecol3"><%= display_currency_overview(item_total_budget )%></div>
+                <div class="cashtablecol4">
+                  <% icon_direction,use_color,color_flag,color_icon =  title.downcase.include?('net income') && !title.downcase.include?('non cash items in net income') ? find_color_direction_and_icon_income(item_total_actuals,item_total_budget) : find_color_direction_and_icon(item_total_actuals, item_total_budget)%>
+                  <% vari = form_hash_of_data_for_occupancy(item_total_actuals,item_total_budget)%>
+                  <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=   display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+                  <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%> </div>
+                </div>
+              </div>
+							<%total_cash_actuals = total_cash_actuals + item_total_actuals%>
+							<%total_cash_budget = total_cash_budget + item_total_budget%>
+          <%end%>
+    			<%flag += 1%>
+					<%@total_cash_variance =total_cash_budget - total_cash_actuals%>
+					<%@total_cash_variance_per = ((@total_cash_variance) * 100) / total_cash_budget rescue ZeroDivisionError%>
+     <%end%>
+
+   	<%if total_cash_actuals && total_cash_budget && @total_cash_variance && @total_cash_variance_per%>
+				 <%title = 'CASH'%>
+         <div class="tablecontentrow">
+                <div class="cashtablecol1" style="font-family:Verdana,Arial,sans-serif;color:black;">Total CASH</div>
+                <%flag+=1%>
+                <div class="cashtablecol3"><%= display_currency_overview(total_cash_actuals)%></div>
+                <div class="cashtablecol3"><%= display_currency_overview(total_cash_budget )%></div>
+                <div class="cashtablecol4">
+                  <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(total_cash_actuals,total_cash_budget) %>
+                  <% vari = form_hash_of_data_for_occupancy(total_cash_actuals,total_cash_budget)%>
+                  <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=   display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+                  <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%> </div>
+                </div>
+              </div>
+					<%end%>
+ </div>
+
+  <%end%>
+
+
+    <%if find_accounting_system_type(0,note_collection)%>
+      <%find_financial_sub_items('Cash Flow From Op Activities')%>
+      <%title='Cash Flow From Op Activities'%>
+      <div class="cashtablerow">
+        <%if @asset_details && !@asset_details.empty?%>
+          <%flag = 0%>
+          <%@asset_details = @asset_details.compact.sort_by(&:Record_id) if @asset_details%>
+          <% for asset_detail in @asset_details%>
+            <div class="tablecontentrow">
+              <%if flag == 0%>
+                <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;<%=raw find_link_to(asset_detail.Title,asset_detail.Record_id)%></div>
+              <%else%>
+                <div class="cashtablecol1">+ <%=raw find_link_to(asset_detail.Title,asset_detail.Record_id)%></div>
+              <%end%>
+              <%flag+=1%>
+              <div class="cashtablecol3"><%= display_currency_overview(asset_detail.Actuals.to_f)%></div>
+              <div class="cashtablecol3"><%= display_currency_overview(asset_detail.Budget.to_f )%></div>
+              <div class="cashtablecol4 padleft50M">
+                <% icon_direction,use_color,color_flag,color_icon =  asset_detail.Title.downcase.include?('net income') && !asset_detail.Title.downcase.include?('non cash items in net income') ? find_color_direction_and_icon_income(asset_detail.Actuals.to_f,asset_detail.Budget.to_f) : find_color_direction_and_icon(asset_detail.Actuals.to_f, asset_detail.Budget.to_f)%>
+                <% vari = form_hash_of_data_for_occupancy(asset_detail.Actuals.to_f,asset_detail.Budget.to_f)%>
+                <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=   display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+                <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%> </div>
+              </div>
+            </div>
+          <%end%>
+        <%end%>
+
+
+        <% if cash_flow_statement['Capital Expenditures']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">+ <a href="" onclick="cashSubCalls(2,{cash_find_id:'<%=cash_flow_statement['Capital Expenditures'][:record_id]%>', cal_exp:true,cash_item:'capital expenditures'});update_level_bread_crum1(2); return false;">Total Capital Expenditures</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Capital Expenditures'][:actuals])%></div>
+            <div class="cashtablecol3"><%=display_currency_overview(cash_flow_statement['Capital Expenditures'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['Capital Expenditures'][:actuals], cash_flow_statement['Capital Expenditures'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Capital Expenditures'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Capital Expenditures'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+
+        <% if cash_flow_statement['Cash Flow From Financing Activities']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">+ <a href="" onclick="cashSubCalls(3,{cash_find_id:'<%=cash_flow_statement['Cash Flow From Financing Activities'][:record_id]%>',cash_item:'Cash Flow From Financing Activities'});update_level_bread_crum1(3); return false;" title="Net Cash from Financing Activities"><%="Cash Flow From Financing Activities"%></a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Financing Activities'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Financing Activities'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['Cash Flow From Financing Activities'][:actuals], cash_flow_statement['Cash Flow From Financing Activities'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Cash Flow From Financing Activities'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Cash Flow From Financing Activities'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+
+        <% if cash_flow_statement['CASH FLOW STATEMENT']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">= Net Cash Flow</div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['CASH FLOW STATEMENT'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['CASH FLOW STATEMENT'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['CASH FLOW STATEMENT'][:actuals],cash_flow_statement['CASH FLOW STATEMENT'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['CASH FLOW STATEMENT'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['CASH FLOW STATEMENT'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+      </div>
+
+
+    <%else%>
+
+      <div class="cashtablerow">
+        <% if cash_flow_statement['net income']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Net Income</div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['net income'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['net income'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['net income'][:actuals],cash_flow_statement['net income'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['net income'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['net income'][:variant])%> </div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['depreciation & amortization detail']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">+ Depreciation &amp; Amortization</div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['depreciation & amortization detail'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['depreciation & amortization detail'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['depreciation & amortization detail'][:actuals],cash_flow_statement['depreciation & amortization detail'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>     <%=display_currency_real_estate_overview_for_percent(cash_flow_statement['depreciation & amortization detail'][:percent])%></div><div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_real_estate_variance(cash_flow_statement['depreciation & amortization detail'][:variant])%></div></div>
+          </div>
+        <%end%>
+        <% if operating_statement['changes in assets and liabilities:']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1"><span title="Changes In Assets And Liabilities"><%="+ Changes In Assets And Liabilities"%> </span></div>
+            <div class="cashtablecol3"><%= display_currency_overview(operating_statement['changes in assets and liabilities:'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(operating_statement['changes in assets and liabilities:'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(operating_statement['changes in assets and liabilities:'][:actuals], operating_statement['changes in assets and liabilities:'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+                <%=display_currency_real_estate_overview_for_percent(operating_statement['changes in assets and liabilities:'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(operating_statement['changes in assets and liabilities:'][:variant])%></div></div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['cash flow from operating activities']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">= <a href="" onclick="cashSubCalls(1,{cash_find_id:'<%=cash_flow_statement['cash flow from operating activities'][:record_id]%>',cash_item:'cash flow from operating activities'});update_level_bread_crum1(1); return false;" title="Net Cash from Operating Activities"><%="Net Cash from Operating Activities"%></a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['cash flow from operating activities'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['cash flow from operating activities'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['cash flow from operating activities'][:actuals], cash_flow_statement['cash flow from operating activities'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span>
+                <%=display_currency_real_estate_overview_for_percent(cash_flow_statement['cash flow from operating activities'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['cash flow from operating activities'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['capital expenditures']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">+ <a href="" onclick="cashSubCalls(2,{cash_find_id:'<%=cash_flow_statement['capital expenditures'][:record_id]%>',cash_item:'capital expenditures', cal_exp:true});update_level_bread_crum1(2); return false;">Total Capital Expenditures</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['capital expenditures'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['capital expenditures'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['capital expenditures'][:actuals], cash_flow_statement['capital expenditures'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['capital expenditures'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['capital expenditures'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['cash flow from financing activities']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">+ <a href="" onclick="cashSubCalls(3,{cash_find_id:'<%=cash_flow_statement['cash flow from financing activities'][:record_id]%>',cash_item:'cash flow from financing activities'});update_level_bread_crum1(3); return false;" title="Net Cash from Financing Activities"><%="Net Cash from Financing Activities"%></a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['cash flow from financing activities'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['cash flow from financing activities'][:budget])%></div>
+            <div class="cashtablecol4 padleft50M">
+              <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['cash flow from financing activities'][:actuals], cash_flow_statement['cash flow from financing activities'][:budget])%>
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['cash flow from financing activities'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['cash flow from financing activities'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['net cash flow']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">= Net Cash Flow</div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['net cash flow'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['net cash flow'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['net cash flow'][:actuals],cash_flow_statement['net cash flow'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['net cash flow'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['net cash flow'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['Cash Flow From Op Activities']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;<a href="" onclick="cashSubCalls(4,{cash_find_id:'<%=cash_flow_statement['Cash Flow From Op Activities'][:record_id]%>',cash_item:'Cash Flow From Op Activities'});update_level_bread_crum1(4); return false;">Cash Flow From Op Activities</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Op Activities'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Op Activities'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['Cash Flow From Op Activities'][:actuals],cash_flow_statement['Cash Flow From Op Activities'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Cash Flow From Op Activities'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Cash Flow From Op Activities'][:variant])%></div>
+            </div>
+          </div>
+
+        <%end%>
+        <% if cash_flow_statement['Non Cash Items in Net Income']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1"> + <a href="" onclick="cashSubCalls(5,{cash_find_id:'<%=cash_flow_statement['Non Cash Items in Net Income'][:record_id]%>',cash_item:'Non Cash Items in Net Income'});update_level_bread_crum1(5); return false;">Non Cash Items in Net Income</a></div>
+            <div class="cashtablecol3"><%=  display_currency_overview(cash_flow_statement['Non Cash Items in Net Income'][:actuals])%></div>
+            <div class="cashtablecol3"><%=  display_currency_overview(cash_flow_statement['Non Cash Items in Net Income'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['Non Cash Items in Net Income'][:actuals],cash_flow_statement['Non Cash Items in Net Income'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Non Cash Items in Net Income'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Non Cash Items in Net Income'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['Changes in assets and liabilities:']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1"> + <a href="" onclick="cashSubCalls(6,{cash_find_id:'<%=cash_flow_statement['Changes in assets and liabilities:'][:record_id]%>',cash_item:'Changes in assets and liabilities:'});update_level_bread_crum1(6); return false;">Changes in assets and liabilities</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Changes in assets and liabilities:'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Changes in assets and liabilities:'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['Changes in assets and liabilities:'][:actuals],cash_flow_statement['Changes in assets and liabilities:'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Changes in assets and liabilities:'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Changes in assets and liabilities:'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['Capital Expenditures']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1"> + <a href="" onclick="cashSubCalls(7,{cash_find_id:'<%=cash_flow_statement['Capital Expenditures'][:record_id]%>',cash_item:'Capital Expenditures'});update_level_bread_crum1(7); return false;">Capital Expenditures</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Capital Expenditures'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Capital Expenditures'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cash_flow_statement['Capital Expenditures'][:actuals],cash_flow_statement['Capital Expenditures'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Capital Expenditures'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Capital Expenditures'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['Cash Flow From Financing Activities']%>
+          <div class="tablecontentrow">
+            <div class="cashtablecol1"> + <a href="" onclick="cashSubCalls(8,{cash_find_id:'<%=cash_flow_statement['Cash Flow From Financing Activities'][:record_id]%>',cash_item:'Cash Flow From Financing Activities'});update_level_bread_crum1(8); return false;">Cash Flow From Financing Activities</a></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Financing Activities'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['Cash Flow From Financing Activities'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['Cash Flow From Financing Activities'][:actuals],cash_flow_statement['Cash Flow From Financing Activities'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['Cash Flow From Financing Activities'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['Cash Flow From Financing Activities'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+        <% if cash_flow_statement['CASH FLOW STATEMENT']%>
+          <div class="cashtablegreyrow">
+            <div class="cashtablecol1">= Net Cash Flow</div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['CASH FLOW STATEMENT'][:actuals])%></div>
+            <div class="cashtablecol3"><%= display_currency_overview(cash_flow_statement['CASH FLOW STATEMENT'][:budget])%></div>
+            <% icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon_income(cash_flow_statement['CASH FLOW STATEMENT'][:actuals],cash_flow_statement['CASH FLOW STATEMENT'][:budget])%>
+            <div class="cashtablecol4 padleft50M">
+              <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(cash_flow_statement['CASH FLOW STATEMENT'][:percent])%></div>
+              <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(cash_flow_statement['CASH FLOW STATEMENT'][:variant])%></div>
+            </div>
+          </div>
+        <%end%>
+      </div>
+
+
+    <%end%>
+
+    <div class="tableheaderow portfolio_overview">&nbsp;</div>
+    <%#*<div id="acc_receivable_aging">%>
+    <%#= render :partial => "properties/acc_receivable_aging" , :locals => {:account_receivables_aging => account_receivables_aging} %>
+    <%#*</div>%>
+    <%#*<div class="paginationcol">%>
+    <%#id = params[:note_id] ? params[:note_id] : params[:id]%>
+    <%#=will_paginate account_receivables_aging,:renderer => 'RemoteLinkRenderer',:params =>{:id =>id,:start_date =>params[:start_date],:partial_page=>"cash_and_receivables",:note_id => params[:note_id],:period=>params[:period],:start_date => params[:start_date],:tl_period => params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year] } %>
+    <%#*</div>%>
+  <% elsif note_collection.accounting_type == 'Cash'%>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <span style="color: black;font-size:13px;"> Data unavailable, as you have selected the 'Accounting Type' as 'Cash'.</span>
+    </div>
+  <%elsif note_collection.accounting_type == 'Accrual' and cash_flow_statement.blank?%>
+    <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+      <% if note_collection.class == RealEstateProperty %>
+        <% note_name = note_collection.property_name %>
+      <% elsif note_collection.class == Portfolio  %>
+      <% note_name =  note_collection.name %>
+			<%else%>
+		<% note_name =  note_collection.note_id %>
+    <% end %>
+      <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+        <span style="color: black;font-size:13px;"><%if remote_property(note_collection.accounting_system_type_id) == true%><span style="padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Asset Financial data at
+
+				<!--<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+				<%end%>.</span>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').show();
+  jQuery('#weekly_display').hide();
+
+<% if (params[:tl_period] =="8" || params[:period] =="8" || ((params[:period] =="3" || params[:tl_period] =="3") && params[:tl_year].to_i >= Date.today.year ) ) %>
+    jQuery('#yrForecast').show();
+<%end%>
+  jQuery('#quarterly').show();
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+      if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+      {
+        document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+      }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+</script>

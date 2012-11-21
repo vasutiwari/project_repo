@@ -1,0 +1,8 @@
+f = MasterFile.find(params[:id])
+if !params[:value].blank? && params[:value].to_i >= 1
+  f.update_attributes(:due_days=>params[:value])
+  page.call("do_master_date_update","#{params[:id]}","#{f.due_days}")
+  page.call "flash_writter", "Due date has been set"
+else
+  page.call("do_master_date_update","#{params[:id]}","#{f.due_days}")
+end	

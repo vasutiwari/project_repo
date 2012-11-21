@@ -1,0 +1,83 @@
+<script>
+	management_more = 'undefined';
+</script>
+<div class="rhs leaseModule"  id="lease_container">
+	<div class="suitemid marginTop20" id="show_assets_list">
+		<h1 class="page-title">Encumbrance</h1>
+		<div class="clear"></div>
+		<%if  !@pdf && !note_collection.is_getting_started_closed%>
+			<%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>note_collection,:portfolio_collection=>portfolio_collection} %>
+		<%end%>
+		<%encumbrance_details(params[:property_id],params[:sort])%>
+		<%find_executed_lease_count(params[:property_id])%>
+		<%executed_leases = @executed_leases%>
+		<%if executed_leases.present?%>
+			<div class="lebredcoms">
+				<div class="lebredcomseow boldtxt" style="color:#000 !important; font-size:12px !important"><%=@tenant_legal_name_count%> Tenant(s): <%=number_with_delimiter(@suite_rentable_sqft_total.round)%> SF </div>
+
+				<div class="lebredcomsright">
+					<%unless @pdf%>
+						<div class="folderlabel">
+							<a onclick="lease_pdfConv(true,'<%=params[:property_id]%>','<%=params[:portfolio_id]%>','property_encumb');return false;" href="javascript:;">
+								<div class="folderlabelcol">Print PDF</div>
+							</a>
+							<span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>
+						</div>
+					<%end%>
+				</div>
+			</div>
+
+
+			<div class="tbl_lease encumb-tbl">
+				<div class="tbl-head encumb-head">
+					<div class="encumbname" style="width:85px;">Encumb Flr</div>
+					<div class="encumbname" style="width:90px;">Encumb Suites</div>
+					<div class="encumbname" style="width:134px;">Option Type</div>
+					<div class="encumbname" style="width:80px;">Dates</div>
+					<div class="encumbname" style="width:114px;"><%= encumbrance_sort_link_helper_for_rent_roll("Option Held By", "Option Held By",{:controller=>"lease",:action =>"encumbrance",:property_id=>params[:property_id],:partial_page => "property_encumb",:portfolio_id =>params[:portfolio_id],:page=>params[:page],:per_page=>25})%></div>
+					<!--<div class="rentname" style="width:50px; text-align:left"><%#= encumbrance_sort_link_helper_for_rent_roll("Suite", "Suite",{:controller=>"lease",:action =>"encumbrance",:property_id=>params[:property_id],:partial_page => "property_encumb",:portfolio_id =>params[:portfolio_id]})%></div>-->
+					<div class="encumbname" style="width:56px;">Suite</div>
+					<div class="encumbname" style="width:165px;">Option Notes</div>
+				</div>
+
+
+				<%executed_leases.each do |exec_lease|%>
+					<%if exec_lease && !exec_lease.tenant.nil?%>
+						<%@tenant_options = exec_lease.tenant.options%>
+						<%@tenant_options = @tenant_options.select{|i| (i.encumbered_suites.present? || i.encumbered_floors.present?) } if @tenant_options.present? %>
+						<%@tenant_options.each do |option_detail|%>
+							<div class="tbl-row <%= cycle("encumb-odd", "encumb-even") %>">
+								<div class="encumbname" style="width:85px;" title="<%=option_detail.encumbered_floors%>"><%=(option_detail.encumbered_floors.present? && option_detail.encumbered_floors != "Enter comma separated") ? truncate(option_detail.encumbered_floors,:length=>13) : raw('&nbsp;')%></div>
+								<div class="encumbname" style="width:90px;" title="<%=option_detail.encumbered_suites%>"><%=(option_detail.encumbered_suites.present? &&option_detail.encumbered_suites != "Enter comma separated") ? truncate(option_detail.encumbered_suites,:length=>13) : raw('&nbsp;')%></div>
+								<div class="encumbname" style="width:134px; text-align:left; line-height: 16px;"><%=option_detail.option_type.present? ? option_detail.option_type : raw('&nbsp;')%></div>
+								<div class="encumbname" style="width:80px;"><%if (option_detail.notice_start.present? && option_detail.notice_end.present?) %> <%= option_detail.notice_start.strftime("%m/%y") %> to  <%= option_detail.notice_end.strftime("%m/%y") %> <%elsif option_detail.notice_start.present?%> <%= option_detail.notice_start.strftime("%m/%y") %> <%elsif option_detail.notice_end.present?%> <%= option_detail.notice_end.strftime("%m/%y") %><%else%> <%=raw('&nbsp;')%><%end%>  </div>
+								<div class="tenant2 version letextbox" style="width:114px; padding:0 4px;word-wrap:break-word;"><a href="" title="<%=exec_lease.tenant.tenant_legal_name%>" onclick="show_tabs_for_edit(<%=params[:portfolio_id]%>,<%=params[:property_id]%>,'terms','mgmt_terms',<%=exec_lease.id%>);load_completer();return false;"><%=exec_lease.tenant.tenant_legal_name%></a></div>
+								<div class="encumbname" style="width:56px;"><%#if !exec_lease.property_lease_suite.nil?%><%#=exec_lease.property_lease_suite.suite_ids.present? ? @suite_no_arr : raw('&nbsp;')%><%#end%>
+									<!--for suite_no start-->
+									<%if !exec_lease.property_lease_suite.nil? && exec_lease.property_lease_suite.suite_ids.present?%>
+										<%suite_ids = exec_lease.property_lease_suite.suite_ids%>
+										<%encumb_suite_no_display(suite_ids)%>
+										<div title="<%=@suite_no_join%>"><%if @suite_no_arr.count==1%><%=@suite_no_arr[0]%><%else%><%=@suite_no_arr[0]%>,<%=@suite_no_arr[1]%><%if @suite_no_arr.count>=3%>,..<%end%><%end%></div>
+									<%else%>
+										<%=raw('&nbsp;')%>
+									<%end%>
+									<!--for suite_no end-->
+								</div>
+								<div class="encumbname" style="width:165px; text-align:left; line-height: 16px;word-wrap:break-word;"><%if !option_detail.note.nil?%><%=truncate(option_detail.note.content,:length=>64)%><%end%></div>
+							</div>
+						<%end%>
+					<%end%>
+				<%end%>
+			</div>
+
+
+			<%unless @pdf%>
+				<div class="paginationcol" style="margin-left:600px;">
+					<%= will_paginate  @executed_leases, :inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'encumbrance', :id=>note_collection.id,:per_page=>25,:page=>params[:page], :portfolio_id=>portfolio_collection.id,:property_id => params[:property_id],  :sort=>params[:sort],:from_pag=>true} %>
+				</div>
+			<%end%>
+		<%else%>
+			<div class='no-data'> No Data To Display </div>
+		<%end%>
+	</div>
+</div>

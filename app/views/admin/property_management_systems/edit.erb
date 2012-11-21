@@ -1,0 +1,27 @@
+<% content_for :title, 'AMP - Asset manager Creation' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  	<div class="fieldrow">
+		  <% unless flash.now[:notice].blank? -%>
+                    <center><font size="4" color="green"><%=flash.now[:notice]%></font></center>
+                   <% end -%>
+	 </div>
+
+  <div class="middlewrapper2">
+
+    <div class="sectiontitle">Edit Property Management System</div>
+    <div class="rowwrapper">
+     <%= form_tag admin_property_management_system_path(@property_management_system.id) ,{:method=>:put } do |f|-%>
+        <%=render :partial=>"form" %>
+        <input type="hidden" name="redirect" value="10"></input>
+      <%end%>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><a onclick="document.forms[0].submit();" style="cursor: pointer;"><img src="/images/btn_submit.gif" width="117" height="32" alt="Submit" /></a></div>
+    </div>
+  </div>
+</div>

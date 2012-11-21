@@ -1,0 +1,104 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="balance_sheet"
+  active_call="performance_review"
+</script>
+<%find_total_non_operating_expense(operating_statement)%>
+<div style="z-index: 1500;" class="rhscontentrow">
+</div>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id , :from=>"financial"} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_sqft_popup'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"financial"} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_unit_popup'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+<div id ="portfolio_overview_property_graph">
+  <% unless pdf_collection %>
+  <div class="pdf_link_financial" style="top:103px;"> <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+	</div>
+     <script>new Control.Modal($('summary_link_pdf'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+  <% end %>
+  <% if notes_collection.length > 0 %>
+    <% if !(time_line_actual.nil? || time_line_actual.blank?) || !(time_line_rent_roll.nil? || time_line_rent_roll.blank?) %>
+    <% end %>
+    <%if !actual.nil? and !operating_statement.nil? and operating_statement.length > 1 %>
+      <div class="financials_tablewrapper financials_tablewrapper_balance_sheet" style="margin-left:168px;background-image: url(/images/asset_balance.png);">
+        <div style="z-index: 1450;" class="renttableheaderow financials_tablewrapper_balance_sheet headerBlueBg">
+          <div class="financials_subheadlabel">Balance Sheet</div>
+          <div class="financials_tablelabel2 financials_tablelabel2_balance">Actuals $</div>
+        </div>
+
+        <%find_financial_sub_items("balance sheet")%>
+        <%=render :partial=>"financial_main_sub_items",:locals=>{:color_display=>"income",:portfolio_collection=>portfolio_collection,:operating_statement=>operating_statement,:pdf_conv_path =>pdf_conv_path,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection,:first_level=>'true',:second_level=>'false',:third_level=>'false'}%>
+        <%title=map_title("balance sheet")%>
+    <% else %>
+      <% req_excel_uploads_folder =  fetch_excels_folder(note_collection.id) %>
+      <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+        <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+        <% if note_collection.class == RealEstateProperty %>
+          <% note_name = note_collection.property_name %>
+        <% else %>
+          <% note_name = note_collection.note_id %>
+        <% end %>
+        <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+          <span style="font-size:13px;padding-left: 230px;">Data Unavailable</span>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+</div>
+
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').show();
+	jQuery('#weekly_display').hide();
+<% if (params[:tl_period] =="8" || params[:period] =="8" || ((params[:period] =="3" || params[:tl_period] =="3") && params[:tl_year].to_i >= Date.today.year ) ) %>
+    jQuery('#yrForecast').show();
+<%end%>
+    jQuery('#quarterly').show();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+  jQuery('#quarterly_message').hide();
+  jQuery('#yrForecast').hide();
+</script>

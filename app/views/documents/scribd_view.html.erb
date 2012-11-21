@@ -1,0 +1,27 @@
+<div class="wrapper" >
+<div class="bodywrapperrow">
+  <div class="contentwrapper">
+    <%unless @document.ipaper_id.nil?%> <br/><%=@document.filename %><br/><br/>
+        <%if @document%>
+                <%=raw(@document.display_ipaper)%>
+        <%end%>
+        <%else%>
+               <div class="filecontainer"  style="height:600px;">
+                        <img  alt="" src="<%=@document.public_filename %>" style="padding-left:330px;padding-right:250px;padding-top:250px" />
+                    </div>
+        <%end%>
+        </div>
+</div>
+</div>
+<!--<style>
+#embedded_flash embed
+{height:572px;width:920px;}
+#embedded_flash
+{
+height:480px
+}
+</style>-->
+
+<script>
+window.onunload = load_completer();
+		</script>

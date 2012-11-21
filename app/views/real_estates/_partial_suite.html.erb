@@ -1,0 +1,30 @@
+<% @suites_collection.each do |suite|%>
+<div class="suitenubrow" style="z-index:5000">
+       <div class="floornub"><%= suite.floor%></div>
+       <div class="daysnub"><%= suite.suite_no%></div>
+       <div class="rentnub"><%= suite.rentable_sqft%></div>
+       <div class="rentnub"><%= suite.usable_sqft%></div>
+        <div class="notenub">notes comes here</div>
+       <div class="dummy2" onmouseover="this.className='userwrapperon'" onmouseout="this.className='dummy2'">
+                <div class="userwrapper2"><span class="dataoption2"><a href="#"></a>
+                      <div class="userdrop24">
+                        <div class="row24">
+
+                          <div class="label34">
+													<a href="javascript:;" onclick="load_writter();edit_suite(<%= suite.id %>,<%=@portfolio.id%>,<%=@property.id%>); return false;">Edit</a>
+
+													</div>
+                        </div>
+                        <div class="row24">
+
+                          <div class="label34">
+													<a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this suite <%=suite.floor%>  ?')){delete_suite(<%= suite.id %>,<%=@property.id%>,'setting_suite');} return false;" >Delete</a>
+													</div>
+                        </div>
+
+                      </div>
+                </span></div>
+              </div>
+       </div>
+
+			 <%end%>

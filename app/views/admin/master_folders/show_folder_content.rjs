@@ -1,0 +1,10 @@
+if params[:id].to_i == 0
+  page.show 'new_file_and_folder'
+  page.replace_html "folder_head",:partial=>'folder_head',:locals=>{:parent_record=>@parent_record,:portfolio_type=>@portfolio_type}
+  page.replace_html "stored_assets_docs_display",:partial=>'folders_view',:locals=>{:portfolio_files => @portfolio_files,:portfolio_filename => @portfolio_filename,
+  :portfolio_folder => @portfolio_folder,:portfolio_type => @portfolio_type}
+else
+  page.hide 'new_file_and_folder'
+  page.replace_html "folder_head",:partial=>'folder_head',:locals=>{:parent_record=>@parent_record,:portfolio_type=>@portfolio_type}
+  page.replace_html "stored_assets_docs_display",:partial=>'head_for_uploads'
+end

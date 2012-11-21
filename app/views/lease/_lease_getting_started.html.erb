@@ -1,0 +1,24 @@
+<% class_name = controller.action_name == "rent_roll" ? "getting_rentRoll" : "getting"%>
+<div id="getStart1" class="Check2">
+            <div style="font-size: 14px ! important;" class="<%= class_name %>"><div  style="margin: -5px -15px 0pt 0pt; float: right;" class="hoursrow2 notede"><a title="Close" href="#" onclick="if(confirm('This will close the window permanently. For further assistance, please contact help@theamp.com. Do you want to proceed to close the window?')){jQuery('#getStart1').hide('slow');close_getting_started(<%=note_collection.id%>,<%=portfolio_collection.id%>)};return false;">Close <img border="0" width="7" height="7" src="/images/del_icon.png"></a></div>
+              Getting Started with AMP Lease Pipeline &amp; Renewals</div>
+            <div class="Check">
+			        <%= link_to 'Add Leasing Agents', {:controller=>'lease',:action=>"getting_started",:item=>'leasing_agent'},:id=>"add_leasing_agents"%>
+							<script>new Control.Modal($('add_leasing_agents'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+						</div>
+            <div class="Check">
+			        <%= link_to 'Edit/Check your list of Vacant Suites', {:controller=>'lease',:action=>"getting_started",:item=>'vacant_suites'},:id=>"list_of_vacant_suites"%>
+						 <script>new Control.Modal($('list_of_vacant_suites'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+						</div>
+            <div class="Check">
+ 			        <%= link_to 'Edit/Check if your list of executed leases are upto date.', {:controller=>'lease',:action=>"getting_started",:item=>'executed_leases'},:id=>"list_of_executed_leases"%>
+						 <script>new Control.Modal($('list_of_executed_leases'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+						</div>
+            <div class="Check">
+		        <%= link_to 'Use Approval & Projection features', {:controller=>'lease',:action=>"getting_started",:item=>'projection_features'},:id=>"upload_form_projection_features"%>
+						<script>new Control.Modal($('upload_form_projection_features'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+						</div>
+          </div>
+					
+					
+					

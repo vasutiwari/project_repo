@@ -1,0 +1,7 @@
+<div class="maginR5 marginT5 fltLeft fp">
+    Floor Plan:<% if params["selected_tab"].present? && params["selected_tab"].eql?("rent_analysis") %>
+    <%= select_tag "floor_plan", options_for_select(@rent_analysis_floor_plan, :selected =>  params[:floor_plan]), :onchange => "display_graphs_for_portfolio_leasing_info_basing_on_selected_floor('rent_analysis', jQuery(this).val(), #{params[:portfolio_id]})" %>
+    <% else %>
+    <%= select_tag "floor_plan", options_for_select(@weekly_floor_plan, :selected =>  params[:floor_plan]), :onchange => "display_graphs_for_portfolio_leasing_info_basing_on_selected_floor('weekly_graphs', jQuery(this).val(), #{params[:portfolio_id]})" %>
+    <% end %>
+</div>

@@ -1,0 +1,19 @@
+<div class="fileheadparent">
+  <% random = Array.new(6){rand(6)}.join %>
+</div>
+<div class="filedatacontainer">	
+  <div class="newbuttons" style="font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;"><img class="icon_no_hover sprite s_folder_add icon_no_hover" src="/images/icon_spacer.gif" />
+    <%= link_to 'New Folder', {:controller=>'master_folders',:action=>"new_folder_creation",:id=>@portfolio_type.id,:folder_id=>@parent_record.id} ,:id=>"upload_folder_#{random}",:title=>"Create new folder" %>
+    <script>new Control.Modal($('upload_folder_<%= random %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+  </div>
+  <div class="newbuttons" style="font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;"><img class="icon_no_hover sprite s_folder_add icon_no_hover" src="/images/icon_spacer.gif" />
+    <%= link_to 'Upload File', {:controller=>'master_folders',:action=>"new_file_creation",:id=>@portfolio_type.id,:folder_id=>@parent_record.id} ,:id=>"upload_file_#{random}",:title=>"Upload File(s)" %>
+    <script>new Control.Modal($('upload_file_<%= random %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+  </div>
+  <span id="select_one1"></span><br/>
+  <span class="status_light_error" id="folder_name_exist"></span>
+</div>
+<div class="filergtwrap" id="stored_assets_docs_display">
+  <%= render :partial => 'folders_content' ,:locals=>{:parent_record => @parent_record,:portfolio_type => @portfolio_type,
+    :portfolio_files => @portfolio_files,:portfolio_folder => @portfolio_folder,:portfolio_filename => @portfolio_filename}%>
+</div>

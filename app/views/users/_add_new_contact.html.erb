@@ -1,0 +1,59 @@
+<%@collaborators = find_contact_details%>
+
+<div class="multnewstop"><img src="images/uplodetop.png" width="460" height="5"  border="0"/></div>
+<div class="multnewsmid">
+  <div class="multnewsheadingbox">
+    <div class="newsarrow"><img src="images/executivearrow.png" width="13" height="12"  border="0"/></div>
+    <div class="newsname">Contact <%="(#{@collaborators.count})"%></div>
+    <div class="newsview">
+		<a id="upload_form_add_contact" title='Add Chat & Property Users' style="text-decoration:none;width:192px;" 	href="/users/add_contacts?from_dash_board='true'" >Add Chat & Property Users</a>
+      <script>new Control.Modal($('upload_form_add_contact'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+    </div>
+  </div>
+  <% if !(@collaborators.nil? || @collaborators.blank?)%>
+    <!--<div id='content1' style="min-height:305px;*min-height:270px">-->
+			<%if @collaborators && @collaborators.length>6%>
+			<div style="float:none;clear:both"></div>
+			<div id="content1" class="dbcontact" style="height: 268px; overflow: hidden; margin: 0pt 4px 0pt 5px; width: 450px;" onmouseout="jQuery('.dbcontact').css('overflow-y','hidden'); jQuery('.dbcontact .newscontentrow').css('width','426px');" onmouseover="jQuery('.dbcontact').css('overflow-y','scroll'); jQuery('.dbcontact .newscontentrow').css('width','426px');">
+			<%else%>
+				<div id="content1" class="dbcontact" style="height: 268px; overflow: hidden; margin: 0pt 4px 0pt 5px; width: 450px;">
+			<%end%>
+      <% @collaborators.each do |collaborator| %>
+		  	<div class="multnewsrow"><div class="newscontentrow">
+				<div class="contact-action">
+				<a href="#" onclick="phonecall_pop_up('<%=collaborator.phone_number%>')"><img width="16" height="16" title="Make a Call" src="/images/Call.png"></a>
+				<a href="mailto:<%=collaborator.email%>"><img width="16" height="16" title="Send Email" src="/images/Maill.png"></a>
+				
+				</div>
+            <div class="newscontentimg"><img src="<%= user_profile_image(collaborator.id) %>" width="26" height="26" border="0" /></div>
+            <div class="newscontenttext">
+              <strong><%=(!collaborator.name.nil? and !collaborator.name.blank?) ?  collaborator.name.titleize : collaborator.email.split('@')[0]%></strong><small><%=(!collaborator.designation.nil? and !collaborator.designation.blank?) ?  ", #{collaborator.designation.titleize}"  : '' %><%=(!collaborator.phone_number.nil? and !collaborator.phone_number.blank?) ?   ",  #{collaborator.phone_number}" : ''%></small>
+							<br />
+              <span class="newsview newsemail"><%= mail_to "#{collaborator.email}"%></span>
+            </div>
+            <!--
+            <div class="deleteiconbox">
+              <div class="deleteicon"> <a href="#"><img src="images/del_icon.png" width="7" height="7"  border="0"/></a></div>
+              <div class="deleteicon"><a href="#"><img src="images/edit_icon.png" width="8" height="8" border="0" /></a></div>
+            </div> -->
+          </div>
+        </div>
+      <%end%>
+		</div>
+  <%else%>
+    <div class="createtaskrow ie_t_row" style="padding: 0pt; margin: 0pt; width: 100%; min-height: 270px;" sizcache="1" sizset="12">
+      <div class="iconcollumn" style="width: 100%;"></div>
+      <div class="labelcoll" style="text-align:center; margin: 0pt auto; padding: 28% 0pt 0pt; text-align: center; width: 100%;" sizcache="1" sizset="12">
+        <%= link_to '+ Add Chat & Property Users', {:controller=>'users',:action=>"add_contacts",:from_dash_board=>'true'} ,:id=>"upload_form_add_no_contact",:class=>"label1_home red_bold",:style=>"float:none; text-decoration:none; white-space:nowrap; display:block" %>
+        <script>new Control.Modal($('upload_form_add_no_contact'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      </div>
+    </div>
+  <%end%>
+</div>
+
+<!--[if IE 7]>
+<style type="text/css">
+body .iefix { float:none;margin-left:70px;}
+body .iefix7 {padding-bottom:0px;margin-top:7px;}
+</style>
+<![endif]-->

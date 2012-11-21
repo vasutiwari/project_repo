@@ -1,0 +1,30 @@
+<div id="sbox-window" style="" class=""><%# @nav_path = (@nav == 'edit') ? 'esp_' : '' %>
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <%= form_tag({:action => "new_master_folder",:portfolio_type_id=>@portfolio_type.id,:parent_id => params[:folder_id]}, :target => "upload_frame", :id => "upload_form1")  do %>
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+      <h3 class="light_head"><%= @portfolio_type.name.capitalize %>&nbsp;<span id="success_error_msg" style="font-size:12px;"></span></h3>
+      <div class="dialog_light_center">
+        <div class="dialog_second_center">
+          <div class="status_light_error" id="error_display"></div>
+          <div class="status_light_error" id="emp_folder" style="display:none;">Please enter folder name..</div>
+          <div class="status_light">
+            <span class="simple_light_text">
+              Folder Name : &nbsp;  <%=text_field_tag "folder_name"%>
+            </span>
+          </div>
+          <br/>
+          <div class="status">						
+          </div>
+          <span style="text-align:right">
+            <%= image_submit_tag("/images/create.png", :width=>"77", :height=>"33", :style=>"border:none;", :onClick=>"return blank_folder_name('folder_name');") %>
+          </span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <iframe id="upload_frame" name="upload_frame" style="display: none"></iframe>
+  <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a></div>
+

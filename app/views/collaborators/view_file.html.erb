@@ -1,0 +1,21 @@
+<script>
+  share  = true;
+	file = true;
+	folder = false;
+</script>
+<div class="basicbodycontainer" style="height:auto;width:775px;">
+      <%= form_tag({:action => "share_file",:portfolio_id=>@portfolio.id,:folder_id => @folder.id,:user_id=>@user.id,:document_id=>@document.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>params[:show_missing_file],:deal_room => params[:deal_room]},:target => "upload_frame", :id => "upload_form7", :onsubmit=>'return restrict_empty_collaborators()')  do %>
+       <%=render :partial=>"/collaborators/share_add_collab",:locals=>{:folder_collection =>@folder,:action =>@action,:mem_list =>@mem_list,:data=>@data}%>
+      <%end%>
+      <h4> &nbsp;</h4>
+      <iframe id="upload_frame" name="upload_frame" style="display: none"></iframe>
+      <a id="sbox-btn-close" onclick="find_close_function('<%=@portfolio.id%>','<%=@document.folder_id%>','hide_del','<%=params[:list]%>','<%=params[:call_from_prop_files]%>');" style="cursor: pointer;"></a>
+</div>
+
+
+<script type="text/javascript">
+ jQuery(document).ready(function(){
+if (navigator.appVersion.indexOf("MSIE 7.") != -1)
+   setTimeout('call_to_text_comment_collab()', '50');
+ });
+</script>

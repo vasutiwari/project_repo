@@ -1,0 +1,38 @@
+<%action_name=params[:action]%>
+
+<div class="box-1col">
+     <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/portfolios">Portfolio List</a> > <%=(action_name== "new" ? "Add" :"Edit")%> Portfolio </div>
+    
+
+    
+     
+    <div class="clearfloat"></div>
+    <div class="col1P col1PBN ">
+      	<p><span>Select Users</span></p>
+        
+        <div class="fltrt maginR20"><label> <input type="checkbox" id="select_all_user" class="valign" style="vertical-align:inherit;" /> Select All</label></div>
+        <div class="clear"></div>
+        <div class="whtBox overflow130">
+        	<table class="t1" cellpadding="0" cellspacing="0" border="0" width="100%">
+				
+					
+					
+										
+						
+							<div style="margin-left:300px;margin-top:50px;"><%= FLASH_MESSAGES['client_admin']['116'] %></div>
+						<%end%>
+								    </tr>
+                </tbody>
+            </table>
+        </div>
+      </div>
+    <div class="clearfloat"></div>
+   
+    <div class="clearfloat"></div>
+    </div>
+
+
+
+
+
+

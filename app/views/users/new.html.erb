@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>&nbsp;&nbsp;<%= "AMP - Simplified Intelligence" %></title>
+<link href="/stylesheets/amp_v2.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/amp_rf.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/SqueezeBox.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/javascripts/application.js"></script>
+<script src="https://www.google.com/jsapi"></script><script>google.load("mootools", "1.2.1");</script>
+<script type="text/javascript" src="/javascripts/SqueezeBox.js"></script>
+<script type="text/javascript">
+window.addEvent('domready', function() {
+	SqueezeBox.assign($$('a.boxed'), {
+		parse: 'rel',
+    url:'/contactus'
+	});
+
+});
+</script>
+<style type="text/css">
+.loginnavwrapper{margin-top:54px;}
+</style>
+<style type="text/css">
+  @media screen and (-webkit-min-device-pixel-ratio:0) {
+   .loginnavwrapper{margin-top:55px;}
+  }
+</style>
+</head>
+<body class="loginbodycontainer">
+<div class="loginmainwrapper">
+    <div class="loginheaderwrapper">
+      <div class="logowrapper"><a href="<%=APP_CONFIG[:main_url]%>"><img src="/images/logo.png"  width="172" he border="0"/></a></div>
+      <div class="loginnavwrapper">
+        <div class="navactive"> <a href="/signup">Sign Up </a></div>
+        <div class="navdeactive"><a href="/login">Log In </a></div>
+      </div>
+    </div>
+<%= form_for @user, :url =>{ :action => :create }, :html => {:multipart => true} do  |u| -%>
+        <% fields_for 'user_profile_detail', @user.user_profile_detail do |d| -%>
+            <% fields_for 'brochure',@brochure do |b| -%>
+                <%=render :partial=>"form",:locals=>{:u=>u,:d=>d,:b=>b,:user_collection => @user,:profile_errors =>@profile_errors}%>
+            <% end %>
+        <% end %>
+<% end %>
+<div class="singup_footer"></div>
+  <div class="signupfooterrow">
+    <div class="footer-link-before-login"><a href="<%=APP_CONFIG[:main_url]%>">Home</a> |  <a href="<%=APP_CONFIG[:main_url]%>/team.html">Team</a> |  <a href="<%=APP_CONFIG[:main_url]%>/security_privacy.html">Privacy & Security</a> |  <a href="<%=APP_CONFIG[:main_url]%>/request_demo/" target="_blank">Contact Us</a> |  <a href="<%=APP_CONFIG[:main_url]%>/terms.html">Terms Of Us</a></div>
+  <div class="ssl-powered-image"><a href="#" title="Secured by: GeoTrust"><img src="images/geotrust-img.png" width="97" height="38" border="0" alt="Secured by: GeoTrust"/></a><a href="#" title="Powered by: Amp"><img src="images/amplogofooter.png" width="72" height="38" border="0" alt="Powered by: Amp"/></a></div>
+    <div class="loginfooterow2">Copyrights &copy; AMP, 2010</div>
+        </div>
+</div>
+</body>
+</html>

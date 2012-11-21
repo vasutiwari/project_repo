@@ -1,0 +1,5 @@
+page << "jQuery('#file_collaborators_list').append('#{@tmp_mem_list}');"
+page.call "addUserScrollsettings"
+page << "jQuery('#collaborator_list').css('color','gray');jQuery('#collaborator_list').val('Enter email addresses here');"
+msg = check_is_property_user ? 'Property User(s) are successfully added' : (params[:is_lease_agent] == 'true' ?  'Leasing Agent(s) are successfully added' : 'Collaborator(s) are successfully added')
+page.call "flash_writter", "#{msg}"

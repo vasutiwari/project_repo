@@ -1,0 +1,21 @@
+if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?('properties') || params[:user] == 'false'
+  if params[:edit_inside_asset] == "true"
+    page.replace_html "portfolio_name_#{@note.id}","#{display_truncated_chars(@note.property_name, 16, true)}"
+    page.replace_html "portfolio_location_#{@note.id}","#{get_location_slider(@note)}"
+  end
+  page.replace_html "show_assets_list",:partial=>'assets_list'
+  unless params[:user] == 'false'
+  page.replace_html "portfolio_name_#{@note.id}","#{display_truncated_chars(@note.property_name, 16, true)}" if @note
+  page.replace_html "portfolio_location_#{@note.id}","#{get_location_slider(@note)}" if @note
+  if params[:close_light_box] == "true"
+    page.hide 'modal_container'
+    page.hide 'modal_overlay'
+    page.call "change_property_pic", "#{@note.id}", "#{@property_image_path}"  if !@note.nil?
+		page.call "change_property_title","#{@note.id}","#{@note.property_name}" if !@note.nil?
+  end
+  page.call "active_title","data_hub"
+  page.call "flash_writter", FLASH_MESSAGES['properties']['409']  if params[:from_task] == "true"
+  end
+else
+  update_partials(page)
+end

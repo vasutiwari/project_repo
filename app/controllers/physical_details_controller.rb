@@ -1,0 +1,2 @@
+class PhysicalDetailsController < ApplicationController
+end

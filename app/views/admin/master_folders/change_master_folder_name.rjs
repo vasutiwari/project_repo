@@ -1,0 +1,19 @@
+if !params[:value].blank?
+  check_folder_name = MasterFolder.find(:first,:conditions => ["name=? and parent_id=? and portfolio_type_id=?",params[:value],params[:parent_id],params[:portfolio_type_id]])
+  f = MasterFolder.find(params[:id])
+  if check_folder_name.blank?
+    f.update_attributes(:name=>params[:value])
+    d = f.updated_at.strftime("%b %d")
+    page.call("do_folder_update","#{params[:id]}","#{f.name}",d)
+    page.call("do_title_update","#{params[:id]}","#{f.name}")
+    page.call "flash_writter", "Folder name has been renamed."
+  else
+    page.call("do_folder_update","#{params[:id]}","#{f.name}",d)
+    page[:folder_name_exist].innerHTML = "Folder Name already exist.."
+    page.visual_effect(:highlight,'folder_name_exist', :duration => 2.5,:startcolor=>"red")
+    page.visual_effect :fade,'folder_name_exist',:duration => 2.5
+  end
+else
+  page.call "flash_writter", "Folder name cant be blank."
+  page.call("do_folder_update","#{params[:id]}","#{params[:value]}",d)
+end

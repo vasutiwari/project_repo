@@ -1,0 +1,38 @@
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="basic_style" style="width: 530px;">
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+      <div class="dialog_light_center">
+        <div class="dialog_second_center">
+            <%= form_tag update_user_image_collaboration_hub_path(params[:id]), :target=>'new_frame', :multipart => true do%>
+            <div class="status_light">
+              <span class="simple_light_text">
+							 <% if params[:logo_image] %>
+                   Choose an image  : <br/>
+									 <% else%>
+									 Choose a profile image  : <br/>
+									 <%end%>
+                <%=file_field :user_image,:uploaded_data,:size=>20%>
+              </span>
+							<br/>
+              <span style="float: right; margin-right: 70px; margin-top: -33px;border-width:0;margin-bottom:0;padding:0;">
+                <input class="button" type="image" src="/images/step4btn_upload.jpg" alt="UPLOAD" title="UPLOAD"/ onclick="return check_picture_empty('user');">
+	
+              </span>
+            </div>
+            <div>
+              <center><font size="2" color="red"><span id="err_upload"></span></font></center>
+            </div>
+						<%= raw("<input type='hidden' value='true' name='logo_image'/>")  if params[:logo_image]%>
+          <%end%>
+          <br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+<iframe id="upload_frame" name="new_frame" style="display: none"></iframe>

@@ -1,0 +1,49 @@
+if params[:save].blank? && params[:update] != "true" 
+  page<< "flush_last_comment();" # this is called to making the edit display null becoz now we want to show the result and check variable 'detect_comment_call'
+  page<< "last_edit_cont = last_edit_comm = '';" # making the previous edit options kill in comment.
+end
+if @notice.empty? # if any action done flash called else loader closed.
+  page.call "load_completer"
+else
+  page.call "flash_writter", @notice
+end
+page.assign "comment_curr", "#{params[:type]}_comment_#{params[:id]}" # params[:type] to identify whether the item is folder or document
+if !params[:save]
+  unless params[:exp_cmt_for]
+    page << "if(jQuery('#prop_#{params[:type]}_#{params[:id]}').length != 0){jQuery('#prop_#{params[:type]}_#{params[:id]}').html('#{@item.comments_finder.count == 0 ? '+' : @item.comments_finder.count}');}"
+    partial = params[:type] == "summary" ? "" : "/comments/comment_view"
+    if params[:update] && params[:type] != "summary"
+      page.replace "comment_view_#{params[:comment_id]}", :partial=>"/comments/new_comment", :locals=>{:comment=>@updated_comment}      
+        page << "jQuery('#list_comments_file').next().show();"
+          else
+      page << "jQuery('.toggle_container2##{params[:type]}_comment_#{params[:id]}').show();"
+      page.replace_html "#{params[:type]}_comment_#{params[:id]}", :partial=>"#{partial}"
+    end
+  else
+    ytd_find = @item.ytd? ? 'ytd_' : ''
+    page << "if(jQuery('#cmt_titled_#{@item.id}').length != 0){jQuery('#cmt_titled_#{@item.id}').html('View all comments (#{@item.comments_finder.count})');}"
+    @exp_item = @item
+    @exp_type = 'explanation'
+    @exp_cmt_for = params[:exp_cmt_for]
+    page.replace_html "#{params[:type]}_comment_#{ytd_find}#{params[:id]}", :partial=>'/explanations/comment_explanation_view'
+  end
+else
+  page << "jQuery('#text_#{params[:type]}_#{params[:id]}').val('');"
+  page << "jQuery('#text_#{params[:type]}_#{params[:id]}').attr('style','height:25px');"
+  unless params[:exp_cmt_for]
+    page << "if(jQuery('#cmt_titled').length != 0){jQuery('#cmt_titled').html('View all comments');}"# (#{@new_cmt.count})');}"
+    page << "if(jQuery('#prop_#{params[:type]}_#{params[:id]}').length != 0){jQuery('#prop_#{params[:type]}_#{params[:id]}').html('#{@new_cmt.count}');}"
+    page.call("set_comment_and_exp_id",@comment_id_to_delete,"all_saved_comments_ids") unless @comment_id_to_delete.nil?
+    page.call("set_comment_and_exp_id",@event_id_to_delete,"all_saved_events_ids") unless @event_id_to_delete.nil?
+    page.insert_html(:bottom, "#{'list_comments_file'}", :partial=>'/comments/new_comment',:locals=>{:comment=>@new_cmt.last})
+  else
+    #@item_id =  params[:exp_cmt_for] == "cap_exp"  ? @item.property_capital_improvement_id : @item.id    
+    page << "if(jQuery('#cmt_titled_#{@item.id}').length != 0){jQuery('#cmt_titled_#{@item.id}').html('View all comments (#{@new_cmt.count})');}"
+    @exp_item = @item
+    @exp_type = 'explanation'
+    @exp_cmt_for = params[:exp_cmt_for]
+    page.call("set_comment_and_exp_id",@comment_id_to_delete,"all_saved_comments_ids") unless @comment_id_to_delete.nil?
+    page.call("set_comment_and_exp_id",@event_id_to_delete,"all_saved_events_ids") unless @event_id_to_delete.nil?
+    page.insert_html(:bottom, "list_comments_explanation_#{params[:id]}", :partial=>'/comments/new_explanation_comment',:locals=>{:comment=>@new_cmt.last})
+  end
+end

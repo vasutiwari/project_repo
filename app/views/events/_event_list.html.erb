@@ -1,0 +1,35 @@
+<style>.subheadcol4 a{color: #1D7AD9;text-decoration:none}
+  .disabled prev_page div{display:none}
+  .disabled next_page div{display:none}
+  .my_files_bottompadding{margin-left:0px;}
+  .breadcrumblabel .setupiconrow img{margin-top: 8px;margin-left:1px}
+  .breadcrumblabel .setupiconrow{padding-right:6px;}
+  .breadcrumblabel{margin-top:0px;}
+  #folder_title{padding-left:0px;margin-top:17px; margin-left:-7px}
+</style>
+<div id='listing_events'  class="filergtwrap">
+  <div class="eventssubheadrow2 updates_disp">
+    <div class="eventscol2">&nbsp;</div>
+  </div>
+  <%if !@events.blank?%>
+    <% for event in @events %>
+      <div class="eventssubheadrow2 updates_disp">
+        <div class="eventscol2 event_filename">
+          <div class="subheadcol4 "><%= display_event(event) %></div>
+        </div>
+        <div class="eventscol2 event_timedisp"><%=display_event_time(event) if !display_event(event).nil? %></div>
+      </div>
+    <%end%>
+		<div class="paginationcol" style="margin-left:445px;">
+    <%=raw display_pagination%>
+		</div>
+  <%else%>
+    <div class="eventssubheadrow2">
+      <div class="eventscol2">
+        <div class="subheadcol4 ">No recent updates.</div>
+        <div class="eventlabel"></div>
+      </div>
+      <div class="eventscol2">&nbsp;</div>
+    </div>
+  <%end%>
+</div>	

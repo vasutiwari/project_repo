@@ -1,0 +1,27 @@
+<% content_for :title , "AMP-Reset password" %>
+<% disply = flash.empty? ?  'none' : 'block'  %>
+<% email = flash[:notice] || 'mail example@theamp.com'
+   email = email.split(' ').last
+%>
+ <div class="loginwrapperrow" style="height: 290px;">
+	<div class="middlewrapper2">
+		<div class="sectiontitle">To Reset Your Password, Check Your Email Now </div>
+		<div class="errorpromptbig" style="padding:0;border:none;display:<%= disply %>"><font color="red" size="3px;"><%= flash[:error]%></font></div>
+		<div class="rowwrapper">
+			<div class="reset_password_cont">
+				<p><font color="green"><%= flash[:notice]%></font> </p>
+				<p>When you receive the email, just click on the activation link inside the message to reset your password </p>
+				<p>your reset password email will expire in 1 week from now at<br />
+					<%= Time.now %></p>
+				<div class="sectiontitle">Can't find the email ?</div>
+				<ol type="1">
+					<p>Verify the spelling of your email address: <%= email %></p>
+					<p>check your bulk or junk mail folder</p>
+					<p>if still you can't find it,&nbsp;<%= link_to 'Just try again', new_password_path, :class=>'bluecolor' %></p>
+				</ol>
+				<p>Do You want to continue login please, &nbsp;<%= link_to 'Click here', login_path, :class=>'bluecolor' %> </p>
+			</div>
+		</div>
+	</div>
+</div>
+<br/>

@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+<link href="/stylesheets/amp_website.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/SqueezeBox.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+		<%= javascript_include_tag "prototype" %>
+		<script type="text/javascript" src="/javascripts/rails.js"></script>
+    <script type="text/javascript">
+		//window.onunload = load_completer();
+		/*	document.observe("dom:loaded", function() {
+
+			});
+			document.observe("ajax:before", function(event) {
+					load_writter();
+			});
+			document.observe("ajax:success", function(event) {
+				 load_completer();
+			}); */
+
+		</script>
+    <%= javascript_include_tag "control.modal" %>
+    <style>
+      .background{
+        background-image:none;
+      }
+    </style>
+  </head>
+  <body class="background" id="get_started2">
+    <div class="lightboxwrapper">
+		<div id="get_started2">
+      <div class="lite_lhs">
+        <div class="lhs_navwrapper">
+          <div class="lhs_navactive"><img src="/images/white_arrow.png" />Request Demo</div>
+          <div class="contactinfowrapper">
+            <div class="contactinforow"><img src="/images/email_icon.png" /><a href="mailto:praveeny@theamp.com">praveeny@theamp.com</a></div>
+            <div class="contactinforow"><img src="/images/telephone_icon.png" />+1 (415) 562-4585</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lite_rhs">
+        <h1>Thanks for showing interest in the AMP platform. We will contact you to understand your needs.</h1>
+       <%= form_tag({:controller=>"home", :action=>"get_started"}, :remote=> true, :method=>:post, id=>"form1") do %>
+          <div class="rowrapper">
+            <div class="fieldlabel">*Email ID:</div>
+            <div class="fieldinputcol">
+              <label>
+							 <input type="text_box" name="email" class="inputfield" />
+							 <input type="hidden" name="field" class="inputfield" id="field" />
+              </label>
+            </div>
+						</br>	</br>
+						<span style="font-size:11px;color:red;padding-left:130px;" id="error_msg"></span>
+          </div>
+          <div class="lite_contentwrapper">
+            <p>We integrate with your existing accounting systems to seamlessly provide information on your assets.&nbsp;You will&nbsp;receive a confirmation&nbsp;email&nbsp;in&nbsp;your inbox&nbsp;as you complete this process.
+            </p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+          </div>
+          <div class="btnrow">
+            <div class="linkwrapper">
+					</div>
+            <div class="bntwrapper">
+             <%= image_submit_tag("/images/nextbtn.png",:style=>"border:none;", :onClick=>"document.getElementById('field').value ='next'") %>
+            </div>
+          </div>
+	      <%end%>
+        </div>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>
+<script>
+window.onunload = load_completer();
+ function load_writter(){
+         jQuery('#success_msg', parent.document.body).html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif;'><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+         jQuery('#msg_writter', parent.document.body).show();
+      }
+			 function load_completer(){
+         jQuery('#msg_writter', parent.document.body).fadeOut(1000);
+      }
+	</script>

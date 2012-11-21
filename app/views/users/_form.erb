@@ -1,0 +1,175 @@
+<div class="loginwrapperrow">
+    <div class="signupheaderrow">Create a new account</div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> Contact Name:</div>
+        <%name_class=user_collection.errors[:name].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+       <%=u.text_field :name, :class=>name_class%>
+      </div>
+    </div>
+        <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%= error_message_on :user, :name%> </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> Job Title:</div>
+      <div class="signupfieldinput">
+	        <%name_class_title=profile_errors && !profile_errors[:title].blank? ? 'signinputboxerror' : 'signinputbox'%>
+         <%=d.text_field :title, :class=>name_class_title%>
+      </div>
+    </div>
+				<div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%if profile_errors%><%=profile_errors["title"]%><%end%></div>
+    </div>
+    <div class="signupfieldrow">
+          <div class="signupfiledlabel"><font color='red'>*</font> Email ID:</div>
+            <%email_class=user_collection.errors[:email].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+                <%=u.text_field :email, :class=>email_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%= error_message_on :user, :email%></div>
+    </div>
+    <div class="signupfieldrow">
+          <div class="signupfiledlabel"><font color='red'>*</font> Phone no:</div>
+            <%phone_number_class=user_collection.errors[:phone_number].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+         <%=u.text_field :phone_number, :class=>phone_number_class%>
+     </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%= error_message_on :user, :phone_number%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> Company Name:</div>
+            <%company_name_class=user_collection.errors["company_name"].blank? ? 'signinputbox' : 'signinputboxerror'%>
+            <div class="signupfieldinput">
+              <%=u.text_field :company_name, :class=>company_name_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%= error_message_on :user, :company_name%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">Website:</div>
+      <div class="signupfieldinput">
+      <%=d.text_field :website, :class=>"signinputbox" %>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+     <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+     <div class="signuperrormessage"></div>
+     </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">Brochure:</div>
+      <div class="signupfieldinput"><%=b.file_field :uploaded_data, :size=>20%></div>
+    </div>
+     <div class="signupfieldrow">
+     <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+     <div class="signuperrormessage"></div>
+         </div>
+     <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> Address:</div>
+            <%address_class=user_collection.errors[:address].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+          <%=u.text_field :address, :class=>address_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%= error_message_on :user, :address%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> City:</div>
+            <%city_class=profile_errors["city"].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+        <%=d.text_field :city, :class=>city_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%if profile_errors%><%=profile_errors["city"]%><%end%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> State:</div>
+            <%state_class=profile_errors["state"].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+        <%=d.text_field :state, :class=>state_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%if profile_errors%><%=profile_errors["state"]%><%end%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> Zip:</div>
+            <%zipcode_class=profile_errors["zipcode"].blank? ? 'signinputbox' : 'signinputboxerror'%>
+      <div class="signupfieldinput">
+        <%=d.text_field :zipcode, :class=>zipcode_class%>
+      </div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+      <div class="signuperrormessage"><%if profile_errors%><%=profile_errors["zipcode"]%><%end%></div>
+    </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel"><font color='red'>*</font> What interests you:</div>
+            <div class="signupiconrow">
+                <div class="signupmainrow">
+          <div class="signuprow"> <div class="signupiconcol"><img src="/images/signup_icon1.png" width="91" height="60" /></div>
+            <div class="signupiconlabel">
+              <input type="checkbox" name="interests[]" value="Manage Notes" <%if params[:interests].include?("Manage Notes")%> checked<% end %> />
+            Manage Notes </div>
+          </div>
+          <div class="signuprow">
+            <div class="signupiconcol"><img src="/images/signup_icon2.png" width="91" height="60" /></div>
+            <div class="signupiconlabel">
+              <input type="checkbox" name="interests[]" value="Manage Real Estate" %<%if params[:interests].include?("Manage Real Estate")%> checked<% end %> />
+              Manage Real Estate </div>
+          </div>
+        </div>
+        <div class="signupmainrow">
+          <div class="signupmainrow">
+            <div class="signuprow">
+              <div class="signupiconcol"><img src="/images/signup_icon3.png" width="90" height="60" /></div>
+              <div class="signupiconlabel">
+                <input type="checkbox" name="interests[]" value="Acquisition" <%if params[:interests].include?("Acquisition")%> checked<% end %> />
+                Acquisition</div>
+            </div>
+            <div class="signuprow">
+              <div class="signupiconcol"><img src="/images/signup_icon4.png" width="90" height="60" /></div>
+              <div class="signupiconlabel">
+                <input type="checkbox" name="interests[]" value="Disposition" <%if params[:interests].include?("Disposition")%> checked<% end %> />
+                Disposition</div>
+            </div>
+            <div class="signuprow">
+              <div class="signupiconcol"><img src="/images/signup_icon5.png" width="90" height="60" /></div>
+              <div class="signupiconlabel">
+                <input type="checkbox" name="interests[]" value="Services" <%if params[:interests].include?("Services")%> checked<% end %> />
+                Services</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+     <div class="signupfieldrow">
+     <div class="signupfiledlabel">&nbsp;&nbsp;&nbsp;</div>
+     <div class="signuperrormessage"><%if profile_errors%><%=profile_errors["interest"]%><%end%></div>
+     </div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">Comments:</div>
+      <div class="signuptextbox">
+        <%=u.text_area :comment, :class=>"textbox"%>
+      </div>
+    </div>
+     <div class="signupbottomrow">
+         By clicking the '<strong>Sign Up</strong>' below, you are agreeing to the <a href="<%=APP_CONFIG[:main_url]%>/privacy.html">Privacy Policy</a> and <a href="<%=APP_CONFIG[:main_url]%>/terms.html">Terms of Use</a> for AMP</div>
+    <div class="signupfieldrow">
+      <div class="signupfiledlabel">&nbsp;&nbsp;</div>
+      <%= image_submit_tag "/images/signup_button.png",:class=>"signupbutcol",:width=>"60",:height=>"23",:border=>"0", :style=>"padding-bottom: 0px;padding-left: 0px;margin-bottom: 24px;margin-left: 12px;"%>
+     </div>
+</div>

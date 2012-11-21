@@ -1,0 +1,88 @@
+<script>
+temp_period='<%=params[:tl_period]%>';
+temp_exp = '<%=params[:highlight_id]%>';
+</script>
+<%calc_for_financial_data_display%>
+<%default_selection = session[:portfolio__id].present? ? "?portfolio_selection=true" : "?property_selection=true" %>
+<%default_selection_sub_items = session[:portfolio__id].present? ? "&portfolio_selection=true" : "&property_selection=true" %>
+<div class="navSubmenu financialSubMenu" style="visibility:hidden;" id="financials_sub_tab">
+
+<a  id="financial" href="javascript:;"   onclick="partial_page='financials';restrict_pwd();performanceReviewCalls('financial',{},'blank',jQuery('#per_tot_sqft').val());jQuery('.pdf_link_financial_end').hide();jQuery('.pdf_link_financial').hide();jQuery('.sqrft_per_unit').hide();return false; load_completer();" class="hide_tabs1" style="display:none;">Operating Statement</a>
+
+<!-- <a href="/real_estate/<%#=portfolio_obj.try(:id)%>/properties/<%#= property_obj.try(:id)%>?tl_period=4&tl_year=<%#=@financial_year%>&highlight_param=financial" class="show_tabs1">Operating Statement</a> -->
+<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%><%=default_selection%>" class="show_tabs1">Operating Statement</a>
+
+|
+
+<%if find_accounting_system_type(3,property_obj) && property_obj.try(:leasing_type) != "Commercial"%>
+
+		<a href="javascript:;" id="capital_expenditure" onclick="partial_page='capital_expenditure';restrict_pwd();performanceReviewCalls('capital_expenditure',{},'blank',jQuery('#per_tot_sqft').val());jQuery('.pdf_link_financial').hide();jQuery('.sqrft_per_unit').hide();return false; load_completer();" class="hide_tabs1" style="display:none;">Maintenance Expenditures</a>
+		
+		<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=capital_expenditure<%=default_selection_sub_items%>" class="show_tabs1">Maintenance Expenditures</a>
+
+
+		<%if session[:property__id].present? && session[:portfolio__id].blank?%>| <%end%>
+  <%else%>
+
+	<a href="javascript:;" id="capital_expenditure" onclick="partial_page='capital_expenditure';restrict_pwd();performanceReviewCalls('capital_expenditure',{},'blank',jQuery('#per_tot_sqft').val());jQuery('.pdf_link_financial_end').hide();jQuery('.pdf_link_financial').hide();jQuery('.sqrft_per_unit').hide();return false; load_completer();" class="hide_tabs1" style="display:none;">Capital Expenditures</a>
+		
+		<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=capital_expenditure<%=default_selection_sub_items%>" class="show_tabs1">Capital Expenditures</a>
+		
+		|
+  <%end%>
+  <% if !current_user.email.match(/\@(.+)/)[0].strip.eql?("@metroproperties.net") %>
+    <%if property_obj.accounting_type != "Cash" || portfolio_obj.try(:leasing_type).eql?("Commercial")%>
+
+			<a href="" id="cash_n_receivables" onclick="partial_page='cash_and_receivables';restrict_pwd();performanceReviewCalls('cash_n_receivables',{});jQuery('.pdf_link_financial_end').hide();return false; load_completer();" class="hide_tabs1" style="display:none;">Cash</a>
+			
+			<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=cash_n_receivables<%=default_selection_sub_items%>" class="show_tabs1">Cash</a>
+			
+			|
+
+		<a href="" id="cash_n_receivables_for_receivables" onclick="partial_page='cash_and_receivables_for_receivables';restrict_pwd();performanceReviewCalls('cash_n_receivables_for_receivables',{});jQuery('.executiverhsrow').hide();jQuery('#id_for_modify_threshold').hide();jQuery('.pdf_link_financial').hide();jQuery('.pdf_link_financial_end').hide();return false; load_completer();" class="hide_tabs1" style="display:none;">Receivables</a>
+		
+		<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=cash_n_receivables_for_receivables<%=default_selection_sub_items%>" class="show_tabs1">Receivables</a>
+		
+		<%if session[:property__id].present? && session[:portfolio__id].blank?%>| <%end%>
+  <%end%>
+	    <%end%>
+
+	<%if session[:property__id].present? && session[:portfolio__id].blank?%>
+
+	<a href="javascript:;" id="variances" onclick="partial_page='variances';restrict_pwd();change_option();performanceReviewCalls('variances',{});jQuery('.pdf_link_financial_end').hide();jQuery('.pdf_link_financial').hide();jQuery('.temp_class').hide();jQuery('.sqrft_per_unit').hide();return false; load_completer();" class="loader_event hide_tabs1" style="display:none;">Variances </a>
+	
+	<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=variances<%=default_selection_sub_items%>" class="show_tabs1">Variances</a>
+	
+	|
+	<a href="" id="note_terms" onclick="set_call('note_terms','<%=portfolio_obj.id%>','<%= property_obj.id%>');return false;" class="hide_tabs1" style="display:none;">Debt</a>
+	
+	<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=note_terms<%=default_selection_sub_items%>" class="show_tabs1">Debt</a>
+	<%end%>
+
+  <%if remote_property(property_obj.accounting_system_type_id)%>  |
+
+		<a href="javascript:;" id="balance_sheet" onclick="partial_page='balance_sheet';restrict_pwd();change_option();performanceReviewCalls('balance_sheet',{});jQuery('.executiverhsrow').hide();jQuery('#id_for_modify_threshold').hide();jQuery('.pdf_link_financial').hide();jQuery('#per_tot_sqft').hide();jQuery('.temp_class').hide();return false; load_completer()" class="hide_tabs1" style="display:none;">Balance Sheet</a>
+		
+		<a href="/real_estate/<%=portfolio_obj.try(:id)%>/properties/<%= property_obj.try(:id)%>?tl_period=4&tl_year=<%=@financial_year%>&highlight_param=balance_sheet<%=default_selection_sub_items%>" class="show_tabs1">Balance Sheet</a>
+		
+  <%end%>
+</div>
+<script type="text/javascript">
+jQuery('#financial').attr('class','selected');
+//enable_disable_tab('financial', active_sub_call);
+
+jQuery(document).ready(function()
+	{
+	  financial_tab_mousehover("<%= params[:highlight_param].present? ? params[:highlight_param] : false%>");
+	}
+	);
+
+	 jQuery('#financials_sub_tab').mouseover(function()
+	{
+    mousehover('asset_view_path','financials')
+	});
+
+	jQuery('#financials_sub_tab').mouseout(function(){
+    delayed_mouseout('asset_view_path');
+});
+</script>

@@ -1,0 +1,177 @@
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  active_call="performance_review"
+  occupancy_type = "<%=params[:occupancy_type]%>"
+  partial_page ="lease_sub_tab"
+
+</script>
+<%note_id = params[:note_id].nil? ? params[:id] : params[:note_id]
+month_collection = @month
+year_collection = @year
+%>
+<% if params[:start_date] %>
+  <% exp_month_ytd = month_collection %>
+  <% exp_ytd_check = false %>
+<% elsif !params[:tl_month].nil? and !params[:tl_month].blank? %>
+  <% exp_month_ytd = month_collection %>
+  <% exp_ytd_check = false %>
+<% else %>
+  <% if (params[:period] && params[:period] == "4") ||  (params[:tl_period] && params[:tl_period] == "4") %>
+    <% exp_month_ytd = Time.new.ago(1.month).strftime("%m").to_i %>
+    <% exp_ytd_check = true %>
+  <% elsif (params[:period] && params[:period] == "5") ||  (params[:tl_period] && params[:tl_period] == "5") %>
+
+    <% exp_month_ytd = month_collection %>
+    <% exp_ytd_check = false %>
+  <% elsif (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") %>
+    <% exp_month_ytd = 12 %>
+    <% exp_ytd_check = true %>
+  <% end %>
+<% end %>
+<div id ="portfolio_overview_property_graph">
+  <% if !sub_leases.blank? %>
+    <div class="rentroll2_tablewrapper">
+      <div class="renttableheaderow">
+        <%if sub_leases.count == 1%>
+        <div class="rentroll2_tablecol1">Suite</div>
+        <div class="rentroll2_tablecol2">Tenant</div>
+        <div class="rentroll2_tablecol3">Space <br/>Type</div>
+        <div class="rentroll2_tablecol4 cashtable2_col4_subcol3">SqFt</div>
+        <div class="rentroll2_tablecol5 cashtable2_col4_subcol3">Base <br/> Rent</div>
+        <div class="rentroll2_tablecol6 cashtable2_col4_subcol3">Effective Rent</div>
+        <div class="rentroll2_tablecol7 cashtable2_col4_subcol3">Lease <br/> End</div>
+        <div class="rentroll2_tablecol8 cashtable2_col4_subcol3">TI&rsquo;s</div>
+        <div class="rentroll2_tablecol9 cashtable2_col4_subcol3">LC&rsquo;s</div>
+        <div class="rentroll2_tablecol10"  id ="financexp" ><%#=month_ytd_explanation%> Explanation</div>
+        <%else%>
+
+				<%params[:period] = params[:tl_period] = params[:period].blank? ? params[:tl_period] : params[:period]%>
+
+        <div class="rentroll2_tablecol1"><%= sort_link_helper("Suite", "ps.suite_no",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"ps.suite_number")%></div>
+
+        <div class="rentroll2_tablecol2"><%= sort_link_helper("Tenant", "pl.tenant",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"pl.tenant")%></div>
+
+        <div class="rentroll2_tablecol3"><%#= sort_link_helper("Space Type ", "ps.space_type",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"ps.space_type")%> Space Type </div>
+
+        <div class="rentroll2_tablecol4 cashtable2_col4_subcol3"><%#= sort_link_helper("SqFt", "ps.rentable_sqft",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"ps.rented_area")%>SqFt</div>
+
+        <div class="rentroll2_tablecol5 cashtable2_col4_subcol3"><%#=sort_link_helper(raw("Base <br/> Rent $"), "pl.base_rent",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"pl.base_rent")%>Base <br/> Rent $</div>
+
+        <div class="rentroll2_tablecol6 cashtable2_col4_subcol3"><%#= sort_link_helper("Effective Rent $", "pl.effective_rate",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"pl.effective_rate")%>Effective Rent $</div>
+
+        <div class="rentroll2_tablecol7 cashtable2_col4_subcol3"><%#= sort_link_helper(raw("Lease <br/> End"), "pl.end_date",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"pl.end_date")%>Lease <br/> End</div>
+
+        <div class="rentroll2_tablecol8 cashtable2_col4_subcol3"><%#= sort_link_helper(raw("TI&rsquo;s $"), "pl.tenant_improvements",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type]}) %><%#=find_sorting_image(params,"pl.tenant_improvements")%>TI&rsquo;s $</div>
+
+        <div class="rentroll2_tablecol9 cashtable2_col4_subcol3"><%#= sort_link_helper(raw("LC&rsquo;s $"), "pl.leasing_commisions",{:controller=>"performance_review_property", :action => "lease_sub_tab",:page=>params[:page],:per_page=>params[:per_page],:id=>note_id,:start_date => params[:start_date],:partial_page=>"lease_sub_tab",:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year], :occupancy_type => params[:occupancy_type],:quarter_end_month=>params[:quarter_end_month]}) %><%#=find_sorting_image(params,"pl.leasing_commisions")%>LC&rsquo;s $</div>
+        <div class="rentroll2_tablecol10"  id ="financexp" ><%#=month_ytd_explanation%> Explanation</div>
+        <%end%>
+      </div>
+      <% sub_leases.each do |lease| %>
+        <div class="tablecontentrow">
+          <div class="rentroll2_tablecol1"><%= lease.suite_number %> </div>
+          <div class="rentroll2_tablecol2" title="<%=lease.tenant%>" <% if lease.tenant.blank? %>style="height:1px;"<% end %>><%=display_truncated_chars(lease.tenant,15,true)%><%#=display_tenant_name(display_truncated_chars(lease.tenant,15,true))%></div>
+          <div class="rentroll2_tablecol3"><%if (lease.space_type.nil? || lease.space_type.blank?)%>&nbsp;<%else%><%=lease.space_type%><%end%></div>
+          <div class="rentroll2_tablecol4 cashtable2_col4_subcol3"><%= lease.rented_area.present? ? lease.rented_area : raw("&nbsp;") %></div>
+          <div class="rentroll2_tablecol5 cashtable2_col4_subcol3"><%= lease.base_rent.present? ? lease.base_rent : raw("&nbsp;") %></div>
+          <div class="rentroll2_tablecol6 cashtable2_col4_subcol3"><%= lease.effective_rate.present? ? lease.effective_rate : raw("&nbsp;")%></div>
+          <div class="rentroll2_tablecol7 cashtable2_col4_subcol3" style= "width:54px;"><%= lease.end_date.nil? ? raw("&nbsp;") : lease.end_date.to_date.strftime("%b %Y")%></div>
+          <div class="rentroll2_tablecol8 cashtable2_col4_subcol3"><%= lease.tenant_improvements.present? ? lease.tenant_improvements : raw("&nbsp;")%> </div>
+          <div class="rentroll2_tablecol9 cashtable2_col4_subcol3"><%= lease.leasing_commissions.present? ? lease.leasing_commissions : raw("&nbsp;")%></div>
+          <div class="rentroll2_tablecol10" style="padding-left:3px;">
+            <% if !month_collection.nil? %>
+              <div onclick="show_rent_explanation('property_lease_sub_<%= lease.id%>');" onmouseover="document.getElementById('non_property_lease_sub_<%= lease.id%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_property_lease_sub_<%= lease.id%>').style.backgroundColor='';"  class="tablecol5" >
+                <span id="non_property_lease_sub_<%= lease.id%>" style="width:150px; display:block;">
+                  <%= truncate_extra_chars_for_expl(sub_lease_explanation(lease.id,lease.occupancy_type,note_collection.id),75) %>&nbsp;</span>
+              </div>
+              <div class="more ie_7_empty_div" id="property_lease_sub_<%= lease.id%>_more">
+              </div>
+              <div id="property_lease_sub_<%= lease.id%>_text"  style="display:none" >
+                <textarea id="property_lease_sub_<%= lease.id%>_box" name="property_lease_sub_<%= lease.id%>_box" class="expand25-300 inline_editing_tablecol5" style="width:150px;"size="5"  onblur="text_msg_display('property_lease_sub_<%= lease.id%>');save_sub_lease_exp(this.value,<%=lease.id %>,<%= month_collection  %>,<%= year_collection%>, '<%=lease.occupancy_type%>', '<%= request.request_uri %>',<%=note_collection.id%>)"><%= sub_lease_explanation(lease.id,lease.occupancy_type,note_collection.id) %></textarea>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      <div class="rentroll2_grayrow">
+        <div class="rentroll2_tablecol1">&nbsp;</div>
+        <div class="rentroll2_tablecol2"><%= sub_leases.count %> <%= display_text_for_counts(sub_leases.count,'Tenant') %></div>
+        <div class="rentroll2_tablecol3">&nbsp;</div>
+        <div class="rentroll2_tablecol4 cashtable2_col4_subcol3" style="text-align: right;"> <%= get_total_area(sub_leases.map(&:rented_area)) %></div>
+        <div class="rentroll2_tablecol5 cashtable2_col4_subcol3" style="text-align: right;"><%=display_currency_overview(get_weighted_data(sub_leases.map(&:rented_area),sub_leases.map(&:base_rent)))%></div>
+        <div class="rentroll2_tablecol6 cashtable2_col4_subcol3" style="text-align: right;"><%= display_currency_overview(get_weighted_data(sub_leases.map(&:rented_area),sub_leases.map(&:effective_rate))) %></div>
+        <div class="rentroll2_tablecol7 cashtable2_col4_subcol3" style= "width:54px;">&nbsp;</div>
+        <div class="rentroll2_tablecol8 cashtable2_col4_subcol3" style="text-align: right;"><%= display_currency_overview(get_weighted_data(sub_leases.map(&:rented_area),sub_leases.map(&:tenant_improvements))) %></div>
+        <div class="rentroll2_tablecol9 cashtable2_col4_subcol3" style="text-align: right;"><%= display_currency_overview(get_weighted_data(sub_leases.map(&:rented_area),sub_leases.map(&:leasing_commissions))) %> </div>
+      </div>
+      <%if params[:start_date] %>
+        <%= will_paginate sub_leases, :renderer => 'RemoteLinkRenderer', :style=>'width:auto' , :params =>{:occupancy_type => params[:occupancy_type], :start_date =>params[:start_date], :period => params[:period],:per_page=>30,:page=>params[:page],:id=> note_id, :partial_page=>params[:partial_page], :id=>note_id, :portfolio_type=>params[:portfolio_type], :financial =>params[:financial_subid] }%>
+      <% else %>
+			  <%= will_paginate sub_leases, :renderer => 'RemoteLinkRenderer', :style=>'width:auto' , :params =>{:occupancy_type => params[:occupancy_type], :tl_month => params[:tl_month],:tl_year => params[:tl_year], :tl_period => (params[:tl_period] ? params[:tl_period] : params[:period]),:per_page=>30,:page=>params[:page], :id=> note_collection.id, :partial_page=>params[:partial_page]}%>
+			<% end %>
+    </div>
+  <% else %><% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+    <div  class="rhscontentrow rhscontentrowtime">
+      <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+      <% if note_collection.class == RealEstateProperty %>
+        <% note_name = note_collection.property_name %>
+      <% else %>
+        <% note_name = note_collection.note_id %>
+      <% end %>
+      <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+        <span style="font-size:13px;">Data Unavailable. Please add Lease information at
+
+				<!--
+				<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>
+				-->
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+
+				.</span>
+      <% else %>
+        <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').hide();
+  jQuery('#yrForecast').hide();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) !=null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+     <% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+</script>

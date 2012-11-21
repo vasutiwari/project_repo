@@ -1,0 +1,64 @@
+
+
+ <%#if @template_folder.present?%>
+<%  user_id = current_user.id%>
+<div class="box-1col">
+  <div class="clearfloat"></div>
+		<div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/templates">Template List</a> > Add Template </div>
+		<div class="mandatryDiv" align="right" style="margin:-30px 0 10px 762px;">( <span class="txtRed">*</span> )<small> Mandatory Fields is required</small> </div>
+	 
+	 
+	 <div class="fltrt">
+      <a href="/client_admin/<%=user_id%>/templates/<%=@template_folder.first.id%>/add_new">
+      New Folder		</a>
+   
+  </div>
+
+  <div class="clearfloat"></div>
+    <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+      <thead >
+        <tr class="fb-tr-head">
+          <th class="bdr-lt-gry bdr-rt-wht" style="width:100px;">Folder Name</th>
+          <th class="bdr-rt-wht"style="width:300px;">Last Updated</th>
+           <th class="bdr-rt-wht" style="width:60px;">Actions</th>
+        </tr>
+      </thead>
+			<%if @template_folder.present?%>
+			<% @template_folder.each do |temp| %>
+			<tr>
+    
+
+	 <td><%= temp.folder_name %></td>
+    <td><%= temp.updated_date %></td>
+
+
+	
+            <td align="center" class="bdr-rt-gry bdr-top-gry">
+    
+              
+          <a href="/client_admin/<%=user_id%>/templates/<%=  temp.id%>/update_folder_new"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a>		
+            </td>
+    </tr>
+
+	<%end%>
+	
+			<%else%>
+			  <tbody><tr><td colspan="3"  style="text-align:center;">No Data To Display</td></tr></tbody>
+			<%end%>
+    </table>
+		<div class="clearfloat"></div>
+		<%if @templates.present?%>
+		<div class="paginationcol" style="margin-left:800px;">
+   
+</div>
+<%end%>
+</div>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,41 @@
+<% vacant_net,notice_net,min_rent,max_rent,net_deposits,minimum_rent,week_array,selected_floor_plan,wi_total,pi_total,total_inquiries = get_last_12_months_rent_and_vacant_units_graph %>
+<div class="box1-colWhite">
+    <div class="box-title">
+        <span class="title">Rent & Vacant Units</span>
+    </div>
+    <% if check_empty_values(vacant_net) || check_empty_values(notice_net) || check_empty_values(min_rent)|| check_empty_values(max_rent) %>
+    <div id="stacked_column3d_line">
+        <script>
+            myChart = new FusionCharts("/FusionCharts/StackedColumn3DLineDY.swf", 'FactorySum', 894, 310, 0, 0);
+            myChart.setDataXML("<chart palette='1' showLabels='1' showvalues='0' sNumberPrefix='$' sYAxisValuesDecimals='2' connectNullData='0' SYAxisName='Rent' PYAxisName='Unit' numDivLines='4' formatNumberScale='0'  decimals='2' SYAxisMinValue='<%= minimum_rent %>'>    <categories>        <%week_array.present? && week_array.each do |week| %><category label= '<%= week.titleize%>'/><%end %>    </categories>     <dataset seriesName='Net Units Vacant' color='#f6bd0f' showValues='0' SYAxisMaxValue='100' parentYAxis='P'>        <%vacant_net.present? && vacant_net.each do |vacant_net| %><set value='<%= vacant_net.to_f%>' /><%end %>    </dataset>    <dataset seriesName='Net Units on Notice' color='#2460a1' showValues='0' parentYAxis='P'>        <%notice_net.present? && notice_net.each do |notice_net| %><set value='<%= notice_net%>' /><%end %>    </dataset>	<dataset seriesName=<% if selected_floor_plan.eql?('All') %> 'Min Rent Avg' <% else %> 'Min Rent' <% end %> color='#cc6419' showValues='0' parentYAxis='S' renderAs = 'Line'>        <%min_rent.present? && min_rent.each do |min_rent| %><set value='<%= min_rent%>' /><%end %>    </dataset>    <dataset seriesName= <% if selected_floor_plan.eql?('All') %> 'Max Rent Avg' <% else %> 'Max Rent' <% end %>  color='#88b800' showValues='0' parentYAxis='S' renderAs = 'Line'>        <%max_rent.present? && max_rent.each do |max_rent| %><set value='<%= max_rent%>' /><%end %>    </dataset>   </chart>")
+            myChart.render("stacked_column3d_line");
+        </script>
+    </div>
+    <% else %>
+    <div style="text-align: center; height: 40px;width: 277px; line-height: 60px;">
+        Data Unavailable. Please Upload Weekly Data
+    </div>
+    <% end %>
+</div>
+<div class="clearfloat">
+</div>
+<div class="box1-colWhite">
+    <div class="box-title">
+        <span class="title">Inquiries & Deposits</span>
+    </div>
+    <% if  check_empty_values(net_deposits) || check_empty_values(wi_total) || check_empty_values(pi_total) || check_empty_values(total_inquiries) %>
+    <div id="inquiries_and_deposits">
+        <script>
+            myChart = new FusionCharts("/FusionCharts/MSCombiDY2D.swf", 'FactorySum1', 894, 310, 0, 0);
+            myChart.setDataXML("<chart  showValues='0' decimals='3' setAdaptiveYMin='1' lineThickness='3' showSecondaryLimits='0' showDivLineSecondaryValue='0'>    <categories>        <%week_array.present? && week_array.each do |week| %><category label= '<%= week.titleize%>'/><%end %>    </categories>    <dataset seriesname='Net Deposits' color='#7ca2ce' parentYAxis='P' renderAs='Line'>       <%net_deposits.present? && net_deposits.each do |net_deposit| %><set value='<%= net_deposit%>' /><%end %>    </dataset>    <dataset parentYAxis='P' seriesname='Walk-in Inquiries' color='#a2c065' renderAs = 'Line'>        <%wi_total.present? && wi_total.each do |wi_total| %><set value='<%= wi_total%>' /><%end %>    </dataset>    <dataset parentYAxis='P' seriesname='Phone Inquiries' color='#bc4642' renderAs='Line'>        <%pi_total.present? && pi_total.each do |pi_total| %><set value='<%= pi_total%>' /><%end %>    </dataset>	 <dataset parentYAxis='P' seriesname='Total Inquiries' color='#75569a' renderAs='Line'>        <%total_inquiries.present? && total_inquiries.each do |total_inquiries| %><set value='<%= total_inquiries%>' /><%end %>    </dataset></chart>")
+            myChart.render("inquiries_and_deposits");
+        </script>
+    </div>
+    <% else %>
+    <div style="text-align: center; height: 40px;width: 277px; line-height: 60px;">
+        Data Unavailable. Please Upload Weekly Data
+    </div>
+    <% end %>
+</div>
+<div class="clearfloat">
+</div>

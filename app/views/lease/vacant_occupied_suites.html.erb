@@ -1,0 +1,123 @@
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+		<div class="dialog_light_center" style="<%if params[:item] == 'vacant_suites'%>width:351px;<%else%><%end%>">
+				<div class="dialog_second_center">
+					<div class="uploadwrapper">
+						<div class="" style="width:457px;padding-top:0px;">
+							<div class="uploadlabelrow">
+									<div class="newfolder_fieldlabel" style="font-weight:normal;">
+
+									 <%if params[:item] == 'vacant_suites'%>
+									<div style="padding:15px; background:#fff;" >
+									<div class="boldtxt" style="margin-bottom:20px; font-size:14px !important;">Vacant Suites</div>
+									<%if @vacant_suites.present?%>
+										<div style="height:31px; overflow:hidden;">
+											<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+											<thead>
+												<tr>
+													<th align="center"  width="80" height="30">Suite</th>
+													<th align="center"  width="75">Rentable&nbsp;SF</th>
+													<th align="center"  width="85" height="30">Days Vacant</th>
+												</tr>
+											</thead>
+										</table>
+									</div>
+									<%if @vacant_suites.count>13%>
+										<%width1="97"%>
+										<%width2="93"%>
+										<%width3="85"%>
+									<%else%>
+										<%width1="80"%>
+										<%width2="75"%>
+										<%width3="85"%>
+									<%end%>
+									<div style="max-height:336px; overflow-x: hidden; overflow-y:auto; margin-top:0px;width:279px;">
+										<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+											<%@vacant_suites.each_with_index do |vacant_suite,k|%>
+											<tbody>
+												<tr class="<%= cycle("odd", "even") %>">
+													<td align="center" width=<%=width1%>><%=vacant_suite.try(:suite_no)%></td>
+													<td align="right" width=<%=width2%>><%=number_with_delimiter(vacant_suite.try(:rentable_sqft).to_i)%></td>
+													<%calculate_vac_days_for_suite(vacant_suite.try(:id))%>
+													<td align="center" width=<%=width3%>><%= @vac_days.present? ? @vac_days  : vacant_suite.try(:days_vaccant) %></td>
+												</tr>
+											</tbody>
+											<%end%>
+										</table>
+								</div>
+             <%else%>
+             No Data to Display
+             <%end%>
+             </div>
+
+									<%elsif params[:item] == 'occupied_suites'%>
+									<div style="padding:15px; background:#fff;">
+									<div class="boldtxt" style="margin-bottom:20px; font-size:14px !important;">View Expirations for the Coming 6 Months</div>
+
+									<%if @interested_six_mnth_suites.present?%>
+									<div style="height:31px; overflow:hidden;">
+										<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+											<thead>
+												<tr>
+													<th width="80" height="30" align="center" >Suite</th>
+													<th width="80" align="center" >Rentable&nbsp;SF</th>
+													<th width="150" align="center" >Tenant Name</th>
+													<th width="80" align="center" >Lease End</th>
+												</tr>
+											</thead>
+										</table>
+									</div>
+									<div style="max-height:336px; overflow-x: hidden; overflow-y:auto; margin-top:0px;width:478px;">
+										<table border="0" cellpadding="6" cellspacing="1" class="pipelinelb-tbl">
+										<% @interested_six_mnth_suites.each_with_index do |property_lease_suite, i|%>
+											<% tenant = property_lease_suite.tenant%>
+											<% lease = property_lease_suite.lease%>
+											<%suite_details = Suite.suites(property_lease_suite) %>
+											<%total_rentable_sqft = 0 %>
+											<tbody>
+												<tr class="<%= cycle("odd", "even") %>">
+													<td align="center" width="80">
+													<%if suite_details && suite_details.present?%>
+													<% suite_details.each_with_index do |suite_detail,j|%>
+														<%comma2 = (j+1 != suite_details.count) ? ',' : ''%>
+														<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma2}"  :  raw("&nbsp;") %>
+														<% total_rentable_sqft = total_rentable_sqft + suite_detail.rentable_sqft.to_i unless suite_detail.rentable_sqft.nil?%>
+													<%end%>
+												<%end%>
+													</td>
+													<td align="right" width="80"><%= total_rentable_sqft ? number_with_delimiter(total_rentable_sqft) : raw("&nbsp;") %></td>
+													<td align="left" width="150" title="<%= tenant.tenant_legal_name if tenant.present?%>"><%= tenant ? truncate(tenant.tenant_legal_name, :length=>30) : raw("&nbsp;") %></td>
+													<td align="center" width="80">
+													<%if lease.try(:mtm)%>
+														MTM
+													<%else%>
+														<%= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%d/%y') : raw("&nbsp;")%>
+													<%end%>
+													</td>
+												</tr>
+							      </tbody>
+                 <%end%>
+								</table>
+							</div>
+							<%else%>
+							No Data to Display
+							<%end%>
+							</div>
+
+
+
+
+									<%end%>
+              </div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+  </div>
+	<a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>

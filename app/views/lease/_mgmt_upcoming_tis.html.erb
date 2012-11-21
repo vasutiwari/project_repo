@@ -1,0 +1,14 @@
+<div class="tbl_lease mgmt-tbl">
+	<%= render "mgmt_filter_headers"%>
+				<%if find_tmp.present?%>
+          <%sum = 0 %>
+          <% find_tmp.each_with_index do |tmp, i|%>
+						<% lease = Lease.find(tmp.lease_id)%>
+						<% tenant = lease.tenant%>
+						<%property_lease_suite = PropertyLeaseSuite.find_by_lease_id(lease.id)%>
+            <%suite_details = Suite.suites(property_lease_suite) %>
+            <%total_rentable_sqft = 0 %>
+						<%= render "mgmt_filter_data",:suite_details=> suite_details,:lease => lease,:tenant => tenant,:property_lease_suite => property_lease_suite,:sum=>sum,:total_rentable_sqft => total_rentable_sqft,:portfolio_collection =>portfolio_collection,:note_collection => note_collection,:i =>i%>
+          <%end%>
+        <%end%>
+</div>

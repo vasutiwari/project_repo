@@ -1,0 +1,5 @@
+<div class="name" id="disp_name"><span id="name" ><strong><%=user_collection.name%></strong></span>&nbsp;<a href="javascript:;" onclick="jQuery('div#disp_name').hide();jQuery('div#change_name').show();jQuery('div#change_name span input[name]').focus();return false;" class="bluecolor" id="displaying_name">Edit</a>
+</div>
+
+<div class="name" style="display:none;" id="change_name"><span><input id="profile_edit" type="text" value="<%= user_collection.name %>" name="name"/><a href="javascript:;" onclick="ajax_call_user_profile_update(jQuery('div#change_name span input[name]').val(),'name');return false;" class="bluecolor"  id="ok_save">Save</a></span>&nbsp;<a href="javascript:;" onclick="jQuery('div#change_name').hide();jQuery('div#disp_name').show();jQuery('div#change_name span input[name]').val(jQuery('div#disp_name span#name').text().strip());return false" class="bluecolor" id="cancel_save">Cancel</a>
+</div>

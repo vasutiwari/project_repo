@@ -1,0 +1,62 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<style type="text/css">
+textarea{
+	clear: both;
+	display: block;
+	font-family: arial;
+	font-size: 1em;
+}
+</style>
+<%  exp_item_collection=@exp_item;
+    exp_type_collection=@exp_type;
+    exp_cmt_for_collection=@exp_cmt_for;
+ if exp_item_collection %>
+ <%#exp_id =  exp_cmt_for_collection == "cap_exp" ? exp_item_collection.property_capital_improvement_id  :  exp_item_collection.id %>
+  <%  if !(params[:show_all] || exp_item_collection.comments_finder.count < 9) %>
+    <div style="float: left;<%if exp_cmt_for_collection == "cap_exp"%>margin-top: -8px;margin-left: 13px; <%else%>margin-top: -25px;margin-left: 10px;<%end%>"><a id="cmt_titled_<%= exp_item_collection.id %>" href="javascript:;" style="float: left; margin-top: 8px; color: #025B8D;" onclick="all_cmts='&show_all=true';call_to_comment('<%= exp_item_collection.id %>','<%= exp_type_collection %>&exp_cmt_for=<%= exp_cmt_for_collection %>');return false;">View all comments (<%= exp_item_collection.comments_finder.count %>)</a></div>
+  <%  end %>
+  <div id="list_comments_explanation_<%= exp_item_collection.id %>">
+    <% if (params[:show_all] || exp_item_collection.comments_finder.count < 8)
+      length = exp_item_collection.comments_finder.count
+    else
+      length = 8
+    end
+  %>
+    <% exp_item_collection.comments_finder.last(length).each do |comment| %>
+    <div class="variance_taskscommentrow" id="comment_view_<%= comment.id %>" onmouseover="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','visible');" onmouseout="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','hidden');">
+        <div class="imagecoll"><img border="0" width="26" height="26" src="<%= pdf_conv_path + display_image_for_user(comment.user.id)%>"/></div>
+        <div class="rowwrapper" id="edit_comment_<%= comment.id %>">
+          <div class="commentwrapper">
+            <div class="commentedrow" style="white-space:normal;width:638px;"><span style="color: #025B8D;font-weight: bold;"><% if current_user.id == comment.user_id %>You<% else %> <%= comment.user.user_name %> <% end %></span>&nbsp;
+              <span id="act_comment_<%= comment.id %>"><%=h comment.comment %></span></div>
+            <div class="timercol"><%= comment.updated_at.strftime('%b %d, %Y at  %I:%M %p') %></div>
+            <div class="commenteditrow" id="comment_view_<%= comment.id %>_options" style="visibility: hidden;" >
+              <% if current_user.id == comment.user_id %>
+                <div class="labell2"><a href="javascript:;" onclick="if(confirm('Are you sure to delete the comment?')){call_to_comment('<%= exp_item_collection.id %>','<%= exp_type_collection %><%= "&comment_id=#{comment.id}" %>&exp_cmt_for=<%= exp_cmt_for_collection %>&delete=true');} return false;"> Delete <img src="/images/del_icon_green.png" width="7" height="7" border="0" /></a></div>
+                <div class="labell2"><a href="javascript:;" onclick="edit_comment('<%=exp_item_collection.id %>','<%= exp_type_collection %>','<%= comment.id %>','<%= "#{exp_cmt_for_collection}__#{exp_item_collection.id}" %>'); return false;">Edit <img src="/images/edit_icon.png"  width="8" height="8" border="0"/></a></div>
+              <%end%>
+            </div>
+          </div>
+        </div>
+      </div>
+    <%end%>
+  </div>
+  <% unless @pdf %>
+  <div class="variance_taskscommentrow" id="new_<%= "#{exp_type_collection}" %><%= "_#{exp_item_collection.id}" %>">
+    <div class="imagecoll"><img width="26" height="26" src="<%= display_image_for_user(current_user.id)%>"/></div>
+    <div class="variance_rowwrapper">
+      <textarea id="text_<%= "#{exp_type_collection}_#{exp_item_collection.id}" %>" class="expand25-200 variance_comment_fieldinput" name="textfield32"></textarea>
+      <div class="variance_addbut">
+        <div class="addpropertyrow"><a href="javascript:;" onclick="if (/\S/.test(jQuery('#text_<%= "#{exp_type_collection}_#{exp_item_collection.id}" %>').val())){call_to_comment(<%= exp_item_collection.id %>,'<%= exp_type_collection %>&exp_cmt_for=<%= exp_cmt_for_collection %>&save=true')}else{alert('Please enter the comment')}return false;"><!--<img border="0" width="16" height="16" src="/images/add.png"/> This is commented as Add text is added to follow uniformity--> Comment</a><span>&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+  <div style="height: 10px;float: left;width: 100%;">&nbsp;</div>
+<% end %>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	jQuery("textarea[class*=expand]").TextAreaExpander();
+});// JavaScript Document
+</script>

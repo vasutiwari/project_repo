@@ -1,0 +1,2 @@
+module ClientAdmin::SettingsHelper
+end

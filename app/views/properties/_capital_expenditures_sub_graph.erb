@@ -1,0 +1,180 @@
+<script>
+<%if note_collection.gross_rentable_area && note_collection.gross_rentable_area!=0%>
+    grossRent=true;
+<%else%>
+    grossRent=false;
+<%end%>
+<%if note_collection.no_of_units && note_collection.no_of_units!=0%>
+    noOfUnits=true;
+<%else%>
+    noOfUnits=false;
+<%end%>
+
+</script>
+ <%if note_collection.portfolio.leasing_type == "Multifamily"%>
+
+<div class="sqrft_per_unit" style="color: black;font-size: 12px;position: absolute;right: 0;top: 120px;z-index: 111111111;"> Values :
+        			<% if order_collection.empty? %>
+				<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {order:'suite_number asc'},this.value)">
+						<%elsif tenant_order.empty? %>
+				<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {tenant_order:'tenant_name asc'},this.value)">
+	   				<% else %>
+						<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {order:'<%= order_list[order_collection] %>'},this.value)">
+					<% end %>
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><% end %>
+          <%if no_of_units_available%><option value="unit_calc"  <%='selected' if params[:unit_calc]%> >Per Unit</option><% end %>
+        </select>
+      </div>
+
+   <%else%>
+
+
+<div class="sqrft_per_unit" style="color: black;font-size: 12px;position: absolute;right: 0;top: 120px;z-index: 111111111;"> Values :
+        			<% if order_collection.empty? %>
+				<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {order:'suite_number asc'},this.value)">
+						<%elsif tenant_order.empty? %>
+				<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {tenant_order:'tenant_name asc'},this.value)">
+	   				<% else %>
+						<select id="per_tot_sqft" onchange="capitalSubCalls(capital_sub_call, {order:'<%= order_list[order_collection] %>'},this.value)">
+					<% end %>
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><% end %>
+          </select>
+      </div>
+
+	 <%end%>
+
+
+      <div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+        <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id, :from=>"capital_expenditure"} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+        <script>new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      </div>
+
+<!--for notes popup-->
+
+      <div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+        <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"capital_expenditure"} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+        <script>new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      </div>
+
+<% color_for_bar = {'red'=>'black','green'=>'#666666'}   %>
+<div id ="portfolio_overview_property_graph" class="capextolbar">
+  <% if cap_exp_result.count > 0 %>
+    <div class="capexheadbar headerBlueBg">
+      <div class="suiteid"><a style="cursor: pointer;" onclick="<% if order_collection.empty? %>capitalSubCalls(capital_sub_call, {order:'suite_number asc'});<% else %> capitalSubCalls(capital_sub_call, {order:'<%= order_list[order_collection] %>'}); <% end %>">Suite id<img width="7" height="5" style="left: 1px;" src="<% if order_collection.empty? %>/images/bulletarrowdown.png<% else %><%= arr_list[order_list[order_collection].split(' ').last] %><% end %>"/></a></div>
+      <div  class="projectname"><a style="cursor: pointer;" onclick="<% if tenant_order.empty? %>capitalSubCalls(capital_sub_call, {tenant_order:'tenant_name asc'});<% else %> capitalSubCalls(capital_sub_call, {tenant_order:'<%= order_list[tenant_order] %>'}); <% end %>">Project Name<img width="7" height="5" style="left: 1px;" src="<% if tenant_order.empty? %>/images/bulletarrowdown.png<% else %><%= arr_list[order_list[tenant_order].split(' ').last] %><% end %>"/></a></div>
+      <div class="actualstolbox">
+        <div class="leftval">0%</div>
+        <div class="midactuals">Actuals $</div>
+        <div class="rightval">100%</div>
+      </div>
+      <div class="annualbudget">Budget $</div>
+      <div class="variance"><span style='float: left;'> Variance?</span><span style='float:right;'> $ </span></div>
+      <div class="projectstatus">Project status</div>
+    </div>
+    <% cap_exp_result.each do |cap_exp| %>
+      <div class="capexbodybar">
+          <div class="suitenum"><% if !cap_exp.suite_number.nil? %><%= cap_exp.suite_number %><% else %>&nbsp;<% end %></div>
+          <div  class="nameproject"><%= cap_exp.tenant_name %></div>
+          <div class="mainactualstol"><% zero_b_bar = cap_exp.actual.to_f.zero? ? 0 : 1 %>
+           <% capex_variance = calculate_capital_exp_sub_variance_and_percentage(cap_exp)%>
+				   <%icon_direction,use_color,color_flag,color_icon = find_color_direction_and_icon(cap_exp.actual.to_f, cap_exp.annual_budget.to_f)%>
+
+						<% b_bar_color = capex_variance[:b_status] ? 'green' : 'red' %>
+             <div class="<%if zero_b_bar != 0 %><%= b_bar_color %>barper<% end %>" style="color:<%= color_for_bar[b_bar_color] %>;width:<%= capex_variance[:b_percent_bar] %><%= '%' %>">
+						 <%if params[:sqft_calc] %>
+						 <%= cap_exp.actual.to_f.zero? ? display_currency_variance(0  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : display_currency_variance(cap_exp.actual.to_f  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) %>
+						 <%else%>
+						 <%if params[:unit_calc]%>
+						 <%= cap_exp.actual.to_f.zero? ? display_currency_variance(0 / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1) ) : display_currency_variance(cap_exp.actual.to_f / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) %>
+						 <%else%>
+						 <%= cap_exp.actual.to_f.zero? ? display_currency_variance(0) : display_currency_variance(cap_exp.actual.to_f) %>
+						 <%end%>
+						 <%end%>
+						 </div>
+
+          </div>
+          <div class="budgetnum">
+					 <%if params[:sqft_calc] %>
+					<%= cap_exp.annual_budget.nil? ? display_currency_overview(0 / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : display_currency_overview(cap_exp.annual_budget.to_f / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) %>
+					<%else%>
+						 <%if params[:unit_calc]%>
+						 					<%= cap_exp.annual_budget.nil? ? display_currency_overview(0 / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_overview(cap_exp.annual_budget.to_f / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) %>
+											<%else%>
+				        	<%= cap_exp.annual_budget.nil? ? display_currency_overview(0) : display_currency_overview(cap_exp.annual_budget.to_f) %>
+						 <%end%>
+						 <%end%>
+					</div>
+          <div class="varinumbox">
+					 <%var_color_flag=color_flag == "red" ? '#CE2929' : '#287207'%>
+            <div class="capexiconcol2 <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>" style="color:<%=var_color_flag%>;">&nbsp;<%= display_currency_real_estate_overview_for_percent(capex_variance[:b_percent]) %> </div>
+            <div class="capextextright" style="color:<%=var_color_flag%>;"><%= params[:sqft_calc] ? display_currency_variance(capex_variance[:b_variant]  / (note_collection.gross_rentable_area ? note_collection.gross_rentable_area.to_f : 1)) : (params[:unit_calc] ? display_currency_variance(capex_variance[:b_variant] / (note_collection.no_of_units ? note_collection.no_of_units.to_f : 1)) : display_currency_variance(capex_variance[:b_variant])) %>   </div>
+          </div>
+          <div class="projecttext"><%=cap_exp.project_status%></div>
+        </div>
+    <%end%>
+			<div class="paginationcol" style="margin-left:600px;">
+    <%= will_paginate cap_exp_result, :renderer => 'RemoteLinkRenderer'%></div>
+  <% else %>
+    <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+      <% if note_collection.class == RealEstateProperty %>
+        <% note_name = note_collection.property_name %>
+      <% else %>
+        <% note_name = note_collection.note_id %>
+      <% end %>
+      <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+        <span style="font-size:13px;">Data Unavailable. Please add Asset Financial data at
+
+				<!--
+				<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>
+				-->
+
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+				.</span>
+      <% else %>
+        <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+     <% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+</script>
+
+

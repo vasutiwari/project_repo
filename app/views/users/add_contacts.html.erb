@@ -1,0 +1,116 @@
+    <head>
+		<script>
+      radio_selected = 'false';
+      jQuery(document).ready(function()
+      {
+        user_email_str="<%=get_emails_of_all_users_for_autocomplete%>";
+        user_emails=user_email_str.split("&lt;$&gt;");
+        jQuery("#collaborator_list").autocomplete(
+        {
+          width: 350,
+          delimiter: /(,)\s*/,
+          lookup: user_emails
+        })
+      });
+    </script>
+    <style>
+      body{
+        background-color: #000000;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+    <div class="lightbox_container2" id='basicbodycontainer'>
+      <div class="lightbox_threshold">
+        <div class="lightbox_headerow">
+          <div class="headerow_coll1"><img src="/images/add_contacts_icon.jpg" width="16" height="16" /> Add Users
+            <span  id='add_contact_step' class="fontsize" style="font-size:12px;"></span>
+          </div>
+        </div>
+        <div class="lightbox_contentrow">
+				 <%if current_user && (current_user.has_role?("Asset Manager") && !current_user.has_role?("Leasing Agent"))%>
+           <div class="add_files_headercol">
+            <input name="radio" type="radio" value="" onclick='jQuery("#add_to_contact").hide();jQuery("#property_share").show();change_contact_link("property");jQuery("span#add_contact_step").html("-  Step 1 of 2")'  />
+            Select a property to share & provide access to storage & collaboration
+						</div>
+          <div class="add_contentrow" id="property_share" style='display:none;'>
+           <div class="add_files_headercol2"><strong>Property List :</strong></div>
+            <div class="add_files_scroll" style="overflow-x:hidden;overflow-y:auto;">
+              <%unless @real_estate_properties.empty?%>
+							  <% @real_estate_properties = @real_estate_properties.compact.sort_by{|x| x.property_name.downcase}%>
+                <%if @real_estate_properties.length > 2%>
+                  <% @real_estate_properties =  @real_estate_properties.compact.reject{|r| r if r.property_name =='property_created_by_system' || r.property_name == "property_created_by_system_for_deal_room" || r.property_name == "property_created_by_system_for_bulk_upload" }%>
+                  <%@real_estate_properties_group = @real_estate_properties.compact.uniq.to_a.in_groups_of(5)%>
+                  <%= form_tag({:controller=>"collaborators",:action=>"view_share"}, :target => "upload_frame_add_property", :id => "form_add_property")  do %>
+                    <%@real_estate_properties_group.each do |real_estate_property_set|%>
+                      <div class="propertylistrow" >
+                        <%real_estate_property_set.compact.each do |real_estate_property| %>
+                          <%property_folder = find_property_folder_by_property_id(real_estate_property.id)%>
+                          <div class="propertylistcoll">
+                            <input type="radio"  value='true' name="add_contacts"  onclick='radio_selected = "true"; jQuery("#selected_property_id").val("<%=real_estate_property.id%>");jQuery("#selected_portfolio_id").val("<%=real_estate_property.portfolio_id%>");<%if property_folder.present?%>jQuery("#selcted_folder_id").val("<%=property_folder.id%>");<%end%>  ' />
+                            <span title='<%=real_estate_property.property_name%>'><%= lengthy_word_simplification(real_estate_property.property_name,3,3)%></span>
+                          </div>
+                        <%end%>
+                      </div>
+                    <%end%>
+                    <input type="hidden" id="is_property_folder"  name= 'is_property_folder' value='true' />
+                    <input type="hidden" id="selected_property_id"  name= 'property_id' value='0' />
+                    <input type="hidden" id="selected_portfolio_id" name= 'portfolio_id' value='0' />
+                    <input type="hidden" id="selcted_folder_id" name= 'folder_id' value='0' />
+                    <input type="hidden" id="folder_revoke" name= 'folder_revoke' value='true' />
+                    <input type="hidden" id="from_dash_board" name= 'from_dash_board' value='<%=params[:from_dash_board]%>' />
+	                  <iframe id="upload_frame_add_property" name="upload_frame_add_property" style="display: none"></iframe>
+                  <%end%>
+		              <%else%>
+	     						  <br/><br/>
+                    <span style='padding-left:25px;'> No Property added</span>
+                  <%end%>
+                <%end%>
+
+            </div>
+          </div>
+					<%end%>
+          <div class="add_files_headercol" >
+					<%if(current_user && (current_user.has_role?("Asset Manager") && !current_user.has_role?("Leasing Agent")))%>
+            <input name="radio" type="radio" value=""  onclick='jQuery("#property_share").hide();jQuery("#add_to_contact").show();change_contact_link("contact");jQuery("span#add_contact_step").html("")' />
+          <%end%>
+						Provide access to storage & chat without property reports
+            <div class="add_contentrow" id="add_to_contact"
+						style="<%if current_user && (current_user.has_role?("Shared User") || current_user.has_role?("Leasing Agent")) && !(current_user.has_role?("Asset Manager"))%>display:block;margin-left:28px;<%else%>
+display:none;margin-left:28px;<%end%>">
+              <div class="add_files_headercol2"><strong>Add to Users:</strong></div>
+              <br/><br/>
+              <span>
+		            <%= form_tag({:action => "create_contact"}, :target => "upload_frame_add_contact", :id => "upload_form_add", :onsubmit=>'return restrict_empty_collaborators()')  do %>
+	              <input type="hidden" id="from_dash_board" name= 'from_dash_board' value='<%=params[:from_dash_board]%>' />
+                <input type="text" value="Enter email addresses here" style="color:gray;" onclick="if(this.value == 'Enter email addresses here'){this.value = '';this.style.color='black';}" onblur="if(/\S/.test(this.value) == false){this.value = 'Enter email addresses here';this.style.color='gray';}" class="add_users_fieldinput" name="collaborator_list"  id="collaborator_list"/>
+              </span>
+							<iframe id="upload_frame_add_contact" name="upload_frame_add_contact" style="display: none"></iframe>
+              <%end%>
+            </div>
+          </div>
+          <div class="add_files_headercol">
+          </div>
+        </div>
+      </div>
+
+			<div class="butwrapper" style="<%if current_user && (current_user.has_role?("Leasing Agent") || current_user.has_role?("Shared User")) && !(current_user.has_role?("Asset Manager"))%>display:block;<%else%>display:none;<%end%>" id="contact_button" >
+        <div class="greenbutton" style="margin-left:250px">
+						<a href="#" onclick= "if(check_email_valid('<%= find_contact_details.collect{|u| u.email.to_s}*","%>')){load_writter();document.forms.upload_form_add.submit();return false;}">Add</a><span>&nbsp;</span>
+				</div>
+        <div class="graybutton"><a href="#" onclick='Control.Modal.close();return false;'>Cancel</a><span>&nbsp;</span></div>
+      </div>
+
+
+     <%if @real_estate_properties && !@real_estate_properties.empty?%>
+			<div class="butwrapper" style="display:none;" id="property_button" >
+        <div class="greenbutton" style="margin-left:250px"><a href="#" id='next_button' onclick="if(radio_selected == 'false'){flash_writter('Please select a property');return false;}{load_writter();document.forms.form_add_property.submit();return false;}">Next</a><span>&nbsp;</span></div>
+        <div class="graybutton"><a href="#" onclick='Control.Modal.close();return false;'>Cancel</a><span>&nbsp;</span></div>
+      </div>
+   <%end%>
+
+       <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+      <div class="bot"></div>
+    </div>
+

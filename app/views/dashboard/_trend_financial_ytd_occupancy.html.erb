@@ -1,0 +1,31 @@
+<%actuals,budgets,variance,percentage = find_financial_details%>
+<%
+    a = {"income detail"  => "Operating Revenue","operating income"  => "Operating Revenues"}
+    title = a[params[:selected_link].strip].present? ? a[params[:selected_link].strip] : params[:selected_link].strip.gsub(' detail','').gsub(' Detail','')
+  %>
+<div class="boxWidth890 marginL5">
+  <div class="box-title"><span class="title"><%if  !params[:tl_period].present? || params[:tl_period] == "4"%><%= title.titleize %> YTD<%elsif params[:tl_period] == "3"%> <%= title.titleize %> Last Year<%elsif params[:tl_period] == "11"%> <%= title.titleize %> Trailing 12 Months<%end%></span></div>
+  <table width="100%" align="center" cellspacing="0" cellpadding="6" border="0" class="tablefb bdr-TRBL-gry marginB5" style="">
+    <thead>
+      <tr class="fb-tr-head ">
+        <th class="bdr-rt-wht bdrTnone td60">Actuals $</th>
+        <th class="bdr-rt-wht bdrTnone td100">Budget $</th>
+        <th class="td100 bdrTnone bdrRnone">Variance $</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%if actuals.present? && budgets.present? %>
+        <% color_display = @parent_title%>
+        <tr>
+          <% icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(actuals.to_f,budgets.to_f) :  find_color_direction_and_icon(actuals.to_f,budgets.to_f)%>
+          <td align="center" class=" bdr-rt-gry"><span class="">$<%=dashboard_currency_display(actuals)%></span></td>
+          <td align="center" class=" bdr-rt-gry"><span class="">$<%=dashboard_currency_display(budgets)%></span></td>
+          <td align="center" class="<%= color_flag %>"><span class="maginR20 <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%>above<%elsif icon_direction.eql?('down')%>belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%>aboveRed<%elsif icon_direction.eql?('down')%>below<%end%><%end%>"><%=display_currency_real_estate_overview_for_percent(percentage)%>, $<%=dashboard_currency_display(variance)%></span> </td>
+        </tr>
+      <%else%>
+      <p class="value-status" style="font-weight:normal;"> No data available</p>
+    <%end%>
+    </tbody>
+  </table>
+  <div class="clear"></div>
+</div>

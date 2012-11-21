@@ -1,0 +1,96 @@
+
+<script>
+  <%seleted_date = params[:start_date] ? "#{params[:start_date]}" : "#{@prev_sunday.strftime("%Y-%m-%d")}"%>
+    weekly_start_date = '<%=seleted_date%>'
+</script>
+<%
+property_id = params[:id] ? params[:id] : params[:note_id]
+acc_type = account_system_type_name((RealEstateProperty.find_real_estate_property(property_id)).accounting_system_type_id)
+%>
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<% if (!property_week_vacant_total.nil? and !property_week_vacant_total.empty?)%>
+  <div class="">
+    <%unless pdf_collection%>
+      <div class="executiveheadcol2"><span class="executiveiconcol"><img src="/images/executivehead_icon.png" width="14" height="16" /></span>
+        <div class="breadlabel">Weekly Display</div>
+      </div>
+    <%end%>
+    <div class="executivecontentrow property_exec">
+      <div class="prop_tablewrapper">
+        <div class="topbig">
+          <div class="executiveheadercol" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Vacant</div>
+          <div class="executiveheadercol3" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span> Notice</div>
+        </div>
+        <%count = property_week_vacant_total.count%>
+        <%property_weekly_display_total(count)%>
+        <div class="midbig">
+          <div class="executivetablebarrow">
+            <div class="prop_tablewrapper1">
+              <div class="prop_tablerow">
+                <div class="prop_tablecoll1">&nbsp;</div>
+                <div class="prop_tablecoll2">Units</div>
+                <div class="prop_tablecoll3">Gross</div>
+                <div class="prop_tablecoll3">Rented</div>
+                <div class="prop_tablecoll3">Net</div>
+                <div class="prop_table2_coll5">Gross %</div>
+                <div class="prop_tablecoll4">Net %</div>
+                <div class="prop_tablecoll5">&nbsp;</div>
+                <div class="prop_table2_coll2">Gross </div>
+                <div class="prop_table2_coll3">Rented</div>
+                <div class="prop_table2_coll4">Net</div>
+                <div class="prop_table2_coll5"> Gross %</div>
+                <div class="prop_table2_coll6">Net % </div>
+              </div>
+              <%for i in 0...count%>
+                <div class="prop_tablerow">
+                  <div class="prop_tablecoll1"><%=@property_week_floor[i]%></div>
+                  <div class="prop_tablecoll2"><%=@property_week_units[i]%></div>
+                  <div class="prop_tablecoll3"><%=@property_week_vacant_total[i]%></div>
+                  <div class="prop_tablecoll3"><%=@property_week_prelsd[i]%></div>
+                  <div class="prop_tablecoll3"><%=property_weekly_display(i,'vacant_net').to_i%></div>
+                  <div class="prop_table2_coll5"><%=property_weekly_display(i,'vacant_gross_per')%></div>
+                  <%vacant_net_per = property_weekly_display(i,'vacant_net_per')%>
+                  <div class="prop_tablecoll4"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'vacant_net_per',vacant_net_per)%>;"><%=vacant_net_per%></span></div>
+                  <div class="prop_tablecoll5">&nbsp;</div>
+                  <div class="prop_table2_coll2"><%=@property_weekly_ntv[i]%></div>
+                  <div class="prop_table2_coll3"><%=@property_week_prelsd2[i]%></div>
+                  <div class="prop_table2_coll4"><%=property_weekly_display(i,'notice_net')%></div>
+                  <div class="prop_table2_coll5"><%=property_weekly_display(i,'notice_gross_per')%></div>
+                  <%notice_net_per = property_weekly_display(i,'notice_net_per')%>
+                  <div class="prop_table2_coll6"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'notice_net_per',notice_net_per)%>;"><%=notice_net_per%></span></div>
+                </div>
+              <%end%>
+              <div class="prop_table_headerow">
+                <div class="prop_tablecoll1">Total</div>
+                <div class="prop_tablecoll2"><%=@vacant_units_total%></div>
+                <div class="prop_tablecoll3"><%=@vacant_gross_total%></div>
+                <div class="prop_tablecoll3"><%=@vacant_rented_total%></div>
+                <div class="prop_tablecoll3"><%=@vacant_net_total%></div>
+                <div class="prop_table2_coll5"><%=@vacant_gross_per%></div>
+                <div class="prop_tablecoll4"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'vacant_total_net_per')%>;"><%=@vacant_net_per%></span></div>
+                <div class="prop_tablecoll5">&nbsp;</div>
+                <div class="prop_table2_coll2"><%=@notice_gross_total%></div>
+                <div class="prop_table2_coll3"><%=@notice_rented_total%></div>
+                <div class="prop_table2_coll4"><%=@notice_net_total%></div>
+                <div class="prop_table2_coll5"><%=@notice_gross_per%></div>
+                <div class="prop_table2_coll6"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'notice_total_net_per')%>;"><%=@notice_net_per%></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottombig">&nbsp;</div>
+      </div>
+    </div>
+    <%unless acc_type == 'YARDI V1' || remote_property(note_collection.accounting_system_type_id)%>
+      <%=render :partial=>"/properties/wres/real_property_weekly",:locals=>{:acc_type=>acc_type,:pdf_conv_path=>pdf_conv_path,:count=>count}%>
+    <%else%>
+      <%=render :partial=>"/properties/wres/yardi_property_weekly",:locals=>{:acc_type=>acc_type,:pdf_conv_path=>pdf_conv_path,:count=>count}%>
+    <%end%>
+  </div>
+<%else%>
+  <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+    <span style="color: black;text-align: center">Data Unavailable. Please Upload Weekly Data</span>
+  </div>
+<%end%>
+

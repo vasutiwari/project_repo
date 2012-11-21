@@ -1,0 +1,19 @@
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+    jQuery("#tabs").tabs();
+  });
+</script>
+
+<div class=" rhs">
+	<div class="suitemid">
+		<div class="suitetabsbox"  id="tabs" style = "padding-top: 10px;">
+		<%#=render :partial=>"property_sub_tab",:locals=>{:tab_collection => @tab,:property_collection =>@property}%>
+		 </div>
+	<div class="suitemidbody nobg">
+		<span style="color: red; align: center;" id="errmsg"></span>
+		<div id="sheet123">
+			<%=render :partial=>"add_or_edit_property"%>
+		</div>
+		</div>
+	</div>
+</div>

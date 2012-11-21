@@ -1,0 +1,30 @@
+xml.graph(
+		:caption=>"Leases and expirations", 
+		:palette=>"2",
+		:showNames=>"1",
+		:showValues=>"1",
+		:PYAxisName=>"Percentage",
+		:baseFontName=> "Calibri",
+		:decimalPrecision=>"0", 
+		:baseFontSize=> "11",
+		:numberPrefix=>"$") {
+				xml.categories(
+				){xml.category(:name =>"0 - 1 Year"){}
+				xml.category(:name =>"1 - 2 Years"){}
+				xml.category(:name =>"2 - 3 Years"){}
+				xml.category(:name =>"3 - 4 Years"){}
+				xml.category(:name =>"> 4 Years"){}
+				}	 
+	 
+		unless (@sdr[0].to_i == 0 && @sdr[1].to_i == 0 && @sdr[2].to_i == 0 && @sdr[3].to_i == 0 && @sdr[4].to_i == 0) 
+		xml.dataset("seriesname".to_sym=>"Years", "color".to_sym=>"#afd8f8", :showValues=>"0"){
+					 xml.set(:value =>"#{@sdr[0]}"){}
+					 xml.set(:value =>"#{@sdr[1]}"){}
+					 xml.set(:value =>"#{@sdr[2]}"){}
+					 xml.set(:value =>"#{@sdr[3]}"){}
+					 xml.set(:value =>"#{@sdr[4]}"){}
+		}
+		end
+	}
+
+

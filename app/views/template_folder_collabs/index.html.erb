@@ -1,0 +1,27 @@
+<h1>Listing template_folder_collabs</h1>
+
+<table>
+  <tr>
+    <th>Shared by</th>
+    <th>Shared to</th>
+    <th>Folder</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @template_folder_collabs.each do |template_folder_collab| %>
+  <tr>
+    <td><%= template_folder_collab.shared_by %></td>
+    <td><%= template_folder_collab.shared_to %></td>
+    <td><%= template_folder_collab.folder_id %></td>
+    <td><%= link_to 'Show', template_folder_collab %></td>
+    <td><%= link_to 'Edit', edit_template_folder_collab_path(template_folder_collab) %></td>
+    <td><%= link_to 'Destroy', template_folder_collab, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Template folder collab', new_template_folder_collab_path %>

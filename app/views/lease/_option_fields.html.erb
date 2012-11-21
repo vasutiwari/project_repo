@@ -1,0 +1,68 @@
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<div class="fields">
+  <%if @count_options != 1%>
+    <div style="margin-top:10px; padding-top:0;" onmouseout="jQuery(this).css('background-color','#ffffff');" onmouseover="jQuery(this).css('background-color','#f6f6f6');" class="close">
+      <div class="option_inc lsrowwrapper" style="padding-top:0;"><span class="closeme"><%= link_to_remove_option_fields "X", f%></span>Options &#8250; Option <%=@count_options%></div>
+    <%else%>
+      <div class="option_inc lsrowwrapper" style="margin-top:10px; padding-top:0;">Options &#8250; Option <%=@count_options%></div>
+    <%end%>
+    <div class="termsnamerow">
+      <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Option Type</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%if @pdf%>
+          <span style="width:111px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.option_type%></span>
+        <%else%>
+          <%= f.select :option_type, options_for_select( [[ "", nil ]] + Option::OPTION_TYPE,f.object.option_type),{},html_options = {:class => "lsselect", :style=>"width:113px;"}%>
+        <%end%>
+      </div>
+      <div class="termsname" style="width:111px; text-align:left; margin-left:37px">Option Start</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :option_start ,:type=>"text", :value => (f.object && f.object.option_start.present?) ? lease_date_format(f.object.try(:option_start)) : "mm/dd/yyyy",:class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:91px",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      </div>
+      <div class="termsname" style="width:111px; text-align:left; margin-left:37px">Option End</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :option_end ,:type=>"text", :value => (f.object && f.object.option_end.present?) ? lease_date_format(f.object.try(:option_end)) : "mm/dd/yyyy", :class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:91px",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      </div>
+    </div>
+    <div class="termsnamerow">
+      <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">L. Para</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :l_para ,:type=>"text", :class=>"lstextfield", :style=>"width:111px", :value =>f.object.l_para.present? ?  f.object.l_para : 'enter comma separated.' , :onclick=>"if(this.value == 'enter comma separated.'){this.value = ''}",:onblur=>"if(this.value == ''){this.value = 'enter comma separated.';this.style.color='gray';}" %>
+      </div>
+      <div class="termsname" style="width:111px; text-align:left; margin-left:37px">Notice Start</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :notice_start ,:type=>"text", :value => (f.object && f.object.notice_start.present?) ? lease_date_format(f.object.try(:notice_start)) : "mm/dd/yyyy", :class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:91px", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      </div>
+      <div class="termsname" style="width:111px; text-align:left; margin-left:37px">Notice End</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :notice_end ,:type=>"text", :value =>(f.object && f.object.notice_end.present?) ? lease_date_format(f.object.try(:notice_end)) : "mm/dd/yyyy", :class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:91px", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+      </div>
+    </div>
+    <div class="termsnamerow">
+      <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Encumbered Floors</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :encumbered_floors ,:type=>"text", :class=>"lstextfield", :style=>"width:111px", :value =>f.object.encumbered_floors.present? ?  f.object.encumbered_floors : 'enter comma separated.' , :onclick=>"if(this.value == 'enter comma separated.'){this.value = ''}",:onblur=>"if(this.value == ''){this.value = 'enter comma separated.';this.style.color='gray';}" %>
+
+      </div>
+      <div class="termsname" style="width:111px; text-align:left; margin-left:37px">Encumbered Suites</div>
+      <div class="termsform" style="padding-left:5px;">
+        <%= f.text_field :encumbered_suites ,:type=>"text", :class=>"lstextfield", :style=>"width:111px", :value =>f.object.encumbered_suites.present? ?  f.object.encumbered_suites : 'enter comma separated.' , :onclick=>"if(this.value == 'enter comma separated.'){this.value = ''}",:onblur=>"if(this.value == ''){this.value = 'enter comma separated.';this.style.color='gray';}" %>
+      </div>
+    </div>
+    <div class="termsnamerow">
+      <div class="termsname namefirst" style="width:100px; text-align:left">Notes</div>
+      <div class="termsform" style="padding-left:5px;">
+        <% f.object.note.present? ? f.object.note : f.object.build_note%>
+        <%= f.fields_for :note do |note_form| %>
+          <%= note_form.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:643px", :value =>note_form.object.content.present? ?  note_form.object.content : '' %>
+        <%end%>
+      </div>
+    </div>
+    <div class="clear"></div>
+    <%if @count_options != 1%>
+    </div>
+  <%end%>
+</div>
+<%@count_options += 1%>

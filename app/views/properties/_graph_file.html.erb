@@ -1,0 +1,10 @@
+<div   id = "gh_graph_new_occupancy_chart" style="display:block;">
+		<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" height="125" id="HTML_graph_new_occupancy_chart" width="350">
+		<param name="allowscriptaccess" value="always"></param>
+		<param name="movie" value="/FusionCharts/<%= @swf_file%>"></param>
+		<param name="FlashVars" value="chartWidth=0&amp;chartHeight=0&amp;debugmode=0&amp;dataXML=<%= render :partial => "#{@xml_partial_file}"  %>"></param>
+		<param name="quality" value="high"></param>
+		<param name="wmode" value="transparent"></param>
+		<embed wmode="transparent" FlashVars="chartWidth=0&amp;chartHeight=0&amp;debugmode=0&amp;dataXML=<%= render :partial => "#{@xml_partial_file}"  %>" allowScriptAccess="always" height="125" name="HTML_graph_new_occupancy_chart" pluginspage="http://www.macromedia.com/go/getflashplayer" quality="high" src="/FusionCharts/<%= @swf_file%>" type="application/x-shockwave-flash" width="350"></embed>
+		</object>
+</div>

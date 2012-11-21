@@ -1,0 +1,124 @@
+<%= form_tag({:controller=>'explanations',:action=>'new_threshold'},:remote=>true,:id=>'variances_form',:target =>"upload_frame_variance")  do %>
+  <%=hidden_field_tag :parent_delete,params[:parent_delete]%>
+  <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+  <%=hidden_field_tag :from_property_edit,"true"%>
+  <%=hidden_field_tag :folder_id,@folder.id%>
+  <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+  <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+  <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+  <input type="hidden" name="pid" value = <%=params[:id]%> > </input>
+  <input type="hidden" name="note_add_edit" value = "true" > </input>
+  <input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+  <%if @prop && !@prop.id.nil?%>
+    <input type="hidden" name="property_id" value = <%=@prop.id%> > </input>
+    <input type="hidden" name="pid" value = <%=@prop.portfolio_id%> > </input>
+  <%end%>
+  <input type="hidden" id = "tab_id" name="tab_id" value ="6" />
+  <input type="hidden" id = "form_txt" name="form_txt" value ="variances" />
+  <input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+  <input type="hidden" name="variances_form_submit" value = "true" id="variances_form_submit" > </input>
+  <input type="hidden" name="variances_form_close" value = "false"  id ="variances_form_close"> </input>
+  <input type="hidden" name="step1" value = "false"  id ="step1"> </input>
+  <input type="hidden" name="step2" value = "false"  id ="step2"> </input>
+  <input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+	<input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+  <input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+	<input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+  <% if params[:try_reload] %>
+    <input type="hidden" value="true" name="try_reload"/>
+  <% end %>
+  <% if params[:place_reload] %>
+    <input type="hidden" value="true" name="place_reload"></input>
+  <% end %>
+    <% variance_percentage,variance_and,variance_or,variance_amount,cap_exp_variance_amt,variance_percentage_ytd,variance_and_ytd,variance_or_ytd,variance_amount_ytd,cap_exp_variance_amt_ytd = calculate_local_values_for_variance(@prop) %>
+   <div class="totalsuitesbox" style="width:768px;">
+    <div class="variance_contentrow" style="padding-bottom:10px;">
+		<div class="variances_headercol"><span class="variances_headercol_size ">Step 1</span>  Set Thresholds to Collect Variance Explanations</div>
+      <div class="add_users_headercol">
+        Explanations are collected after financial statements are loaded on AMP
+				<br/><br/>
+              <strong>Thresholds for YTD Values,</strong> collected monthly
+			</div>
+
+         <div class="collab_lightbox_contentrow" style="margin-top:9px;width:743px;">
+            <div class="lightbox_contentcol1">Income &amp; Expenses: Items with Variances beyond&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+            <div class="lightbox_contentcol3">
+              <input type="text" name= "variance_percentage_ytd" size="8" value="<%= variance_percentage_ytd %>" id="variance_percentage_ytd"></input>%
+              &nbsp;
+            </div>
+            <div class="lightbox_contentcol2">
+              <div class="lightbox_contentcol2_subcol" style="width:46px;">
+                <input type="radio" name="variance_and_or_ytd" value="and" <%= variance_and_ytd %> value="" name=""/>
+                <div class="collab_tasks_label">And</div>
+              </div>
+              <div class="lightbox_contentcol2_subcol"  style="width:37px;">
+                <input type="radio" name="variance_and_or_ytd" value="or" <%= variance_or_ytd %> />
+                <div class="collab_tasks_label">Or</div>
+              </div>
+            </div>
+            <div class="lightbox_contentcol3">
+              <div class="collab_tasks_label2">$&nbsp;</div>
+              <input type="text" name= "variance_amount_ytd" size="8" value="<%= variance_amount_ytd %>" id="variance_amount_ytd"></input>
+            </div>
+          </div>
+				<div class="collab_lightbox_contentrow" style="margin-top:9px;width:743px;display:<%= @prop.leasing_type == "Multifamily" ? "none" : "block" %>">
+        <div class="lightbox_contentcol1">Capital Expenditures: Items with Variances beyond $      </div>
+        <div class="lightbox_contentcol3">
+          <input type="text" name= "cap_exp_variance_ytd" size="8" value="<%= cap_exp_variance_amt_ytd %>" id="cap_exp_variance_ytd"/>
+        </div>
+      </div>
+      </div>
+      <div class="lightbox_contentcol1" style="width:425px;padding-top:5px;padding-bottom:5px;">
+        <strong>Thresholds for Month Values,</strong> collected monthly
+      </div>
+          <div class="variance_collaboraterow" style="margin-top:3px;padding-bottom:3px;">
+             <div class="collab_lightbox_contentrow" style="margin-top:9px;width:743px;margin-left:10px;">
+             <div class="lightbox_contentcol1">Income &amp; Expenses: Items with Variances beyond&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+             <div class="lightbox_contentcol3">
+               <input type="text" name= "variance_percentage" size="8" value="<%= variance_percentage %>" id="variance_percentage"></input>%
+               &nbsp;
+             </div>
+             <div class="lightbox_contentcol2">
+               <div class="lightbox_contentcol2_subcol" style="width:46px;">
+                 <input type="radio" name="variance_and_or" value="and" <%= variance_and %> value="" name=""/>
+                 <div class="collab_tasks_label">And</div>
+               </div>
+               <div class="lightbox_contentcol2_subcol" style="width:37px;">
+                 <input type="radio" name="variance_and_or" value="or" <%= variance_or %> />
+                 <div class="collab_tasks_label">Or</div>
+               </div>
+             </div>
+             <div class="lightbox_contentcol3">
+               <div class="collab_tasks_label2">$&nbsp;</div>
+               <input type="text" name= "variance_amount" size="8" value="<%= variance_amount %>" id="variance_amount"></input>
+             </div>
+			     	</div>
+					<div class="collab_lightbox_contentrow" style="margin-top:9px;width:743px;margin-left:11px;margin-bottom:5px;display:<%=@prop.leasing_type == "Multifamily" ? "none" : "block" %>">
+          <div class="lightbox_contentcol1">Capital Expenditures: Items with Variances beyond $      </div>
+          <div class="lightbox_contentcol3">
+            <input type="text" name= "cap_exp_variance" size="8" value="<%= cap_exp_variance_amt %>" id="cap_exp_variance"/>
+          </div>
+        </div>
+    </div>
+    <span id="error_msg" style="color:red;" place="asset"></span>
+
+ <div class="buttonwrapper2" style="margin-left:250px;padding-bottom:25px;">
+      <div class="greenbutton">
+        <%unless @prop.leasing_type == "Multifamily" %>
+          <a href="javascript:;" onclick="if(check_variance_threshold()){document.forms.variances_form.submit();}">Save</a>
+        <% else %>
+          <a href="javascript:;" onclick="if(check_variance_threshold()){document.forms.variances_form.submit();}">Save</a>
+        <% end %>
+        <span>&nbsp;</span></div>
+      <div class="greenbutton">
+        <a onClick="if(check_variance_threshold()){step_2=true;document.getElementById('step2').value = 'true';document.getElementById('step1').value = 'false';document.getElementById('step2').value = 'true';document.forms.variances_form.submit();}" style="cursor: pointer;">Goto Step 2 </a><span>&nbsp;</span></div>
+            <!-- COMMENTED CANCEL BUTTON IN LIGHTBOX
+      <%#link = params[:edit_inside_asset] == "true" ? "show_data_hub_docs_real_estate(#{@portfolio.id},selected_item,'hide_del','true','true');return false;" : "Control.Modal.close();refresh_page_after_close_prop(#{@portfolio.id},#{find_by_real_estate_property_id(@property.id).parent_id},'hide_del',#{params[:list] ? params[:list] : '0'},#{params[:highlight]},'#{params[:show_past_shared]}','#{params[:from_debt_summary]}','#{params[:from_property_details]}',#{@property.id},'#{params[:call_from_variances]}','#{params[:month]}','#{params[:document_id]}','#{params[:tl_month]}')"%>
+      <div class="graybutton"><a onClick="<%#=link%>" style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+      -->
+    </div>
+    <div class="bot"></div>
+         </div>
+
+<%end%>
+<iframe id="upload_frame_variance" name="upload_frame_variance" style="display: none"></iframe>

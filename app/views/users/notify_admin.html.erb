@@ -1,0 +1,21 @@
+<script>
+<%if params[:mail_sent].present?%>
+flash_writter("Mail has been sent to Client Admin")
+<%end%>
+</script>
+
+<div class="box-1col">
+	<div class="nopropertyDiv">
+		<p><span class="iconNotificaton">There are no properties available to display.</span> </p>
+		<p>You can notify your admin about this.
+		<%unless current_user.roles.map(&:name).uniq.include?("Client Admin")%>
+		<%if params[:from_view].present?%>
+		<a class="ndBtnBg disable">Notify Admin</a>
+		<%else%>
+		<%= link_to 'Notify Admin', {:action=>"notify_admin", :controller=>"users", :from_view=>"true", :mail_sent=>"true"}, :class=> "ndBtnBg" %>
+		<%end%>
+		<%end%>
+		</p>
+	</div>
+	<div class="clearfloat"></div>
+</div>

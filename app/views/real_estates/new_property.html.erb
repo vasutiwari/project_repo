@@ -1,0 +1,59 @@
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+    jQuery("#tabs").tabs();
+  });
+	remote_accounting_system_types = [];
+	<%if !find_remote_accounting_system_types.empty?%>
+	<%find_remote_accounting_system_types.each do |account_sys_id| %>
+	  remote_accounting_system_types.push(<%=account_sys_id%>)
+	<%end%>
+	<%end%>
+</script>
+
+
+<div class="suitemid" style="margin-top:0px;">
+  <div class="suitetabsbox"  id="tabs" style = "padding-top: 30px;">
+
+<!-- Property sub tab starts here-->
+	<%if @tab != "4"%>
+    <div  id="tabactive1" style= "border-right:1px solid #E3DFDF" class="<%=  get_basic_tab_class%>">
+		         <a onclick="form_txt='basic';set_tab(1,'basic');if(check_variance_threshold()){if(document.getElementById('real_estate_property_property_name') != null){}; if(check_image_type()){add_property_form_submit(form_name); <%if @property.valid? && !@property.address.nil?%>form_name='#basic_details_form'; <%end%>}}"  style="cursor: pointer;">
+					Basic
+					</a>
+					      <a style="display:none;cursor:pointer;" id="basic_onclick">Basic</a>
+					<span></span>
+		</div>
+	<%end%>
+<%if @property.new_record? %>
+  <span></span>
+<%else%>
+  <%link = params[:edit_inside_asset] == "true" ? "show_data_hub_docs_real_estate(port_id,selected_item,'hide_del','true','true');return false;" : "Control.Modal.close();refresh_page_after_close_prop(#{@property.portfolio.id},#{find_by_real_estate_property_id(@property.id).parent_id},'hide_del',#{params[:list] ? params[:list] : '0'},#{params[:highlight] ? params[:highlight] : '0'},'#{params[:show_past_shared]}','#{params[:from_debt_summary]}','#{params[:from_property_details]}',#{@property.id},'#{params[:call_from_variances]}','#{params[:month]}','#{params[:document_id]}','#{params[:tl_month]}','#{params[:tl_period]}','#{params[:period]}')"%>
+  <span></span></div>
+<%end%>
+<%if @property.new_record? %>
+  <span style="width:700px;float:left;"><a id="sbox-btn-close" style="right:-17px;top:-24px;" onclick='Control.Modal.close();return false;'></a></span>
+	<%end%>
+<!-- Property sub tab ends here-->
+
+   </div>
+
+<div class="suitemidbody nobg">
+  <span style="color: red; align: center;" id="errmsg"></span>
+  <div id="sheet123">
+
+<!-- Basic tab starts here-->
+	<div style="display:block;">
+      <%=render :partial=>"basic_form"%>
+		</div>
+<!-- Basic tab ends here-->
+
+  </div>
+</div>
+
+
+
+<!--[if IE 7]>
+<style type="text/css">
+body #unorderd_list {.margin-left:-100px;}
+</style>
+<![endif]-->

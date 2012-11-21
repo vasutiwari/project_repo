@@ -1,0 +1,238 @@
+
+<%  pdf_convn_path,note_collection =  pdf_path_and_note(params[:property_id])
+months_order = ["","Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]%>
+<body>
+  <div class="box-1col">
+    <% lease_expirations_calculation(nil,nil)%>
+    <div class="box-title"><span class="title"><%=@month_val.present? && @year.present? ? "Occupancy as of #{months_order[@month_val]} #{@year}" : ''%></span></div>
+    <div class="box4-colWhite fltlft">
+      <div id="occupancyTabContent1"></div>
+    </div>
+    <%if @suite_vacant.present? || @lease_expiartions.present?%>
+      <script>
+        myChart = new FusionCharts("/FusionCharts/Pie2D.swf",'FactorySum1', 280, 185, 0, 0);
+        myChart.setDataXML("<chart bgColor='FFFFFF' showBorder='0' showPercentInToolTip='1' pieRadius='50' animation='1' labelSepChar= '\n' formatNumberScale='0' numberSuffix=' SF' pieSliceDepth='7' startingAngle='305'><set label='Vacant'  link='/lease/rent_roll?rent_roll_filter=vacant&property_id=<%=params[:property_id]%>&portfolio_id=<%=params[:portfolio_id]%>' value='<%= @suite_vacant[1]%>'  color='<%= @suite_vacant[0]%>' /><% @lease_expirations.each_with_index do |i,j| %><set label='<%= i[1] %>'  value='<%= i[3].to_i %>'  link='/lease/rent_roll?rent_roll_filter=<%= j.eql?(3) ? i[1].to_s.gsub('& above','and above') : "#{i[1]}_expiration"%>&property_id=<%=params[:property_id]%>&portfolio_id=<%=params[:portfolio_id]%>' color='<%= i[2] %>'/><% end %><styles><definition><style type='font' name='CaptionFont' size='10' color='666666' /><style type='font' name='SubaptionFont' bold='0' /></definition><application><apply toObject='caption' styles='CaptionFont' /><apply toObject='SubCaption' styles='SubCaptionFont' /></application></styles></chart>");
+        myChart.render("occupancyTabContent1");
+      </script>
+    <%else%>
+      <div style="text-align: center; height: 0px;width: 277px; line-height: 183px;">No data available </div>
+    <%end%>
+    <%lease_details%>
+    <%=render :partial=> "property_leasing_activity",:locals=>{:leases_collection=>@leases,:note_collection => note_collection}%>
+    <div class="clearfloat"></div>
+    <div class="box-1col">
+      <div class="fltLeft col2">
+        <div class="box-title"><span class="title">Vacancy and Expirations</span></div>
+        <div class="box2-colWhite">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <thead>
+              <tr>
+                <th width="50px" class="bdr-bottom-gry">&nbsp;</th>
+                <th width="110px" class="bdr-bottom-gry">&nbsp;</th>
+                <th width="60px" class="bdr-bottom-gry">Actual</th>
+                <th width="120px" class="bdr-bottom-gry">Variance</th>
+                <th width="5px" class="bdr-bottom-gry">&nbsp;</th>
+              </tr>
+            </thead>
+            <%vac_suite_calcs(note_collection.id)%>
+            <tr>
+              <td height="40px" class="lspacing"><span>Vacancy</span> <br /></td>
+              <td valign="middle"><div class="value-bar-outer fltlft">
+                  <div class="value-bar"><img align="left" width="<%=bar_percentage_dashboard(@vacant_display.to_f,'true')%>" height="16" src="/images/blue-bar.png"/></div>
+                  <br />
+                </div></td>
+              <td align="right"><%= @rent_sqft%></td>
+              <%occupancy_percent_for_month%>
+            <style>.greenrow { float:none; }.redrow2 {float:none;}</style>
+            <%occupancy_graph = @occupancy_graph%>
+            <%
+            if occupancy_graph.blank?
+            occupancy_graph[:occupied] = {:value => 0.0, :val_percent => 0.0 ,:diff => 0,:diff_percent => 0.0 ,:style => "greenrow" ,:diff_word => "above" }
+            occupancy_graph[:vacant] = {:value => 0.0, :val_percent => 0.0 ,:diff => 0.0,:diff_percent => 0.0 ,:style => "greenrow",:diff_word =>"above"}
+            end
+            %>
+            <% color_icon = occupancy_graph[:vacant][:style] == 'redrow2' ? 'uparrowred' : 'greenarrowdown' %>
+            <%vacancy_var = (occupancy_graph[:vacant][:diff_percent].infinite? || occupancy_graph[:vacant][:diff_percent].nan?) ? display_currency_real_estate_overview_for_percent(occupancy_graph[:vacant][:diff_percent].to_f) : display_currency_real_estate_overview_for_percent(occupancy_graph[:vacant][:diff_percent].round.abs)%>
+            <td width="100px" align="center">
+              <%if !vacancy_var.eql?("0%")%>
+                <span class="<%=occupancy_graph[:vacant][:style]%>">
+                  <img width="8" src="<%= pdf_convn_path%>/images/<%= color_icon %>.png"/><%= vacancy_var%></span>,
+                <span class="<%=occupancy_graph[:vacant][:style]%>"><%=display_sqrt_real_estate_overview(occupancy_graph[:vacant][:diff])%></span>
+              <%else%>
+                <span><%=display_sqrt_real_estate_overview(occupancy_graph[:vacant][:diff])%></span>
+              <%end%>
+            </td>
+            <td width="70px"><%= link_to "#{@suites_count} ", {:controller=>'lease',:action=>"vacant_occupied_suites",:item=>'vacant_suites',:propertyid=>note_collection.id},:id=>"vacant_suites_LB"%>
+              <script>new Control.Modal($('vacant_suites_LB'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </td>
+            </tr>
+            <% occupied_suite_total_calcs(note_collection.id)%>
+            <tr>
+              <td class="lspacing"><span>6 Mo Exp</span> <br /></td>
+              <td valign="middle"><div class="value-bar-outer fltlft">
+                  <div class="value-bar"><img align="left" width="<%=@occ_percent.to_f%>%" height="16" src="/images/blue-bar.png"/></div>
+                                              <br />
+                                              </div></td>
+                                              <td align="right"><%= @sqft_value%></td>
+                    <td>&nbsp;</td>
+                    <td><%= link_to "#{@leases_exp}", {:controller=>'lease',:action=>"vacant_occupied_suites",:item=>'occupied_suites',:propertyid=>note_collection.id},:id=>"occupied_suites_LB"%>
+                      <script>new Control.Modal($('occupied_suites_LB'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script></td>
+                    </tr>
+                    </table>
+                  </div>
+                </div>
+                <%interested_and_negotiated_leases(note_collection.id,nil,nil)%>
+                <%find_pending_approval(@property_lease_suites_negotiated,note_collection.id)%>
+                <div class="fltrt col2">
+                  <div class="box-title"><span class="title">Pipeline</span></div>
+                  <div class="box2-colWhite">
+                    <table width="100%" cellspacing="0" cellpadding="2" border="0">
+                      <tbody>
+                        <tr>
+                          <td height="40px" width="100px" class="lspacing"><span><%= link_to "Pending Approval", lease_property_pipeline_path(params[:portfolio_id],note_collection.try(:id),:from_mgmt =>'true')%></span> <br/>
+                          </td>
+                          <td valign="middle" width="130px"><div class="value-bar-outer fltlft">
+                              <div class="value-bar"><img align="left" width="<%=@pending_percent.to_f.round%>%" height="16" src="/images/blue-bar.png"/></div>
+                                                          <br/>
+                                                          </div></td>
+                                                          <td width="60px"><%=@pending_sqft%></td>
+
+                                <td width="70px"><%= link_to "#{@pending_count}", lease_property_pipeline_path(params[:portfolio_id],note_collection.try(:id),:from_mgmt =>'true')%></td>
+                                </tr>
+                                <%find_active_prospects(@property_lease_suites_interested,note_collection.id)%>
+                                <tr>
+                                  <td class="lspacing"><span><%= link_to "Prospects", lease_property_pipeline_path(params[:portfolio_id],note_collection.try(:id),:from_mgmt =>'true')%></span> <br/></td>
+                                  <td valign="middle"><div class="value-bar-outer fltlft">
+                                      <div class="value-bar"><img align="left" width="<%=@prospect_percent.to_f.round%>%" height="16" src="/images/blue-bar.png"/></div>
+                                                                  <br/>
+                                                                  </div></td>
+                                                                  <td><%=@prospect_sqft%></td>
+
+                                                                  <td><%= link_to "#{@prospect_count}", lease_property_pipeline_path(params[:portfolio_id],note_collection.try(:id),:from_mgmt =>'true')%></td>
+                                                                  </tr>
+                                                                  </tbody>
+                                                                  </table>
+                                                                  </div>
+                                                                  </div>
+                                                                  <div class="clearfloat"></div>
+                                    </div>
+                                    <div class="clearfloat"></div>
+                                    <div class="box-1col">
+                                      <div class="fltLeft col2">
+                                        <div class="box-title fltLeft"><span class="title">Top 10 Tenants</span></div>
+                                        <div class="fltrt maginR5"><a href="/lease/<%=note_collection.portfolio_id%>/rent_roll/<%=note_collection.id%>/property_rentroll?rent_roll_filter=top_10_tenants">View All</a> </div>
+                                        <div class="clear"></div>
+                                        <div class="box2-colWhite">
+                                          <table cellpadding="0" cellspacing="0" border="0" width="100%" class="tablePad">
+                                            <tr>
+                                              <th width="100%" align="left" class="bdr-bottom-gry td182">Tenant</th>
+                                              <th  class="bdr-bottom-gry td130">&nbsp;</th>
+                                              <th  class="bdr-bottom-gry">SF</th>
+                                              <th   class="bdr-bottom-gry td70">Lease <br />End</th>
+                                              <th class="lspacing bdr-bottom-gry td70" style="width:87px;">Annual <br />
+                                                Rent PSF</th>
+                                            </tr>
+
+                                            <%top_tenants, top_ten_tenants = RealEstateProperty.top_tenants_from_lease_rent_roll(note_collection)%>
+                                            <%if top_ten_tenants.present?%>
+                                              <%top_ten_tenants.each do |top|%>
+						  <tr>
+                <td nowrap><a class="font11" href="/lease/<%=note_collection.portfolio_id%>/dashboard_terms/<%=note_collection.id%>/dashboard_terms?lease_id=<%=top.try(:lease_id)%>" title="<%= top.try(:tenant).titleize %>"><%=truncate(top.try(:tenant).titleize, :length=>18)%></a></td>
+                <td valign="middle" align="center"><div class="value-bar-outer fltlft">
+                    <div class="value-bar value-bar100">
+                      <%bar_perct= percentage_cals_for_bar(note_collection,top.try(:lease_rent_roll_sqft).to_i)%>
+                      <img align="left" width="<%=bar_perct.to_i >= 100 ? 100 : bar_perct.to_i %>%" height="16" src="/images/blue-bar.png">
+                           </div>
+                           <br />
+                           </div></td>
+                           <td align="right"><%=number_with_delimiter(top.try(:lease_rent_roll_sqft).to_i)%></td>
+                      <td align="center"><%=top.try(:lease_end_date).present? ? top.try(:lease_end_date).strftime("%m/%d/%y") : nil%></td>
+                      <td align="right"><%= top.try(:lease_rent_roll_sqft) ? number_with_precision((top.try(:psfsql).to_f / top.try(:lease_rent_roll_sqft).to_i), :precision=>2) : number_with_precision(0.00, :precision=>2) %></td>
+                      </tr>
+                    <%end%>
+										<%else%>
+										<tr>
+										<td>No data available</td>
+										</tr>
+										<%end%>
+                                                    </table>
+                                                  </div>
+                                                </div>
+                                                <%property_leases = RealEstateProperty.find_Upcoming_ten_Expirations(note_collection)%>
+                                                <div class="fltrt col2">
+                                                  <div class="box-title fltLeft"><span class="title">Upcoming 10 Expirations</span></div>
+                                                  <div class="fltrt maginR5"><a href="/lease/<%=note_collection.portfolio_id%>/rent_roll/<%=note_collection.id%>/property_rentroll?rent_roll_filter=top_10_expirations">View All</a> </div>
+                                                  <div class="clear"></div>
+                                                  <div class="box2-colWhite">
+                                                    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="tablePad">
+                                                      <tr>
+                                                        <th width="100%" align="left" class="bdr-bottom-gry td182">Tenant</th>
+                                                        <th  class="bdr-bottom-gry td130">&nbsp;</th>
+                                                        <th  class="bdr-bottom-gry">SF</th>
+                                                        <th  class="lspacing bdr-bottom-gry td70">Lease <br />End</th>
+                                                        <th class="lspacing bdr-bottom-gry td70" style="width:73px;">Annual <br />
+                                                          Rent PSF</th>
+                                                      </tr>
+                                                      <%if property_leases.present?%>
+                      <%property_leases.each do |upcoming_expiration_lease|%>
+                        <%if upcoming_expiration_lease%>
+                          <tr>
+                            <td nowrap><a class="font11" href="/lease/<%=note_collection.portfolio_id%>/dashboard_terms/<%=note_collection.id%>/dashboard_terms?lease_id=<%=upcoming_expiration_lease.try(:lease_id)%>" title="<%= upcoming_expiration_lease.try(:tenant).titleize %>"><%=truncate(upcoming_expiration_lease.try(:tenant).titleize, :length=>18)%></a></td>
+                            <td valign="middle" align="center"><div class="value-bar-outer fltlft">
+                                <div class="value-bar value-bar100">
+                                  <%bar_percentage= percentage_cals_for_bar(note_collection,upcoming_expiration_lease.try(:lease_rent_roll_sqft).to_i)%>
+                                  <img align="left" width="<%=bar_percentage.to_i >= 100 ? 100 : bar_percentage.to_i %>%" height="16" src="/images/blue-bar.png">
+                                       </div>
+                                       <br />
+                                       </div></td>
+                                       <td align="right"><%=upcoming_expiration_lease.try(:lease_rent_roll_sqft).to_i ? number_with_delimiter(upcoming_expiration_lease.try(:lease_rent_roll_sqft).to_i)  : raw('&nbsp;')%></td>
+                                  <td align="center"><%=upcoming_expiration_lease.lease_end_date ? upcoming_expiration_lease.try(:lease_end_date).strftime("%m/%d/%y") : raw('&nbsp;')%></td>
+                                  <td align="right"><%=upcoming_expiration_lease.try(:lease_rent_roll_sqft) ? number_with_precision((upcoming_expiration_lease.try(:psfsql).to_f / upcoming_expiration_lease.try(:lease_rent_roll_sqft).to_i), :precision=>2) : number_with_precision(0.00, :precision=>2)%></td>
+                                  </tr>
+                                <%end%>
+                              <%end%>
+														<%else%>
+									      	<tr>
+									      	<td>No data available</td>
+									      	</tr>
+									      	<%end%>	
+                                                              </table>
+                                                            </div>
+                                                          </div>
+                                                          <div class="clearfloat"></div>
+                                                          </div>
+                                                          <div class="clearfloat"></div>
+                                                          <%year_collection,rented_area_collection,cumulatuive_percentage,total_sum = lease_expiration_graph_display%>
+                                                          <div class="box-2col fltLeft">
+                                                            <div class="box-title"><span class="title">Lease Expirations By Year</span></div>
+                                                            <div class="graph" id="LeaseExpirationGraph"></div>
+                                                            <%if total_sum != 0 %>
+                                                              <script>
+                                                                myChart = new FusionCharts("/FusionCharts/MSColumn3DLineDY.swf",'FactorySum2', 434, 251, 0, 0);
+                                                                myChart.setDataXML("<chart caption='' XAxisName='' palette='1' animation='1' formatNumberScale='1' numberSuffix=' SF'  sNumberSuffix='%' showValues='0' seriesNameInToolTip='1' SYAxisMaxValue='100'><categories><%year_collection.each do |year|%><category label='<%= year %>' /><%end%></categories><dataset seriesname='Lease Expiry'><%rented_area_collection.each do |i|%><set value='<%=i%>' /><%end%> </dataset> <dataset seriesName='Cumulative Expiry %' parentYAxis='S' renderAs ='Line'> <%cumulatuive_percentage.each do |cum|%> <set value='<%=number_with_precision(cum, :precision=>2)%>' /> <%end%></dataset>   <styles>  <definition>      <style type='font' color='666666' name='CaptionFont' size='15' />        <style type='font' name='SubCaptionFont' bold='0' />     </definition>     <application>    <apply toObject='caption' styles='CaptionFont' />  <apply toObject='SubCaption' styles='SubCaptionFont' /> </application></styles></chart>");
+                                                                myChart.render("LeaseExpirationGraph");
+                                                              </script>
+                                                            <%else%>
+                                                              <div style="text-align: center; height: 251px;width: 434px; line-height: 219px;">No data available </div>
+                                                            <%end%>
+                                                          </div>
+                                                          <%total_months,occ_tot,vac_tot,occ_and_vac_tot,total_months_x,flag_var = trailing_12_month_graph(note_collection) %>
+                                                          <div class="box-2col fltrt">
+                                                            <div class="box-title"><span class="title">Trailing 12 Months Occupancy </span></div>
+                                                            <div class="graph" id="12months_occupancy"></div>
+                                                            <%if occ_and_vac_tot.present? && flag_var.eql?(1) %>
+                                                              <script>
+                                                                myChart = new FusionCharts("/FusionCharts/StackedColumn3D.swf",'FactorySum3', 434, 251, 0, 0);
+                                                                myChart.setDataXML("<chart decimals = '2' xAxisName='' yAxisMaxValue='100' numberSuffix='%'  areaBorderColor='FFFFFF' showValues='0' numVDivLines='3' palette='2'>    <categories>  <%total_months_x.each do |month|%>      <category label='<%= month%>' /><%end%></categories>    <dataset seriesName='Occupied'> <%total_months.each do|month|%>    <set value='<%= occ_tot[month].present? ? (occ_tot[month].to_f / occ_and_vac_tot[month].to_f ) * 100 : ''  rescue nil %>' /><%end%>    </dataset>    <dataset seriesName='Vacant' >        <%total_months.each do|month|%>    <set value='<%= vac_tot[month].present? ? (vac_tot[month].to_f / occ_and_vac_tot[month].to_f ) * 100 : ''   rescue nil%>' /><%end%>    </dataset></chart>");
+                                                                myChart.render("12months_occupancy");
+                                                              </script>
+                                                            <%else%>
+                                                              <div style="text-align: center; height: 251px;width: 434px; line-height: 219px;">No data available </div>
+                                                            <%end%>
+                                                          </div>
+																													
+																													
+																													<%= render :partial => "dashboard/exec_summary_for_leasing_info" %>
+																													
+																													
+                                                          </body>

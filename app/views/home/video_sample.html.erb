@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>AMP</title>
+<link href="/stylesheets/amp_v2.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/ampnew.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+<script type="text/javascript" src="/javascripts/highcharts.js"></script>
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "control.modal" %>
+    <%= javascript_include_tag "effects" %>
+    <%= javascript_include_tag "controls" %>
+    <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "rails" %>
+</head>
+<body>
+<script>
+function showVideo()
+{
+document.getElementById("vidy").style.display="none"
+document.getElementById("vid").style.display="inline"
+}
+function showVideoyou()
+{
+document.getElementById("vid").style.display="none"
+document.getElementById("vidy").style.display="inline"
+}
+</script>
+<div class="errow_mainwrapper">
+  <div class="mainwrapper">
+    <div class="headerwrapper">
+      <div class="logowrapper">
+        <%= render :partial => "layouts/logo" %>
+      </div>
+      <div class="globalnavwrapper">
+            <% if current_user %>
+            <div class="globalcol1">Welcome<%=  current_user && current_user.name.blank? ? current_user && current_user.email.blank? ?  "" : ", "+ current_user.email : ", "+current_user.name %></div>
+                <% if !current_user.has_role?('Admin') %><div class="globalcol2"><span style="float:left;padding-right:3px;">
+              <img src="<%= user_profile_image(current_user.id)%>"  width="17px" height="17px" border="0" id="user_image"></img>
+            </span>
+            <a href="javascript:;"></a>
+          <a href="/collaboration_hub?open_profile=true">Profile</a></div>
+                <!--<div class="globalcol2"><span style="float:left;"><img border="0" width="15px" height="15px" src="/images/printer.png" />&nbsp;</span><a href="javascript:;" onclick="window.print();">Print</a></div>-->
+                <% end %>
+                <div class="globalcol3"><a href="/logout">Logout</a></div>
+            <% else %>
+                <div class="globalcol3" style="border-right: none;"><a href="/login">Login</a></div>
+             <% end %>
+        </div>
+        <% if show_small_amp_logo %>
+            <div class="amplogocol"><img border="0" width="111" height="35" src="/images/amplogo_small.png"/></div>
+        <% end %>
+    <% if current_user && !current_user.has_role?('Admin') %>
+        <div class="headernavwrapper">
+                <% if current_user.has_role?("Asset Manager") %>
+                    <div class="navdeactive"><a href="<%= welcome_path %>">Home</a></div>
+                    <div class="navdeactive"> <a href="<%= portfolios_path %>"> Portfolios </a></div>
+                    <div class="navdeactive"> <a href="<%= goto_asset_view_path(current_user.id) %>">Property</a></div>
+                    <div class="navdeactive"> <a href="/collaboration_hub">My Files </a> </div>
+                    <div class="navdeactive"> <a href="/transaction?deal_room=true">Deals</a></div>
+                <% else %>
+                    <div class="navdeactive"> <a href="<%= shared_users_path %>">My Files</a> </div>
+                <% end %>
+        </div>
+    <% end %>
+    </div>
+    <div class="error_bodywrapperrow">
+      <div class="homecontentwrapper" style="background-color:grey;width:883px;height:418px;">
+			<div id="vid" style="display:none;margin-left:169px;">
+			<iframe src="http://player.vimeo.com/video/27613710?title=0&amp;byline=0&amp;portrait=0" width="500" height="400" frameborder="0"></iframe><p></p>
+					</div>
+					
+						<div id="vidy" style="display:none;margin-left:169px;">
+		<iframe width="500" height="400" src="http://www.youtube.com/embed/gbi8e2w_als?hl=en&fs=1" frameborder="0" allowfullscreen></iframe>
+					</div>
+			
+      <a href="#" onclick="showVideo()">View Vimeo Video</a><br>
+      <a href="#" onclick="showVideoyou()">View Youtube Video</a>
+			<div id="container" style="width: 400px; height: 400px; margin: 0 auto"></div>
+			<% list_of_names1 = {"colors"  => ["#cccccc", "#f3f3e9", "#e6e6e6","#0071ba","#4088B8","#ff0000"], "name" => ["Arun","Sasie","Soundar","Karthik","Udhaya","Mohan"],	"value" => ["10","20","30","30","20","10"]} %>
+			<% list_of_name1 = list_of_names1.keys %>
+			<% list_of_names2 = {"colors"  => ["#ff0000", "#4088B8", "#0071ba","#e6e6e6","#f3f3e9","#cccccc"], "name" => ["Arun","Sasie","Soundar","Karthik","Udhaya","Mohan"],	"value" => ["30","20","10","10","20","30"]} %>
+			<% list_of_name2 = list_of_names2.keys %>
+			<script type="text/javascript">
+				chart_type = ["pie","column","bar","area"]
+				var test=[];
+				y = 0
+				<% 0.upto list_of_names1[list_of_name1.first].count-1 do |i| %>
+					<% list_of_name1.each do |j| %>
+						test[y] = "<%= list_of_names1[j][i] %>";
+						y = y + 1;
+					<% end %>
+				<% end %>
+				var test1=[];
+				x = 0
+				<% 0.upto list_of_names2[list_of_name2.first].count-1 do |i| %>
+					<% list_of_name2.each do |j| %>
+						test1[x] = "<%= list_of_names2[j][i] %>";
+						x = x + 1;
+					<% end %>
+				<% end %>
+			</script>
+
+      </div>
+    </div>
+<div class="error_footerrow">
+      <div class="footerwrapper">
+                    <% if current_user %>
+                        <div class="footerrow" style="width: 630px;">
+                            <div class="footercol2"><a href="/logout">Logout</a></div>
+                            <div class="footercol"><a href="<%=APP_CONFIG[:main_url]%>/request_demo/" target="_blank">Contact Us</a></div>
+                            <div class="footercol"><a href="<%= current_user.has_role?("Asset Manager") ? '/collaboration_hub?open_profile=true' : '#' %>" style="<%= current_user.has_role?('Asset Manager') ? '' : 'text-decoration:none;cursor:none;'%>">Profile </a></div>
+                            <div class="footercol"><a href="<%= current_user.has_role?("Asset Manager") ? welcome_path : shared_users_path %>">Home</a></div>
+                        </div>
+                    <% else %>
+                        <div class="footerrow" style="width:554px;">
+                            <div class="footercol2"><a href="/login">Login</a></div>
+                            <div class="footercol"><a href="<%=APP_CONFIG[:main_url]%>/request_demo/" target="_blank">Contact Us</a></div>
+                        </div>
+                    <% end %>
+                    <div class="footericonrow"><a href="http://www.verisign.com/ssl-certificate/"><img src="/images/ssl_icon.png" width="24" height="26"  border="0"/></a>&nbsp;</div>
+                    <div class="footerow2">Copyrights &copy; AMP, 2010</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

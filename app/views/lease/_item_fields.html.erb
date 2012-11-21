@@ -1,0 +1,15 @@
+<div class="notesnamerow" id="ClauseOtherItem-<%=@item_index%>" onmouseover="jQuery(this).css('background-color','#f6f6f6');this.style.width='765px'" onmouseout="jQuery(this).css('background-color','#ffffff');this.style.width='750px'">
+  <div class="close" style="float:left; width:765px;">
+    <%if f.object.new_record?%>
+      <span class="closeme" onclick="if(confirm('Are you sure you want to delete?')){jQuery('#item_link').show();add_other_item --;delete_item(jQuery('#lease_clause_attributes_items_attributes_<%=@item_index - 1%>_id').val());jQuery('#lease_clause_attributes_items_attributes_<%=@item_index - 1%>_id').remove();jQuery(this).parent().parent().remove();return false;}">X</span>
+    <%else%>
+      <span class="closeme" onclick="if(confirm('Are you sure you want to delete?')){jQuery('#item_link').show();add_other_item --;delete_item(jQuery('#lease_clause_attributes_items_attributes_<%=@item_index - 1%>_id').val());jQuery('#lease_clause_attributes_items_attributes_<%=@item_index - 1%>_id').remove();jQuery(this).parent().parent().remove();return false;}">X</span>
+    <%end%>
+    <div class="termsform namefirst">
+      <%= f.text_field :name, :type=>"text", :class=>"lstextfield", :style=>"width:220px;"%>
+    </div>
+    <div class="termsform">
+      <%= f.text_field :description, :type=>"text", :class=>"lstextfield", :style=>"width:509px;"%>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,4 @@
+<%@property_types = find_property_types%>
+<%=form_for(@property, :method => :put, :url => client_admin_properties_path,:html=>{:multipart=>true}) do |p| %>
+<%=render "form",:p=>p, :property_collection => @property, :property_types => @property_types%>
+<%end%>

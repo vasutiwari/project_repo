@@ -1,0 +1,28 @@
+<% content_for :title, 'AMP - Asset manager Creation' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <div class="fieldrow">
+    <% unless flash.now[:notice].blank? -%>
+      <center><font size="4" color="green"><%=flash.now[:notice]%></font></center>
+    <% end -%>
+  </div>
+  <div class="middlewrapper2">
+    <div class="sectiontitle"><span style="float:left;">Edit Asset Manager</span> <span style="float: right"><%=link_to "<<< Back <<<",admin_asset_managers_path%></span></div>
+    <div class="rowwrapper">
+      <%= form_tag({:controller=>"admin/asset_managers", :action=>"update", :id=>@user.id, :page=>params[:from]} , :method=>:put, :id=>"admin_form" ) do %>
+        <%=render :partial=>"form",:locals=>{:user_collection => @user} %>
+        <input type="hidden" name="redirect" value="10"></input>
+      <%end%>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><a onclick="jQuery('#admin_form').submit();" style="cursor: pointer;"><img src="/images/btn_submit.gif" width="117" height="32" alt="Submit" /></a></div>
+    </div>
+  </div>
+</div>
+
+
+
+

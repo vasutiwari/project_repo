@@ -1,0 +1,37 @@
+         <div class="collab_profile_imgcol" >
+            <span>
+              <img src="<%= user_profile_image(user_collection.id)%>"  width="123" height="123" border="0" id="user_image"></img>
+            </span>
+            <a href="javascript:;"></a>
+          </div>
+          <div class="collab_details_row">
+            <div class="collab_name_col" style="white-space: nowrap;" id="replace_user_name_render">
+              <%= render :partial => "collaboration_hub/user_name_render",:locals => {:user_collection => user_collection} %>
+            </div>
+            <div class="collab_name_col" style="white-space: nowrap;"><%=user_collection.email%>&nbsp;</div>
+            <div id="password_render">
+              <%= render :partial => "collaboration_hub/password_render" , :locals => {:user_collection => user_collection} %>
+            </div>
+            <div class="collab_description_col" style="white-space: nowrap;" id="phone_number_render">
+              <%= render :partial => "collaboration_hub/edit_phone_number" , :locals => {:user_collection => user_collection} %>
+            </div>
+            <div class="collab_description_col" style="white-space: nowrap;" id="job_title_render">
+              <%= render :partial => "collaboration_hub/edit_job_title" , :locals => {:user_collection => user_collection} %>
+            </div>
+            <div class="collab_description_col" style="white-space: nowrap;" id="description_render">
+              <%= render :partial => "collaboration_hub/description_render" , :locals => {:user_collection => user_collection} %>
+            </div>
+            <div class="collab_lastupdated_col" id="profile_last_changed"><%= render :partial => "collaboration_hub/render_updated_date",:locals => {:user_collection => user_collection} %></div>
+          </div>
+          <div class="changepiccol" style="position:absolute;top:155px;width:130px;left:10px;">
+            <a href="<%= edit_user_image_collaboration_hub_path(user_collection.id)%>" id="edit_user_image1"><img src="/images/editicon.png" width="15" height="16" border="0"/></a>
+            <script>new Control.Modal($('edit_user_image1'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className : 'modal_container', method : 'get'});</script>
+            <a href="<%= edit_user_image_collaboration_hub_path(user_collection.id)%>" id="edit_user_image2"> Change Picture</a>
+            <script>new Control.Modal($('edit_user_image2'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className : 'modal_container', method : 'get'});</script>
+                                                <br>
+                                                <br>
+    <a href="<%= edit_user_image_collaboration_hub_path(user_collection.id,:logo_image=>true)%>" id="logo_login_image1"><img src="/images/editicon.png" width="15" height="16" border="0"/></a>
+            <script>new Control.Modal($('logo_login_image1'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className : 'modal_container', method : 'get'});</script>
+                        <a href="<%= edit_user_image_collaboration_hub_path(user_collection.id,:logo_image=>true)%>" id="logo_login_image"> Change Logo</a>
+                                <script>new Control.Modal($('logo_login_image'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className : 'modal_container', method : 'get'});</script>
+          </div>

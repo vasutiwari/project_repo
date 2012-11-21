@@ -1,0 +1,23 @@
+<%initial_assignments%>
+<div id='listing_shared_users'>
+  <div class="dev_edit_managenoterhsrow1" style="padding-left:5px;">
+    <div class="portfolio_setup_row">
+      <div class="setuptablerow new-class">
+        <div class="setupsubheadrow" style="width:643px;">
+          <div class="eventscol1">
+            <div class="subheadcol4">Recent Updates in '<span title="<%=(folder_collection.name == 'my_files' && folder_collection.parent_id == 0 ? 'My Files ' : folder_collection.name.titleize) %>" ><%= lengthy_word_simplification(folder_collection.name == 'my_files' && folder_collection.parent_id == 0 ? 'My Files ' : folder_collection.name.titleize) %></span>' </div>
+            <div class="setupnaviconlast"></div>
+          </div>
+          <div class="eventscol1" style="width:336px;">
+            <% if !shared_users.nil? && !shared_users.empty? %>
+              <div class="subheadcol4"><label>Filter by user&nbsp;</label><%=select_tag :filter, options_for_select(['All Users']+shared_users.collect{|x| [x.email,x.id]}) ,:id => 'filter_option',:onchange => "call_filtering([#{event_ids.join(",") }])",:style => 'border:default; width: 220px;'%></div>
+            <%end%>
+          </div>
+        </div>
+        <div id="listing_event">
+          <%= render :partial => '/events/event_list' %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

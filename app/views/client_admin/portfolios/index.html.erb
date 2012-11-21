@@ -1,0 +1,95 @@
+<%#if @portfolios.present?%>
+	<%user_id=current_user.id%>
+ <div class="box-1col">
+    <div class="clearfloat"></div>
+    <div class="box-title fltLeft"><span class="title">Portfolio List (<%=@portfolios_count%>)</span></div>
+    <div class="fltrt"><a href="/client_admin/<%=user_id%>/portfolios/new" class="loader_event button lightBlue"><span>Add Portfolio</span></a></div>
+    <div class="clearfloat"></div>
+   <!-- <div><a href="#" class="iconAdd"><span>Add Portfolio</span></a></div>-->
+    <div>&nbsp;</div>
+    	<table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+        	<thead >
+            	<tr class="fb-tr-head">
+            	<th class="bdr-lt-gry bdr-rt-wht" style="width:100px;">Portfolio</th>
+                <th class="bdr-rt-wht"style="width:300px;">Properties</th>
+                <th class="bdr-rt-wht" style="width:60px;">Actions</th>
+                </tr>
+            </thead>
+						<%if @portfolios.present?%>
+						<%@portfolios && @portfolios.each_with_index do |portfolio,i|%>
+						<%basic_portfolio=portfolio.is_basic_portfolio?%>
+						<%class_name=(i%2==0) ? "tablefbAlternate" : ""%>
+            <tbody>
+						<%portfolio_image=portfolio.find_portfolio_image%>
+
+            	<tr class=<%=class_name%>>
+                	<td align="left" class="bdr-rt-gry bdr-top-gry"><img src=<%=portfolio_image%> class="imgPLM" title="" alt="" height="35" width="42px;" /> <strong><%=portfolio.name%> <%="(default)" if basic_portfolio%></strong></td>
+										<%total,properties,properties_id=find_properties_based_on_portfolios(portfolio)%>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry">
+											<% if properties.present?%>
+										<%properties && properties.each.with_index do |property_name,j|%>
+									<!--	<a href="<%#=property_info_path(portfolio.id,properties_id[j])%>">-->
+									<a href="/client_admin/<%=user_id%>/properties/<%=properties_id[j]%>/edit?sort=<%= params[:sort] || 'Commercial' %>">
+									<%=property_name%></a><%if properties.count>1%><%if j==0%>, <%end%><%end%>
+										<%end%>
+										<%else%>
+										-
+										<%end%>
+										<%if total!=""%>
+										and + <%#=total%>
+											<%= link_to "#{total} more",{:controller=>"client_admin/portfolios",:action=>"other_properties",:id=>"#{portfolio.id}"}, :id=>"#{portfolio.id}"%>
+							<script>new Control.Modal($("<%=portfolio.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+										<%end%>
+										</td>
+                  <td align="center" class="bdr-rt-gry bdr-top-gry">
+									<%if basic_portfolio%>
+									<img src="/images/icon_editDeactive.png" title="Edit" alt="Edit" />
+									<img src="/images/iconDeleteDeactive.png" title="Delete" alt="Delete" />
+									<%else%>
+									<a class="loader_event" href="/client_admin/<%=user_id%>/portfolios/<%=portfolio.id%>/edit"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a>
+										<%= link_to image_tag("/images/iconDeleteActive.png", :alt=>"Delete",:border=>"0", :title=>'Delete'),client_admin_portfolio_path(user_id,portfolio.id),:method=>:delete, :confirm => "#{FLASH_MESSAGES['client_admin']['117']}"%>
+									<%end%>
+
+									</td>
+              </tr>
+              </tbody>
+							<%end%>
+							<%else%>
+							<tbody><tr><td colspan="3"  style="text-align:center;">No Data To Display</td></tr></tbody>
+							<%end%>
+        </table>
+    <div class="clearfloat"></div>
+		<div style="margin-left:223px;font-size:13px"><%= FLASH_MESSAGES['client_admin']['106'] %></div>
+			<%if @portfolios.present?%>
+			<div class="paginationcol" style="margin-left:800px;">
+				<%=will_paginate @portfolios %>
+			</div>
+		<%end%>
+    </div>
+		<%#else%>
+		<!--
+		  <div class="box-1col">
+			<div class="nopropertyDiv">
+    	<p><span class="iconNotificaton">No portfolio is available.</span> </p>
+		<p>Please contact your client admin <code><a href="mailto:admin@theam.com">&lt;admin email as link&gt;</a></code> to request access.</p>
+        </div>
+    <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+		</div> -->
+		<%#end%>
+<script>
+<%if params[:page].nil? && (params[:add_portfolio].eql?('true') || params[:edit_portfolio].eql?('true'))%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['406']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['client_admin']['112']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+
+</script>

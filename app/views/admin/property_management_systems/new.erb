@@ -1,0 +1,22 @@
+<% content_for :title, 'AMP - Asset manager Creation' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  <div class="middlewrapper2">
+    <div class="sectiontitle">Create New Property Management System : <span style="float: right"><%=link_to "<<< Back <<<",admin_property_management_systems_path%></span></div>
+    <div class="rowwrapper"><font color="red"><%= flash[:error] %></font>
+     <%= form_for @property_management_system, :url => { :action => :create } do -%>
+     <%=render :partial=>"form" %>
+      <%end%>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><a onclick="document.forms[0].submit();" style="cursor: pointer;" href="javascript:;"><img src="/images/btn_submit.gif" width="117" height="32" alt="Submit" border="0" /></a></div>
+    </div>
+  </div>
+</div>
+
+
+

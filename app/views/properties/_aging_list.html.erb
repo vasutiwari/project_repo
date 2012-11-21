@@ -1,0 +1,28 @@
+<% exp_month_ytd , exp_ytd_check = set_local_variables_value(params , (defined?(@current_time_period.month).nil? ? nil : @current_time_period.month) , {:option => "income_expence"}) %>
+		<%exp_ytd_check = false%>
+		<%if (params[:period] == "4" || params[:tl_period] == "4") || ((params[:period] == "7" || params[:tl_period] == "7") && ((params[:start_date].nil? || params[:start_date].blank?) && ( params[:tl_month].nil? ||  params[:tl_month].blank?)))
+		find_redmonth_start_for_recv(find_selected_year(Date.today.year))
+		exp_month_ytd = @month_red_start - 12
+%>
+<%end%>
+<div class="cashtable2_col1"><%=aging.property_suite.suite_number%></div>
+<div class="cashtable2_col2" title="<%=aging.tenant%>" style="word-wrap:break-word;"><%=display_truncated_chars(aging.tenant.titleize,50,true)%></div>
+<div class="cashtable2_col3" style="text-align:right;width:66px;"><%=display_currency_overview(aging.amount)%></div>
+<div class="cashtable2_col4_subcol3"><%=display_currency_overview(aging.paid_amount) %></div>
+<div class="cashtable2_col4_subcol3"><%=display_currency_overview(aging.over_30days)%></div>
+<div class="cashtable2_col4_subcol3"><%=display_currency_overview(aging.over_60days)%></div>
+<div class="cashtable2_col4_subcol3"><%#=display_currency_real_estate_overview(aging.over_90days)|%><%=display_currency_overview(aging.over_120days)%></div>
+<div class="cashtable2_col4_subcol3"><%=display_currency_overview(aging.prepaid)%></div>
+<div class="cashtable2_tablecol5" style="width:110px;padding-left:10px;">
+	<% if @explanation == true  && !@current_time_period.nil? && !exp_ytd_check %>
+<div onclick="show_aged_explanation('account_receivables_aging_<%= aging.id%>');" onmouseover="document.getElementById('non_account_receivables_aging_<%= aging.id%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_account_receivables_aging_<%= aging.id%>').style.backgroundColor='';"  class="tablecol5" >
+			<span id="non_account_receivables_aging_<%= aging.id%>" style="padding-top:1px;padding-bottom:6px;margin-left:5px;padding-left:5px;width:60%;border:0px solid red;display:block;">
+					<%= truncate_extra_chars_for_expl(aged_receivable_explanation(aging.id,exp_month_ytd,exp_ytd_check),75) if aged_receivable_explanation(aging.id,exp_month_ytd,exp_ytd_check) %>&nbsp;
+			</span>
+		</div>
+		<div class="more ie_7_empty_div" id="account_receivables_aging_<%= aging.id%>_more"></div>
+		<div id="account_receivables_aging_<%= aging.id%>_text"  style="display:none" >
+			<textarea id="account_receivables_aging_<%= aging.id%>_box" name="account_receivables_aging_<%= aging.id%>_box" class="expand25-300 inline_editing_tablecol5" style="width:125px;"size="5"  onblur="text_msg_display('account_receivables_aging_<%= aging.id%>');save_aged_receivable_exp(this.value,<%=aging.id %>,<%= exp_month_ytd  %>,<%= exp_ytd_check%>, 0, '<%= request.request_uri %>');document.getElementById('non_account_receivables_aging_<%= aging.id%>').style.backgroundColor='';"><%= aged_receivable_explanation(aging.id,exp_month_ytd,exp_ytd_check) %></textarea>
+		</div>
+	<% end %>
+</div>

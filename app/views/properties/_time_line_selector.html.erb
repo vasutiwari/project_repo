@@ -1,0 +1,499 @@
+<%find_dashboard_portfolio_display%>
+<% @period = (!@period.nil? ? @period : period)
+@note_id = (!@note.nil? ? @note.id : note_id) %>
+<%
+navigation_start_position=@navigation_start_position;
+note_ids=@note_id;
+note=@note;
+periods=@period;
+partial=@partial;
+month_list=@month_list;
+current_time_period=@current_time_period;
+time=@time;
+timeline=@timeline;
+time1=@time1;
+account_receivables_aging=@account_receivables_aging;
+account_receivables_aging_for_receivables=@account_receivables_aging_for_receivables;
+financial=@financial;
+cap_ex=@cap_ex;
+lease=@lease;
+ctlm=@ctlm;
+%>
+<script>
+<%if note.class == "RealEstateProperty"%>
+<%if note.gross_rentable_area && note.gross_rentable_area!=0%>
+    grossRent=true;
+<%else%>
+    if(partial_page != "cash_and_receivables" && partial_page !="leases" && partial_page !="lease_sub_tab" && partial_page !="rent_roll_highlight" && partial_page !="cash_and_receivables_for_receivables" && partial_page != 'variances')
+    {
+      grossRent=false;
+    }
+<%end%>
+<%if note.no_of_units && note.no_of_units!=0%>
+    noOfUnits=true;
+<%else%>
+    if(partial_page != "cash_and_receivables" && partial_page !="leases" && partial_page !="lease_sub_tab" && partial_page !="rent_roll_highlight" && partial_page !="cash_and_receivables_for_receivables" && partial_page != 'variances')
+    {
+      noOfUnits=false;
+    }
+<%end%>
+<%end%>
+
+</script>
+<% periods = (!periods.nil? ? periods : period) %>
+<% note_ids = (!note.nil? ? note.id : note_id) %>
+<% start_date = (!start_date.nil? ? start_date : 0)%>
+<%partial = params[:partial_page].nil? ? partial_page : params[:partial_page]%>
+<% select_time_period(periods,note_ids,partial,start_date,timeline_start,timeline_end) %>
+<%date_array = @date_array
+date_element = @date_element%>
+<% unless (timeline.nil? || timeline == 'undefined'|| timeline == '')
+  time  = timeline.to_date
+end
+%>
+<% time = time1.next_month  if ctlm %>
+<div class="executiverhsrow executiverhsrow3" style="z-index: 19000; float: left;">
+<%params[:tl_year] = periods == "3" ? Date.today.prev_year.year.to_i : params[:tl_year].to_i%>
+  <div class="timelinelabel_wrapper timelineboder" style="width: 160px;">
+    <div class="rhslabel" style= "padding-bottom: 5px; width: 130px; padding-left: 30px;">Select Options</div>
+    <div class="executivesubtabrow" style="width: 160px;">
+      <div id="yearToDate" class="<% if periods == "4" %>subtabactiverow<% else %>subtabdeactiverow<%end%>">
+        <div class="timelf"></div>
+        <div class="subactvmid">
+          <% if Date.today.month != 1 %>
+            <a href="javascript:;" onclick="jQuery('#monthyear').hide();active_sub_year = <%=Date.today.year%>;call_timeline_filter_property(4,selected_item,partial_page,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');current_selection=1;return false;" >YTD</a>
+          <% else %>
+            <font color="#999990">YTD</font>
+          <% end %>
+        </div>
+        <div class="timert"></div>
+      </div>
+      <div id="lastMonth"  class="<% if (periods == "5") %>subtabactiverow<% else %>subtabdeactiverow<%end%>">
+        <div class="timelf"></div>
+        <div class="subactvmid">
+				<%calc_for_financial_data_display%>
+				<%month_cal = @financial_month%>
+          <a href="javascript:;" onclick="active_sub_year = <%=Date.today.month == 1 ? Date.today.prev_month.year : Date.today.year%>;active_sub_month=<%=month_cal%>;call_timeline_filter_property(5,selected_item,partial_page,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');current_selection=2;active_sub_month=<%=month_cal%>;dynamic_month_change();return false;">Month</a>
+        </div>
+        <div class="timert"></div>
+      </div>
+      <div id="yearforecast" class="<% if periods == "8"%>subtabactiverow<% else %>subtabdeactiverow<%end%>">
+        <div class="timelf"></div>
+        <div class="subactvmid">
+          <a href="javascript:;" onclick="active_sub_year = <%= Date.today.year%>;call_timeline_filter_property(8,selected_item,partial_page,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%=params[:start_date]%>');current_selection=5;dynamic_month_change();return false;">Yr Forecast</a>
+        </div>
+        <div class="timert"></div>
+      </div>
+
+    <div class="timelabelrow" style = "width: 140px;">
+      <%if periods !="8" && periods !="3"  && periods !="2" && periods !="9"%>
+        <div id="monthyear" class="<% if periods == "7" %>subtabactiverow<% else %>subtabdeactiverow<%end%>">
+          <div class="timelf"></div>
+          <div id ="monthytd"class="subactvmid">
+            <a href="javascript:;" onclick="jQuery('.timelinedropdown').css('margin-left','0px');call_timeline_filter_property(7,selected_item,partial_page,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%=params[:start_date]%>');current_selection=4;dynamic_month_change();return false;">Month YTD</a>
+          </div>
+          <div class="timert"></div>
+        </div>
+      <%end%>
+      <div class="timelinedropdown" style="width: 20px;">
+        <select id='more_options' class="timeoption" style="width:68px; font-size:11px;"  onchange="load_writter();change_timeline_options(document.getElementById('more_options').value,<%=Date.today.year%>,'<%params[:start_date]%>','<%=Date.today.prev_year.year%>',jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),<%=(Time.now.beginning_of_quarter - 1).strftime("%m")%>,<%=(Time.now.beginning_of_quarter - 1).strftime("%Y")%>);load_completer();">
+          <option value="more" <% if periods != "3" && !(params[:tl_year].to_i  < Date.today.year) && periods != "7"  %>selected<%end%>  >More</option>
+          <option value="Year"  <% if periods == "3" && params[:tl_year].to_i  < Date.today.year  %>selected<%end%> >Year</option>
+          <%if params[:partial_page] != "variances"%> <option id= "quarterly" value="quarterly"  <% if periods == "2" %>selected<%end%> >Quarterly</option> <%end%>
+          <%if (find_accounting_system_type(3,note) || find_accounting_system_type(4,note) || find_accounting_system_type(5,note)) && (params[:partial_page] == 'portfolio_partial' || params[:real_estate_id])%>
+            <%if note.leasing_type == "Multifamily"%><option id="weekly_display" value="weekly"  <% if periods == "9" %>selected<%end%> >Weekly</option><%end%>
+          <%end%>
+				<%if params[:partial_page] == "financials" || params[:partial_page] == "financial" || params[:real_estate_id]%><option value="trailing" <%if periods == "11" %> selected <%end%>>T-12</option><%end%>
+        </select>
+      </div>
+    </div>
+  </div>
+ </div>
+
+  <div class="timelinewrapper" style = "width: 590px;">
+    <div class="timelabel" style = "text-align: center; padding-bottom: 5px; width: 584px;">Timeframe</div>
+    <div class="timelineselector" style = "padding-left: 1px; width: 589px;">
+      <div class="timewrapper" style="width:701px;">
+        <div class=" jcarousel-skin-tango">
+          <div class="jcarousel-container-horizontal" style="position: relative; display: block;">
+            <div class="jcarousel-clip jcarousel-clip-horizontal" style="overflow: hidden; position: relative;">
+              <ul class="jcarousel jcarousel-list jcarousel-list-horizontal" id="mycarousel_horizontal_new" style="overflow: hidden; position: relative; top: 0px; left: 0px; margin: 0px; padding: 0px; height: 468px;">
+                <% if periods == "1" %>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if params[:tl_month].nil? || params[:tl_month] == "" %><% if date_element[i] < time.beginning_of_month.strftime("%Y-%m-%d") %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %><% else %><% if date_element[i] == time.ago(1.month).beginning_of_month.strftime("%Y-%m-%d") %><% navigation_start_position = i - 3 %>active<% else %>deactive<% end %><% end %>" id = "time_line_highlight_<%= i%>" onclick="change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,sub_tab,'blank',jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods == "2" %>
+                  <% for i in 0..11%>
+                    <%quarter_end_month,quarter_year = find_quarter_end_month(i)%>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<%if ((((Time.now.beginning_of_quarter.month) - 3) == (date_element[i]).scan(/(.*)\s-/).flatten.to_s.split("-")[1].to_i)  && quarter_year == Date.today.year && !params[:quarter_end_month]) || (params[:quarter_end_month].to_i == (date_element[i]).scan(/(.*)\s-/).flatten.to_s.split("-")[1].to_i + 2) && quarter_year == (params[:tl_year] ?  params[:tl_year].to_i : Date.today.year )%><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="active_sub_year=<%=quarter_year%>;quarter_end_month=<%=quarter_end_month%>;change_chart_interval_property('<%= (date_element[i]).scan(/(.*)\s-/).flatten.to_s %>','<%= (date_element[i]).scan(/-\s(.*)/).flatten.to_s %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,partial_page,jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>',jQuery('#per_tot_sqft').val());dehighlight();document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();change_quarterly_message( '<%=find_quarterly_each_msg(quarter_end_month,quarter_year)%>');return false;" onmouseover="timeline_on_over(<%= i%>);" <% if (i+1)%4 == 1 %> <% style="block" %> <% else %> <% style="none" %>onmouseout = "timeline_on_out(<%= i%>);" <% end %>>
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;&nbsp;&nbsp;<span id = "show_time_hover_<%= i%>" style="display:<%= style %>;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods == "9" && note.leasing_type=="Multifamily" %>
+								<% prev = !(params[:start_date].blank?) ? "#{params[:start_date].to_date.strftime("%B %d %Y").to_date.day}" : "#{@prev_sunday.day}"%>
+									<% date_element.each do |i|
+											date_collect = i.split('-')
+											if (date_collect[2] == prev)
+												date_element = date_element[0,13]
+												date_array = date_array[0, 13]
+											end
+										end
+									%>
+                  <% for i in 0..12%>
+                    <%#class_name,navigation_start_position=weekly_class(i,date_array[i])%>
+                    <%#prev =  "#{@prev_sunday.day}#{(@prev_sunday.to_date).strftime("%b")}"%>
+                   <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if date_array[i] == prev %><%navigation_start_position = ((i+2)/12)*12 %>active<%else%>deactive<%end%>" id = "time_line_highlight_<%= i%>" onclick="jQuery('#lastMonth').attr('className','subtabdeactiverow');change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,sub_tab,'blank',jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();jQuery('#lastMonth').attr('className','subtabdeactiverow');return false;" >
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <center>
+                          <div class="label2">
+			  <%date_month = @date_month%>
+                            <a href="javascript:;" title='<%= "#{date_array[i]}"" #{date_month[i]}"%>'> <%= date_array[i] %></a><span title='<%= "#{date_array[i]}"" #{date_month[i]}"%>' style="display: block;"><%= date_month[i] %></span>
+                          </div></center>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods ==  "3" %>
+                  <% time = Time.now if time.blank?
+                  if params[:tl_year]
+                    #ind =  date_element.index{ |i| i.include? params[:tl_year].to_s}
+                    ind =  date_element.index{ |i| i.include? time.prev_year.beginning_of_year.strftime("%Y-%m-%d") }
+                  else
+                    ind =  date_element.index{ |i| i.include? time.prev_year.beginning_of_year.strftime("%Y-%m-%d") }
+                  end
+                  date_element = date_element[ind-2, 5]
+                  date_array = date_array[ind-2,5]
+                %>
+                  <script>
+                    foreYear = "<%= params[:tl_year].blank? ? time.prev_year.strftime("%Y") : params[:tl_year] %>"
+                  </script>
+                  <% for i in 0...5 %>
+                    <%class_name,navigation_start_position=find_time_line_selector_year_class(date_element,i,time,navigation_start_position)%>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<%=class_name%>" id = "time_line_highlight_<%= i%>" onclick="active_sub_year = <%= date_element[i].split('-')[0] %>;change_chart_interval_property('<%= (date_element[i]).scan(/(.*)\s-/).flatten.to_s %>','<%= (date_element[i]).scan(/-\s(.*)/).flatten.to_s %>',<%= note.id %>,'RealEstateProperty',3,partial_page,jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= date_array[i] %>'><%= date_array[i] %></a>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods ==  "4" %>
+                  <% timeline_msg = "- #{Date.today.ago(1.month).beginning_of_month.strftime("%b %Y")}" %>
+                  <%find_time_line_item_color%>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+													<%month_red_start = @month_red_start%>
+                          <div class="<% if  month_list && month_list.include?(date_element[i]) && date_element[i].to_date < Date.today.beginning_of_month %><% navigation_start_position = ((i)/12)*12 %><%if month_red_start.nil? || (month_red_start && i < month_red_start)%>active<%else%><%@deactive_red=true%>deactive_red<%end%><% else %><%@deactive_red=false%>deactive<% end %>"   title="<%=find_timeline_selector_title((date_array[i]).scan(/-\s(.*)/).flatten.to_s, (date_array[i]).scan(/(.*)\s-/).flatten.to_s )%>" id="time_line_highlight_<%= i%>" onclick="jQuery('#yearToDate').attr('className','subtabdeactiverow');active_period=10;change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',10,partial_page,sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                          <div class="left">&nbsp;</div>
+                          <div class="label">
+                            <div class="label2">
+                              <a href="javascript:;"  title="<%=find_timeline_selector_title((date_array[i]).scan(/-\s(.*)/).flatten.to_s, (date_array[i]).scan(/(.*)\s-/).flatten.to_s )%>"><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                            </div>
+                          </div>
+                          <div class="right">&nbsp;</div>
+                        </div>
+                    </li>
+                  <% end %>
+                <%elsif periods=="5"%>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if date_element[i] == current_time_period.strftime("%Y-%m-%d") %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,'<%=partial%>',sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+		<%elsif periods=="10"%>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if date_element[i] == current_time_period.strftime("%Y-%m-%d") %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,'<%=partial%>',sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods ==  "6" %>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if month_list && month_list.include?(date_element[i]) && date_element[i].to_date < Date.today.beginning_of_month %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',<%= periods%>,'<%=partial%>',sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods ==  "7" %>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if  month_list && @end_date && month_list.select{|x| x.to_date.month<=@end_date.to_date.month}.include?(date_element[i]) %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="active_period=10;change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',active_period,'<%=partial%>',sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('monthyear').className = 'subtabdeactiverow';document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %>'><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+                <% elsif periods ==  "8" %>
+                  <% time = Time.now if time.blank?
+                  ind =  date_element.index{ |i| i.include? time.prev_year.beginning_of_year.strftime("%Y-%m-%d") }
+                  date_element = date_element[ind-2, 5]
+                  date_array = date_array[ind-2,5]
+                %>
+                  <script>
+                    foreYear = "<%= time.beginning_of_year.strftime("%Y") %>"
+                  </script>
+                  <% for i in 0...5 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                      <div class="<% if (date_element[i]).scan(/(.*)\s-/).flatten.to_s == time.beginning_of_year.strftime("%Y-%m-%d") %><% navigation_start_position = ((i)/12)*12 %>active<% else %>deactive<% end %>" id = "time_line_highlight_<%= i%>" onclick="active_sub_year = <%= date_element[i].split('-')[0] %>;change_chart_interval_property('<%= (date_element[i]).scan(/(.*)\s-/).flatten.to_s %>','<%= (date_element[i]).scan(/-\s(.*)/).flatten.to_s %>',<%= note.id %>,'RealEstateProperty',3,partial_page,jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;">
+                        <div class="left">&nbsp;</div>
+                        <div class="label">
+                          <div class="label2">
+                            <a href="javascript:;" title='<%= date_array[i] %>'><%= date_array[i] %></a>
+                          </div>
+                        </div>
+                        <div class="right">&nbsp;</div>
+                      </div>
+                    </li>
+                  <% end %>
+									 <% elsif periods ==  "11" %>
+                  <% timeline_msg = "- #{Date.today.ago(1.month).beginning_of_month.strftime("%b %Y")}" %>
+                  <%find_time_line_item_color%>
+                  <% for i in 0.. date_array.count - 1 %>
+                    <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+													<%month_red_start = @month_red_start%>
+												<%for k in  (@month_format - 365).month..12 do
+														month_list <<  Date.new( (@month_format - 365).year,k,1).strftime("%Y-%m-%d")
+													if i == 12
+														for j in 1..@financial_month.to_i do
+														month_list <<  Date.new(Time.now.year,j,1).strftime("%Y-%m-%d")
+													end
+													end
+													end
+													%>
+                          <div class="<% if  month_list && month_list.uniq.include?(date_element[i]) && date_element[i].to_date < Date.today.beginning_of_month %><% navigation_start_position = ((i)/12)*12 %>active<% else %><%@deactive_red=false%>deactive<% end %>"   title="<%=find_timeline_selector_title((date_array[i]).scan(/-\s(.*)/).flatten.to_s, (date_array[i]).scan(/(.*)\s-/).flatten.to_s )%>" id="time_line_highlight_<%= i%>" onclick="jQuery('#yearToDate').attr('className','subtabdeactiverow');active_period=10;change_chart_property('<%= date_element[i] %>',<%= note.id %>,'RealEstateProperty',10,partial_page,sub_tab,jQuery('#per_tot_sqft').val(),jQuery('#per_tot_rent_roll').val(),'<%params[:start_date]%>');dehighlight_month('<%= date_array.count%>');document.getElementById('time_line_highlight_'+<%=i%>).className = 'active';monthHighLight();dynamic_month_change();return false;" onmouseover="timeline_on_over(<%= i%>);" onmouseout = "timeline_on_out(<%= i%>);">
+                          <div class="left">&nbsp;</div>
+                          <div class="label">
+                            <div class="label2">
+                              <a href="javascript:;"  title="<%=find_timeline_selector_title((date_array[i]).scan(/-\s(.*)/).flatten.to_s, (date_array[i]).scan(/(.*)\s-/).flatten.to_s )%>"><%= (date_array[i]).scan(/(.*)\s-/).flatten.to_s %></a>&nbsp;<span id = "show_time_hover_<%= i%>" style="display:none;"><%= (date_array[i]).scan(/-\s(.*)/).flatten.to_s %></span>
+                            </div>
+                          </div>
+                          <div class="right">&nbsp;</div>
+                        </div>
+                    </li>
+                  <% end %>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+ <%unless periods == "9"%>
+<div class="executiveheadcol" style="<%if @balance_sheet%>margin-top:52px;<%end%>z-index:18900;margin-bottom: 0px;padding-bottom: 0px;border-bottom: none;">
+  <span class="executiveheadcol_for_title">
+    <div class="executivecol_subrow"><span class="executiveiconcol"><img src="/images/executivehead_icon.png" width="14" height="16" /></span>
+      <!--<div class="executiveblacklabel2" style="float:left; text-align:left;width:181px;">-->
+			<%if note.class == "RealEstateProperty"%>
+			<%if note && note.property_name.present?%>
+        <%if account_receivables_aging%>Cash<%elsif account_receivables_aging_for_receivables%>Account Receivables Aging <%#= timeline_msg %><%elsif financial%><%if @balance_sheet%>Balance sheet <%else%> Operating Statement<%end%> <%elsif cap_ex%>  Capital Expenditure <%elsif lease%>  <% lease = false %> Lease <%else%>	Executive Summary<%end%>
+			<%else%>
+				<%if account_receivables_aging%>Cash<%elsif account_receivables_aging_for_receivables%>Account Receivables Aging <%#= timeline_msg %><%elsif financial%><%if @balance_sheet%>Balance sheet <%else%> Operating Statement<%end%> <%elsif cap_ex%>  Capital Expenditure  <%elsif lease%>  <% lease = false %> Lease <%else%>	Executive Summary<%end%>
+			<%end%>
+			<%end%>
+      <!--</div>-->
+      <%if params[:action]=='for_notes' || params[:action]=="show" || params[:partial_page]=="portfolio_partial" %>
+        <div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+          <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note.id, :from=>"for_notes"} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+          <script>new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+        </div>
+        <!--for notes popup-->
+        <div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+          <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note.id, :from=>"for_notes"} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+          <script>new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+        </div>
+      <%end%>
+    </div>
+  </span>
+  <% if @show_variance_thresholds %>
+    <div class="executiveinputrow" style="z-index:1600">
+      <div class="notesalelf"></div>
+      <div class="executiveinputmid" id="id_for_variance_threshold">
+        <ul class="inputcoll2" id="cssdropdown">
+          <li class="headlink3" id="id_for_modify_threshold">
+            <div class="morebutton_label">
+            <a href="/real_estates/add_property/<%= note.try(:class).eql?(Portfolio) ? note.id : note.portfolio.id %>/?property_id=<%=note.id%>&call_from_variances=true" method="put" style="width:16,height:16,border:0;">Variance Thresholds</a>
+
+						<%#= link_to "Variance Thresholds", {:action =>'add_property',:controller => "real_estates",:id =>note.portfolio_id,:property_id=>note.id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:call_from_variances=>true,:month=>params[:month],:document_id=>params[:document_id]},{:id => "edit_note_box_#{note.id}"}%></div>
+					<script>//new Control.Modal($("edit_note_box_<%#=note.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+					<span></span>
+          </li>
+        </ul>
+      </div>
+      <div class="notesalelf" style="z-index:-1"></div>
+    </div>
+  <% else %>
+    <div class="executiveinputrow" style="z-index:1600;">
+      <div class="notesalelf"></div>
+      <div class="executiveinputmid" id="id_for_variance_threshold">
+      </div>
+      <div class="notesalelf" style="z-index:-1"></div>
+    </div>
+  <% end %>
+</div>
+<%end%>
+<%find_financial_month_update%>
+<div id="yrForecast" style="margin-top: 35px;font-size: 10px; color:#666;display:none;"><span id="setForeYear"></span><span id="setForeYearDetails"> Yr Forecast Actuals =<% if Time.now.strftime("%b") != 'Jan' %> Actuals: Jan to <%= @month_value%> +  <% end %> Budget: <%= @month_financial %> to Dec</span></div>
+<div id="quarterly_message" style="margin-top: 35px;font-size: 10px; color:#666;display:none;">
+  <span id="set_quarter_msg"></span>
+  <span id="set_quarter_msg_details"></span>
+</div>
+<script>
+  foreCastfir = "&nbsp;Yr Forecast Actuals =<% if Time.now.strftime("%b") != 'Jan' %> Actuals: Jan to <%= @month_value%> + <% end %> Budget: <%= @month_financial %> to Dec";
+  foreCastSec = "&nbsp;Yr Forecast Actuals = Budget: Jan to Dec";
+<% if periods == '3' or periods == '8' %>
+    jQuery('.jcarousel-clip.jcarousel-clip-horizontal').css('padding-left','141px');
+    jQuery('#setForeYear').html(foreYear);
+    if(foreYear >= "<%= time.nil? ? '9999':time.strftime("%Y")  %>" || active_period == '8')
+    jQuery('#yrForecast').show();
+    else
+      jQuery('#yrForecast').hide();
+<% end %>
+
+<%#m=(Time.now.beginning_of_quarter.month) - 1%>
+<%#end_month,quarter_year = find_quarter_end_month(m)%>
+<%end_month,quarter_year = find_quarter_end_month(Date.today.month - 4)%>
+
+<%@quarter_message = find_quarterly_each_msg(end_month,quarter_year)%>
+  quarter_msg = '<%=@quarter_message%>';
+
+	<%@quarter_default_message = false%>
+<% if periods == '2'%>
+    foreYear = "<%=params[:tl_year]%>"
+   //jQuery('.jcarousel-clip.jcarousel-clip-horizontal').css('padding-left','120px');
+
+  <%if params[:action] == "select_time_period"%>
+      jQuery('#set_quarter_msg').html("<%=@quarter_message%>");
+  <%end%>
+    if(active_period == '2' && partial_page != 'rent_roll_highlight' && partial_page != 'rent_roll' && partial_page != 'leases' && partial_page !='lease_sub_tab' && partial_page != "cash_and_receivables_for_receivables" )
+      jQuery('#quarterly_message').show();
+    else
+      jQuery('#quarterly_message').hide();
+<% end %>
+
+<% if periods == '2'%>
+  // jQuery('.jcarousel-clip.jcarousel-clip-horizontal').css('padding-left','70px');
+<%end%>
+
+<% if periods == '9'%>
+    jQuery('.jcarousel-clip.jcarousel-clip-horizontal').css('margin-left','32px');
+<%end%>
+
+</script>
+<%unless periods == "9"%>
+<div style="border-bottom-color: #ECECEC;border-bottom-style: solid;border-bottom-width: 1px;float: left;margin-bottom: 10px;padding-bottom: 5px;*padding-bottom: 0px;position: relative;width: 781px;z-index: 2000;"></div>
+<%end%>
+<script>
+  // These two lines are added for select month ytd when comes to this page first time
+  //value= jQuery('div.active').children('div.label').children('div.label2').last().children().html();
+
+  jQuery('div#monthytd').children().text(active_sub_month != ''? (months[parseInt(active_sub_month,10) - 1]+' YTD') : (crMonth != '' ? (crMonth+' YTD') : ''));
+
+  jQuery('#mycarousel_horizontal_new').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%=(Date.today.month == 1 && (params[:period] != "7" &&  params[:tl_period] != "7")) ? 24 : (navigation_start_position ? (navigation_start_position + 1) : 6) %>
+  });
+
+<% if periods == "4" %>
+    jQuery('#monthyear').hide();
+<% end %>
+  jQuery('#message').fadeOut(8000);
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+      if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+      {
+        document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+      }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  breadData="";
+</script>
+<!--[if IE 7]>
+<style type="text/css">
+  body .ie_7_position{top:0px;}
+</style>
+<![endif]-->
+
+<style type="text/css">
+  .ie_7_position{top:27px;}
+</style>
+
+<script>
+if(active_period == "4"  || active_period == "3" || active_period == "8" || active_period == "6" || active_period == "2")
+  {
+	 active_sub_month = '';
+	}
+  jQuery('#monthyear.subtabactiverow').css('margin-right','0px');
+  jQuery('#monthyear.subtabactiverow').css('margin-top','8px');
+</script>

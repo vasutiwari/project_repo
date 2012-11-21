@@ -1,0 +1,231 @@
+<%action_name=params[:action]%>
+<%portfolio_id=portfolio.id%>
+<div class="box-1col">
+     <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/portfolios">Portfolio List</a> > <%=(action_name== "new" ? "Add" :"Edit")%> Portfolio </div>
+     <div class="col1P">
+          <table width="700px" cellpadding="2" cellspacing="4">
+          	<tbody>
+           	  <tr>
+               	  <td align="right" style="width:80px;">Portfolio Name: <span class="txtRed">*</span></td>
+                  <td align="left" style="width:100px;"><%=f.text_field :name, :onfocus=>"jQuery('#portfolio_name_error').hide();",:value=>name%>
+										<div id="portfolio_name_error" style="color:red;font-size:12px;display:none;">
+											<%#= error_message_on :portfolio, :name %>
+											Please provide portfolio name
+										</div>
+											<span id="portfolio_name_already" style="color:red;font-size:12px;">
+											<%=name_error if name_error.present?%>
+											</span>
+										</td>
+										<%portfolio_image=portfolio.find_portfolio_image_form%>
+                  <td align="left" style="width:60px;">Portfolio Image:</td>
+                  <td align="left" style="width:50px;"><img src=<%=portfolio_image%> title="" alt="" height="67" width="108px"/></td>
+                <td align="left" style="width:100px;"><%=file_field_tag :portfolio_image%></td>
+              </tr>
+           </tbody>
+       	  </table>
+      </div>
+
+      <div class="col1P">
+        <table width="700px" cellpadding="2" cellspacing="4">
+          	<tbody>
+           	  <tr>
+              	<td align="right" style="width:80px;">Chart of Account:</td>
+
+                <td style="width:470px;" align="left">
+								<%if action_name == "new" || action_name == "create"%>
+								<%=f.select :chart_of_account_id,options_for_select(chart_of_accounts.collect{|u|[u.name,u.id]})%>
+
+								<%else%>
+								 <%=chart_type%>
+								<%end%>
+								</td>
+              </tr>
+            </tbody>
+            <tbody>
+           	  <tr>
+              	<td align="right" style="width:80px;">Type of Property:</td>
+                <td style="width:470px;" align="left">
+								<% if action_name == "edit"%>
+								<label><%=property_type%> <span id="commercial_count">(0)</span></label>
+								<%else%>
+								<%=f.hidden_field :leasing_type,:value=>"Commercial"%>
+								<label><input type="radio" id="commercial" class="type_portfolio valign" name="com1" value="1"/> Commercial <span id="commercial_count">(0)</span></label> &nbsp; <label><input type="radio" id="multifamily" class="type_portfolio valign" name="com1" value="2"/> Multifamily <span id="multifamily_count">(0)</span></label>
+								<%end%>
+								</td>
+              </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <div class="col1P properties_type_check">
+			<%=render "properties_check",:properties => properties,:commercial_count => commercial_count,:multifamily_count => multifamily_count%>
+      </div>
+    <div class="clearfloat"></div>
+    <div class="col1P col1PBN ">
+      	<p><span>Select Users</span></p>
+        <div class="fltLeft marginZero">You have Selected <span id="user_count" class="TxtBold">0</span> of <span class="TxtBold"><%=users.count%></span> Users</div>
+        <div class="fltrt maginR20"><label> <input type="checkbox" id="select_all_user" class="valign" style="vertical-align:inherit;" /> Select All</label></div>
+        <div class="clear"></div>
+        <div class="whtBox overflow130">
+        	<table class="t1" cellpadding="0" cellspacing="0" border="0" width="100%">
+					<%=hidden_field_tag :total_user,:value=>users.map(&:id)%>
+					<%if users && !users.empty?%>
+						<%users && users.each_with_index do |user,i|%>
+						<%if i%4==0%>
+								<tbody>
+									 <tr>
+						<%end%>
+										<td><label>
+										<%user_email=user.email%>
+											<%=check_box_tag "user[#{i}]", "#{user.id}",false,:class=>"user_select valign", :style=>"vertical-align:inherit;"%><%=(user.name?) ? user.name : ""%><br/>
+										<a href="mailto:<%=user_email%>" class="lineH"><%=user_email%></a>
+										</label></td>
+					<%if i%4==3%>
+									 </tr>
+									</tbody>
+									<%end%>
+									<%end%>
+						<%else%>
+							<div style="margin-left:300px;margin-top:50px;"><%= FLASH_MESSAGES['client_admin']['116'] %></div>
+						<%end%>
+								    </tr>
+                </tbody>
+            </table>
+        </div>
+      </div>
+    <div class="clearfloat"></div>
+    <div align="center"><a href="javascript:void(0)" onclick="validate_portfolio_submit('<%=form_name%>');" class="button blue">SAVE PORTFOLIO<%#=f.submit "SAVE PORTFOLIO"%></a> <a href="/client_admin/<%=current_user.id%>/portfolios" class="button grey">CANCEL</a></div>
+    <div class="clearfloat"></div>
+    </div>
+
+<script>
+jQuery(document).ready(function() {
+jQuery('html, body').animate({scrollTop:0}, 'fast');
+<%portfolio_properties && portfolio_properties.each do |property|%>
+jQuery(".property_select").each( function() {
+if (jQuery(this).val()=="<%=property%>")
+{
+jQuery(this).attr("checked","checked");
+}
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+});
+	if (jQuery('.property_select:checked').size()=="<%=properties.count%>")
+{
+jQuery("#select_all_property").attr("checked",true);
+}
+<%end%>
+
+
+<%portfolio_users.present? && portfolio_users.each do |portfolio| %>
+jQuery(".user_select").each( function() {
+if (jQuery(this).val()=="<%=portfolio%>")
+{
+jQuery(this).attr("checked","checked");
+}
+jQuery("#user_count").text(jQuery('.user_select:checked').size());
+});
+if (jQuery('.user_select:checked').size()=="<%=users.count%>")
+{
+jQuery("#select_all_user").attr("checked",true);
+}
+<%end%>
+
+jQuery("#commercial").attr("checked","checked");
+jQuery("#commercial_count").text("(<%=commercial_count%>)");
+<%if action_name=="new"%>
+jQuery("#multifamily_count").text("(<%=multifamily_count%>)");
+<%end%>
+jQuery("#user_count").text(jQuery('.user_select:checked').size());
+
+jQuery("#select_all_user").click(function(){
+jQuery(".user_select").each( function() {
+if (jQuery("#select_all_user").is(':checked')==true)
+{
+jQuery(this).attr("checked","checked");
+}
+	else
+{
+jQuery(this).attr("checked",false);
+}
+jQuery("#user_count").text(jQuery('.user_select:checked').size());
+});
+});
+
+jQuery(".user_select").click( function() {
+jQuery("#user_count").text(jQuery('.user_select:checked').size());
+if (jQuery(this).is(':checked')==false)
+{
+jQuery("#select_all_user").attr("checked",false);
+}
+else if(jQuery('.user_select:checked').size()=="<%=users.count%>")
+{
+jQuery("#select_all_user").attr("checked","checked");
+}
+});
+
+
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+
+
+
+
+jQuery(".type_portfolio").click( function() {
+load_writter();
+var type=jQuery(".type_portfolio:checked").val();
+
+ if (type == "1")
+ {
+ jQuery("#portfolio_leasing_type").val("Commercial");
+ }
+ else
+ {
+  jQuery("#portfolio_leasing_type").val("Multifamily")
+ }
+if (jQuery(this).is(':checked')==true)
+{
+  var type=jQuery(this).val();
+	get_type_properties(type)
+}
+});
+
+jQuery("#portfolio_chart_of_account_id").change( function() {
+load_writter();
+ var type=jQuery(".type_portfolio:checked").val();
+ if (type == "1")
+ {
+ jQuery("#portfolio_leasing_type").val("Commercial")
+ }
+ else
+ {
+  jQuery("#portfolio_leasing_type").val("Multifamily")
+ }
+	get_type_properties(type)
+});
+function get_type_properties(type)
+{
+var action_name="<%=action_name%>"
+var chart_acc_id = jQuery('#portfolio_chart_of_account_id').val();
+jQuery.ajax({
+                          url: '/client_admin/portfolios/get_type_properties',
+                                                                         data:'value='+type+'&action='+action_name+'&id='+"<%=portfolio_id%>"+'&chart='+chart_acc_id,
+                                                                                success: function(data){
+																																								load_completer();
+																																								jQuery(".properties_type_check").html(data)
+																																								if (action_name=="edit")
+																																								{
+																																										<%portfolio_properties && portfolio_properties.each do |property|%>
+																																										jQuery(".property_select").each( function() {
+																																										if (jQuery(this).val()=="<%=property%>")
+																																										{
+																																										jQuery(this).attr("checked","checked");
+																																										}
+																																										jQuery("#property_count").text(jQuery('.property_select:checked').size());
+																																										});
+																																										<%end%>
+																																								}
+																																						}
+	});
+
+}
+});
+		</script>

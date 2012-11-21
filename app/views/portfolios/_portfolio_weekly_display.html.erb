@@ -1,0 +1,58 @@
+<script>
+    <%seleted_date = params[:prev_date] ? "#{params[:prev_date]}" : (params[:next_date] ? "#{params[:next_date]}" :(params[:cur_date] ? "#{params[:cur_date]}" : "#{@prev_sunday.strftime("%B %d, %Y")}"))%>
+    weekly_cur_date = '<%=seleted_date%>'
+</script>
+<%#date_calc(real_properties)%>
+<div id ="portfolio_weekly_data">
+  <%property_count = @prop_id_coll.count%>
+	<%pre_date,cur_date,next_date,index = prev_or_next_date%>
+	<%prop_id = params[:portfolio_id] ? params[:portfolio_id] : params[:id]%>
+	<%prop_id = prop_id.nil? && !@portfolio.nil? ? @portfolio.id : prop_id%>
+	<div class="fltrt rankby" id="rank_by_weekly" style="margin: -45px 10px;">
+		<%if index == 0%>
+			<span style="color:gray">Previous</span> &nbsp;
+		<%else%>
+			<%= link_to '<< Previous', {:controller=>'portfolios',:action=>"select_time_period_real_overview", :period=>params[:period], :partial_page=>params[:partial_page],:portfolio_id=>prop_id,:prev_date=>pre_date},:id=>'previous',:remote => true %> &nbsp;
+		<%end%>
+		<span> Week Ended <%=cur_date%> </span>
+		&nbsp;
+		<%if index == 9%>
+		<span style="color:gray">Next</span>
+	<%else%>
+		<%= link_to 'Next >>', {:controller=>'portfolios',:action=>"select_time_period_real_overview", :period=>params[:period], :partial_page=>params[:partial_page],:portfolio_id=>prop_id,:next_date=>next_date},:id=>'next',:remote => true %>
+	<%end%>
+	</div>
+  <%unless display_head == 'No Display'%>
+		<table cellspacing="0" cellpadding="3" border="0" class="table2 tableBg" width="100%">
+            <thead>
+              <tr class="fb-tr-head">
+                <th align="center" class="bdr-rt-gry bdr-lt-gry td150 bdr-bottom-gry bdr-top-gry" rowspan="2">Property</th>
+                <th align="center" class="bdr-rt-gry td60 bdr-bottom-gry bdr-top-gry" rowspan="2">Flr Plan</th>
+                <th align="center" class="bdr-rt-gry td60 bdr-bottom-gry bdr-top-gry" rowspan="2">Units</th>
+                <th align="center" colspan="2" rowspan="2" class="bdr-rt-gry padzero bdr-bottom-gry td120 bdr-top-gry">Vacancy</th>
+                <th align="center" colspan="2" rowspan="2" class="bdr-rt-gry padzero bdr-bottom-gry td120 bdr-top-gry">Net Vac <a><img src="/images/question-3.png" title="Vacant - Rented" alt="Formula" border="0" class="valign" /></a> </th>
+                <th align="center" colspan="2" rowspan="2" class="bdr-rt-gry padzero bdr-bottom-gry td120 bdr-top-gry">Net Not <a><img src="/images/question-3.png" title="Notice - Rented" alt="Formula" border="0" class="valign" /></a></th>
+                <th align="center" colspan="2" rowspan="2" class="bdr-rt-gry padzero bdr-bottom-gry td110 bdr-top-gry">Net Avail <a><img src="/images/question-3.png" title="Net Vac + Net Not" alt="Formula" border="0" class="valign" /></a></th>
+                <th align="center" colspan="2" class="bdr-rt-gry padzero bdr-bottom-gry td100 bdr-top-gry">Traffic</th>
+                <th class="bdr-bottom-gry td60 bdr-top-gry" rowspan="2">Dep</th>
+              </tr>
+               <tr class="fb-tr-head">
+               <th class="bdr-rt-gry bdr-bottom-gry td60">PI</th>
+               <th class="bdr-rt-gry bdr-bottom-gry td60">WI</th>
+              </tr>
+            </thead>
+			<%j=-1%>
+			<%for i in 0...property_count%>
+					<%date = params[:prev_date] ? params[:prev_date].to_date : ( params[:next_date] ? params[:next_date].to_date : (params[:cur_date] ? params[:cur_date].to_date : @prev_sunday))
+					 calculate_portfolio_weekly_report(@prop_id_coll[i],date.strftime("%Y-%m-%d")) %>
+					<%j+=1%>
+					<%=render :partial => "portfolio_weekly_data_display",:locals => {:cur_date =>cur_date,:i=>i,:j=>j,:periods=>@period,:real_properties=>@real_properties,:portfolio_collection=>@portfolio,:year_to_date=>@year_to_date,:prop_id_coll=>@prop_id_coll,:property_weekly_ntv=>@property_weekly_ntv,:property_week_prelsd2=>@property_week_prelsd2,:property_week_vacant_total=>@property_week_vacant_total,:property_week_floor=>@property_week_floor,:property_week_units=>@property_week_units,:property_week_vacant_total=>@property_week_vacant_total,:property_week_prelsd=>@property_week_prelsd,:pi_total=>@pi_total,:wi_total=>@wi_total,:dep_total=>@dep_total,:property_count=>property_count}%>
+			<%end%>
+	</table>
+<%else%>
+  <div style="text-align: center;" class="rhscontentrow rhscontentrowtime">
+    <span style="color: black;">Data Unavailable. Please Upload Weekly Data</span>
+  </div>
+<%end%>
+</div>
+

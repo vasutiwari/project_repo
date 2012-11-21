@@ -1,0 +1,200 @@
+<script>
+  var year_option = '<%= params[:tl_year]%>';
+  var current_year = '<%= financial_year%>';
+  var month_option = '<%= params[:tl_month]%>';
+  var current_option = '<%= financial_month%>';
+  var quarter_option = '<%= params[:quarter]%>';
+	 if (year_option != '' || year_option != '' && month_option){
+    jQuery('#year_options1').val(year_option);
+  }
+  else{
+    jQuery('#year_options1').val(current_year);
+  }
+  if (month_option != '' || month_option != '' && year_option){
+    jQuery('#month_options1').val(month_option);
+  }
+  else{
+    jQuery('#month_options1').val(current_option);
+  }
+  if (quarter_option != '' || quarter_option != '' && year_option){
+    jQuery('#quarter_options1').val(quarter_option);
+  }
+
+</script>
+
+
+               	<div id="budgetHeader"><div style="float:right;"></div><span class="fltLeft" style="margin-left:40px;">
+                 <select id="change_options1" name="" onchange="load_writter();change_dashboard_options_part('<%=params[:property_id]%>','<%=params[:portfolio_id]%>',document.getElementById('change_options1').value,document.getElementById('month_options1').value,jQuery('#year_options1').val(),'<%=financial_month%>','<%=financial_year%>',' ');">
+                <option value="4" <% if params[:tl_period] == "4"  %>selected<%end%>>YTD</option>
+                <option value="5" <% if (params[:tl_period] == "5" ||  params[:tl_period] == "10") %>selected<%end%>><% if params[:tl_period] == "5"%>Last Month <%else%>Month<%end%></option>
+                <option value="3" <% if (params[:tl_period] == "3" || params[:tl_period] == "8")  %>selected<%end%>>Year</option>
+                <option value="2" <% if (params[:tl_period] == "2" )%>selected<%end%>>Quarterly</option>
+								<option value="11" <% if (params[:tl_period] == "11" )%>selected<%end%>>T-12</option>
+              </select>
+                  <select id="month_options1" style="visibility:hidden;" onchange="load_writter();change_dashboard_options_part('<%=params[:property_id]%>','<%=params[:portfolio_id]%>',jQuery('#change_options1').val(),document.getElementById('month_options1').value,jQuery('#year_options1').val(),'<%=financial_month%>','<%=financial_year%>',' ');">
+                <%month_string.each_with_index do |i,j|%>
+                  <option value="<%= j + 1 %>" > <%= i %> </option>
+                <%end%>
+              </select>
+                  </span>
+                  <span class="select-lbl">
+                 <select id="quarter_options1" style="visibility:hidden;" onchange="load_writter();change_dashboard_options_part('<%=params[:property_id]%>','<%=params[:portfolio_id]%>',jQuery('#change_options1').val(),' ',jQuery('#year_options1').val(),'<%=financial_month%>','<%=financial_year%>',document.getElementById('quarter_options1').value);">
+                <%quarter_string.each_with_index do |i,j|%>
+                  <option value="<%= j+1 %>"> <%= i %> </option>
+                <%end%>
+              </select>
+							<select id="year_options1" style="visibility:hidden;" onchange="load_writter();change_dashboard_options_part('<%=params[:property_id]%>','<%=params[:portfolio_id]%>',jQuery('#change_options1').val(),jQuery('#month_options1').val(),document.getElementById('year_options1').value,'<%=financial_month%>','<%=financial_year%>',' ');">
+                <%year_string.each_with_index do |i,j|%>
+                  <option value="<%= i %>"> <%= i %> </option>
+                <%end%>
+              </select>
+							</span>
+                  </div>
+                	<div>
+                    <table width="100%" cellspacing="0" cellpadding="6" border="0" class="table hovertr" id="budgetTbl">
+										<%income_title = map_title('Op.Revenue')%>
+							<%if !operating_statement[income_title].nil?%>			
+            <tbody>
+						
+            <tr class="db-tr-subhead">
+              <td align="right" class="td10 bdr-lt-gry hide bdrTnone">&nbsp;</td>
+              <td class="td100 hide bdrTnone">&nbsp;</td>
+              <td align="center" class="td80 bdr-rt-gry bdr-lt-gry bdrTnone">Actual $</td>
+              <td align="center" class="td80 bdr-rt-gry bdrTnone">Budget $</td>
+              <td align="center" class="td140 bdr-rt-gry bdrTnone">Variance $</td>
+							<td align="center" class="bdr-rt-gry td30 bdrTnone" >%</td>
+            </tr>
+        <% if !operating_statement[income_title].nil? %>
+            <tr>
+              <td align="right" class="bdr-lt-gry hide">&nbsp;</td>
+              <td class="hide">Op. Revenue</td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement[income_title][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement[income_title][:budget])%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							  <% bar_display = (income_color(display_currency_real_estate_overview(operating_statement[income_title][:actuals]), display_currency_real_estate_overview(operating_statement[income_title][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png" %>
+                <% op_rev_bar = display_currency_real_estate_overview_for_percent(operating_statement[income_title][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%= display_currency_real_estate_overview(operating_statement[income_title][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%= op_rev_bar.to_i  >= 100 ? '100%' : op_rev_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtGreen"style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%= display_currency_real_estate_overview_for_percent(operating_statement[income_title][:percent])%></td>
+            </tr>
+						  <%end%>
+					<% if !operating_statement[expense_title].nil? %>
+            <tr>
+             <td align="right" class="bdr-lt-gry hide">-</td>
+             <td class="hide"> Op. Expenses</td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement[expense_title][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement[expense_title][:budget])%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							 <% bar_display = (expense_color((operating_statement[expense_title][:actuals]), (operating_statement[expense_title][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png" %>
+                <% op_exp_bar = display_currency_real_estate_overview_for_percent(operating_statement[expense_title][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement[expense_title][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%= op_exp_bar.to_i >= 100 ? '100%' : op_exp_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtGreen"style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement[expense_title][:percent])%></td>
+            </tr>
+					<%end%>
+						<%noi_title = map_title('NOI')%>
+					  <% if !operating_statement[noi_title].nil? %>
+            <tr class="db-tr-total">
+              <td align="right" class="bdr-lt-gry hide">= </td>
+              <td class="hide"><a href="#">NOI</a></td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement[noi_title][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement[noi_title][:budget])%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							   <%bar_display = (income_color((operating_statement[noi_title][:actuals]), (operating_statement[noi_title][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png"%>
+                <% noi_bar = display_currency_real_estate_overview_for_percent(operating_statement[noi_title][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement[noi_title][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%= noi_bar.to_i  >= 100 ? '100%' : noi_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtRed" style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement[noi_title][:percent])%></td>
+            </tr>
+					<%end%>
+					        <%if !operating_statement['maintenance projects'].nil?%>
+            <tr>
+              <td align="right" class="bdr-lt-gry hide">&nbsp;</td>
+              <td class="hide">Maintenance Projects</td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement["maintenance projects"][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement["maintenance projects"][:budget])%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							 <%bar_display = (expense_color((operating_statement["maintenance projects"][:actuals]), (operating_statement["maintenance projects"][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png"%>
+                <% maint_bar = display_currency_real_estate_overview_for_percent(operating_statement["maintenance projects"][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement["maintenance projects"][:variant].abs)%></span><img src="/images/dashboard_real_tablegreenbar_bg.png" width="<%= maint_bar.to_i  >= 100 ? '100%' : maint_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtGreen" style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement["maintenance projects"][:percent])%></td>
+            </tr>
+							<%end%>
+							 <%title = map_title("Net Income") %>
+        <%if operating_statement[title]%>
+            <tr class="db-tr-total">
+             <td align="right" class="bdr-lt-gry hide">=</td>
+             <td class="hide"><a href="#">Net Income</a></td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement[title][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement[title][:budget])%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							  <%bar_display = (income_color((operating_statement[title][:actuals]), (operating_statement[title][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png"%>
+                <% inc_bar = display_currency_real_estate_overview_for_percent(operating_statement[title][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement[title][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%=inc_bar.to_i  >= 100 ? '100%' : inc_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtGreen" style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement[title][:percent])%></td>
+            </tr>
+						 <%end%>
+						   <%if !operating_statement['capital expenditures'].nil?%>
+            <tr>
+             <td align="right" class="bdr-lt-gry hide">- </td>
+             <td class="hide">CapExp</td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry"><%=display_currency_real_estate_overview(operating_statement['capital expenditures'][:actuals].to_f * -1)%></td>
+              <td align="right" class="bdr-rt-gry"><%=display_currency_real_estate_overview(operating_statement['capital expenditures'][:budget].to_f * -1)%></td>
+              <td align="left" class="bdr-rt-gry"><div class="value-bar-outer fltlft">
+							    <%bar_display = (expense_color((operating_statement["capital expenditures"][:actuals].to_f * -1), (operating_statement["capital expenditures"][:budget].to_f * -1))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png"%>
+                <% cap_exp_bar = display_currency_real_estate_overview_for_percent(operating_statement["capital expenditures"][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement['capital expenditures'][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%=cap_exp_bar.to_i  >= 100 ? '100%' : cap_exp_bar %>" height="16" align="left" /></div>
+                </div></td>
+                <td class="bdr-rt-gry txtRed"style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement['capital expenditures'][:percent])%></td>
+            </tr>
+						<%end%>
+						 <%if !operating_statement['net cash flow'].nil? || !operating_statement['CASH FLOW STATEMENT'].nil?%>
+            <tr class="db-tr-total">
+            <td align="right" class="bdr-lt-gry hide bdr-bottom-gry">= </td>
+            <td class="hide bdr-bottom-gry"><a href="#">Net Cash Flow</a></td>
+              <td align="right" class="bdr-rt-gry bdr-lt-gry bdr-bottom-gry"><%=display_currency_real_estate_overview(operating_statement['net cash flow'][:actuals])%></td>
+              <td align="right" class="bdr-rt-gry bdr-bottom-gry"><%=display_currency_real_estate_overview(operating_statement['net cash flow'][:budget])%></td>
+              <td align="left" class="bdr-rt-gry bdr-bottom-gry"><div class="value-bar-outer fltlft">
+							<%bar_display = (income_color((operating_statement['net cash flow'][:actuals]), (operating_statement['net cash flow'][:budget]))) == 'green' ? "dashboard_real_tablegreenbar_bg.png" : "red-bar.png"%>
+                <% cash_bar = display_currency_real_estate_overview_for_percent(operating_statement['net cash flow'][:percent])%>
+                  <div class="value-bar"><span class="fltrt"><%=display_currency_real_estate_overview(operating_statement['net cash flow'][:variant].abs)%></span><img src="/images/<%= bar_display%>" width="<%=cash_bar.to_i >= 100 ? '100%' : cash_bar %>" height="16" align="left" /></div>
+                </div> </td>
+                <td class="bdr-rt-gry bdr-bottom-gry txtGreen" style="color: <%= bar_display == 'dashboard_real_tablegreenbar_bg.png' ? '#006600' : '#A43030' %>"><%=display_currency_real_estate_overview_for_percent(operating_statement['net cash flow'][:percent])%></td>
+            </tr>
+						 <%end%>
+						 <%else%>
+						 <tr>
+						 <td>
+						 	<p style="font-weight: normal;text-align:center;" class="value-status"> No data available</p>
+							</td>
+							<tr/>
+						 <%end%>
+          </tbody></table>
+          </div>
+				
+
+					
+<% if params[:portfolio_id].present?  && !params[:property_id].present?
+  @portfolio = Portfolio.find_by_id(params[:portfolio_id])
+  @resource = "'Portfolio'"
+  @note = @portfolio
+%>
+<%end%>
+<script>
+<% if params[:tl_period] == "5" ||  params[:tl_period] == "10" %>
+jQuery('#month_options1').show();
+jQuery('#month_options1').css({"visibility":"visible"});
+jQuery('#year_options1').show();
+jQuery('#year_options1').css({"visibility":"visible"});
+<%end%>
+<%if params[:tl_period] == "3" || params[:tl_period] == "8" ||  params[:tl_period] == "2"%>
+jQuery('#year_options1').show();
+jQuery('#year_options1').css({"visibility":"visible"});
+<%end%>
+<%if params[:tl_period] == "2"%>
+jQuery('#quarter_options1').show();
+jQuery('#quarter_options1').css({"visibility":"visible"});
+<%end%>
+</script>

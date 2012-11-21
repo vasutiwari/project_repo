@@ -1,0 +1,8 @@
+page.replace_html "leases_and_occupancy_property_graph", :partial => "/properties/leases_and_occupancy_property_graph/",:locals=>{:portfolio_collection=>@portfolio,
+:note_collection=>@note,:rent_roll_group=>@rent_roll,:rent_area=>@rent_area,:rent_sum=>@rent_sum,:aged_recievables=>@aged_recievables,:end_date=>@end_date,
+:user_id_graph=>@user_id_graph,:prop=>@prop,:start_date => @start_date}
+if !(@rent_roll.nil? or @rent_roll.blank?)
+  page.call "call_individual_graph_leases_property", "#{params[:id]}", "graph_leases_chart_property","#{params[:start_date]}","#{params[:end_date]}","#{@user_id_graph}"
+  page.call "call_individual_graph_rent_distribution_property", "#{params[:id]}", "graph_rent_distribution_chart_property","#{params[:start_date]}","#{params[:end_date]}","#{@user_id_graph}"
+  page.call "call_individual_graph_leases_expiration_property", "#{params[:id]}", "graph_lease_expiration_chart_property","#{params[:start_date]}","#{params[:end_date]}","#{@user_id_graph}"
+end

@@ -1,0 +1,894 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<!-- css and js added starts here-->
+
+ <%if params[:user] == 'false'%>
+    <title>&nbsp;AMP - Simplified Intelligence</title>
+    <%else%>
+    <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+    <%end%>
+    <!-- PLEASE UNCOMMENT THE FOLLOWING IF DEPENDENCY FAILS -->
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "control.modal" %>
+    <%= javascript_include_tag "effects" %>
+    <%= javascript_include_tag "controls" %>
+    <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "lease_mgmt" %>
+		<%= javascript_include_tag "common" %>
+    <%= javascript_include_tag "rails" %>
+	<%= javascript_include_tag "dashboard" %>
+    <link type="text/css" href="/ampchat/cometchatcss.php" rel="stylesheet" charset="utf-8"/>
+
+      <script type="text/javascript" src="/ampchat/cometchatjs.php" charset="utf-8"></script>
+      <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+      <script src="/javascripts/tree_view_lib/jquery.cookie.js" type="text/javascript"></script>
+      <script src="/javascripts/tree_view_lib/jquery.treeview.js" type="text/javascript"></script>
+      <script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+      <script type="text/javascript" src="/javascripts/slideshow/jquery.slideViewerPro.1.0.js"></script>
+      <script type="text/javascript" src="/javascripts/slideshow/jquery.timers-1.2.js"></script>
+      <script type="text/javascript" src="/javascripts/jquery.autocomplete.js"></script>
+      <script type="text/javascript" src="/javascripts/swfupload.js"></script>
+      <script type="text/javascript" src="/javascripts/fileprogress.js"></script>
+      <script type="text/javascript" src="/javascripts/handlers.js"></script>
+      <script type="text/javascript" src="/javascripts/swfupload.queue.js"></script>
+      <script type="text/javascript" src="/javascripts/jquery.jcarousel.min.js"></script>
+      <script type="text/javascript" src="/javascripts/jquery.textarea-expander.js"></script>
+      <script type="text/javascript" src="/javascripts/jquery.qtip-1.0.js"></script>
+
+      <!--	<script type="text/javascript" charset="utf-8">
+var is_ssl = ("https:" == document.location.protocol);
+var asset_host = is_ssl ? "https://s3.amazonaws.com/getsatisfaction.com/" : "http://s3.amazonaws.com/getsatisfaction.com/";
+document.write(unescape("%3Cscript src='" + asset_host + "javascripts/feedback-v2.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript" charset="utf-8">
+var feedback_widget_options = {};
+	feedback_widget_options.display = "overlay";
+	feedback_widget_options.company = "amp";
+feedback_widget_options.placement = "right";
+feedback_widget_options.color = "#94CDA9";
+feedback_widget_options.style = "idea";
+var feedback_widget = new GSFN.feedback_widget(feedback_widget_options);
+</script> -->
+      <%= javascript_include_tag "DatePicker/date" %>
+      <%= javascript_include_tag "DatePicker/jquery.datePicker-2.1.2" %>
+      <script type="text/javascript" src="/FusionCharts/FusionCharts.js"></script>
+      <%= stylesheet_link_tag 'amp_v2', :media=>'all' %>
+      <%= stylesheet_link_tag 'amp_dev', :media=>'all' %>
+      <%= stylesheet_link_tag 'nyroModal', :media=>'all' %>
+      <%= javascript_include_tag 'nested_form' %>
+      <% if !(controller_name == 'properties' && action_name == 'show')  %>
+        <%= stylesheet_link_tag "ampnew_label.css", :media=>"all" %>
+      <% end %>
+      <link href="/stylesheets/jquery-ui.css" rel="stylesheet" type="text/css" media="all" />
+      <%= stylesheet_link_tag "ampnew", :media=>"all"  %>
+      <%= stylesheet_link_tag "amp_rf", :media=>"all"  %>
+      <link href="/stylesheets/sprites.css" rel="stylesheet" type="text/css" />
+      <link href="/javascripts/tree_view_lib/jquery.treeview.css" rel="stylesheet" type="text/css" />
+      <%= stylesheet_link_tag 'DatePicker/datePicker1', :media=>"all" %>
+      <script>jQuery.noConflict();update_for_user = true // to know the file name updates for user</script>
+      <link href="/stylesheets/jcarousel.css" rel="stylesheet" type="text/css" />
+
+					<!--[if IE 7]>
+		<link href="/stylesheets/amp_ie7.css" rel="stylesheet" type="text/css" media=all>
+		<![endif]-->
+		<!--[if IE 8]>
+		<link href="/stylesheets/amp_ie8.css" rel="stylesheet" type="text/css" media=all>
+		<![endif]-->
+
+<!-- css and js added ends here-->
+
+
+
+
+<link href="/stylesheets/screen_v1.0.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/javascripts/common.js"></script>
+
+  <link rel="stylesheet" href="/stylesheets/bubble-tooltip.css" media="screen"/>
+  <script type="text/javascript" src="/javascripts/bubble-tooltip.js"></script>
+  <link href="/stylesheets/treemenu.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="/javascripts/jquery.jstree.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.hotkeys.js"></script>
+<!-- scripts added starts here-->
+
+<script type="text/javascript">
+//To hide the loader after page load
+	jQuery(window).load(function() {
+	   load_completer();
+		   jQuery("#loader_event_for_links a[href]").addClass("loader_event");
+			 jQuery("#subheader a[href]").addClass("loader_event");
+
+		   //~ jQuery("userwrapper a[href]").addClass("loader_event");
+		  //~ jQuery("userdrop2 a").removeClass("loader_event");
+//Unwanted loading event removed
+		  //~ jQuery("#ddBtn").removeClass("loader_event");
+			//~ jQuery(".newstreebox a").removeClass("loader_event");
+			//~ jQuery("#mega-menu a[href]").removeClass("loader_event");
+			//~ jQuery(".alertnamerow a[href]").removeClass("loader_event");
+//To show the loader while click the tabs
+		 jQuery(".loader_event").click(function() {
+	   load_writter();
+	});
+
+	});
+// we have changed the function flash_writter() with new CSS and images, here we have written code in this function itself
+        function flash_writter(msg){
+          jQuery('#success_msg').html(msg);
+					jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+          jQuery('#msg_writter').show();
+          jQuery('#msg_writter').fadeOut(10000);
+          msg_t = setTimeout('flash_completer();', 5000);
+        }
+// we have changed the function load_writter() with new CSS and images, here we have written code in this function itself.
+        function load_writter(){
+            jQuery('#success_msg').html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif; '><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+						//jQuery('#msg_writter').css('background','none');
+            jQuery('#msg_writter').show();
+        }
+// we have changed the function load_writter1() with new CSS and images, here we have written code in this function itself.
+        function load_writter1(){
+          jQuery('#success_msg1').html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif; '><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+          jQuery('#msg_writter1').show();
+        }
+        function load_completer() {
+					jQuery('#msg_writter').fadeOut(1000);
+        }
+        function load_completer1() {jQuery('#msg_writter1').fadeOut(1000);}
+        function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+        function rewritter(txt){ clearTimeout(msg_t); flash_writter(txt);}
+
+        function store_folder_id(folder_id){
+          var old_id=document.getElementById('move_folder_id').value;
+          if (old_id != ''){
+            jQuery('#'+'style_folder_'+old_id).css('color','');  }
+          document.getElementById('move_folder_id').value=folder_id;
+          jQuery('#'+'style_folder_'+folder_id).css('color','red');
+        }
+
+        function flash_static(msg){
+          jQuery('#success_msg').html(msg);
+          jQuery('#msg_writter').show();
+          Event.observe(document.body, 'click', function(event) {jQuery('#msg_writter').hide(); Event.stop(event);})
+        }
+
+        function store_doc_id(doc_id){
+          var old_id=document.getElementById('add_doc_id').value;
+          if (old_id != ''){
+            jQuery('#'+'style_doc_'+old_id).attr('style',''); }
+          document.getElementById('add_doc_id').value=doc_id;
+          jQuery('#'+'style_doc_'+doc_id).attr('style','color:red');
+        }
+
+        function close_control_model()
+        {
+          Control.Modal.close();return false;
+        }
+
+        function go_back_to_file_structure_in_view_task()
+        {
+          if (document.getElementById('is_saved').value == "false")
+          {
+            var pid =document.getElementsByName('pid')[0].value;
+            var folder_id = document.getElementsByName('folder_id')[0].value;
+            //var doc_id = document.getElementById('task_doc_id').value;
+            // removed line - /properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+doc_id+"&delete_stored_file=true"+cr
+            if (<%=  !request.env['HTTP_REFERER'].nil? && request.env['HTTP_REFERER'].include?("collaboration_hub")%>) { var cr = "&from_collab_task=true"}else{ var cr=""}
+            new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&delete_stored_file=true"+cr,{
+              asynchronous:true,
+              evalScripts:true,
+							onComplete: function(request){
+
+									load_completer();
+							},
+							onLoading: function(request){
+
+									load_writter();
+							},
+              insertion:Insertion.Top
+            });
+
+          }
+        }
+
+        function go_back_to_file_structure(opt,path,from_performance_review)
+        {
+          if (document.getElementById('is_saved').value == "false")
+          {
+            var r=  (typeof(opt) == 'undefined' || opt == 'undefined') ? confirm("Would you like to save the task and proceed?") : false
+            var pid =document.getElementsByName('pid')[0].value;
+            if (<%= (!request.env['HTTP_REFERER'].nil? && request.env['HTTP_REFERER'].include?("collaboration_hub") or (controller.controller_name == "collaboration_hub" and @controller.action_name == 'index'))%>) { var cr = "&from_collab_task=true"}else{ var cr=""}
+            var folder_id = document.getElementsByName('folder_id')[0].value;
+            var doc_id = document.getElementById('task_doc_id').value;
+            if (r==true)
+            {
+              with_out_file_task_validation(path,from_performance_review);
+            }
+            else
+            {
+              if(from_performance_review == 'true' )
+              {
+                replace_performance_review(path,from_performance_review)
+              }
+              else
+              {
+                if(($("all_saved_explanation_ids")!=null && $("all_saved_explanation_ids").value!="") || ($("all_saved_comments_ids")!=null && $("all_saved_comments_ids").value!="") || ($("all_saved_events_ids")!=null && $("all_saved_events_ids").value!=""))
+                {
+                  new Ajax.Request("/explanations/delete_exps_and_comments?explanation_ids="+$("all_saved_explanation_ids").value+"&comment_ids="+$("all_saved_comments_ids").value+"&event_ids="+$("all_saved_events_ids").value,{
+                    asynchronous:true,
+                    evalScripts:true,
+                    onSuccess : function(){
+                    },
+									onComplete: function(request){
+
+											load_completer();
+									},
+									onLoading: function(request){
+
+											load_writter();
+									},
+                    insertion:Insertion.Top
+                  });
+                }
+                new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+doc_id+"&delete_stored_file=true&call_for_task=true",{
+                  asynchronous:true,
+                  evalScripts:true,
+									onComplete: function(request){
+
+											load_completer();
+									},
+									onLoading: function(request){
+
+											load_writter();
+									},
+                  insertion:Insertion.Top
+                });
+              }
+            }
+          }
+        }
+
+        function replace_performance_review(path,from_performance_review)
+        {
+          new Ajax.Request(path+"?from_performance_review=true",{
+            synchronous:true,
+            evalScripts:false,
+            method:'get',
+						onComplete: function(request){
+
+								load_completer();
+						},
+						onLoading: function(request){
+
+								load_writter();
+						},
+            insertion:Insertion.Top
+          });
+        }
+
+        function go_back_cancel()
+        {
+          var pid =document.getElementsByName('pid')[0].value;
+          var folder_id = document.getElementsByName('folder_id')[0].value;
+          var doc_id = document.getElementById('task_doc_id').value;
+          new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+doc_id+"&delete_stored_file=true&call_for_task=true",{
+            asynchronous:true,
+            evalScripts:true,
+						onComplete: function(request){
+
+								load_completer();
+						},
+						onLoading: function(request){
+
+								load_writter();
+						},
+            insertion:Insertion.Top
+          });
+        }
+
+        function go_back_cancel_for_folder()
+        {
+          var pid =document.getElementsByName('pid')[0].value;
+          var folder_id = document.getElementsByName('folder_id')[0].value;
+          //var doc_id = document.getElementById('task_doc_id').value;
+          var task_id = document.getElementById('store_task_id').value;
+          new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&delete_stored_file_for_folder=true"+"&task_id="+task_id+"&call_for_task=true",{
+            asynchronous:true,
+            evalScripts:true,
+						onComplete: function(request){
+
+								load_completer();
+						},
+						onLoading: function(request){
+
+								load_writter();
+						},
+            insertion:Insertion.Top
+          });
+        }
+
+        function call_links_events(pid,folder){
+          new Ajax.Request("/properties/show_asset_files?pid="+ pid +"&folder_id="+ folder +"&delete_stored_file_for_folder=true&call_for_task=true",{
+            asynchronous:true,
+            evalScripts:true});
+        }
+
+        function go_back_to_file_structure_for_folder()
+        {
+          if (document.getElementById('is_saved').value == "false")
+          {
+            var r=confirm("Would you like to save the task and proceed?");
+            var pid =document.getElementsByName('pid')[0].value;
+            var folder_id = document.getElementsByName('folder_id')[0].value;
+            //var doc_id = document.getElementById('task_doc_id').value;
+            var task_id = document.getElementById('store_task_id').value;
+            if (r==true)
+            {
+              return with_out_file_task_validation();
+              new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+pid,{
+                asynchronous:true,
+                evalScripts:true,
+								onComplete: function(request){
+
+										load_completer();
+								},
+								onLoading: function(request){
+
+										load_writter();
+								},
+                insertion:Insertion.Top
+              });
+            }
+            else
+            {
+              new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&delete_stored_file_for_folder=true"+"&task_id="+task_id,{
+                asynchronous:true,
+                evalScripts:true,
+								onComplete: function(request){
+
+										load_completer();
+								},
+								onLoading: function(request){
+
+										load_writter();
+								},
+                insertion:Insertion.Top
+              });
+            }
+          }
+        }
+
+        function go_back_to_file_structure_create_controller(from_task)
+        {
+          var pid =document.getElementsByName('pid')[0].value;
+          var folder_id = document.getElementsByName('folder_id')[0].value;
+          new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+pid+"&from_task="+from_task,{
+            synchronous:true,
+            evalScripts:false,
+            onComplete:function(request){
+              flash_writter("Task updated successfully");
+  <%#*load_completer();%>
+        },
+        onLoading:function(request){
+          load_writter();
+        },
+        insertion:Insertion.Top
+      });
+    }
+
+    function go_back_for_file_structure()
+    {
+      var pid =document.getElementsByName('pid')[0].value;
+      var folder_id = document.getElementsByName('folder_id')[0].value;
+      new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+pid,{
+        asynchronous:true,
+        evalScripts:true,
+					onComplete: function(request){
+
+							load_completer();
+					},
+					onLoading: function(request){
+
+							load_writter();
+					},
+        insertion:Insertion.Top
+      });
+    }
+
+
+    function add_task_via_folder(folder_id,ext)
+    {
+      extn = typeof(ext) != 'undefined' ? '&extn_type=disc' : ""
+      new Ajax.Request("/tasks/new_task_via_folder?folder_id="+folder_id+extn,{
+        asynchronous:true,
+        method : 'get',
+        evalScripts:true,
+				onComplete: function(request){
+
+						load_completer();
+				},
+				onLoading: function(request){
+
+						load_writter();
+				},
+        insertion:Insertion.Top
+      });
+    }
+
+    function add_file_function_for_property(folder_id)
+    {
+      var task_id = document.getElementById('store_task_id').value;
+      //document.getElementById('store_task_id').href = "/tree_view/task_add_files_using_tree?folder_id="+folder_id+"&via_folder=true&task_id="+task_id
+      val ="/tasks/task_add_files_using_tree?folder_id="+folder_id+"&via_folder=true&task_id="+task_id;
+      $("add_files_task").href=val;
+      window.location =val;
+      new Control.Modal($("add_files_task"), {className:'modal_container'});
+    }
+
+
+    function go_back_for_file_structure_doer_task(isFolderShared,from_update_task)
+    {
+      var r=confirm("Would you like to save the task and proceed?");
+      if( r == true)
+        return with_out_file_task_validation();
+      else
+        go_back_for_file_structure_doer(isFolderShared,from_update_task);
+    }
+
+    function go_back_for_file_structure_doer(isFolderShared,from_update_task)
+    {
+      if(isFolderShared=="true")
+      {
+        var pid =document.getElementsByName('pid')[0].value;
+        var folder_id = document.getElementsByName('folder_id')[0].value;
+        new Ajax.Request("/properties/show_asset_files?pid="+pid+"&folder_id="+folder_id+"&id="+pid+"&call_for_task=true",{
+          asynchronous:true,
+          evalScripts:true,
+          onComplete:function(request){
+            load_completer();
+            if(from_update_task == "true")
+            {
+              flash_writter("Task updated successfully");
+            }
+            else
+            {
+              load_writter();
+            }
+          },
+          onLoading:function(request){
+            load_writter();
+          },
+          insertion:Insertion.Top
+        });
+      }
+      else
+      {
+        if(from_update_task == "true")
+        {
+          flash_writter("Task updated successfully");
+        }
+        else
+        {
+          load_writter();
+          if(($("all_saved_explanation_ids")!=null && $("all_saved_explanation_ids").value!="") || ($("all_saved_comments_ids")!=null && $("all_saved_comments_ids").value!="") || ($("all_saved_events_ids")!=null && $("all_saved_events_ids").value!=""))
+          {
+            new Ajax.Request("/explanations/delete_exps_and_comments?explanation_ids="+$("all_saved_explanation_ids").value+"&comment_ids="+$("all_saved_comments_ids").value+"&event_ids="+$("all_saved_events_ids").value,{
+              asynchronous:true,
+              evalScripts:true,
+              onSuccess : function(){
+              },
+              onComplete : function(){
+                load_completer();
+              },
+              onLoading : function(){
+                load_writter();
+              },
+              insertion:Insertion.Top
+            });
+          }
+        }
+
+        window.location="/shared_users";
+      }
+
+    }
+
+    function add_file_single_file_upload()
+    {
+      var already_upload = document.getElementById('already_upload_file').value;
+      var all_already_upload =document.getElementById('all_already_upload_file').value;
+      var all_tree_structure =document.getElementById('all_tree_structure_file').value;
+      var recently_added_files_by_tree = jQuery('#recently_added_files_by_tree').val();
+      var params = {portfolio_id:cl_port_id,folder_id:cl_folder_id,id:cl_doc_id,already_upload:already_upload,all_already_upload:all_already_upload,all_tree_structure:all_tree_structure,recently_added_files_by_tree:recently_added_files_by_tree};
+      var length = jQuery('#single_file_upload_list').children().length-1;
+      if(length==-1 || length==0)
+        flash_writter('Please select a file to upload');
+      else
+        new Ajax.Request(return_path+cl_url, {asynchronous: true, evalScripts: true, parameters:params, method: 'POST', onComplete: function(res) { Control.Modal.close();return false; } });
+    }
+
+    function add_file_single_file_upload_for_folder()
+    {
+      var already_upload = document.getElementById('already_upload_file').value;
+      var all_already_upload =document.getElementById('all_already_upload_file').value;
+      var all_tree_structure =document.getElementById('all_tree_structure_file').value;
+      var recently_added_files_by_tree = jQuery('#recently_added_files_by_tree').val();
+      if(cl_task_id == "from_portfolio_summary")
+      {
+        portfolio_summary = 'true';
+        load_writter();
+        var params = {from_portfolio_summary:portfolio_summary,portfolio_id:cl_port_id,folder_id:cl_folder_id,already_upload:already_upload,all_already_upload:all_already_upload,all_tree_structure:all_tree_structure,recently_added_files_by_tree:recently_added_files_by_tree};
+      }
+      else
+      {
+        var params = {portfolio_id:cl_port_id,folder_id:cl_folder_id,task_id:cl_task_id,already_upload:already_upload,all_already_upload:all_already_upload,all_tree_structure:all_tree_structure,recently_added_files_by_tree:recently_added_files_by_tree};
+      }
+      var length = jQuery('#single_file_upload_list').children().length-1;
+      if(length==-1 || length==0)
+        flash_writter('Please select a file to upload');
+      else
+        new Ajax.Request(return_path+cl_url, {asynchronous: true, evalScripts: true, parameters:params, method: 'POST', onComplete: function(res) { Control.Modal.close();return false; } });
+    }
+
+    function add_file_single_file_upload_for_folder_for_tree()
+    {
+  <%if  params[:type] == "summary"%>
+        load_writter();
+  <%end%>
+      document.getElementById('all_already_upload_file1').value = document.getElementById('all_already_upload_file').value;
+      document.getElementById('all_tree_structure_file1').value = document.getElementById('all_tree_structure_file').value;
+      jQuery('#upload_form4 #recently_added_files_by_tree').val(jQuery('#upload_form4 #recently_added_files_by_tree').val() == "" ? jQuery('#upload_form4 #recently_added_files_by_tree').val()+jQuery('#add_doc_id').val() : jQuery('#upload_form4 #recently_added_files_by_tree').val()+','+jQuery('#add_doc_id').val());
+      if(jQuery('#add_doc_id').val() == "")
+        flash_writter('Please select a file to upload');
+      else
+        document.forms.upload_form4.submit();
+    }
+
+    function show_collaboration_overview(){
+  <%  if current_user.has_role?("Shared User") && session[:role] == 'Shared User' %>
+        window.location = "/shared_users"
+  <%  else %>
+	  <%if session[:portfolio__id].present?%>
+        window.location = "/collaboration_hub?portfolio_id=<%=session[:portfolio__id]%>"
+				<%else%>
+				window.location = "/collaboration_hub?portfolio_id=<%= params[:portfolio_id]%>&property_id=<%=session[:property__id]%>&folder_id=<%= params[:folder_id]%>"
+			<%end%>
+  <% end %>
+    }
+    function show_transaction_overview(){
+<%  if current_user.has_role?("Shared User") && session[:role] == 'Shared User' %>
+      window.location = "/shared_users"
+<%  else %>
+<%if session[:portfolio__id].present?%>
+       window.location = "/transaction?deal_room=true&portfolio_id=<%=session[:portfolio__id]%>"
+<%else%>
+      window.location = "/transaction?deal_room=true&portfolio_id=<%= params[:portfolio_id]%>&property_id=<%=session[:property__id]%>"
+	<%end%>
+<% end %>
+  }
+  function show_transaction_overview_page(){
+	  <%  if current_user.has_role?("Shared User") && session[:role] == 'Shared User' %>
+        window.location = "/transaction?deal_room=true"
+		<%else%>
+      <%if session[:portfolio__id].present?%>
+        window.location = "/transaction?deal_room=true&portfolio_id=<%=session[:portfolio__id]%>"
+      <%else%>
+        window.location = "/transaction?deal_room=true&portfolio_id=<%= params[:portfolio_id]%>&property_id=<%=session[:property__id]%>"
+	    <%end%>
+	<%end%>
+  }
+
+	jQuery(document).ready(function()
+	{
+	enable_disable_amp_logo();
+	}
+	);
+
+ </script>
+
+<!-- scripts added ends here-->
+</head>
+<%unless params[:user] == 'false'%>
+	<!--body start for user-->
+	<body class="onhover">
+		<%all_properties = RealEstateProperty.find_owned_and_shared_properties_of_a_user(current_user.id,prop_folder=true)%>
+		 <div id="callout" onblur="blurTimerStart()"></div>
+				 <% if current_user.nil? %>
+					<% if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?('share') %>
+						<% path = login_path %>
+					<% else %>
+						<% path = root_path %>
+					<% end %>
+				<% else %>
+				<%if is_leasing_agent %>
+					<% path = goto_asset_view_path(current_user.id) %>
+				<%elsif current_user.has_role?('Asset Manager') %>
+						<% path = welcome_path %>
+					<% else %>
+						<% path = shared_users_path %>
+					<% end %>
+				<% end %>
+		<!--Loading Msg Start-->
+		<div id="msg_writter" class="msgWritter">
+			<div id="success_msg" class="loadingmsg"><div class="msgTxt"><img width="83" height="15" border="0" align="absmiddle" style="padding:0; margin:0;" src="/images/loading_amp.gif"/>&nbsp;&nbsp;<strong>Loading...</strong></div></div>
+		</div>
+		<!--Loading Msg End-->
+		<!--container start-->
+			<div class="container">
+				<!--header starts here-->
+					<div class="header">
+							<%action = params[:action]
+							if action.eql?("financial_info") || action.eql?("property_info") || action.eql?("welcome") || action.eql?("portfolio_commercial_leasing_info") || action.eql?("portfolio_multifamily_leasing_info") || action.eql?("property_commercial_leasing_info") || action.eql?("property_multifamily_leasing_info")
+							url_condition = true
+							else
+							url_condition = false
+							end
+							if url_condition
+								find_last_visited_url(current_user)
+							end
+							%>
+
+							<%if is_leasing_agent%>
+													<% shared_folders = Folder.find_by_sql("SELECT * FROM folders WHERE id IN (SELECT folder_id FROM shared_folders WHERE is_property_folder =1 AND user_id = #{current_user.id })")
+											shared_portfolios = Portfolio.where("id in (?) and leasing_type= 'Commercial' and name not in ('portfolio_created_by_system','portfolio_created_by_system_for_bulk_upload','portfolio_created_by_system_for_deal_room')",shared_folders.collect{|x| x.portfolio_id}) if !(shared_folders.nil? || shared_folders.blank?) %>
+													<%shared=  SharedFolder.includes(:folder=>:real_estate_property).where("shared_folders.is_property_folder = ? and shared_folders.user_id = ? and real_estate_properties.leasing_type= 'Commercial' and real_estate_properties.property_name not in ('portfolio_created_by_system','portfolio_created_by_system_for_bulk_upload','portfolio_created_by_system_for_deal_room')",true,current_user.id) if !(shared_portfolios.nil? || shared_portfolios.blank?)
+													prop_ids = shared.map(&:real_estate_property_id) if shared
+													shared_properties = prop_ids.present? ? RealEstateProperty.where(:id=>prop_ids) : []%>
+												<%all_portfolios = shared_portfolios%>
+											<%else%>
+												<%# all_portfolios = Portfolio.find_shared_and_owned_portfolios(current_user.id)%>
+												<% all_portfolios = Portfolio.find_portfolios(current_user)%>
+											<%end%>
+
+											<%last_portfolio, first_property = Portfolio.last_created_portfolio_of_a_user(current_user)%>
+											<%portfolio = session[:portfolio__id].present? ? session[:portfolio__id] : params[:real_estate_id].present? ? params[:real_estate_id].to_i : params[:portfolio_id].present? ? params[:portfolio_id].to_i : params[:pid].present? ? params[:pid].to_i : (params[:id].present? && params[:action].eql?("add_property")) ? params[:id].to_i : last_portfolio.present? ? last_portfolio.try(:id) : @portfolio.present?  ? @portfolio.try(:id) : last_portfolio.try(:id) %>
+											<%portfolio_obj = Portfolio.find_by_id(portfolio)%>
+											 <%prop = RealEstateProperty.find_properties_of_portfolio(portfolio_obj.id).try(:last) if portfolio_obj.present?%>
+											<%note = (session[:property__id].present? && params[:access].blank?) ? session[:property__id] : (params[:property_id].present? && params[:access].blank?) ? params[:property_id].to_i : (params[:id].present? && !params[:action].eql?("add_property")) ? params[:id].to_i : params[:nid].present? ? params[:nid].to_i : prop.present? ? prop.try(:id) : @note.present? ? @note.try(:id) : first_property.try(:id) %>
+											<%property_obj = RealEstateProperty.find_by_id(note.to_i)%>
+							<%gate = (params[:from_session].present? || params[:from_view].present? || params[:no_properties].present?)%>
+							<!--top level header starts here-->
+								<div class="acInfo"> <span id="span_id" style="display:none;"><a href="http://localhost:3000/" style="margin-left: 0px !important;" target="_blank"><img  src="/images/amplogo_small.png" border="0" class="amplogoM5" style="margin-bottom:-3px;" /></a> |</span><span style="margin-left: 7px !important;"><%= current_user.try(:email).present? ? current_user.try(:email) : current_user.try(:name)%>
+									</span>|<a href="<%=my_profile_collaboration_hub_index_path%>?open_user_profile=true<%=gate ? "&no_properties=true" : ""%>&portfolio_id=<%=portfolio_obj.try(:id)%>&property_id=<%=property_obj.try(:id)%>"><img src="<%= user_default_image(current_user.id)%>"  width="12px" height="12px" border="0" title="" alt="" class="valign"  id="user_profile_image"/> Profile</a>|<% if current_user.has_role?('Client Admin') %> <a href="/client_admin/<%=current_user.id%>/users" class="highlightacInfo"><span>Switch to Admin Console</span></a>|
+                    <% end %><a href="<% if current_user.has_role?('Asset Manager') %><%= logout_path%><% else %><%= logout_path%><% end %>">Logout</a></div>
+								<div class="logo" styel= "cursor:pointer;" id="amp_logo">					
+									<%= render :partial => "layouts/logo",:locals => {:path => path,:portfolio_obj => portfolio_obj,:property_obj => property_obj} %>
+								</div>
+							<!--top level header ends here-->
+							<div class="navpostion">
+								<div class="nav">
+									<!--div for header tabs links starts here-->
+									<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%>
+										<div id="loader_event_for_links" style="<%if is_leasing_agent && (params[:action].eql?("pipeline") || params[:action].eql?("show_pipeline") || params[:action].eql?("show_asset_files")  || params[:action].eql?("news") || params[:controller].eql?("transaction") || params[:controller].eql?("collaboration_hub") || params[:action].eql?("stacking_plan") || params[:action].eql?("suites"))%>margin-left:180px;<%end%>">
+
+											<!-- links to header tabs starts here-->
+												<!--for shared user starts here-->
+													<%if !current_user.has_role?("Asset Manager") && !is_leasing_agent%>
+														<a href='/shared_users' class="<%= (controller_name == 'shared_users') || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction') ? 'selected' : '' %>" onmouseover="mousehover(this.id,'files');" onmouseout="mouseout(this.id,'files');" id="files_id">Files </a>
+														<a href="/home/news" class="<%= (controller_name == 'home') ? 'selected' : '' %>" onmouseover="mousehover(this.id,'news');" onmouseout="delayed_mouseout(this.id);" id="news_id">News</a>
+													<%end%>
+												<!--for shared user ends here-->
+												<!--for asset manager and leasing agent start-->
+													<% if current_user.has_role?('Asset Manager') || is_leasing_agent%>
+														<% if (current_user.approval_status == nil || current_user.approval_status == true) %>
+															<%if !is_leasing_agent%>
+																	<%if all_properties.present?%>
+																		<%if current_user.has_role?("Asset Manager") %>
+																				<%if request.request_uri.eql?("welcome")%>
+																						<a href="/nav_dashboard/dashboard?portfolio_id=<%= portfolio_obj.try(:id)%>" class="<%= (controller_name == 'dashboard' || (controller_name == 'users' &&  action_name == 'welcome')) ? 'selected' : '' %>" onmouseover="mousehover(this.id,'dashboard');" onmouseout="mouseout(this.id,'dashboard');" id="dashboard_id">Dashboard</a>
+																				<%elsif session[:property__id].present?%>
+
+																					<a href="/dashboard/<%=portfolio_obj.try(:id)%>/financial_info/<%=property_obj.try(:id)%>/financial_info" class="<%= (controller_name == 'dashboard' || (controller_name == 'users' &&  action_name == 'welcome')) ? 'selected' : '' %> " onmouseover="mousehover(this.id,'dashboard');" onmouseout="mouseout(this.id,'dashboard');" id="dashboard_id">Dashboard</a>
+																				<%else%>
+																						<a href="/nav_dashboard/dashboard?portfolio_id=<%= portfolio_obj.try(:id)%>" class="<%= (controller_name == 'dashboard' || (controller_name == 'users' &&  action_name == 'welcome')) ? 'selected' : '' %> " onmouseover="mousehover(this.id,'dashboard');" onmouseout="mouseout(this.id,'dashboard');" id="dashboard_id">Dashboard</a>
+																				<%end%>
+																		<%else%>
+																				<a href="<%= shared_users_path %>" class="<%= (controller_name == 'users' && action_name == 'welcome') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'dashboard');" onmouseout="mouseout(this.id,'dashboard');" id="dashboard_id">Dashboard</a>
+																		<%end%>
+																	<%else%>
+																	<%if params[:from_session].present? %>
+																			<%= link_to 'Dashboard', {:action=>"notify_admin", :controller=>"users", :from_session=>"true"}, :class=> "#{(controller_name == 'users' && action_name == 'notify_admin') ? 'selected' : ''}" %>
+																			<%else %>
+																			<%= link_to 'Dashboard', {:action=>"notify_admin", :controller=>"users", :from_view=>"true"}, :class=> "#{(controller_name == 'users' && action_name == 'notify_admin') ? 'selected' : ''}" %>
+																			<%end%>
+																	<%end%>
+																	<%if all_properties.present? && current_user.try(:client).try(:is_financials_required)%>
+																	  <% financial_href= (session[:portfolio__id].blank? && session[:property__id].blank?) ? "/real_estate/#{portfolio}/properties/#{note}" : goto_asset_view_path(current_user.id)%>
+																	  <a href="<%= financial_href%>" id='asset_view_path' class="<%= (((controller_name == 'properties' ) && (!params[:from_property_details].present?) && ( action_name == 'show' || action_name == 'show_folder_files')) || (controller_name == 'lease' && action_name == 'show_pipeline')) ? 'selected' : '' %> loader_event" onmouseover="mousehover(this.id,'financials');" onmouseout="mouseout(this.id,'financials');">Financials</a>
+																	<%elsif (current_user.try(:client).try(:is_financials_required) && (params[:action].eql?("notify_admin") || params[:action].eql?("news") || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction')))%>
+																	  <a class="disable" id="asset_view_path">Financials</a>
+																	<%end%>
+															<%end%>
+														<% end %>
+														<%note_id = (params[:property_id].present? || params[:id].present? || params[:nid].present? || (session[:property__id].present? && !session[:portfolio__id].present?)) ? note : prop.present? ?  prop.try(:id) : first_property.try(:id)%>
+														<%if (property_obj.try(:leasing_type)=="Commercial" || portfolio_obj.try(:leasing_type)=="Commercial") && (!is_leasing_agent)
+														href_var = "/lease/#{portfolio}/management/#{note_id}/management"
+														elsif (property_obj.try(:leasing_type)=="Commercial" || portfolio_obj.try(:leasing_type)=="Commercial") && (is_leasing_agent)
+														href_var = "/lease/#{portfolio}/pipeline/#{note_id}/property_pipeline"
+														else
+														href_var = "/performance_review_property/rent_roll?portfolio_id=#{portfolio}&id=#{note}&property_id=#{note}&partial_page=rent_roll_highlight&tl_year=#{Time.now.year}&from_lease=ya"
+														end%>
+														<%if all_properties.present?%>
+															<%if session[:property__id].present? || (is_leasing_agent && (controller_name == 'lease' && action_name =='show_pipeline')) || (is_leasing_agent && (controller_name == 'collaboration_hub' && action_name =='my_profile'))%>
+																	<a href="<%=href_var%>"  class="<%= (controller_name == 'lease') || (controller_name == 'lease' && action_name =='show_pipeline') || (controller_name == 'performance_review_property' && action_name == 'rent_roll') ? 'selected' : '' %> " style="<%= (session[:collab_val].present? && !session[:pipeline].present?) ? 'display:none' : 'display:block'%>" onmouseover="mousehover(this.id,'leasing');" onmouseout="mouseout(this.id,'leasing');"  id="leasing_id">Leasing </a>
+															<%else%>
+																	<a class="disable" id="leasing_id" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Leasing</a>
+															<%end%>
+
+															<%if session[:portfolio__id].present?%>
+																	<a href='/files/<%=portfolio%>?folder_id=<%=Folder.folder_of_a_portfolio(portfolio).try(:id)%>&hide_var=true' class="<%= (controller_name == 'properties' && action_name == 'show_asset_files') || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'files');" onmouseout="mouseout(this.id,'files');" id="files_id">Files </a>
+															<%else%>
+																	<a href='/files/<%=portfolio%>/<%=note_id%>' class="<%= (controller_name == 'properties' && action_name == 'show_asset_files') || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'files');" onmouseout="mouseout(this.id,'files');" id="files_id">Files </a>
+															<%end%>
+														<%else%>
+																<a class="disable"  id="leasing_id" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Leasing</a>
+																<%if is_leasing_agent || (current_user.has_role?('Asset Manager') && (params[:action].eql?("notify_admin") || params[:action].eql?("news") || params[:controller].eql?("collaboration_hub") || params[:controller].eql?("transaction")))%><a href='/collaboration_hub' class='<%= (controller_name == 'properties' && action_name == 'show_asset_files') || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction') ? 'selected' : '' %>' onmouseover="mousehover(this.id,'files');" onmouseout="mouseout(this.id,'files');" id="files_id">Files</a><%else%>
+																<a class="disable">Files</a><%end%>
+														<%end%>
+
+														<%if all_properties.present?%>
+															<%if !is_leasing_agent%>
+																	<%if session[:property__id].present?%>
+																		<a href= "/real_estates/add_property/<%=portfolio%>/?property_id=<%=note_id%>" class="<%= (controller_name == 'real_estates') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'settings');" onmouseout="mouseout(this.id,'settings');" id="settings_id">Settings</a>
+																	<%else%>
+																		<a class="disable" id="settings_id" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Settings</a>
+																	<%end%>
+															<%end%>
+															<%news_href = session[:portfolio__id].present? ? "?portfolio_id=#{portfolio}" : "?portfolio_id=#{portfolio}&property_id=#{note_id}"%>
+																<a href="/home/news<%=news_href%>" class="<%= (controller_name == 'home') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'news');" onmouseout="delayed_mouseout(this.id);" id="news_id"  value="<%=portfolio%>">News</a>
+														<%else%>
+																<%if !is_leasing_agent%><a class="disable" id="settings_id" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Settings</a><%end%>
+																<%param_var = params[:from_session].present? ? "from_session=true" : params[:from_view].present? ? "from_view=true" : ""%>
+																<a href="/home/news?no_properties=true&<%=param_var.present? ? param_var : ""%>" class="<%= (controller_name == 'home') ? 'selected' : '' %> " onmouseover="mousehover(this.id,'news');" onmouseout="delayed_mouseout(this.id);"  id="news_id">News</a>
+														<%end%>
+											<% end %>
+										<!--for asset manager and leasing agent end-->
+									</div>
+									<%end%>
+							<!--div for header tabs links ends here-->
+									<!-- sub header starts here-->
+											<div id="subheader">
+													<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= render :partial=> "partials/sub_header",:locals=>{:property_obj=>property_obj,:portfolio_obj=>portfolio_obj, :all_properties=>all_properties}%><%end%>
+											</div>
+									<!-- sub header ends here-->
+									</div>
+									<!--mega drop down starts here-->
+										<%find_portfolios_properties_in_megadrop%>
+										<%if current_user.has_role?('Asset Manager') || is_leasing_agent%>
+											<%if (controller.controller_name != "collaboration_hub" && controller.action_name != "index") &&  params[:open_user_profile] !='true' && (controller.controller_name != 'home' && controller.action_name != 'news') && (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= render :partial=> "partials/mega_dropdown",:locals=>{:portfolio_collection=>portfolio_obj,:note_collection=>property_obj,:old_note=>@note_old, :all_properties=>all_properties}%><%end%>
+										<%end%>
+									<!--mega drop down ends here-->
+								</div>
+						</div>
+				<!--header ends here-->
+					<!--content starts here-->
+						<%if controller_name == 'dashboard' || (controller_name == 'users' && (action_name.eql?("welcome") || action_name.eql?("dashboard") || action_name.eql?("comm_display") || action_name.eql?("multifamily_display") || action_name.eql?("dashboard_commercial")  || action_name.eql?("dashboard_commercial_leases"))) || (controller_name == 'lease' &&action_name.eql?("budget"))%>
+						<div class="clearfloat"></div>
+						<div class="content" id="content_detail">
+							<%if all_properties.present?%>
+							<!--content-->
+								<%=yield %>
+								<!--<div class="clearfloat"></div>-->
+							<%else%>
+								<%=yield %>
+							<%end%>
+						</div>
+						<%else%>
+							<div class="mainwrapper" style="<%if controller_name == 'home'%>width: 994px;<%end%>">
+								<div class="bodywrapperrow">
+									<div class="contentwrapper">
+									<%=yield %>
+									</div>
+								</div>
+								<div class="clearfloat"></div>
+							</div>
+						<%end%>
+					<!--content ends here-->
+					<div class="clearfloat"></div>
+					<div class="footer" style="height:63px;">					
+					<div class="footer-nav fltlft">© 2011 <% if Rails.env != "development" %><%= get_analytics_code %><% end %>AMP Technologies | <a <%unless gate%> 
+<%home_path= (current_user.has_role?("Asset Manager") && session[:property__id].present? ) ? "/nav_dashboard/dashboard?portfolio_id=#{portfolio}&property_id=#{note}" : (current_user.has_role?("Asset Manager") && !session[:property__id].present? ) ? "/nav_dashboard/dashboard?portfolio_id=#{session[:portfolio__id].present? ? session[:portfolio__id] : portfolio}" : (is_leasing_agent ? path : shared_users_path) %>
+<%end%>href=<%=home_path.present? ? home_path : "/dashboard/notify_admin?from_session=true"%>>Home</a> | <a href="<%=my_profile_collaboration_hub_index_path%>?open_user_profile=true<%=gate ? "&no_properties=true" : ""%>">Profile</a> | <a href="http://localhost:3000/request_demo/" target="_blank" class="boxed" rel="{handler:'iframe',size:{x:760,y:300},iframePreload:true}">Contact Us </a></div>
+							<div class="footer-ssl fltrt">
+								<a target="GT__SIP" href="https://smarticon.geotrust.com/smarticonprofile?Referer=https://localhost:3000" tabindex="-1">
+								<img src="/images/ssl.png" width="99" height="40" align="left" /></a>&nbsp;&nbsp;<img src="/images/powered-by-logo.png" width="83" height="44" align="right" />
+							</div>
+						</div>
+					<div class="clearfloat"></div>
+				</div>
+		<!--container end-->
+	</body>
+	<!--body end for user-->
+<%else%>
+	<!--body start for user-->
+	<body>
+		 <div id="callout" onblur="blurTimerStart()"></div>
+				 <% if current_user.nil? %>
+					<% if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?('share') %>
+						<% path = login_path %>
+					<% else %>
+						<% path = root_path %>
+					<% end %>
+				<% else %>
+				<%if is_leasing_agent %>
+					<% path = goto_asset_view_path(current_user.id) %>
+				<%elsif current_user.has_role?('Asset Manager') %>
+						<% path = welcome_path %>
+					<% else %>
+						<% path = shared_users_path %>
+					<% end %>
+				<% end %>
+		<!--Loading Msg Start-->
+		<div id="msg_writter" class="msgWritter">
+			<div id="success_msg" class="loadingmsg"><div class="msgTxt"><img width="83" height="15" border="0" align="absmiddle" style="padding:0; margin:0;" src="/images/loading_amp.gif"/>&nbsp;&nbsp;<strong>Loading...</strong></div></div>
+		</div>
+		<!--Loading Msg End-->
+		<!--container start-->
+			<div class="container">
+				<!--header starts here-->
+					<div class="header">
+							<!--top level header starts here-->
+								<div class="logo" id="amp_logo">
+									<a href="/"><img border="0" id="logo_img" src="/images/amp-logo.png" height="35" width="104" border="0" /></a>
+								</div>
+							<!--top level header ends here-->
+							<div class="navpostion">
+								<div class="nav">
+									<!--div for header tabs links starts here-->
+										<div>
+												<a href="<%= login_path %>">Log In</a>
+										</div>
+									<!--div for header tabs links ends here-->
+									</div>
+								</div>
+						</div>
+				<!--header ends here-->
+					<!--content starts here-->
+							<div class="mainwrapper" style="<%if controller_name == 'home'%>width: 994px; margin-left: -39px;<%end%>">
+								<div class="bodywrapperrow">
+									<div class="contentwrapper">
+									<%=yield %>
+									</div>
+								</div>
+								<div class="clearfloat"></div>
+							</div>
+					<!--content ends here-->
+					<div class="clearfloat"></div>
+					<div class="footer" style="height:63px;">
+							<div class="footer-nav fltlft">© 2011 <% if Rails.env != "development" %><%= get_analytics_code %><% end %>AMP Technologies | <a href="/">Home</a> | <a href="/team.html">Team</a> | <a href="/security_privacy.html">Privacy &amp; Security</a> | <a href="http://localhost:3000/request_demo/" target="_blank" class="boxed" rel="{handler:'iframe',size:{x:760,y:300},iframePreload:true}">Contact Us | <a href="/security_privacy.html">Terms Of Use</a></a></div>
+							<div class="footer-ssl fltrt">
+								<a target="GT__SIP" href="https://smarticon.geotrust.com/smarticonprofile?Referer=https://localhost:3000" tabindex="-1">
+								<img src="/images/ssl.png" width="99" height="40" align="left" /></a>&nbsp;&nbsp;<img src="/images/powered-by-logo.png" width="83" height="44" align="right" />
+							</div>
+						</div>
+					<div class="clearfloat"></div>
+				</div>
+		<!--container end-->
+	</body>
+	<!--body end for user-->
+<%end%>
+<div id="printable"></div>
+</html>
+
+<script>
+jQuery("body").mouseover(function(event) {
+if (jQuery("body").is('.onhover'))
+{
+a= ["dashboard_id","asset_view_path","leasing_id","files_id","settings_id","news_id"];
+for(var n=0; n<a.length; n++){
+   delayed_mouseout(a[n]);
+}
+}
+else
+{event.stopPropagation();jQuery("body").addClass('onhover');
+
+}
+});
+
+
+</script>
+
+ 

@@ -1,0 +1,11 @@
+<span id="comment_value_profile" style="display:none;"><%if !user_collection.comment.blank? %><%= user_collection.comment %><% else %><% end %></span>
+<div class="comment" id="disp_comment"><strong>Description</strong> :
+  <div id="comment_description" style="white-space:normal;min-height:10px;max-height:50px;overflow:auto;padding:4px;"><h><%if !user_collection.comment.nil? && !user_collection.comment.blank?%><%= user_collection.comment %><%else%>No description<%end%></h>
+  </div>
+  <div><a href="javascript:;" onclick="jQuery('div#disp_comment').hide();jQuery('div#change_comment').show();jQuery('div#change_comment span input[name]').focus();return false;" class="bluecolor" id="comment_edit">Edit
+  </a></div>
+</div>
+<div class="comment" id="change_comment" style="display:none;"><strong>Description</strong> :
+  <span><input id="edit_profile_description"type="text" value="<%= user_collection.comment %>" name="name"/><a href="javascript:;" onclick="ajax_call_user_profile_update(jQuery('div#change_comment span input[name]').val(),'comment');return false;" class="bluecolor"  id="ok_save_comment">Save</a></span>&nbsp;<a href="javascript:;" onclick="jQuery('div#change_comment').hide();jQuery('div#disp_comment').show();
+jQuery('div#change_comment span input[name]').val(jQuery('div#comment_description').text().strip()) ;return false;" class="bluecolor" id="cancel_save_comment">Cancel</a>
+</div>

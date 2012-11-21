@@ -1,0 +1,823 @@
+<script>
+  click_cancel = 'false';
+  click_approval = 'false';
+  click_approval_inside = 'false';
+  click_archeived = 'false';
+  click_archeived_inside = 'false';
+  click_attach = 'false';
+  click_abstract = 'false';
+  click_delete = 'false';
+  click_delete_inside = 'false';
+  click_file_name='false';
+  click_more='false';
+	management_more='false'
+  selected_row = 'undefined';
+  open_text_box = 'undefined';
+  term_mark_form = false;
+  form_name ="#mgmt_terms_form"
+  form_txt ="docs"
+  tab = "7"
+  activive_tab(form_txt)
+</script>
+<link rel="stylesheet" href="/stylesheets/DatePicker/input_datepicker.css">
+<%
+suite_collection = @new_suite
+pdf_convn_path = @pdf.blank? ? '' : Rails.root.to_s+'/public'
+%>
+<div id="pipeline_attachment">
+  <%if is_leasing_agent && (controller.controller_name !='lease' && controller.action_name !='show_pipeline') || (controller.controller_name =='lease' && controller.action_name =='pipeline') || (controller.controller_name =='lease' && controller.action_name =='update_suite_and_lease')|| (controller.controller_name =='lease' && controller.action_name =='edit_lease') && !@pdf%>
+    <div class="clear"></div>
+    <%#=render :partial=>"lease/lease_sub_head",:locals=>{:portfolio_collection=>portfolio_collection}%>
+  <%end%>
+  <div class="rhs leaseModule"  id="lease_container">
+    <div class='suitemid marginTop20'  id="show_assets_list">
+      <h1 class="page-title">Pipeline</h1>
+      <div class="clear"></div>
+      <%if  !@pdf && !note_collection.is_getting_started_closed%>
+        <%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>note_collection,:portfolio_collection=>portfolio_collection} %>
+      <%end%>
+
+      <div class="pipeline-page-header-tbl">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td colspan="4" class="boldtxt">Vacancy</td>
+            <td rowspan="5" style="border-right:1px solid #ECECEC;"></td>
+            <td rowspan="5" style="border-left:1px solid #fff;"></td>
+            <td colspan="4" class="boldtxt">Active Prospects</td>
+          </tr>
+          <tr>
+            <%vac_suite_calcs(note_collection.id)%>
+            <td width="120" height="30"><div class="vacancygrimg2" style="width:100%"><img width="1" height="14" style="width:<%=bar_percentage_dashboard(@vacant_display.to_f,'true')%>;" src="<%= pdf_convn_path%>/images/vacancygrbg.png"/></div></td>
+            <td width="80" align="right"><%=bar_percentage_dashboard_without_round(@vacant_display.to_f)%></td>
+            <td width="80" align="right"><%= @rent_sqft%></td>
+            <td width="80" align="right"> <%= link_to "#{@suites_count} ", {:controller=>'lease',:action=>"vacant_occupied_suites",:item=>'vacant_suites',:propertyid=>note_collection.id},:id=>"vacant_suites_LB"%>
+              <script>new Control.Modal($('vacant_suites_LB'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </td>
+            <%find_active_prospects(@property_lease_suites_interested,note_collection.id)%>
+            <td width="120"><div class="vacancygrimg2" style="width:100%"><img width="1" height="14" style="width:<%=@prospect_percent.to_f.round%>%;" src="<%= pdf_convn_path%>/images/vacancygrbg.png" /></div></td>
+                                                                               <td width="40" align="right"><%=@prospect_percent.to_f.round%>%</td>
+                                                                               <td width="80" align="right"><%=@prospect_sqft%></td>
+                <td width="80" align="right"><a  onclick="jQuery('html,body').animate({scrollTop: jQuery('#prospectview').offset().top},'fast');"><%=@prospect_count%></a></td>
+          </tr>
+          <tr>
+            <%occupancy_percent_for_month%>
+          <style>.greenrow { float:none; }.redrow2 {float:none;}</style>
+          <%occupancy_graph = @occupancy_graph%>
+          <%if occupancy_graph.present?%>
+            <% color_icon = occupancy_graph[:vacant][:style] == 'redrow2' ? 'uparrowred' : 'greenarrowdown' %>
+            <td height="20" colspan="4" align="right" valign="top" class="<%=occupancy_graph[:vacant][:style]%>">
+              <img width="8" src="<%= pdf_convn_path%>/images/<%= color_icon %>.png"/><%=(occupancy_graph[:vacant][:diff_percent].infinite? || occupancy_graph[:vacant][:diff_percent].nan?) ? display_currency_real_estate_overview_for_percent(occupancy_graph[:vacant][:diff_percent].to_f) : display_currency_real_estate_overview_for_percent(occupancy_graph[:vacant][:diff_percent].round.abs)%>, <%=display_sqrt_real_estate_overview(occupancy_graph[:vacant][:diff])%>  &nbsp;<%=occupancy_graph[:vacant][:diff_word]%> <%=TEXT_CHANGE_CONFIG['budjet']['1']%></td>
+          <%end%>
+          <td colspan="4"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="boldtxt">6 Month Expiration</td>
+            <td colspan="4" class="boldtxt">Pending Approval</td>
+          </tr>
+          <tr>
+            <% occupied_suite_total_calcs(note_collection.id)%>
+            <td width="100" height="30"><div class="vacancygrimg2" style="width:100%"><img width="1" height="14" style="width:<%= (@occ_percent.to_f.round)%>%;" src="<%= pdf_convn_path%>/images/vacancygrbg.png" /></div></td>
+                                                                                           <td align="right"><%= @occ_percent.to_f.round%>%</td>
+                                                                                           <td align="right"><%= @sqft_value%></td>
+                <td align="right"><%= link_to "#{@leases_exp}", {:controller=>'lease',:action=>"vacant_occupied_suites",:item=>'occupied_suites',:propertyid=>note_collection.id},:id=>"occupied_suites_LB"%>
+                  <script>new Control.Modal($('occupied_suites_LB'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script></td>
+                <%find_pending_approval(@property_lease_suites_negotiated,note_collection.id)%>
+                <td width="100"><div class="vacancygrimg2" style="width:100%"><img width="1" height="14" style="width:<%=@pending_percent.to_f.round%>%;" src="<%= pdf_convn_path%>/images/vacancygrbg.png" /></div></td>
+                                                                                   <td align="right"><%=@pending_percent.to_f.round%>%</td>
+                                                                                   <td align="right"><%=@pending_sqft%></td>
+                    <td align="right"><a onclick="jQuery('html,body').animate({scrollTop: jQuery('#ApprovalUnderNegotiationLeases').offset().top},'fast');"><%=@pending_count%></a></td>
+                    </tr>
+                    </table>
+                  </div>
+
+                  <div class="leadditem">
+                    <div id="lease_agents" >
+                      <%=render :partial=>"lease/lease_agents_display"%>
+                    </div>
+                  </div>
+
+
+                  <div id="ApprovalUnderNegotiationLeases">
+                    <div class="leadditem">
+                      <div class="lebredcoms" style="padding-bottom:0;">
+                        <div class="lebredcomsleft boldtxt" style="color:#000 !important; font-size:12px !important; line-height:20px;">Pending Approval & Negotiation Leases</div>
+                        <div class="lebredcomsright" style="margin-top:-8px">
+                          <%unless @pdf%>
+                            <div class="folderlabel">
+                              <a onclick="lease_pdfConv(true,'<%=note_collection.id%>','<%=portfolio_collection.id%>','property_pipeline','<%=params[:selected_value]%>');return false;" href="javascript:;">
+                                <div class="folderlabelcol">Print PDF</div>
+                              </a>
+                              <span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>
+                            </div>
+                          <%end%>
+                        </div>
+                      </div>
+                    </div>
+                    <%if @property_lease_suites_negotiated.present?%>
+                      <div class="tbl_lease pipeline-tbl">
+                        <div class="tbl-head pipeline-head" style="height:43px;">
+                          <div class="suiteno" style="width:52px">Suite</div>
+                          <div class="suiteno" style="width:60px">Suite<br />Status</div>
+                          <div class="sqft" style="width:55px">Rentable SF</div>
+                          <div class="tenant" style="width:113px">Tenant</div>
+                          <div class="hoursbox2 lease" style="width:101px;">
+                            <div class="lease" style="border-bottom:1px solid #E3DFDF; width:99px; background:#4bacc6; margin-left:1px">Lease</div>
+                            <div class="lease" style="width:50px;">Start</div>
+                            <div class="lease" style="width:50px;border-left:1px solid #E3DFDF">End</div>
+                          </div>
+                          <div class="hoursbox2 psf" style="width:101px;">
+                            <div class="psf" style="border-bottom:1px solid #E3DFDF;width:100px; background:#4bacc6; margin-left:1px">psf </div>
+                            <div class="lease" style="width:50px;">Rent</div>
+                            <div class="lease" style="width:50px;border-left:1px solid #E3DFDF">TI</div>
+                          </div>
+                          <div class="note" style="width:155px">Note</div>
+                          <div class="note" style="width:80px">Attachments</div>
+                          <div class="actions" style="width:63px;">Actions </div>
+                        </div>
+
+
+                        <%if @property_lease_suites_negotiated.present?%>
+                          <%sum = sum1 = 0%>
+                          <% @property_lease_suites_negotiated.each_with_index do |property_lease_suite, i|%>
+                            <% tenant = property_lease_suite.tenant%>
+                            <% lease = property_lease_suite.lease%>
+                            <%suite_details = Suite.suites(property_lease_suite) %>
+                            <%total_rentable_sqft = 0 %>
+                            <div class="tbl-row <%= cycle("pipeline-odd", "pipeline-even") %>" style="margin:0;">
+                              <div class="suiteno" style="width:52px;word-wrap:break-word;">
+                                <%if suite_details && suite_details.present?%>
+                                  <% suite_details.each_with_index do |suite_detail,j|%>
+                                    <%comma2 = (j+1 != suite_details.count) ? ',' : ''%>
+                                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma2}"  :  raw("&nbsp;") %>
+                                    <% total_rentable_sqft = total_rentable_sqft + suite_detail.rentable_sqft.to_i unless suite_detail.rentable_sqft.nil?%>
+                                  <%end%>
+                                <%else%>
+                                  <%= raw("&nbsp;")%>
+                                <%end%>
+                              </div>
+                              <%sum = sum + total_rentable_sqft%>
+      <%#sum1 = @negotiated_six_mnth.include?(lease) ? (sum1 + total_rentable_sqft) : sum1 %>
+                              <div class="suiteno" style="width:60px">
+                                <%if suite_details && suite_details.present?%>
+                                  <% suite_details.each_with_index do |suite_detail,k|%>
+                                    <%comma3 = (k+1 != suite_details.count) ? ',' : ''%>
+                                    <%= !suite_detail.status.nil? ? "#{suite_detail.status.capitalize}#{comma3}" : raw("&nbsp;") %>
+                                  <%end%>
+                                <%else%>
+                                  <%= raw("&nbsp;")%>
+                                <%end%>
+                              </div>
+
+                              <div class="sqft" style="width:55px"><%= total_rentable_sqft ? number_with_delimiter(total_rentable_sqft) : raw("&nbsp;") %></div>
+                              <div class="tenant2 version letextbox" title = '<%=tenant ? tenant.tenant_legal_name : raw("&nbsp;") %>' style="width:105px; padding:0 4px;word-wrap:break-word;"><%= tenant ? truncate(tenant.tenant_legal_name, :length=>43) : raw("&nbsp;") %></div>
+                              <div class="lease" style="width:50px;"><%= (lease && lease.commencement)  ? lease.commencement.strftime('%m/%d/%y') : raw("&nbsp;")%></div>
+                              <div class="lease" style="width:51px;">
+                                <%if lease.try(:mtm)%>
+                                  MTM
+                                <%else%>
+                                  <%= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%d/%y') : raw("&nbsp;")%>
+                                <%end%>
+                              </div>
+                              <div class="lease" title ="<%= (lease && lease.effective_rate)  ? sprintf("%.2f",lease.effective_rate) : raw("&nbsp;")%>" style="width:50px;"><%= (lease && lease.effective_rate)  ? truncate(sprintf("%.2f",lease.effective_rate),  :length=>7  ) : raw("&nbsp;")%></div>
+                              <div class="lease" title="<%= (lease && !tl_pipeline(lease).blank?) ? sprintf("%.2f",tl_pipeline(lease)) : raw("&nbsp;")%>" style="width:51px;"><%= (lease && !tl_pipeline(lease).blank?) ? truncate(sprintf("%.2f",tl_pipeline(lease)),  :length=>7) : raw("&nbsp;")%></div>
+
+                              <!-- <div class="note" style="width:100px">Options Stuff etc</div>-->
+                              <div class="note left" style="width:147px; padding:0 4px;word-wrap:break-word;<%unless @pdf%>height: 19px;<%end%>text-align: left;" title="<%= (lease && lease.note)  ? lease.note.content : raw("&nbsp;")%>">
+                                <%= (lease && !lease.note.nil? && lease.note.content.present?)  ? truncate(lease.note.content, :length=>58) : raw("&nbsp;") %>
+                              </div>
+                              <!--for approved lease attachment start-->
+                              <div class="note" style="width:72px; text-align:left; padding:4px; line-height:14px;height: 19px;">
+                                <%if property_lease_suite.class.column_names.include?("lease_id") %>
+        <%#suite_details = Suite.suites(property_lease_suite) %>
+        <%# suite_details.each_with_index do |suite_detail,l|%>
+                                  <%if lease.documents.present?%>
+                                    <%lease_static_var= 0%>
+
+                                    <%lease.documents.each_with_index do |lease_doc,l|%>
+                                      <%lease_static_var=lease_static_var+1%>
+                                      <%if lease_static_var == 1 || lease_static_var == 2 || lease_static_var == 3 || lease_static_var == 4%><a href="<%=download_doc_path(lease_doc.id)%>" title="<%=lease_doc.filename%>"><%=truncate(lease_doc.filename,:length=>13)%></a><%end%>
+                                    <%end%>
+                                  <%else%>
+                                    <%unless @pdf%>
+                                      <%= form_for suite_collection,:url=>{:controller=>"lease",:action=>"update_suite_and_lease", :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id}, :html=>{:target => "attach_form",:multipart=>true,:id=>"negotiated_form_#{property_lease_suite.id}"} do |pipe_file| -%>
+                                        <div class="attach-outer">
+                                          <input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="add_file_suite_each<%=i%>"  />
+                                          <input type='file' name='pipeline_file_upload' class="hidden-input-file" id='suitefilefield_<%=property_lease_suite.id%>' size="1" onchange='attachment_pipeline_negotiated(<%=i%>,<%=property_lease_suite.id%>);document.forms.negotiated_form_<%=property_lease_suite.id%>.submit();'/>
+                                          <input type="hidden" id = "lease_id" name="lease_id" value ="<%=lease.id%>" />
+                                          <%if params[:initiate].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:initiate]%>" /><%end%>
+                                          <input type="hidden" id = "per_page" name="per_page" value ="25" />
+                                          <input type="hidden" id = "propleasesuite" name="propleasesuite" value ="true" />
+                                          <input type="hidden" id = "suiteid" name="suiteid" value ="<%=property_lease_suite.id%>" />
+                                        </div>
+                                      <%end%>
+                                    <%end%>
+                                  <%end%>
+        <%#end%>
+                                <%else%>
+                                  <%if property_lease_suite.document.present?%>
+                                    <a href="<%=download_doc_path(property_lease_suite.document.id)%>" title="<%=property_lease_suite.document.filename%>"><%=truncate(property_lease_suite.document.filename,:length=>13)%></a>
+                                  <%else%>
+                                    <%unless @pdf%>
+                                      <%= form_for suite_collection,:url=>{:controller=>"lease",:action=>"update_suite_and_lease", :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id}, :html=>{:target => "attach_form",:multipart=>true,:id=>"negotiated_form_#{property_lease_suite.id}"} do |pipe_attach_file| -%>
+                                        <div class="attach-outer">
+                                          <input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="add_file_suite_each<%=i%>"  />
+                                          <input type='file' name='pipeline_file_upload' class="hidden-input-file" id='suitefilefield_<%=property_lease_suite.id%>' size="1" onchange='document.forms.negotiated_form_<%=property_lease_suite.id%>.submit();'/>
+                                          <input type="hidden" id = "suiteid" name="suiteid" value ="<%=property_lease_suite.id%>" />
+                                          <%if params[:initiate].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:initiate]%>" /><%end%><input type="hidden" id = "per_page" name="per_page" value ="25" />
+                                          <input type="hidden" id = "propleasesuite" name="propleasesuite" value ="false" />
+                                        </div>
+                                      <%end%>
+                                    <%end%>
+                                  <%end%>
+                                <%end%>
+                              </div>
+                              <!--for approved lease attachment end-->
+                              <%unless @pdf%>
+                                <div class="actions" style="width:60px; margin-left: 3px;">
+                                  <div class="folderlabel">
+                                    <!--
+                                                                                                            <a href="javascript:;" onclick="if(confirm('Are you sure you want to mark this lease as executed  ?')){mark_as_executed(<%#= lease.id %>,<%#=portfolio_collection.id%>,<%#=note_collection.id%>,'negotiated_suite','execute');} return false;" style="padding:0">
+                                    -->
+
+                                    <a href="" onclick="load_writter();show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'nego_pipeline','pipeline');load_completer();return false;">
+
+                                      <div class="folderlabelcol" style="padding:4px; width:38px;">Proposal</div>
+                                    </a>
+                                    <img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                                  <div class="clear"></div>
+                                  <%if !@pdf%>
+                                    <div id="morebtn" onmouseover="document.getElementById('moreddmenu<%=i%>').style.visibility='visible'" onmouseout="document.getElementById('moreddmenu<%=i%>').style.visibility='hidden'">
+                                      <div class="folderlabel" style="margin-top:1px;"><a href="#" style="padding:0">
+                                          <div class="folderlabelcol" style="padding:4px 4px 4px 6px; width:43px; text-align:left">More&nbsp;&nbsp;&#9660;</div>
+                                        </a><img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                                      <span class="moreddmenu" id="moreddmenu<%=i%>" style="visibility:hidden; z-index:1000000;" onmouseover="this.style.visibility='visible'" onmouseout="this.style.visibility='hidden'">
+                                        <%if !is_leasing_agent%><div class="labeldd1">
+                                          <%expiration = !lease.expiration.nil? ? lease.expiration : 'false'%>
+                                          <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+                                          <%if expiration!= 'false' && commencement != 'false'%>
+                                            <%vars =  expiration < Date.today ? 'status_inactive' : 'execute' %>
+                                          <%else%>
+                                            <%vars = 'false'%>
+                                          <%end%>
+                                          <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false'%>
+                                          <a href="javascript:;" onclick="if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=total_rentable_sqft > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=note_collection.id%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please go to the Proposal & fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}" >Mark as Executed</a>
+                                        </div><%end%>
+                                        <!-- Edit attachments link added in more options start-->
+                                        <div class="labeldd1">
+                                          <a href="javascript:;" onclick="if(open_text_box == 'true'){return false;}else{ click_more='true';  show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'nego_pipeline','pipeline');}"> Edit Attachments </a>
+                                        </div>
+                                        <!-- Edit attachments link added in more options end-->
+                                        <!--
+                                                                                                                              <div class="labeldd1">
+                                                                                                                              <a href="javascript:;" onclick="if(confirm('Are you sure you want to mark the lease as inactive and archive it?')){mark_as_executed(<%#= lease.id %>,<%#=portfolio_collection.id%>,<%#=note_collection.id%>,'negotiated_suite','archieve');} return false;" >Mark as Archive</a>
+                                                                                                                              </div>
+                                        -->
+                                      <%if !is_leasing_agent%>  <div class="labeldd1 noborder">
+                                           <a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this lease permanently?')){delete_lease(<%= lease.id %>,<%= note_collection.id %>,<%= portfolio_collection.id %>,'negotiated_suite');} return false;" >Delete Permanently</a>
+                                        </div><%end%>
+                                      </span>
+                                      <div class="clear"></div>
+                                    </div>
+                                  <%end%>
+                                </div>
+                              <%end%>
+
+                            </div>
+
+                          <%end%>
+                        <%end%>
+
+                      </div>
+                    <%else%>
+                      <div class='no-data'> No Data To Display </div>
+                    <%end%>
+                  </div>
+
+                  <%if @property_lease_suites_negotiated.present? && !@pdf%>
+                    <div class="paginationcol" style="margin-left:600px;">
+                      <%= will_paginate  @property_lease_suites_negotiated, :inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'pipeline', :property_id=>note_collection.id,:per_page=>25,:page=>params[:initiate], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true,:nego=>'true',:intr=>'false'} %>
+                    </div>
+                  <%end%>
+
+                  <div id="InterestedProspects">
+                    <div id="prospectview" class="leadditem">
+                      <div class="lebredcoms" style="padding-bottom:0;">
+                        <div class="leall" style="margin:0;">
+                          <div class="lstextnamebox" style="<%if @pdf%>padding-right:0px;text-align:right !important<%else%>padding-right:19px;text-align:right !important<%end%>">View</div>
+                          <div class="daysdiv lsfileddeactive" style="<%if @pdf%>padding-right:15px;<%end%>">
+                            <script>
+                              portfolio_id = <%=portfolio_collection.id%>;
+                              property_id = <%=note_collection.id%>;
+                            </script>
+                            <%if @pdf%>
+                              <span style="width:87px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=(params[:selected_value] && params[:selected_value]!= "Active Leases") ? params[:selected_value] : 'Active Items'%></span>
+                            <%else%>
+                              <%=select_tag 'select', options_for_select({"Active Items" => "Active Items", "Inactive Items" => "Inactive Items"}, (params[:selected_value] && params[:selected_value]!= "Active Leases") ? params[:selected_value] : 'Active Items'), :style=>'width:89px;margin-left:-17px;margin-top:2px;', :onchange => 'onchange_handler(property_id,portfolio_id, this.value,"pipeline","property_pipeline");'%>
+                            <%end%>
+                          </div>
+                        </div>
+                        <div class="lebredcomsleft boldtxt" style="color:#000 !important; font-size:12px !important; line-height:20px;">Interested Prospects</div>
+                      </div>
+                    </div>
+                    <%if @pdf && !@property_lease_suites_interested.present?%>
+                      <div class='no-data'> No Data To Display </div>
+                    <%else%>
+                      <div  class="tbl_lease pipeline-tbl">
+                        <div class="tbl-head pipeline-head" style="height:43px;">
+                          <div class="suiteno" style="width:52px">Suite</div>
+                          <div class="suiteno" style="width:60px">Suite<br />
+                            Status</div>
+                          <div class="sqft" style="width:55px">Rentable SF</div>
+                          <div class="tenant" style="width:113px">Tenant</div>
+                          <div class="hoursbox2 lease" style="width:101px;">
+                            <div class="lease" style="border-bottom:1px solid #E3DFDF; width:99px; background:#4bacc6; margin-left:1px">Lease</div>
+                            <div class="lease" style="width:50px;">Start</div>
+                            <div class="lease" style="width:50px;border-left:1px solid #E3DFDF">End</div>
+                          </div>
+                          <div class="hoursbox2 psf" style="width:101px;">
+                            <div class="psf" style="border-bottom:1px solid #E3DFDF;width:100px; background:#4bacc6; margin-left:1px">psf </div>
+                            <div class="lease" style="width:50px;">Rent</div>
+                            <div class="lease" style="width:50px;border-left:1px solid #E3DFDF">TI</div>
+                          </div>
+                          <div class="note" style="width:155px">Note</div>
+                          <div class="note" style="width:80px">Attachments</div>
+                          <div class="actions" style="width:63px;">Actions </div>
+                        </div>
+
+                        <%= form_for suite_collection,:url=>{:controller=>"lease",:action=>"create_suite_and_lease", :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id}, :html=>{:target => "pipeline_page",:multipart=>true,:id=>"negotiated_form"} do |p| -%>
+                          <%unless @pdf%>
+                            <div class="tbl-row <%= cycle("pipeline-odd", "pipeline-even") %>" style="padding:7px 0 4px ; margin:0;" onclick ="if(open_text_box == 'true'){alert('Info : Please Click on Save or Cancel button');return false;}">
+                              <div class="suiteno" style="width:52px">
+
+                                <%=p.select :suite_no, options_for_select(@vacant_and_occupied_suites, ''), {:include_blank => true, :default => nil}, :style=>'width:44px;margin-left:3px;margin-top:1px;', :onchange => 'get_suite_rentable_sqft(this.value,property_id,portfolio_id);'%>
+
+                              </div>
+                              <div class="suiteno" style="width:60px" id ="suite_status_form_id">
+                                Vacant
+      <%#=p.text_field :status, :style=>"width:51px" %>
+      <%#=p.select 'status', options_for_select({"Vacant" => "Vacant", "Occupied" => "Occupied"}, 'Vacant'), {}, :style =>"width:55px;margin-left:3px;margin-top:1px;"%>
+                              </div>
+                              <div class="sqft" style="width:55px">
+                                <%=text_field_tag :rentable_sqft,'', :style=>"width:46px" %>
+                              </div>
+                              <div class="tenant" style="width:113px">
+                                <%=text_field_tag :tenant_legal_name, '', :style=>"width:104px" %>
+                              </div>
+                              <div class="lease" style="width:50px;">
+                                <%=text_field_tag :commencement , '', :style=>"width:41px;text-align:center", :value=>"mm/dd/yy", :class=>"datepicker1 date-pick",:onblur=>"custom_validation_for_date(jQuery('#commencement').val(),'','commencement')" %>
+                              </div>
+                              <div class="lease" style="width:51px;">
+                                <%=text_field_tag :expiration, '', :style=>"width:41px;text-align:center", :value=>"mm/dd/yy", :class=>"datepicker1 date-pick",:onblur=>"custom_validation_for_date(jQuery('#expiration').val(),'','expiration')"%>
+                              </div>
+                              <div class="lease" style="width:50px;">
+                                <%=text_field_tag :effective_rate, '', :style=>"width:41px;text-align:center", :value=>"" %>
+                              </div>
+                              <div class="lease" style="width:51px;">
+                                <input type="text" name= "ti" id= "ti_vals" style="width:41px; text-align:center" value=""/>
+      <%#=text_field_tag :effective_rate, '', :style=>"width:41px;text-align:center", :value=>"" %>
+                              </div>
+                              <div class="note" style="width:155px">
+                                <textarea name="notes"   style="width:146px;position:relative;" class="expand25-300" value = "" onclick="if(this.value == ''){this.value = ''}" onblur="if(this.value == ''){this.value = '';this.style.color='gray';}"></textarea>
+
+      <%#=text_field_tag :expiration, '', :style=>"width:91px"%>
+                              </div>
+
+                              <div style="width:72px; padding:4px" class="note">
+                                <div class="attach-outer">
+                                  <input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="add_files_suites"/>
+                                  <input type='file' name='pipeline_file_upload' class="hidden-input-file" id='suitefilefield' size="1" onchange="attach_intrested_pros();" />
+                                </div>
+                              </div>
+                              <div class="actions" style="width:60px;margin-left: 3px;">
+                                <%unless @pdf%>
+                                  <div class="folderlabel" style="margin-top:-1px;">
+                                    <a href="javascript:;" onclick="if(open_text_box != 'true') { if (Date.parse(jQuery('#expiration').val()) < Date.parse(jQuery('#commencement').val())) {alert('Lease start should be lesser than lease end');} else {var rent_val = jQuery('#rentable_sqft').val(); var eff_rent_val = jQuery('#effective_rate').val(); var ti_val = jQuery('#ti_vals').val(); if ((jQuery.trim(rent_val).length == 0 || (!isNaN(rent_val) && rent_val > 0)) && (jQuery.trim(eff_rent_val).length == 0 || (!isNaN(eff_rent_val) && eff_rent_val > 0)) && (jQuery.trim(ti_val).length == 0 || (!isNaN(ti_val) && ti_val > 0))) {load_writter();jQuery('#negotiated_form').submit(); load_completer();} else{alert('Rentable Sqft, Rent and TI should be a number and it should be greater than 0')}}}" style="padding:0"><div class="folderlabelcol" style="padding:4px; width:45px;">Add</div></a>
+                                    <img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                                <%end%>
+                                <div class="clear">
+                                </div>
+                              </div>
+                            </div>
+                          <%end%>
+                        <%end%>
+                        <%if @property_lease_suites_interested.present?%>
+                          <%sum2=0%>
+                          <% @property_lease_suites_interested.each_with_index do |property_lease_suite,j|%>
+
+                            <%= form_for suite_collection,:url=>{:controller=>"lease",:action=>"create_suite_and_lease", :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id}, :html=>{:target => "pipeline_page",:multipart=>true,:id=>"negotiated_form_index_#{j}"} do |p| -%>
+                              <%if property_lease_suite.class.column_names.include?("lease_id") %>
+                                <% tenant = property_lease_suite.tenant%>
+                                <% lease = property_lease_suite.lease%>
+                                <%suite_details = Suite.suites(property_lease_suite) %>
+                                <%total_rentable_sqft = 0 %>
+                                <div class="tbl-row <%= cycle("pipeline-odd", "pipeline-even") %>" id="dynamic_divs<%=j%>" style="padding:3px 0 4px; margin:0;" id="intersterted_row_<%=j%>" onclick="if(open_text_box != 'true' && click_approval == 'true'){click_approval = 'false'} else{ if(open_text_box == 'true'){click_attach = 'false'; click_file_name='false';} if(click_cancel=='true'){click_file_name='false'; click_attach='false';} if(click_file_name == 'true' || click_attach=='true' || click_abstract=='true' || click_approval=='true' || click_archeived=='true' || click_delete=='true') {if(click_file_name=='true'){click_file_name=='false'} else{return false;}} else{hide_other_rows('<%=j%>'); <%unless lease.is_detailed_view%> show_or_hide_text_boxes('<%=j%>')<%else%> if(open_text_box != 'true') { if(click_more!='true' && (click_archeived_inside!='true' && click_delete_inside!='true' && click_approval_inside!='true')){show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'inters_pipeline','pipeline');load_completer();} else{click_archeived_inside ='false'; click_delete_inside ='false';click_approval_inside ='false'; }return false;}<%end%> }}" title="<%unless lease.is_detailed_view%> Click to Edit <%else%> Go to Proposal to edit <%end%>">
+
+                                  <%suite_numbers= ""%>
+                                  <%if suite_details && suite_details.present?%>
+                                    <% suite_details.each_with_index do |suite_detail,m|%>
+                                      <%comma = (m+1 != suite_details.count) ? ',' : ''%>
+                                      <%suite_numbers += (!suite_detail.suite_no.nil?) ? "#{suite_detail.suite_no.strip}#{comma} "  :  raw("&nbsp;") %>
+                                      <% total_rentable_sqft = total_rentable_sqft + suite_detail.rentable_sqft.to_i unless suite_detail.rentable_sqft.nil?%>
+                                    <%end%>
+                                  <%else%><%suite_numbers = raw("&nbsp;")%>
+                                  <%end%>
+                                  <div class="suiteno" style="width:52px;word-wrap:break-word;" id = "suiteno<%=j%>" class="bluecolor" >
+                                    <span title= '<%= suite_numbers.present? ? suite_numbers : "" %>' id="disp_name_suite<%=j%>"><%=suite_numbers%></span>
+                                  </div>
+                                  <div class="suiteno" style="display:none;width:52px;" id="change_name_suite<%=j%>">
+
+                                    <!--
+                                                                                                      <input id="profile_edit_suite<%#=j%>" type="text" value="<%#= suite_numbers.present? ? suite_numbers : "" %>" name="suite_numbers" style="width:50px;" onblur = "get_suite_rentable_sqft_index(this.value,<%#=note_collection.id%>,<%#=portfolio_collection.id%>,<%#=j%>);" />
+                                    -->
+																		<%= select_tag "profile_edit_suite#{j}", options_for_select([''] + @vacant_and_occupied_suites, suite_numbers.strip != "&nbsp;" ? suite_numbers.strip : ''), :style=>'width:44px;margin-left:3px;margin-top:1px;', :name=>'suite_numbers', :onchange => 'get_suite_rentable_sqft_index(this.value,property_id,portfolio_id,this.id.substring(this.id.length - 1, this.id.length));' %>
+
+
+          <%#=select_tag 'select', options_for_select({"Active Items" => "Active Items", "Inactive Items" => "Inactive Items"}, params[:selected_value] ? params[:selected_value] : 'Active Items'), :style=>'width:89px;margin-left:-17px;margin-top:2px;', :onchange => 'onchange_handler(property_id,portfolio_id, this.value,"pipeline","property_pipeline");'%>
+
+
+                                  </div>
+
+
+          <%#sum2 = @interested_six_mnth.include?(lease) ? (sum2 + total_rentable_sqft) : sum2 %>
+                                  <div class="suiteno" style="width:60px"  id="status_index<%=j%>">
+                                    <%if suite_details && suite_details.present?%>
+                                      <% suite_details.each_with_index do |suite_detail,n|%>
+                                        <%comma1 = (n+1 != suite_details.count) ? ',' : ''%>
+                                        <%= !suite_detail.status.nil? ? "#{suite_detail.status.capitalize}#{comma1}" : raw("&nbsp;") %>
+                                      <%end%>
+                                    <%else%>
+                                      <%= raw("&nbsp;")%>
+                                    <%end%>
+                                  </div>
+
+                                  <%unless suite_details.blank?%>
+                                    <div class="sqft" style="width:55px" id="rentable_sqft_index<%=j%>">
+                                      <%= (total_rentable_sqft && total_rentable_sqft!= 0) ? number_with_delimiter(total_rentable_sqft.to_i) : raw("&nbsp;") %>
+                                    </div>
+                                    <input type='hidden' value='<%= (total_rentable_sqft && total_rentable_sqft!= 0) ? total_rentable_sqft.to_i : "" %>' name='rentable_sqft' id="rentable_sqft_index_hidden<%=j%>">
+                                    <input type='hidden' value='<%=tenant ? tenant.id : ""%>' name='tenant_id'>
+                                  <%else%>
+                                    <input type='hidden' value='<%= lease.try(:basic_rentable_sqft).present? ?  lease.try(:basic_rentable_sqft).to_i : lease.try(:basic_rentable_sqft)%>' name='rentable_sqft' id="rentable_sqft_index_hidden<%=j%>">
+                                    <input type='hidden' value='<%=tenant ? tenant.id : ""%>' name='tenant_id'>
+                                    <div class="sqft" style="width:55px; height:20px;" class="bluecolor">
+                                      <span id="rentable_sqft_index<%=j%>" ><%= lease.try(:basic_rentable_sqft).present? ?  number_with_delimiter(lease.try(:basic_rentable_sqft).to_i) : lease.try(:basic_rentable_sqft)%></span>
+                                    </div>
+                                    <div class="sqft" style="display:none; width:55px" id="change_name_rent<%=j%>"><input id="profile_edit_rent<%=j%>" type="text" value="<%= lease.try(:basic_rentable_sqft).present? ?  number_with_delimiter(lease.try(:basic_rentable_sqft).to_i) : lease.try(:basic_rentable_sqft)%>" name="rent" style="width:50px;" onfocus= "note_id = '<%=note_collection.id%>';lease_id = '<%=lease ? lease.id : ""%>';tenant_id = '<%=tenant ? tenant.id : ""%>';suite_id = '';" /></div>
+                                  <%end%>
+                                <%else%>
+                                  <div class="suitenubrow2" style="padding:3px 0 4px; margin:0; width:780px;">
+                                    <%suite_id = property_lease_suite.id%>
+                                    <div class="suiteno"  id ="suiteno<%=j%>"  style="width:52px">
+                                      <%= !property_lease_suite.suite_no.nil? ? property_lease_suite.suite_no  :  raw("&nbsp;") %>
+                                    </div>
+
+                                    <div class="suiteno" style="width:60px">
+                                      <%= !property_lease_suite.status.nil? ? property_lease_suite.status.capitalize : raw("&nbsp;") %>
+                                    </div>
+
+                                    <div class="sqft" style="width:55px"><%= property_lease_suite ? number_with_delimiter(property_lease_suite.rentable_sqft.to_i) : raw("&nbsp;") %></div>
+                                  <%end%> <!-- if end -->
+                                  <script>
+                                    // m = [];
+            <%#suite_ids.each do |i|%>
+              //m.push('<%#=i%>');
+            <%#end%>
+                                  </script>
+
+                                  <div class="tenant2 version letextbox" style="width:105px; padding:0 4px;word-wrap:break-word;" id = "tenant_id<%=j%>" class="bluecolor">
+                                    <span title= '<%= tenant ? tenant.tenant_legal_name : "" %>' id="disp_name<%=j%>"><%= tenant ? truncate(tenant.tenant_legal_name, :length=>43) : "" %></span>
+                                  </div>
+                                  <div class="tenant" style="display:none; width:113px;height:19px;text-align:left; text-indent:5px" id="change_name<%=j%>"><input id="profile_edit<%=j%>" type="text" value="<%= tenant ? tenant.tenant_legal_name : "" %>" name="tenant_legal_name" style="width:104px;" /></div>
+                                  <div class="lease date_class bluecolor" style="width:50px;height: 20px;" id ="comm_id<%=j%>">
+                                    <span id="disp_name_com<%=j%>" ><%= (lease && lease.commencement)  ? lease.commencement.strftime('%m/%d/%y') : raw("&nbsp;")%></span>
+                                  </div>
+                                  <div class="lease" style="display:none; width:50px" id="change_name_com<%=j%>"><input id="profile_edit_com<%=j%>" type="text" value="<%= (lease && lease.commencement)  ? lease.commencement.strftime('%m/%d/%y') : 'mm/dd/yy'%>" name="commencement" style="width:41px;" onblur="if(custom_validation_for_date(jQuery('#profile_edit_com<%=j%>').val(),'','profile_edit_com<%=j%>')){if (jQuery.trim(jQuery('#tenant_id<%=j%>').children().html()).length == 0 ){alert('Please enter Tenant details first'); jQuery('div#comm_id<%=j%>').show();jQuery('#ui-datepicker-div').hide();jQuery('div#change_name_com<%=j%>').hide(); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;}}" onfocus= "note_id = '<%=note_collection.id%>';lease_id = '<%=lease ? lease.id : ""%>';tenant_id = '<%=tenant ? tenant.id : ""%>';suite_id = '<%=suite_id%>';" class="datepicker_class1 date-pick"/></div>
+
+                                  <%if lease.try(:mtm)%>
+                                    <div class="lease" style="width:51px;height: 20px;" class="bluecolor">
+                                      <span>MTM</span>
+                                    </div>
+                                  <%else%>
+                                    <div class="lease bluecolor date_class" style="width:51px;height: 20px;" id="exp_id<%=j%>">
+                                      <span id="disp_name_exp<%=j%>" ><%= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%d/%y') : raw("&nbsp;")%></span>
+                                    </div>
+                                    <div class="lease" style="display:none; width:50px" id="change_name_exp<%=j%>"><input id="profile_edit_exp<%=j%>" type="text" value="<%= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%d/%y') : 'mm/dd/yy'%>" name="expiration" style="width:41px;" onblur="if(custom_validation_for_date(jQuery('#profile_edit_exp<%=j%>').val(),'','profile_edit_exp<%=j%>')){if (jQuery.trim(jQuery('#tenant_id<%=j%>').children().html()).length == 0 ){alert('Please enter Tenant details first'); jQuery('div#exp_id<%=j%>').show();jQuery('#ui-datepicker-div').hide();jQuery('div#change_name_exp<%=j%>').hide(); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;}}" onfocus= "note_id = '<%=note_collection.id%>';lease_id = '<%=lease ? lease.id : ""%>';tenant_id = '<%=tenant ? tenant.id : ""%>';suite_id = '<%=suite_id%>';" class="datepicker_class1 date-pick" /></div>
+                                  <%end%>
+
+                                  <div class="lease" style="width:50px;height: 20px;" id= "eff_id<%=j%>" class="bluecolor">
+                                    <span id="disp_name_eff<%=j%>" title ='<%= (lease && lease.effective_rate)  ? sprintf("%.2f",lease.effective_rate) : raw("&nbsp;")%>'><%= (lease && lease.effective_rate)  ? truncate(sprintf("%.2f",lease.effective_rate),  :length=> 7 ) : raw("&nbsp;")%></span>
+                                  </div>
+                                  <div class="lease" style="display:none; width:50px" id="change_name_eff<%=j%>"><input id="profile_edit_eff<%=j%>" type="text" value="<%= (lease && lease.effective_rate)  ? sprintf("%.2f",lease.effective_rate) : ""%>" name="effective_rate" style="width:41px;" /></div>
+
+                                  <%unless (lease && lease.is_detailed_view == true)%>
+
+                                    <div class="lease" style="width:51px;" id= "ti_id<%=j%>" class="bluecolor">
+                                      <span id="disp_name_ti<%=j%>" title='<%= (lease && !tl_pipeline(lease).blank?) ? sprintf("%.2f",tl_pipeline(lease)) : raw("&nbsp;")%>'><%= (lease && !tl_pipeline(lease).blank?) ? truncate(sprintf("%.2f",tl_pipeline(lease)),  :length=>7) : raw("&nbsp;")%></span>
+                                    </div>
+                                    <div class="lease" style="display:none; width:51px" id="change_name_ti<%=j%>"><input id="profile_edit_ti<%=j%>" type="text" value="<%= (lease && !tl_pipeline(lease).blank?) ? sprintf("%.2f",tl_pipeline(lease)) : ""%>" name="ti" style="width:41px;" /></div>
+                                  <%else%>
+                                    <div class="lease" style="width:51px;"><%= (lease && !tl_pipeline(lease).blank?) ? sprintf("%.2f",tl_pipeline(lease)) : raw("&nbsp;")%></div>
+                                  <%end%>
+                                  <%if lease %>
+                                    <div class="note" style="width:147px; padding:0 4px; word-wrap:break-word;<%unless @pdf%>height: 19px;<%end%>text-align: left;" id ="note_id<%=j%>" class="bluecolor">
+                                      <span id="disp_name_note<%=j%>" title="<%= (lease && !lease.note.nil? && lease.note.content.present?)  ?  lease.note.content : raw("&nbsp;") %>"><%= (lease && !lease.note.nil? && lease.note.content.present?)  ? truncate(lease.note.content, :length=>58) : raw("&nbsp;") %></span>
+                                    </div>
+                                    <div class="note" style="display:none; width:155px;" id="change_name_note<%=j%>">
+                                      <textarea name="content" id="profile_edit_note<%=j%>" style="width:146px;position:relative;" class="expand20-300" value = "<%if lease && lease.note.present?%><%=lease.note.content %><%else%><%end%>" onclick="if(this.value == ''){this.value = ''}" onblur="if(this.value == ''){this.value = '';this.style.color='gray';}"><%if lease && lease.note.present?%><%=lease.note.content %><%else%><%end%></textarea>
+                                    </div>
+                                  <%else%>
+                                    <div class="note" style="width:155px;">
+                                      <%=raw("&nbsp;")%>
+                                    </div>
+                                  <%end%>
+                                  <!--for attach file for intrested prospects start-->
+                                  <div class="note" id ="attachments_name_id_<%=j%>" style="width:72px; text-align:left; padding:4px; line-height:14px;height: 19px;">
+                                    <!--<a href="#">&lt;file name&gt;</a>-->
+                                    <%if property_lease_suite.class.column_names.include?("lease_id") %>
+                                      <%if lease.documents.present?%>
+                                        <%intrested_prospect_var = 0%>
+                                        <%lease.documents.each_with_index do |lease_doc,o|%>
+                                          <%intrested_prospect_var = intrested_prospect_var + 1%>
+                                          <%if intrested_prospect_var == 1 || intrested_prospect_var == 2 || intrested_prospect_var == 3 || intrested_prospect_var == 4%>
+                                            <%unless lease.is_detailed_view%>
+																							<div class="attach-outer">
+
+																							<a href="<%=download_doc_path(lease_doc.id)%>" name="Browse3" class="btn-browse" value="<%=lease_doc.filename%>" title="<%=lease_doc.filename%>" id="attachment_name_<%=j%>" onclick="if(open_text_box == 'true'){click_file_name='true';} else{click_file_name='false';}"><%=truncate(lease_doc.filename,:length=>13)%></a>
+
+																								<!--<input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="suite_file_up<%#=j%>" onclick="if(open_text_box == 'true'){click_attach='true';} else{click_attach='false';}"/>-->
+																								<input type='file' name='pipeline_file_upload' class="hidden-input-file" id='suitefilefield_<%=property_lease_suite.id%>' size="1" onchange="attach_intrested_pros_filename_edit(<%=j%>,<%=property_lease_suite.id%>);" />
+																							</div>
+
+
+
+																					  <%else%>
+																							<a href="<%=download_doc_path(lease_doc.id)%>" title="<%=lease_doc.filename%>" id="attachment_name_<%=j%>" onclick="if(open_text_box == 'true'){click_file_name = 'false';} click_more='true'; show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'inters_pipeline','pipeline');"><%=truncate(lease_doc.filename,:length=>13)%></a>
+																					 <%end%>
+                                          <%end%>
+                                          <div class='suite_data_ups' id='pipeline_data_up<%=j%>' style="display:none;"><div style="overflow: hidden; width: 110px;"><input type="hidden" id = "suiteid" name="suiteid" value ="<%=property_lease_suite.id%>" />
+
+                                              <%if params[:page].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:page]%>" /><%end%><input type="hidden" id = "per_page" name="per_page" value ="25" />
+                                              <input type="hidden" id = "selected_value" name="selected_value" value ="<%=params[:selected_value] ? params[:selected_value] : 'Active Leases'%>" />
+                                              <input type="hidden" id = "lease_id" name="lease_id" value ="<%=lease.id%>" /><input type="hidden" id = "propleasesuite" name="propleasesuite" value ="true" /><input type="hidden" id = "suites_form" name="suites_form" value ="false" />
+                                              <!--<input type='file' name='pipeline_file_upload' id='suitefilefield_<%#=property_lease_suite.id%>' size="2" />--></div></div>
+                                          <input type="hidden" name="document_id" value ="<%=lease_doc.id%>" />
+
+
+
+                                        <%end%><br />
+            <%#= link_to "More", :controller=>'lease', :action => 'update', :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id,:lease_id=>lease.id,:more_link_var=>'true',:form_txt=>'docs', :id =>"more_link_#{j}" %>
+
+
+                                      <%else%>
+                                        <%unless @pdf%>
+              <%#= form_for suite_collection,:url=>{:controller=>"lease",:action=>"update_suite_and_lease", :portfolio_id=>portfolio_collection.id,:property_id=>note_collection.id}, :html=>{:target => "attach_form_pipeline",:multipart=>true,:id=>"negotiated_form_#{property_lease_suite.id}"} do |pipe_attach_file| -%>
+																<%unless lease.is_detailed_view%>
+																		<div class="attach-outer">
+																			<input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="suite_file_up<%=j%>" onclick="if(open_text_box == 'true'){click_attach='true';} else{click_attach='false';}"/>
+																			<input type='file' name='pipeline_file_upload' class="hidden-input-file" id='suitefilefield_<%=property_lease_suite.id%>' size="1" onchange="attach_intrested_pros_edit(<%=j%>,<%=property_lease_suite.id%>);" />
+																		</div>
+																<%else%>
+																	<span><a href="javascript:;" id="suite_file_up"  onclick="if(open_text_box == 'true'){click_attach = 'false';} click_more='true'; show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'inters_pipeline','pipeline');">Attach File</a></span>
+																<%end%>
+
+
+
+
+                              <div class='suite_data_ups' id='pipeline_data_up<%=j%>' style="display:none;"><div style="overflow: hidden; width: 110px;"><input type="hidden" id = "suiteid" name="suiteid" value ="<%=property_lease_suite.id%>" />
+
+                                  <%if params[:page].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:page]%>" /><%end%><input type="hidden" id = "per_page" name="per_page" value ="25" />
+                                  <input type="hidden" id = "selected_value" name="selected_value" value ="<%=params[:selected_value] ? params[:selected_value] : 'Active Leases'%>" />
+                                  <input type="hidden" id = "lease_id" name="lease_id" value ="<%=lease.id%>" /><input type="hidden" id = "propleasesuite" name="propleasesuite" value ="true" /><input type="hidden" id = "suites_form" name="suites_form" value ="false" />
+                                 <!-- <input type='file' name='pipeline_file_upload' id='suitefilefield_<%#=property_lease_suite.id%>' size="2" />--></div></div>
+
+              <%#end%>
+                                        <%end%>
+                                      <%end%>
+          <%#end%>
+                                    <%else%>
+                                      <%if property_lease_suite.document.present?%>
+                                        <a href="<%=download_doc_path(property_lease_suite.document.id)%>" title="<%=property_lease_suite.document.filename%>"><%=truncate(property_lease_suite.document.filename,:length=>13)%></a>
+                                      <%else%>
+                                        <%if !lease.present?%>
+                                          <div id="add_file_pipeline_each<%=j%>"> <span><a href="javascript:;" id="suite_file_up"  onclick="click_attach='true'; if(open_text_box == 'true'){click_attach = 'false';} else{alert('Please enter Tenant details'); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;}">Attach File</a></span></div>
+                                        <%end%>
+                                      <%end%>
+                                    <%end%>
+                                  </div>
+                                  <!--for attach file for intrested prospects end-->
+                                  <div class="actions" style="width:60px;margin-left: 3px;">
+                                    <%if !@pdf %>
+
+                                      <div class="folderlabel" id="abs_button_<%=j%>">
+                                        <a href="javascript:;" onclick="click_abstract='true'; if(open_text_box == 'true'){click_abstract = 'false';} else{load_writter();show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'inters_pipeline','pipeline');load_completer();return false;}" style="padding:0">
+                                          <div class="folderlabelcol" style="padding:4px; width:45px;">Proposal</div>
+                                        </a>
+                                        <img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+
+
+                                      <div class="folderlabel" style="display:none;" id="save_button_<%=j%>">
+
+                                        <a href="javascript:;" onclick="if (Date.parse(jQuery('#profile_edit_exp<%=j%>').val()) < Date.parse(jQuery('#profile_edit_com<%=j%>').val())) {alert('Lease start should be lesser than lease end');} else {var rent_val = jQuery('#rentable_sqft_index_hidden<%=j%>').val(); if ((jQuery.trim(rent_val).length == 0) || !isNaN(rent_val) && rent_val > 0) {load_writter();jQuery('#negotiated_form_index_<%=j%>').submit(); load_completer();} else{alert('Rentable Sqft should be a number and it should be greater than 0')}}" style="padding:0">
+                                          <div class="folderlabelcol" style="padding:4px; width:45px;">Save</div>
+                                        </a>
+                                        <img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+
+
+
+                                      <div class="clear"></div>
+                                    <%end%>
+                                    <%unless @pdf%>
+                                      <div class="folderlabel"  style="display:none;" id="cancel_button_<%=j%>">
+                                        <a style="padding:0;" onclick="click_cancel='true';">
+                                          <div class="folderlabelcol" style="padding:4px; width:45px;">Cancel</div>
+                                        </a>
+                                        <img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+
+                                      <div id="morebtn_<%=j%>" onmouseover="document.getElementById('moreddmenus<%=j%>').style.visibility='visible'" onmouseout="document.getElementById('moreddmenus<%=j%>').style.visibility='hidden'">
+                                        <div class="folderlabel" style="margin-top:1px;"><a href="#" style="padding:0">
+                                            <div class="folderlabelcol" style="padding:4px 4px 4px 6px; width:43px; text-align:left">More&nbsp;&nbsp;&#9660;</div>
+                                          </a><img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                                        <span class="moreddmenu" id="moreddmenus<%=j%>" style="<%if is_leasing_agent%>top:54px;<%end%>visibility:hidden; z-index:1000000;" onmouseover="this.style.visibility='visible'" onmouseout="this.style.visibility='hidden'">
+
+                                          <%unless params[:selected_value] && params[:selected_value] == "Inactive Items"%>
+                                            <div class="labeldd1">
+                                              <a href="javascript:;" onclick="click_approval = 'true';if(open_text_box == 'true'){click_approval = 'false';} else{<%if lease%> if(jQuery.trim(jQuery('#disp_name_suite<%=j%>').html()).length!= 0)  { if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=note_collection.id%>,'interested_suite','approve');} else{click_approval = 'false'; click_approval_inside = 'true'; click_cancel='true';}} else {alert('Please Enter atleast 1 Suite.');} return false; <%else%> alert('Please enter Tenant details'); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;<%end%>}" >Mark for Approval</a>
+                                            </div>
+                                          <%end%>
+
+                                          <%if !@pdf%>
+
+                                            <%unless params[:selected_value] && params[:selected_value] == "Inactive Items"%>
+                                              <%if !is_leasing_agent%><div class="labeldd1">
+                                                <a href="javascript:;" onclick="click_archeived = 'true'; if(open_text_box == 'true'){click_archeived = 'false';} else{<%if lease%> if(confirm('Are you sure you want to mark the lease as inactive and archive it?')){mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=note_collection.id%>,'interested_suite','archieve');} else{click_archeived = 'false'; click_archeived_inside = 'true'; click_cancel='true';} return false; <%else%> alert('Please enter Tenant details'); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;<%end%>}" >Mark as Inactive</a>
+                                              </div> <%end%>
+                                            <%end%>
+                                            <!-- Edit attachments link added in more options start-->
+                                            <div class="labeldd1">
+                                              <a href="javascript:;" id="more_link_<%=j%>" onclick="if(open_text_box == 'true'){return false;}else{ click_more='true';  show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'inters_pipeline','pipeline');}"> Edit Attachments </a>
+                                            </div>
+                                            <!-- Edit attachments link added in more options end-->
+                                            <%if !is_leasing_agent%><div class="labeldd1 noborder">
+                                              <a href="javascript:;" onclick="click_delete = 'true'; if(open_text_box == 'true'){click_delete = 'false';} else{<%if lease%> if(confirm('Are you sure you want to delete this lease permanently?')){delete_lease(<%= lease.id %>,<%= note_collection.id %>,<%= portfolio_collection.id %>,'interested_suite', '<%=selected_value= params[:selected_value] ? params[:selected_value] : 'Active Leases'%>');} else{click_delete = 'false'; click_delete_inside = 'true'; click_cancel='true'; } return false; <%else%> alert('Please enter Tenant details'); jQuery('div#tenant_id<%=j%>').hide();jQuery('div#change_name<%=j%>').show();jQuery('div#change_name<%=j%> input[name]').focus();return false;<%end%>}" >Delete Permanently</a>
+                                            </div><%end%>
+                                          <%end%>
+                                        </span>
+                                        <div class="clear"></div>
+                                      </div>
+                                    <%end%>
+                                  </div>
+                                </div>
+                              <%end%>
+                            <%end%>
+
+                          <%end%>
+                        </div>
+                      </div>
+                    <%end%>
+
+
+                    <%if @property_lease_suites_interested.present? && !@pdf%>
+                      <div class="paginationcol" style="margin-left:600px;">
+                        <%= will_paginate  @property_lease_suites_interested, :inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'pipeline', :property_id=>note_collection.id,:per_page=>25,:page=>params[:page], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true,:intr=>'true',:nego=>'false'} %>
+                      </div>
+                    <%end%>
+                  </div>
+              </div>
+              </div>
+              <iframe id="pipeline_page" name="pipeline_page" style="display: none"></iframe>
+              <iframe id="attach_form" name="attach_form" style="display: none"></iframe>
+              <iframe id="attach_form_pipeline" name="attach_form_pipeline" style="display: none"></iframe>
+              <script>
+							jQuery("textarea[class*=expand]").TextAreaExpander();
+                asset_managers_and_collaborators_array = [];
+                active_call = 'property_pipeline'
+                image_active();
+
+                /*
+                      jQuery('#commencement').focus(function() {
+                  if (jQuery('#commencement').val() == "mm/dd/yy")
+                  {
+                    jQuery('#commencement').val('');
+                  }
+                });
+                jQuery('#expiration').focus(function() {
+                  if (jQuery('#expiration').val() == "mm/dd/yy")
+                  {
+                    jQuery('#expiration').val('');
+                  }
+                });
+                jQuery('#expiration').blur(function() {
+                  a= jQuery('#expiration').val();
+                  if (a!="")
+                  {jQuery('#expiration').val(a);}
+                  else
+                  {jQuery('#expiration').val('mm/dd/yy');}
+                });
+                jQuery('#commencement').blur(function() {
+                  b= jQuery('#commencement').val();
+                  if (b!="")
+                  {jQuery('#commencement').val(b);}
+                  else
+                  {jQuery('#commencement').val('mm/dd/yy');}
+                });
+                 */
+
+                //var tot_sqft = '<%=!sum.blank? ? number_with_delimiter(sum.to_i) : "0" %>';
+                //var tot_sqft_six_mnth = <%=sum1%> + <%=sum2%>
+                // if (tot_sqft == 0)
+                // {jQuery('#tot_sqft').html('0 SF');}
+                // else {jQuery('#tot_sqft').html(tot_sqft + ' SF');}
+                //jQuery('#tot_sqft_six_mnth').html(tot_sqft_six_mnth + ' SqFt');
+
+                jQuery(function() {
+                  jQuery( ".datepicker" ).datepicker();
+                });
+
+                page = '<%=params[:page].present? ? params[:page] : 1%>'
+
+                //	jQuery('.date_class').click(function() {
+                //	jQuery('.suitenubrow2').children().each(function(e){
+                //          jQuery(this).attr("onclick", '');
+                //         });
+                //});
+
+                jQuery('.datepicker_class').datepicker();
+                //  onSelect: function() {
+                //    var str = jQuery(this).attr('id');
+                //     str = str.substring(str.length - 1, str.length);
+                //   ajax_call_lease_suite_create_update(note_id,lease_id,tenant_id,suite_id,jQuery(this).val(),this.name,page,str);
+                //    return false;
+                //    }
+                // });
+
+                jQuery('#ui-datepicker-div').hide();
+
+                function yield_calender(type){
+                  Date.firstDayOfWeek = 0;
+                  Date.format = 'mm/dd/yyyy';
+                  jQuery(function()
+                  {
+                    jQuery('.date-pick').datePicker({createButton:false,clickInput:true});
+                    jQuery('#start-date').bind(
+                    'dpClosed',
+                    function(e, selectedDates)
+                    {
+                      var d = selectedDates[0];
+                      if ( d ) {
+                        d = new Date(d);
+                        jQuery('#end-date').dpSetStartDate(d.addDays(1).asString());
+                      }
+                    }
+                  );
+
+                  });
+              }
+
+
+              jQuery(function()
+              {
+                jQuery('.date-pick')
+                .datePicker({createButton:false})
+                .bind(
+                'click',
+                function()
+                {
+                  jQuery(this).dpDisplay();
+                  this.blur();
+                  return false;
+                }
+              );
+              });
+
+
+
+
+
+
+              yield_calender('true');
+
+              function sleep(msecs)
+              {
+                var start = new Date().getTime();
+                var cur = start
+                while(cur - start < msecs)
+                {
+                  cur = new Date().getTime();
+                }
+              }
+
+
+
+              </script>
+
+
+
+              <!--[if IE 7]>
+              <link rel="stylesheet" href="/stylesheets/DatePicker/input_datepicker.css">
+              <![endif]-->
+              <!--[if IE 8]>
+              <link rel="stylesheet" href="/stylesheets/DatePicker/input_datepicker.css">
+              <![endif]-->
+
+
+

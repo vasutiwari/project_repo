@@ -1,0 +1,193 @@
+<link href="/javascripts/tree_view_lib/jquery.treeview.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/default_swf.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<link href="/stylesheets/ampnew.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+  jQuery(document).ready(function(){
+    jQuery("#browser").treeview({
+      animated: "fast",
+      collapsed: true,
+      unique: true,
+      persist: "cookie",
+      toggle: function() {
+        window.console && console.log("%o was toggled", this);
+      }
+    });
+    load_completer();
+	  if (jQuery("#ul_test").height() > 400) {
+            jQuery("#ul_test").css({
+                "height": "300px",
+                "overflow-y": "auto"
+            })
+        }
+
+        jQuery("li").click(function(){
+
+            if (jQuery("#ul_test").height() > 400) {
+                jQuery("#ul_test").css({
+                    "height": "300px",
+                    "overflow-y": "auto"
+                })
+            }
+        })
+  });
+</script>
+<script type="text/javascript">
+  cl_url = "display_added_files"
+  <%if params[:deal_room] == 'true'%>
+    cl_url = "display_added_files?deal_room=true&add_file_deal=true"
+    <%end%>
+  //cl_id  = "<%#= @tmp_asset.id %>"
+  cl_port_id = "<%= @real_estate_property.portfolio_id %>"
+  cl_folder_id = "<%= params[:folder_id] %>"
+<% if @document %>cl_doc_id = "<%=@document.id%>"<%end%>
+<%if params[:from_portfolio_summary] == 'true'%>
+  cl_task_id = "from_portfolio_summary";
+<%else%>
+  cl_task_id='';
+<%end%>
+<% if params[:task_id] %> cl_task_id = "<%=params[:task_id] %>";<%end%>
+  cl_ajax = true;
+  return_path = '/tasks/';
+</script>
+<script type="text/javascript">
+  eval(tempFiles);
+	tempFiles = "";
+  jQuery(document).ready(function() {
+    jQuery("#tabs").tabs();
+  });
+  var a1 = jQuery('#browser').html();
+  a1 = a1.gsub('<ul>','').gsub('</ul>','').gsub(" ",'')
+  if(a1 == "" )
+  {
+    jQuery('#click_text').html('No files to select');
+    jQuery('#buttonwrapper').hide();
+  }
+</script>
+<div class="basicbodycontainer" style="height:auto;width:850px;">
+  <div class="headerow_coll1"><img src="/images/page_white_get.png" width="16" height="16" />Add files </div>
+  <div id="tabs">
+    <ul>
+      <li><span class="lightbox_activetab_lt"></span><a href="#fragment-2"><img src="/images/pc_icon.png"  border="0"/>From Local Computer</a><span class="lightbox_activetab_rt"></span></li>
+      <li><span class="lightbox_activetab_lt"></span><a href="#fragment-1"><img src="/images/lightbox_butt_icon.png"  border="0"/>From AMP</a><span class="lightbox_activetab_rt"></span></li>
+    </ul>
+ <% if @document %>
+      <div id="fragment-2">
+        <div class="lightbox_container2">
+          <div class="loan_contentwrapper">
+            <div class="lightbox_headerow">
+            </div>
+            <%= form_tag({:action => "single_file_upload_in_the_create_task",:controller => "tree_view",:swf_upload => "",:document_id => @document.id}, :multipart => true,:target => "upload_frame_task_add_files_using_tree2", :id => "upload_form5")  do %>
+              <div class="collab_lightbox_contentrow">
+                <div class="add_users_contentrow">
+                  <div class="add_users_headercol margin_updown">Click on Browse to select a file from your Local Computer</div>
+                  <div class="add_users_headercol bottompadding">
+                    <input type="file" name="file" id="fileUpAddFiles" onchange="if(find_file_already_added_in_addFiles()){disable_control();document.forms.upload_form5.submit();load_writter();}"/>
+                  </div>
+                </div>
+              </div>
+             <input type='hidden' value="<%=params[:from_portfolio_summary]%>" id='from_portfolio_summary' name='from_portfolio_summary'/>
+              <input type="hidden" name="document_id" id="document_id" value="<%=@document.id%>"/>
+              <div id="upload_files_list">
+                <input type="hidden" name="already_upload_file" id="already_upload_file" value=""/>
+              </div>
+              <div id='all_uploaded_files_list'> 	<input type="hidden" name="all_already_upload_file" id="all_already_upload_file" value="<%=params[:already_uploaded]%>" />  </div>
+              <div id='all_tree_selected_file'> 	<input type="hidden" name="all_tree_structure_file" id="all_tree_structure_file" value="<%=params[:tree_structure_list]%>" />  </div>
+              <input type="hidden" name = "recently_added_files_by_tree" value="<%= params[:recently_added_files_by_tree].blank? ? '' : params[:recently_added_files_by_tree]%>" id="recently_added_files_by_tree" />
+            <%end%>
+            <iframe id="upload_frame_task_add_files_using_tree2" name="upload_frame_task_add_files_using_tree2" style="display: none"></iframe>
+            <div class="collab_lightbox_contentrow" id="upload_file" style="display:none">
+              <div class="add_users_contentrow">
+                <div class="add_users_headercol">Selected files to upload</div>
+                <div class="addfiles_subrow" id="single_file_upload_list">
+               </div>
+              </div>
+            </div>
+          </div>
+          <div class="butwrapper">
+            <div class="greenbutton" style="margin-left:250px"><a href="javascript:;" onclick='tempFiles="";add_file_single_file_upload(); return false;'>Upload</a><span>&nbsp;</span></div>
+            <div class="graybutton"><a href="javascript:;" onclick='Control.Modal.close();load_completer();return false;' style="cursor: pointer;" >Cancel</a><span>&nbsp;</span></div>
+          </div>
+          <div class="bot"></div>
+        </div>
+      </div>
+    <%else%>
+      <div id="fragment-2">
+        <div class="lightbox_container2">
+          <div class="loan_contentwrapper">
+            <div class="lightbox_headerow">
+            </div>
+            <%= form_tag({:action => "single_file_upload_in_the_create_task",:controller => "tree_view",:swf_upload => "",:folder_id => params[:folder_id],:task_id =>params[:task_id]}, :multipart => true, :target => "upload_frame_task_add_files_using_tree3", :id => "upload_form6")  do %>
+              <div class="collab_lightbox_contentrow">
+                <div class="add_users_contentrow">
+                  <div class="add_users_headercol margin_updown">Click on Browse to select a file from your Local Computer</div>
+                  <div class="add_users_headercol bottompadding">
+                    <input type="file" name="file"  id="fileUpAddFiles" onchange="if(find_file_already_added_in_addFiles()){disable_control();document.forms.upload_form6.submit();load_writter();}"/>
+                  </div>
+                </div>
+              </div>
+              <div id="upload_files_list">
+                <input type="hidden" name="already_upload_file" id="already_upload_file" value=""/>
+              </div>
+             <input type='hidden' value="<%=params[:from_portfolio_summary]%>" id='from_portfolio_summary' name='from_portfolio_summary'/>
+              <input type='hidden' name='task_id' value='<%=params[:task_id]%>' id="task_id" />
+              <input type="hidden" name="folder_id" id="folder_id" value="<%=params[:folder_id]%>"/>
+              <div id='all_uploaded_files_list'> 	<input type="hidden" name="all_already_upload_file" id="all_already_upload_file" value="<%=params[:already_uploaded]%>" />  </div>
+              <div id='all_tree_selected_file'> 	<input type="hidden" name="all_tree_structure_file" id="all_tree_structure_file" value="<%=params[:tree_structure_list]%>" />  </div>
+              <input type="hidden" name = "recently_added_files_by_tree" value="<%= params[:recently_added_files_by_tree].blank? ? '' : params[:recently_added_files_by_tree]%>" id="recently_added_files_by_tree" />
+            <%end%>
+            <iframe id="upload_frame_task_add_files_using_tree3" name="upload_frame_task_add_files_using_tree3" style="display: none"></iframe>
+            <div class="collab_lightbox_contentrow" id="upload_file" style="display:none">
+              <div class="add_users_contentrow">
+                <div class="add_users_headercol">Selected files to upload</div>
+                <div class="addfiles_subrow" id="single_file_upload_list">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="butwrapper" >
+            <div class="greenbutton" style="margin-left:250px"><a href="javascript:;" onclick='add_file_single_file_upload_for_folder(); return false'>Upload</a><span>&nbsp;</span></div>
+            <div class="graybutton"><a href="javascript:;" onclick='Control.Modal.close();load_completer();return false;' style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+          </div>
+          <div class="bot"></div>
+        </div>
+      </div>
+    <%end%>
+    <div id="fragment-1">
+      <div class="lightbox_container2">
+        <div class="loan_contentwrapper">
+          <div class="lightbox_headerow">
+          </div>
+          <div class="lightbox_contentrow" style="overflow: auto; width: 659px; padding-left: 50px;">
+            <%= form_tag({:action => "add_file_using_treeview",:controller => "tree_view",:treeview => "",:deal_room=>params[:deal_room],:add_file_deal=>'true'}, :target => "upload_frame_task_add_files_using_tree", :id => "upload_form4")  do %>
+              <div class="add_files_headercol" id='click_text' style='width:356px;'>Click on a file to select</div>		<br/><br/><br/>
+              <div id="ul_test"><%=raw(@tree_structure.join(" "))%></div>
+              <input type='hidden' value='' id='add_doc_id' name='add_doc_id'/>
+              <input type='hidden' value="<%=params[:from_portfolio_summary]%>" id='from_portfolio_summary' name='from_portfolio_summary'/>
+              <div id='all_uploaded_files_list'> 	<input type="hidden" name="all_already_upload" id="all_already_upload_file1" value="<%=params[:already_uploaded]%>" />  </div>
+              <div id='all_tree_selected_file'> 	<input type="hidden" name="all_tree_structure" id="all_tree_structure_file1" value="<%=params[:tree_structure_list]%>" />  </div>
+              <input type="hidden" name = "recently_added_files_by_tree" value="<%= params[:recently_added_files_by_tree].blank? ? '' : params[:recently_added_files_by_tree]%>" id="recently_added_files_by_tree" />
+              <input type='hidden' value='<%= params[:folder_id] %>' id='folder_id' name='folder_id'/>
+              <input type='hidden' value='<%= @real_estate_property.portfolio_id %>' id='pid' name='pid'/>
+              <% if @document%><input type='hidden' value='<%=@document.id%>' id='doc_id' name='doc_id'/><%end%>
+              <input type='hidden' name='task_id' value='<%=params[:task_id]%>' id="task_id" />
+            <%end%>
+          </div>
+          <iframe id="upload_frame_task_add_files_using_tree" name="upload_frame_task_add_files_using_tree" style="display: none"></iframe>	 </div>
+        <div class="butwrapper" id='buttonwrapper'>
+          <div class="greenbutton" style="margin-left:250px"><a href="javascript:;" onclick="add_file_single_file_upload_for_folder_for_tree(); return false">Upload</a><span>&nbsp;</span></div>
+          <div class="graybutton"><a href="javascript:;" onclick='Control.Modal.close();load_completer();return false;' style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+        </div>
+        <div class="bot"></div>
+      </div>
+    </div>
+  </div>
+  <a id="sbox-btn-close" onclick='Control.Modal.close();load_completer();return false;' style="cursor: pointer;"></a>
+</div>
+<script>
+<%if params[:missing_files_list]%>
+    jQuery('#advanced_style').hide();
+    jQuery('#basic_style').show();
+<%end%>
+Control.Modal.current.position();
+</script>

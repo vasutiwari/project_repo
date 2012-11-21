@@ -1,0 +1,104 @@
+	<%user_id=current_user.id%>
+ <%#if @users.present?%>
+  <div class="box-1col">
+    <div class="clearfloat"></div>
+    <div class="box-title fltLeft"><span class="title">Users (<%=@users_count%>)</span></div>
+    <div class="fltrt"><a href="/client_admin/<%=user_id%>/users/new" class="button lightBlue"><span>Add User</span></a></div>
+    <div class="clearfloat"></div>
+   <!-- <div><a href="#" class="iconAdd"><span>Add Portfolio</span></a></div>-->
+    <div>&nbsp;</div>
+    	<table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+        	<thead >
+            	<tr class="fb-tr-head">
+            	<th class="bdr-lt-gry bdr-rt-wht" style="width:80px;">Name</th>
+                <th class="bdr-rt-wht" style="width:100px;">Email</th>
+                <th class="bdr-rt-wht" style="width:180px;">Access</th>
+                <th class="bdr-rt-wht" style="width:100px;">Portfolio Access</th>
+                <th class="bdr-rt-wht" style="width:90px;">Role</th>
+                <th class="bdr-rt-wht" style="width:50px;">Actions</th>
+                </tr>
+            </thead>
+						<%if @users.present?%>
+						<% @users && @users.each_with_index do |user,i|%>
+						<%class_name=(i%2==0)? "tablefbAlternate" : ""%>
+              <tbody>
+                <tr  class=<%=class_name%>>
+                	<td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry"><%=user.try(:name).present? ? user.try(:name) : "-"%></td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry"><%=user.try(:email).present? ? user.try(:email) : "-"%></td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry">
+										<%total,properties,properties_id=find_properties_client_user(user)%>
+										<%if properties.present?%>
+										<%properties && properties.compact.each_with_index do |property_name,k|%>
+										<!--<a href="/client_admin/<%#=user_id%>/properties/<%#=properties_id[k]%>/edit?sort=<%#= params[:sort] || 'Commercial' %>">--><%=property_name%><!--</a>--><%if properties.last != property_name%>,<%end%>
+										<%end%>
+										<%if total!=""%>
+										and
+											<%= link_to "#{total} more",{:controller=>"client_admin/users",:action=>"other_properties",:id=>"#{user.id}"}, :id=>"#{user.id}"%>
+							<script>new Control.Modal($("<%=user.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+										<%end%>
+										<%else%>
+										-
+										<%end%>
+										</td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry">
+										<%portfolios_total,portfolios,portfolios_id=find_user_portfolios(user)%>
+										<%if portfolios.present?%>
+										<%portfolios && portfolios.compact.each_with_index do |portfolios_name,j|%>
+										<a href="/client_admin/<%=user_id%>/portfolios/<%=portfolios_id[j]%>/edit"><%=portfolios_name%></a><%if portfolios.last != portfolios_name%>,<%end%>
+										<%end%>
+										<%if portfolios_total!=""%>
+										and
+										<%= link_to "#{portfolios_total} more",{:controller=>"client_admin/users",:action=>"other_portfolio",:id=>"#{user.id}"}, :id=>"#{user.id}+port"%>
+							<script>new Control.Modal($("<%=user.id%>+port"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+										<%end%>
+										<%else%>
+										-
+										<%end%>
+										</td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry"><%=user.try(:selected_role).present? ? user.try(:selected_role) : "-"%></td>
+                    <td align="center" class="bdr-rt-gry bdr-top-gry">
+                    	<a  class="loader_event" href="/client_admin/<%=user_id%>/users/<%=user.id%>/edit"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a>
+										<%= link_to image_tag("/images/iconDeleteActive.png", :alt=>"Delete",:border=>"0", :title=>'Delete'),client_admin_user_path(user_id,user.id),:method=>:delete,:confirm => 'Are you sure want to delete?' %>
+                    </td>
+               </tr>
+              </tbody>
+							<%end%>
+							<%else%>
+                <tbody><tr><td colspan="6"  style="text-align:center;">No Data To Display</td></tr></tbody>
+              <%end%>
+        </table>
+    <div class="clearfloat"></div>
+		<%if @users.present?%>
+				<div class="paginationcol" style="margin-left:800px;">
+						<%=will_paginate @users %>
+						</div>
+		<%end%>
+    </div>
+		<%#else%>
+		<!--
+		  <div class="box-1col">
+			<div class="nopropertyDiv">
+    	<p><span class="iconNotificaton">No user is available.</span> </p>
+		<p>Please contact your client admin <code><a href="mailto:admin@theam.com">&lt;admin email as link&gt;</a></code> to request access.</p>
+        </div>
+    <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+		</div> -->
+		<%#end%>
+
+<script>
+<%if params[:page].nil? && (params[:add_user].eql?('true') || params[:edit_user].eql?('true'))%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['406']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['client_admin']['111']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+
+</script>

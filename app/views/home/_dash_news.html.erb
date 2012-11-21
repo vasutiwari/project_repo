@@ -1,0 +1,232 @@
+		<script type="text/javascript">
+					/*
+					*  How to load a feed via the Feeds API.
+					*/
+				google.load("feeds", "1");
+				String.prototype.truncate = function(length) {
+					 if (this.length > length) {
+						return this.slice(0, length - 3) + "...";
+					} else {
+						return this;
+					}
+				};
+				// Our callback function, for when a feed is loaded.
+				function feedLoaded(result) {
+					if (!result.error) {
+						// Grab the container we will put the results into
+						var div_content = $('#content').get();
+						$(div_content).empty()
+						// Loop through the feeds, putting the titles onto the page.
+						// Check out the result object for a list of properties returned in each entry.
+						// http://code.google.com/apis/ajaxfeeds/documentation/reference.html#JSON
+						for (var i = 0; i < result.feed.entries.length; i++) {
+							var entry = result.feed.entries[i];
+							var myString = entry.link;
+							s=myString.substr(myString.length - 1);
+							if (s=="/"){
+							entry.link=myString.substring(0, myString.length - 1)
+							}
+							if(entry.link.split("/")[2] == "www.cpexecutive.com"){
+								a= '<div class="newsmainbox1" style="margin-top:8px;"><div class="newsbodybox"> <div class="newsbodyboxleft"><img src="/images/newsboxleft.png" width="4" height="33" border="0"/></div><div class="newsbodyboxmid"><div class="newsboxheading"><a href="#" class = "news_link" title="'+entry.title+'" value = '+entry.link+'>' +entry.title.truncate(75) + '</a></div><div class="newsboxheading2">'+entry.publishedDate.substr(5,6)+'</div></div><div class="newsbodyboxright"><img src="/images/newsboxright.png" width="4" height="33" border="0"/></div> <div class="newsbodycontentbox"><div class="newsbodycontent"><div class="newsbodycontentimg">'+entry.content.truncate(1400)+'</div></div></div><div class="newscontentbot"><img src="/images/newscontentbotimg.png" width="686" height="4" border="0"/></div></div></div>';
+							}
+							else if (entry.link.split("/")[2] != "www.costar.com")
+												{
+							a= '<div class="newsmainbox1" style="margin-top:8px;"><div class="newsbodybox"> <div class="newsbodyboxleft"><img src="/images/newsboxleft.png" width="4" height="33" border="0"/></div><div class="newsbodyboxmid"><div class="newsboxheading"><a href="#" class = "news_link" title="'+entry.title+'" value = '+entry.link+'>' +entry.title.truncate(75) + '</a></div><div class="newsboxheading2">'+entry.publishedDate.substr(5,6)+'</div></div><div class="newsbodyboxright"><img src="/images/newsboxright.png" width="4" height="33" border="0"/></div> <div class="newsbodycontentbox"><div class="newsbodycontent"><div class="newsbodycontentimg">'+entry.content.truncate(1100)+'</div></div></div><div class="newscontentbot"><img src="/images/newscontentbotimg.png" width="686" height="4" border="0"/></div></div></div>';
+							}
+							else
+							{
+													a= '<div class="newsmainbox1" style="margin-top:8px;"><div class="newsbodybox"> <div class="newsbodyboxleft"><img src="/images/newsboxleft.png" width="4" height="33" border="0"/></div><div class="newsbodyboxmid"><div class="newsboxheading"><a href='+entry.link+' class = "news_link1" target="_blank" title="'+entry.title+'" value = '+entry.link+'>' +entry.title.truncate(75) + '</a></div><div class="newsboxheading2">'+entry.publishedDate.substr(5,6)+'</div></div><div class="newsbodyboxright"><img src="/images/newsboxright.png" width="4" height="33" border="0"/></div> <div class="newsbodycontentbox"><div class="newsbodycontent"><div class="newsbodycontentimg">'+entry.content.truncate(1100)+'</div></div><div class="newscontentbot"><img src="/images/newscontentbotimg.png" width="686" height="4" border="0"/></div></div></div>';
+							}
+
+							if (title_text == "National Real Estate Investor")
+							{
+							$(".newsbodycontentimg").find('img').hide();
+							}
+
+
+							$('.browse').hide();
+							$(a).appendTo(div_content);
+
+							if (entry.link.split("/")[2] != "www.costar.com")
+							{
+
+							if (entry.title == "Prosky on Healthcare Real Estate" || entry.link == "http://www.cpexecutive.com/property-types/seniors-housing/cpe-tv-mel-gamzons-seniors-report-1q11" || entry.link == "http://www.cpexecutive.com/multimedia/cperadio/dees-striblings-economy-watch-weekly-15" || entry.link == "http://www.cpexecutive.com/finance/cmbs/prudentials-rick-romano-on-reits-cmbs" || entry.link == "http://www.cpexecutive.com/regions/mid-atlantic/breaking-blackstone-purchases-36-shopping-malls-for-473m-from-equity-one")
+												 {
+
+												 }
+												 else
+												 {
+												 if  (entry.link.split("/")[2] == "www.multihousingnews.com")
+												 {
+
+												 }
+												 else if(entry.link.split("/")[2] == "blog.cushwake.com" || entry.link.split("/")[2] == "feedproxy.google.com")
+												 {
+
+												 }
+												 else
+												 {
+												 $('.newsbodycontentimg')[i].childNodes[0].innerHTML="";
+												 }
+												 }
+							}
+												 //~ if ($('.newsbodycontentimg')[i].childNodes.length >= 4)
+												 //~ {
+													//~ $('.newsbodycontentimg')[i].childNodes[4].innerHTML="";
+													 //~ }
+						}
+					}
+				}
+					//~ google.setOnLoadCallback(OnLoad);
+			</script>
+		<div class="bodywrapperrow2" style="padding-left:7px;">
+		<div class="bodywrappernews" style="padding-left:0px">
+			<div class="newsmain">
+				<div class="newsmaintop"><img src="/images/newsmaintop.png" width="936" height="10" boder="0"/></div>
+				<div class="newsmainmid">
+					<div class="newsmainleft">
+						<div class="newsbodybox2">
+							<div class="newsboxheading">News Feeds</div>
+						</div>
+						<div class="newsline"><img src="/images/newsline.png" width="212" height="1" /></div>
+						<div class="newstreebox">
+							<%google_parsing%>
+							<%-for  j in 1..@parent_title_count%>
+								<div class='one' id = "newstreetext_<%=j%>">
+									<div class="newstreetext">
+												<img class = "hide" src="/images/newsMultimg.png" width="11" height="11" border="0" style="margin-bottom:2px; cursor: pointer;"/><img class = "show_one" src="/images/newsplusMultimg1.png" width="11" height="11" border="0" style="display:none"/>
+												<img src="/images/newsfolder.png" width="16" height="13"  border="0" style="margin-top:4px;margin-right:10px;margin-left:-1px;  "/><a   class="tool_ti" style="margin-left:-2px" title="<%=@parent_title[j]["text"]%>"><%=truncate(@parent_title[j]["text"], :length=>17, :ommision=>"..")%></a>
+									</div>
+									<%v=@child[j]["children"]%>
+									<div class='ex1'>
+										<div class='ex' id='ex_<%=j%>'>
+											<%i=0%>
+											<%v.each do |sv|%>
+												<%i += 1%>
+												<%title=sv["title"]%>
+												<%xmlUrl=sv["xmlUrl"]%>
+												<%if !title.nil?%>
+													<div class="newsdeactive">
+														<div class="buttonleft"></div>
+														<div class="buttonmid" id="act<%=j%>" style="margin-left:-1px;"><div class="activeimgbutton"><img class = "ra1" src="/images/newsrssdeactive.png" width="12" height="12"  border="0"/></div><div class="activeimgbutton1" style= "display:none;margin-right:9px"><img class = "ra1" src="/images/newsrssactive.png" width="12" height="12"  border="0"/></div><a class="jk" href="#" title="<%=title%>" value= "<%= "#{xmlUrl}"%>")><%=truncate(title, :length=>20, :ommision=>"..")%></a>
+														</div>
+														<div class="buttonright"></div>
+													</div>
+												<%end%>
+											<%end%>
+										</div>
+									</div>
+								</div>
+							<%end%>
+						</div>
+					</div>
+					<div class="newsmainright">
+						<div class="newsmainname"><div class="test_text" align="center"><strong></strong></div></div>
+						 <div class="browse" style="display:none">Browsing outside AMP</div>
+						<div id='content'></div>
+					</div>
+				</div>
+			</div>
+			<div class="newsmainbot"><img src="/images/newsmainbot.png" width="936" height="12" /></div>
+		</div>
+		</div>
+
+		<script>
+			$(document).ready(function() {
+				var url = "<%=params[:dash_link]%>";
+				var newsid = "<%=params[:id]%>"
+				var div_content = document.getElementById("content");
+					$(div_content).empty()
+					a= '<iframe src= '+url+' width="700" height="1200" frameborder="0" style="margin-left:10px"></iframe>'
+					$('.browse').show();
+					$(a).appendTo(div_content);
+					if(newsid == 1 || newsid == 2){
+						$('#ex_5').children().first().attr('class','newsactive');
+						$('#act5').children().first().css('display','none');
+						$('#act5').children().first().next().css('display','block');
+					}
+					else if(newsid == 3 || newsid == 4){		
+						$('#ex_6').children().first().attr('class','newsactive');
+						$('#act6').children().first().css('display','none');
+						$('#act6').children().first().next().css('display','block');}
+					else if(newsid == 5 || newsid == 6){
+						$('#ex_6').children().first().next().attr('class','newsactive');
+						$('#act3').children().first().next().css('display','none');
+						$('#act3').children().first().next().next().css('display','block');
+					}
+					else if(newsid == 7 || newsid == 8){
+						$('#ex_6').children().first().next().attr('class','newsactive');
+						$('#act4').children().first().next().css('display','none');
+						$('#act4').children().first().next().next().css('display','block');
+					}
+			});
+		</script>
+
+	<script>
+		$(".hide").click(function(){
+			$(this).parent().next().toggle();
+		});
+
+		$(".show_one").click(function(){
+			$(this).parent().next().toggle();
+		});
+
+	$(".jk").click(function(){
+		title_text=$(this).attr('title');
+		$(".test_text").html("<b>" + title_text + "</b>");
+	});
+
+	$('.jk').click(function(){
+	$.each($.find(".activeimgbutton1"),function(index,value){
+	$(value).css('display','none');
+	});
+	$.each($.find(".activeimgbutton"),function(index,value){
+	$(value).css('display','block');
+	});
+	$(this).prev().prev().toggle();
+	$(this).prev().toggle();
+	$.each($.find(".newsactive"),function(index,value){
+	$(value).attr('class','newsdeactive');
+	});
+	$(this).parent().parent().attr('class','newsactive')
+	});
+
+
+	$('.hide').click(function(){
+	$(this).next().show();
+	$(this).hide();
+	});
+
+	$('.show_one').click(function(){
+	$(this).prev().show();
+	$(this).hide();
+	});
+
+	/*
+	$(".tool_ti").click(function(){
+		$(this).parent().next().show();
+		$(this).prev().prev().prev().hide();
+		$(this).prev().prev().show();
+	});
+	*/
+
+		$(document).ready(function() {
+			$(".news_link").live("click", function(){
+				var url = $(this).attr("value");
+				var div_content = document.getElementById("content");
+					$(div_content).empty()
+					a= '<iframe src= '+url+' width="700" height="1200" frameborder="0" style="margin-left:10px"></iframe>'
+					$('.browse').show();
+					$(a).appendTo(div_content);
+			});
+		});
+	$('.jk').click(function(){
+		// Create a feed instance that will grab Digg's feed.
+		var val = $(this).attr("value");
+		var feed = new google.feeds.Feed(val);
+		feed.setNumEntries(100);
+		// Calling load sends the request off.  It requires a callback function.
+		feed.load(feedLoaded);
+	});
+
+	</script>

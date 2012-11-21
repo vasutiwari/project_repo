@@ -1,0 +1,474 @@
+<script type="text/javascript" src="/javascripts/swfupload.js"></script>
+<script type="text/javascript" src="/javascripts/fileprogress.js"></script>
+<script type="text/javascript" src="/javascripts/handlers.js"></script>
+<script type="text/javascript" src="/javascripts/swfupload.queue.js"></script>
+<%= javascript_include_tag "DatePicker/date" %>
+<%= javascript_include_tag "DatePicker/jquery.datePicker-2.1.2" %>
+<%= stylesheet_link_tag 'DatePicker/datePicker1' %>
+<link href="/stylesheets/default_swf.css" rel="stylesheet" type="text/css" />
+<script>
+
+<%  if !params[:open_folder].blank?  %>
+    show_hide_asset_docs1_real_estate(<%= params[:pid]%>,<%= params[:open_folder]%>,'hide_del');
+<% end %>
+</script>
+
+<script type="text/javascript">
+window.onunload = load_completer();
+  function flash_writter(msg){
+    jQuery('#success_msg').html(msg);
+    jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+    jQuery('#msg_writter').show();
+    msg_t = setTimeout('flash_completer();', 3000);
+  }
+          function load_writter(){
+            jQuery('#success_msg').html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif; '><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+            jQuery('#msg_writter').css('background','none');
+            jQuery('#msg_writter').show();
+          }
+
+        function load_completer() {
+          jQuery('#msg_writter').fadeOut(1000);
+        }
+  function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+  function rewritter(txt){ clearTimeout(msg_t); flash_writter(txt);}
+</script>
+
+
+<script type="text/javascript">
+window.onunload = load_completer();
+    AddedFiles = [];
+  var swfu = true;
+  reject_ajax = false;
+  call_drag_and_drop = false;
+  function load_swf(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref:'<%= request.env['HTTP_REFERER'] %>' <% if session[:wres_user] %><%= ', wres_user:true' %><%end%>},
+      file_size_limit : "150 MB",
+      // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadComplete,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function change_color(p){
+    /*if (p=="overview_tab"){
+      document.getElementById("overview_tab").style.color='#8D8D8D';
+      document.getElementById("datahub_tab").style.color='#0071BA';
+      active_call="overview"
+    }
+    else{
+      document.getElementById("datahub_tab").style.color='#8D8D8D';
+      document.getElementById("overview_tab").style.color='#0071BA';
+      active_call="datahub"
+    }*/
+    return false;
+  }
+
+  function load_swf_task(get_path,folder,user_id) {
+    var document_id = document.getElementById('document_id').value;
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"document_id":document_id},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTask,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function delect_selected_file(upload_type,upload_file_id,document_id,fname)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+    jQuery("#fileUpAddFiles").val(null);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+        var already_upload_file = document.getElementById('already_upload_file').value;
+    new Ajax.Request("/tasks/delect_task_file?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&document_id="+document_id+"&already_upload_file="+already_upload_file,{
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+    }
+
+  function roll_calender(sufix){
+    jQuery(function()
+    {
+      jQuery('.date-pick').datePicker({startDate:'01/01/2000'})
+      strt = '#start-date'+ sufix
+      etrt = '#end-date'+ sufix
+      jQuery(strt).bind(
+      'dpClosed',
+      function(e, selectedDates)
+      {
+        var d = selectedDates[0];
+        if (d) {
+          d = new Date(d);
+          jQuery(etrt).dpSetStartDate(d.addDays(1).asString());
+        }
+      }
+    );
+      jQuery(etrt).bind(
+      'dpClosed',
+      function(e, selectedDates)
+      {
+        var d = selectedDates[0];
+        if (d) {
+          d = new Date(d);
+          jQuery(strt).dpSetEndDate(d.addDays(-1).asString());
+        }
+      }
+    );
+    });
+  }
+
+  function submit_adv_dates() // this is for advanced due date setting
+  {
+    var ret = true;
+    jQuery('#err_info_date').html('');
+    jQuery('#frmAdvanced :input:text').each( function(){
+      if(this.value == '--not set--'){
+        jQuery('#err_info_date').html('Plese select the date before you submit.');
+        ret = false;
+        return false;
+      }
+    });
+    return ret;
+<%#*new Ajax.Request('/portfolios/save_dates', {asynchronous:true, evalScripts:true, method:'post', parameters:document.getElementById('frmAdvanced').serialize()});%>
+<%#*return false;%>
+  }
+
+
+
+<%if (controller.controller_name == 'shared_users' && controller.action_name == "index") || params[:list] == "shared_list"%>
+    if(document.getElementById('real_estate_block') != null)
+    {
+      document.getElementById('real_estate_block').style.display = "block";
+    }
+<%else%>
+    document.getElementById('real_estate_block').style.display = "none";
+<%end%>
+
+  function load_swf_task_form_folder(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"folder_id":folder},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTaskFolder,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function delect_selected_file_for_folder(upload_type,upload_file_id,task_id,fname)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+        jQuery("#fileUpAddFiles").val(null);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+    var already_upload_file = document.getElementById('already_upload_file').value;
+    new Ajax.Request("/tasks/delect_task_file_for_folder?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&task_id="+task_id+"&already_upload_file="+already_upload_file,{
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+  }
+
+     function delect_selected_file_main(upload_type,upload_file_id,document_id,fname)
+    {
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+			var already_upload_file = document.getElementById('all_already_upload_file').value;
+			var all_tree_structure_file = document.getElementById('all_tree_structure_file').value;
+			if(upload_type=='Document')
+				update_deleted_task_document_list(upload_file_id);
+			else
+				update_deleted_task_file_list(upload_file_id);
+    new Ajax.Request("/tasks/delect_task_file_for_main?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&document_id="+document_id+"&already_upload_file="+already_upload_file+"&all_tree_structure_file="+all_tree_structure_file,{
+      asynchronous:true,
+      evalScripts:true,
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      insertion:Insertion.Top
+    });
+    }
+
+    function delect_selected_file_main_for_folder(upload_type,upload_file_id,task_id,fname)
+    {
+			AddedFiles.splice(AddedFiles.indexOf(fname),1);
+			var already_upload_file = document.getElementById('all_already_upload_file').value;
+			var all_tree_structure_file = document.getElementById('all_tree_structure_file').value;
+			if(upload_type=='Document')
+				update_deleted_task_document_list(upload_file_id);
+			else
+				update_deleted_task_file_list(upload_file_id);
+			new Ajax.Request("/tasks/delect_task_file_for_main?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&task_id="+task_id+"&already_upload_file="+already_upload_file+"&all_tree_structure_file="+all_tree_structure_file,{
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+    }
+function update_deleted_task_file_list(id) {
+    deleted_task_files = jQuery('#deleted_task_files').val();
+    if(deleted_task_files=='')
+      deleted_task_files = deleted_task_files+String(id);
+    else
+      deleted_task_files = deleted_task_files+","+String(id);
+     jQuery('#deleted_task_files').val(deleted_task_files);
+ }
+function update_deleted_task_document_list(id) {
+    deleted_task_documents = jQuery('#deleted_task_documents').val();
+    if(deleted_task_documents=='')
+      deleted_task_documents = deleted_task_documents+String(id);
+    else
+      deleted_task_documents = deleted_task_documents+","+String(id);
+     jQuery('#deleted_task_documents').val(deleted_task_documents);
+}
+
+</script>
+
+<% #default_overtab = (controller.controller_name == 'shared_users' && (controller.action_name == 'index')) ? 'executivesubtab' : 'deactivesubtab' %>
+<% #default_settab = (controller.controller_name == 'collaboration_hub' && (controller.action_name == 'my_profile')) ? 'executivesubtab' : 'deactivesubtab' %>
+
+<div class="bodywrapperrow">
+  <div class="contentwrapper"><%j=1%>
+
+            <div class="profile_subheadwrapper">
+        <!--<div class="profile_subheadrow">
+          <div class="<%#=default_overtab%>" id="col_overview">
+            <div class="left"></div>
+            <div class="tabwrapper">
+              <div class="tabicon" style=" width:95px" id="col_overview_image"><a id="overview_tab" href="" onClick="show_collaboration_overview();change_color('overview_tab');return false;"><img src="/images/executive_icon2.png" width="31" height="25" border="0" /></a>&nbsp;</div>
+              <div class="tablabel"><a id="overview_tab" href="" onClick="show_collaboration_overview();change_color('overview_tab');return false;">Overview</a></div>
+            </div>
+            <div class="right"></div>
+          </div>
+          <div class="<%#=default_settab%>" id="col_setup">
+            <div class="left"></div>
+            <div class="tabwrapper">
+              <div class="tabicon" style="width:50px"  id="col_setup_image"><a href=""  onClick="show_collaboration_myprofile();return false;"><img src="/images/profile_icon.png" width="33" height="26" border="0" /></a>&nbsp;</div>
+              <div class="tablabel"><a href=""  onClick="show_collaboration_myprofile();return false;"> Profile</a></div>
+            </div>
+            <div class="right"></div>
+          </div>
+        </div>-->
+      </div>
+
+      <div id="notes" >
+        <!--<div id ="show_assets_list" >
+          <%#if params[:task_id].nil? %>
+            <%#= render :partial => '/partials/shared_folders_docs',:locals=>{:j => j} %>
+          <%#else%>
+            <div style="padding-right: 134px;" class="rhs">
+              <div class="managenoterhsrow1">
+              </div>
+            </div>-->
+
+          <%#end%>
+      </div>
+
+   <!--   <div id="real_estate">
+        <div id ="show_assets_list2">
+          <div id="real_estate_block" style="display:block;">
+            <% #if params[:task_id].nil? %>
+              <%#= render :partial => '/properties/shared_folders_docs',:locals=>{:j => j} %>
+            <%#else%>
+            <%#end%>
+          </div>
+        </div>
+      </div>
+            -->
+
+    <div id = "overview">
+            <div class="collab_profile_mainrow">
+                <div class="collabscontentrow">
+                    <div id="portfolio_dropbox_view">
+                        <div id ="show_assets_list" class="collab_left">
+                            <%= render :partial => '/collaboration_hub/my_files_assets_list' %>
+                        <%= render :partial => '/collaboration_hub/collaboration_overview' %>
+                            </div>
+                    </div>
+                </div>
+         </div>
+    </div>
+
+
+
+
+
+    </div>
+</div>
+
+<script>
+window.onunload = load_completer();
+<%if !params[:task_id].nil? %>
+  <% if !@doc.nil? %>
+    <% if @doc.user_id == current_user.id %>
+      function link_to_view_task_function()
+      {
+        new Ajax.Request("<%=edit_task_tasks_path(:id=>@doc.id,:portfolio_id=>@doc.real_estate_property.portfolio.id,:folder_id=>@doc.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file], :from_assign_task=>@from_assign_task) %>",{
+          asynchronous:true,
+          evalScripts:true,
+					onLoading:function(request){
+						load_writter();
+					},
+					onComplete:function(request){
+						load_completer();
+					},
+           insertion:Insertion.Top
+        });
+      }
+			<% else %>
+      function link_to_view_task_function()
+      {
+        new Ajax.Request("<%=view_task_tasks_path(:id=>@doc.id,:portfolio_id=>@doc.real_estate_property.portfolio.id,:folder_id=>@doc.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file], :from_assign_task=>@from_assign_task)%>",{
+          asynchronous:true,
+          evalScripts:true,
+                    onLoading:function(request){
+                        load_writter();
+                    },
+                    onComplete:function(request){
+                        load_completer();
+                    },
+           insertion:Insertion.Top
+        });
+      }
+    <% end %>
+      window.onload = link_to_view_task_function;
+  <% elsif @task %>
+    <% if @task.user_id == current_user.id %>
+      function viewTaskWithoutDocument()
+      {
+        new Ajax.Request("<%=edit_task_tasks_path(:id=>@task.id, :portfolio_id=>@task.folder.portfolio_id, :folder_id=>@task.folder_id, :del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file], :store_task_id=>params[:task_id],:edit_task_for_folder => "true") %>",{
+          asynchronous:true,
+          evalScripts:true,
+					onLoading:function(request){
+						load_writter();
+					},
+					onComplete:function(request){
+						load_completer();
+					},
+           insertion:Insertion.Top
+        });
+      }
+			<% else %>
+      function viewTaskWithoutDocument()
+      {
+
+        new Ajax.Request("<%=view_task_tasks_path(:task_id=>@task.id, :portfolio_id=>@task.folder.portfolio_id, :folder_id=>@task.folder_id, :del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file], :store_task_id=>params[:task_id])%>",{
+          asynchronous:true,
+          evalScripts:true,
+                    onLoading:function(request){
+                        load_writter();
+                    },
+                    onComplete:function(request){
+                        load_completer();
+                    },
+          insertion:Insertion.Top
+        });
+      }
+    <% end %>
+      window.onload = viewTaskWithoutDocument;
+  <%else%>
+      flash_writter("The Task does not exist");
+  <% end %>
+<% end %>
+</script>
+<!-- seller portfolio panel end -->

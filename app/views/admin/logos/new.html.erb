@@ -1,0 +1,20 @@
+<% content_for :title, 'AMP - Logo settings' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  <div class="middlewrapper2">
+    <%= form_for @client, :url => {:controller=>:logos,:action => :create},:html=>{:multipart => true} do |client_form| %>
+       <%= render 'form', :client_form => client_form %>
+    <%end %>
+  </div>
+</div>
+<style type="text/css">
+  .myclass {
+    margin-top: 20px;
+  }
+
+</style>
+<script>
+  jQuery('#client_type_accounting_system_types').change(function() {jQuery('.chart_type').find('option').remove();jQuery('#client_type_accounting_system_types :selected').each(function(){jQuery('.chart_type').append(jQuery("<option></option>").attr("value",jQuery(this).val()).text(jQuery(this).text()));})});
+</script>

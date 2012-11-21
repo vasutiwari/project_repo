@@ -1,0 +1,189 @@
+<script>
+    term_option_count = 1;
+    rent_suite_count = 1;
+    rent_sch_count = 1;
+    rent_cpi_count = 1;
+    rent_other_rev_count = 1;
+    rent_per_count = 1;
+    rent_parking_count = 1;
+    rent_recovery_count = 1;
+    management_more = 'undefined';
+</script>
+
+<%pdf= @pdf
+a = @a
+pdf_convn_path= @pdf_convn_path
+property_lease_suites= @property_lease_suites %>
+<%unless pdf %>
+<%#=render :partial=>"lease/lease_sub_head",:locals=>{:portfolio_collection=>portfolio_collection} %>
+<%end %>
+<div class="rhs leaseModule" id = "lease_container">
+	
+		<div class="subheadwrapper">
+		<div class="clear"></div>
+		
+			<div class="suitemid marginTop20">
+				<div id="show_assets_list">
+						<h1 class="page-title">Management</h1>
+						<div class="clear">
+						</div>
+						<%if  !pdf && !note_collection.is_getting_started_closed %>
+						<%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>note_collection,:portfolio_collection=>portfolio_collection} %>
+						<%end %>
+						<!--Management header starts here-->
+						<div class="boxItems">
+								<div class="exblue-box">
+										<% total_sum = 0 %>
+										<%total_sqrft = 0 %>
+										<%if a.present? %>
+										<% a.each_with_index do |property_lease_suite_detail, i| %>
+										<%total_sqrft = 0 %>
+										<%suite_details = Suite.suites(property_lease_suite_detail) %>
+										<% suite_details.each_with_index do |suite_detail,j| %>
+										<%total_sqrft = total_sqrft  + (!suite_detail.rentable_sqft.nil? ? suite_detail.rentable_sqft : total_sqrft ) %>
+										<%end %>
+										<%total_sum = total_sum + total_sqrft %>
+										<%end %>
+										<%end %>
+										<%occupied_sqft_percent_calc(note_collection.id) %>
+										<%rent_sqft = @rent_sqft
+										occupied_percentage= @occupied_percentage
+										tenant_count= @tenant_count
+										find_lease_count= @find_lease_count
+										find_tmp_count= @find_tmp_count
+										lease_for_insurance_count= @lease_for_insurance_count
+										find_lease= @find_lease
+										lease_for_insurance= @lease_for_insurance
+										find_tmp= @find_tmp %>
+										<div class="section" style="width:180px">
+												<span class="head">Occupancy SF</span>
+												<span class="value"><%=rent_sqft %></span>
+										</div>
+										<div class="section" style="width:175px">
+												<span class="head">Occupancy</span>
+												<span class="value"><span class="vacancygrimg2 value-bar"><img width="1" height="14" style="width:<%=occupied_percentage%>%;" src="<%=pdf_convn_path%>/images/vacancygrbg.png" /><span class="value-current"><%=occupied_percentage %>%</span></span></span>
+										</div>
+										<div class="section" style="width:105px">
+												<span class="head">Tenants</span>
+												<span class="value"><%= tenant_count ? tenant_count : 0 %></span>
+										</div>
+										<div class="section" style="width:105px">
+												<span class="head">Insurance Alerts</span>
+												<span class="value"><a href="javascript:;" onclick='onchange_handler(<%=note_collection.id%>,<%=portfolio_collection.id%>, "Insurance Alerts","management","management");return false;'><%=lease_for_insurance_count ? lease_for_insurance_count : 0 %></a></span>
+										</div>
+										<div class="section" style="width:105px">
+												<span class="head">Upcoming TIs</span>
+												<span class="value"><a href="javascript:;" onclick='onchange_handler(<%=note_collection.id%>,<%=portfolio_collection.id%>, "Upcoming TIs","management","management");return false;'><%=find_tmp_count ? find_tmp_count : 0 %></a></span>
+										</div>
+										<div class="section noborder" style="width:105px">
+												<span class="head">Upcoming Leases</span>
+												<span class="value"><a href="javascript:;" onclick='onchange_handler(<%=note_collection.id%>,<%=portfolio_collection.id%>, "New Leases","management","management");return false;'><%=find_lease_count ? find_lease_count : 0 %></a></span>
+										</div>
+								</div>
+						</div>
+						<!--Management header ends here--><!--leadditem startss here-->
+						<div class="leadditem" style="padding:10px 0 5px;">
+								<%unless pdf %>
+								<div class="lebredcomsright">
+										<%unless pdf %>
+										<div class="folderlabel">
+												<a onclick="lease_pdfConv(true,'<%=note_collection.id%>','<%=portfolio_collection.id%>','management','<%=params[:selected_value]%>','<%=params[:search_lease]%>','<%=params[:search_txt]%>');return false;" href="javascript:;">
+														<div class="folderlabelcol">
+																Print PDF
+														</div>
+												</a>
+												<span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>
+										</div><%end %>
+								</div>
+								<div class="lebredcomsright" style="margin-right:5px;">
+										<div class="folderlabel">
+												<a href="" onclick="load_writter();set_call('mgmt_terms','<%=portfolio_collection.id%>','<%=note_collection.id%>');load_completer();return false;">
+														<div class="folderlabelcol">
+																Add Lease
+														</div>
+												</a>
+												<span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>
+										</div>
+								</div>
+								<div class="hoursbox2">
+										<div class="lsfileddeactive">
+												<input name="input14" type="text" style="width:260px; height:25px !important; line-height:25px !important;" class="lstextfield" id="lease_search_text" value="<%=params[:search_txt] && params[:search_txt] != '' ? params[:search_txt] : 'Enter Suite ID or Tenant Name or Option Type'%>" onblur="if (this.value == '') {this.value = 'Enter Suite ID or Tenant Name or Option Type';}" onfocus="if (this.value == 'Enter Suite ID or Tenant Name or Option Type') {this.value = '';}"/>
+										</div>
+										<div class="lebredcomsright" style="float:left">
+												<div class="folderlabel" style="margin-left:5px; padding-bottom:2px; ">
+														<a onclick="search_lease(<%=portfolio_collection.id%>,<%=note_collection.id%>);">
+																<div class="folderlabelcol">
+																		<img src="/images/search.png" width="10" height="10" border="0"/>&nbsp;Search
+																</div>
+														</a><span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>
+												</div>
+										</div>
+								</div><%end %>
+								<div class="lstextnamebox" style="<%if pdf%>padding-left:580px;<%else%>padding-left:83px;<%end%>padding-top:4px; text-align:right !important">
+										View
+								</div>
+								<div class="daysdiv lsfileddeactive" style="padding-bottom:3px;">
+										<script>
+																	portfolio_id = <%=portfolio_collection.id%>;
+																	property_id = <%=note_collection.id%>;
+
+										</script>
+										<%if pdf %>
+										<span style="width:87px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=params[:selected_value] != '' ? params[:selected_value] : 'Active Leases' %></span>
+										<%else %>
+										<%=select_tag 'select', options_for_select({"Active Leases" => "Active Leases", "Expired Leases" => "Inactive Leases","Upcoming Leases" => "New Leases","Insurance Alerts" => "Insurance Alerts","Upcoming TIs" => "Upcoming TIs"}, params[:selected_value] ? params[:selected_value] : 'Active Leases'), :style=>'width:98px;margin-left:-2px;margin-top:5px;', :onchange => 'onchange_handler(property_id,portfolio_id, this.value,"management","management");' %>
+										<%end %>
+								</div>
+						</div>
+						<!--leadditem ends here-->
+						<%if property_lease_suites.present? && params[:selected_value] != "New Leases" && params[:selected_value] != "Insurance Alerts" && params[:selected_value] != "Upcoming TIs" %>
+						<%= render "mgmt_prop_lease", :property_lease_suites => property_lease_suites, :portfolio_collection =>portfolio_collection,:note_collection => note_collection %>
+						<%elsif params[:selected_value] == "New Leases" && find_lease && find_lease_count > 0 %>
+						<%= render "mgmt_new_lease", :find_lease => find_lease, :portfolio_collection =>portfolio_collection,:note_collection => note_collection %>
+						<%elsif params[:selected_value] == "Insurance Alerts" && lease_for_insurance && lease_for_insurance_count > 0 %>
+						<%= render "mgmt_insurance_alerts",:lease_for_insurance => lease_for_insurance,:portfolio_collection =>portfolio_collection,:note_collection => note_collection %>
+						<%elsif params[:selected_value] == "Upcoming TIs" && find_tmp && find_tmp_count > 0 %>
+						<%= render "mgmt_upcoming_tis",:find_tmp => find_tmp,:portfolio_collection =>portfolio_collection,:note_collection => note_collection %>
+						<%else %>
+						<div class='no-data'>
+								No Data To Display
+						</div>
+						<%end %>
+						<%if property_lease_suites.present? && !pdf && params[:selected_value] != "New Leases" && params[:selected_value] != "Insurance Alerts" && params[:selected_value] != "Upcoming TIs" %>
+						<div class="paginationcol" style="margin-left:600px;">
+								<%= will_paginate  property_lease_suites, :inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'management', :property_id=>note_collection.id,:per_page=>25,:page=>params[:page], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true, :mgmt=>'true', :selected_value=>params[:selected_value] ? params[:selected_value] : 'Active Leases'} %>
+						</div>
+						<%elsif params[:selected_value] == "New Leases" && find_lease && find_lease_count > 0 && !pdf %>
+						<div class="paginationcol" style="margin-left:600px;">
+								<%= will_paginate  find_lease, :inner_window => 25, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'management', :property_id=>note_collection.id,:per_page=>1,:page=>params[:page], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true, :mgmt=>'true', :selected_value=>params[:selected_value] ? params[:selected_value] : 'Active Leases'} %>
+						</div>
+						<%elsif params[:selected_value] == "Insurance Alerts" && lease_for_insurance && lease_for_insurance_count > 0 && !pdf %>
+						<div class="paginationcol" style="margin-left:600px;">
+								<%= will_paginate  lease_for_insurance, :inner_window => 25, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'management', :property_id=>note_collection.id,:per_page=>1,:page=>params[:page], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true, :mgmt=>'true', :selected_value=>params[:selected_value] ? params[:selected_value] : 'Active Leases'} %>
+						</div>
+						<%elsif params[:selected_value] == "Upcoming TIs" && find_tmp && find_tmp_count > 0 && !pdf %>
+						<div class="paginationcol" style="margin-left:600px;">
+								<%= will_paginate  find_tmp, :inner_window => 25, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'management', :property_id=>note_collection.id,:per_page=>1,:page=>params[:page], :portfolio_id=>portfolio_collection.id,  :sort=>params[:sort],:from_pag=>true, :mgmt=>'true', :selected_value=>params[:selected_value] ? params[:selected_value] : 'Active Leases'} %>
+						</div>
+						<%end %>
+				</div>
+			</div>
+
+
+
+    </div>
+    <div class="clearfloat"></div>
+  </div>
+
+
+
+<iframe id="mgmt_attach_frame" name="mgmt_attach_frame" style="display: none">
+</iframe>
+<script>
+    //var totl_sqft = '<%#=!sum.blank? ? number_with_delimiter(sum.round) : "0" %>';
+    //jQuery('#totl_sqft').html(totl_sqft + ' SF');
+		
+
+		
+		
+</script>

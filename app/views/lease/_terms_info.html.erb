@@ -1,0 +1,73 @@
+<%master_display = terms_master_display(params[:property_id])%>
+<div class="lsrowwrapper">Info & Amendment</div>
+<div class="lssectionwrapper">
+  <div class="termsnamerow">
+    <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Type</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%if @pdf%>
+        <span style="width:78px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=info_form.object.info_type == "" ? '' : info_form.object.info_type %></span>
+      <%else%>
+        <%= info_form.select :info_type, options_for_select( Info::INFO_TYPE,info_form.object.info_type),{},html_options = {:class => "lsselect", :style=>"width:80px; text-align:left;"}%>
+      <%end%>
+    </div>
+    <div class="termsname" style="text-align: left; margin-left: 12px; width: 46px;">Category</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%if @pdf%>
+        <span style="width:78px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=info_form.object.category == "" ? '' : info_form.object.category %></span>
+      <%else%>
+        <%= info_form.select :category, options_for_select( Info::INFO_USE,info_form.object.category),{},html_options = {:class => "lsselect", :style=>"width:80px; text-align:left;"}%>
+      <%end%>
+    </div>
+    <div style="text-align: left; margin-left: 12px; width: 21px;" class="termsname">Use</div><div class="termsform" style="padding-left:10px;">
+      <%if @pdf%>
+        <%= info_form.text_field :use ,:type=>"text", :class=>"lstextfield", :style=>"width:75px"%>
+      <%else%>
+        <%= info_form.text_field :use ,:type=>"text", :class=>"lstextfield", :style=>"width:80px"%>
+      <%end%>
+    </div>
+    <div class="termsname" style="<%if @pdf%>text-align: left; width: 75px; margin-left: -6px;<%else%>text-align: left; width: 45px; margin-left: 12px;<%end%>">Lease ID</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%if @pdf%>
+        <%= info_form.text_field :lease_msg ,:type=>"text", :class=>"lstextfield", :style=>"width:75px"%>
+      <%else%>
+        <%= info_form.text_field :lease_msg ,:type=>"text", :class=>"lstextfield", :style=>"width:83px"%>
+      <%end%>
+    </div>
+    <div class="termsname" style="text-align: left; width: 33px; margin-left: 12px;">Status</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%if @pdf%>
+        <span style="width:78px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=info_form.object.renewal == "" ? '' : info_form.object.renewal %></span>
+      <%else%>
+        <%= info_form.select :renewal, options_for_select( Info::INFO_RENEWAL,info_form.object.renewal),{},html_options = {:class => "lsselect", :style=>"width:80px; text-align:left;"}%>
+      <%end%>
+    </div>
+  </div>
+  <div class="termsnamerow">
+    <div class="termsname namefirst" style="width:100px; text-align:left">Amendment</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%= info_form.text_field :amendments ,:type=>"text", :class=>"lstextfield", :style=>"width:638px;"%>
+    </div>
+  </div>
+  <div class="termsnamerow">
+    <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Master Lease</div>
+    <div class="termsform" style="padding-left:10px;">
+      <%=lease_form.select :parent_id,"<option value=''>None</option>".html_safe + terms_options_for_select(master_display,lease_form.object.parent_id),{:class => "lsselect", :style=>"width:80px; text-align:left;"}%>
+    </div>
+  </div>
+
+  <div class="termsnamerow" style="padding:5px 0;">
+    <%unless @pdf%>
+      <span id="info_note" class="version rentnamelinkrt">+ <a onclick="jQuery('#info_note').hide();jQuery('#NotesInfo').show();return false;" onmouseover="focusDivOver('NotesInfo')" onmouseout="focusDivOut('NotesInfo')" >Notes</a></span>
+    <%end%>
+    <div class="notesnamerow" id="NotesInfo" onmouseover="focusDivOver('NotesInfo')" onmouseout="focusDivOut('NotesInfo')" style="<%if @pdf && @lease.present? && @lease.tenant.present? && @lease.tenant.info.present? && @lease.tenant.info.note.present? && @lease.tenant.info.note.content.present?%>display:block;<%else%>display:none;<%end%>">
+      <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('Are you sure you want to delete?')){jQuery('#NotesInfo').hide();jQuery('#info_note').show();jQuery('#lease_property_lease_suite_attributes_tenant_attributes_info_attributes_note_attributes_content').val('');return false;}">X</span>Notes</div>
+      <div class="termsform" style="padding-left:0px;">
+        <%= info_form.fields_for :note do |note_form| %>
+          <%= note_form.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px", :value =>!note_form.object.content.nil? ?  note_form.object.content : '' %>
+        <%end%>
+      </div>
+    </div>
+  </div>
+
+</div>
+

@@ -1,0 +1,99 @@
+<script>
+  cur_email = '<%= current_user.email %>';
+  file=false;
+  folder=true;
+  jQuery(document).ready(function()
+  {
+
+    user_email_str="<%=get_emails_of_all_users_for_autocomplete%>";
+    user_emails=user_email_str.split("&lt;$&gt;");
+    jQuery("#collaborators_list").autocomplete(
+    {
+      width: 530,
+      delimiter: /(,)\s*/,
+      lookup: user_emails
+    });
+
+    jQuery('input:text#collaborators_list').bind(
+    {
+      focus: function()
+      {
+        if (jQuery(this).val()=='Type Email ID(s) Separated by Commas here')
+          jQuery(this).val('');
+      },
+      blur: function()
+      {
+        if (jQuery(this).val()=='')
+          jQuery(this).val('Type Email ID(s) Separated by Commas here');
+      }
+    })
+  });
+</script>
+<div id="sbox-window" style="padding:5px 5px 30px;" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <%= form_tag({:action => "new_folder",:folder_id => @folder.id,:pid=>@portfolio.id,:del_files=>params[:del_files],:deal_room => params[:deal_room]}, :target => "upload_frame", :id => "upload_form1")  do %>
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black;width:590px;overflow:hidden;padding-bottom:0px;" class="createfolder_container">
+      <div class="lightbox_headerow">
+        <div class="headerow_coll1"><img border="0" width="20" height="20" src="/images/collaboration_hub_new_floder.png"/> <%=title_display(params[:folder_id])%></div>
+      </div>
+      <div class="createfolder_contentrow">
+        <div class="createfolder_wrapper">
+          <div class="add_users_headercol">
+            <div class="createfolder_label" style = "width:80px">Folder Name:</div>
+            <input type="text" class="create_fieldinput" name="folder_name" id="folder_name" style= "width:470px;"/>
+            <%=hidden_field_tag :is_master, @folder.is_master %>
+            <%= raw('<input type=hidden value=true name=bulk_upload />') if params[:bulk_upload] %>
+            <span id="success_error_msg" style="font-size:12px;margin-left:215px;"></span>
+          </div>
+          <%folder_members = find_folder_member(@folder)%>
+          <% is_property_folder = (@folder.is_master.eql?(false) && @folder.parent_id==0) %>
+            <%# Bulk upload folders and it's sub folders are blocked from beeing shared %>
+            <%if  params[:bulk_upload] != 'true'%>
+            <%unless folder_members.empty? || is_property_folder %>
+              <div class="add_users_headercol">
+                <div class="createfolder_label">&nbsp;</div>
+                <div class="creatfolder2_label2">Collaborators inside "<%=@folder.name%>" can access this folder </div>
+              </div>
+            <%else%>
+              <div class="create_wrapper">
+                <input id ="create_folder_private" name="radiobutton" type="radio" value="radiobutton" onclick="jQuery('#collaborators_list').val('Type Email ID(s) Separated by Commas here');jQuery('#collaborators_list').parent('div.add_users_headercol').hide();"/>
+                Keep Private for now
+              </div>
+              <div class="create_wrapper2">
+                <input id ="create_folder_invite" name="radiobutton" type="radio" value="radiobutton" checked="checked" onclick="jQuery('#collaborators_list').parent('div.add_users_headercol').show();"/>
+                Invite People to Upload or Download files
+              </div>
+              <div class="add_users_headercol">
+                <input name="collaborators_list" type="text"  id="collaborators_list" class="create_fieldinput2" value="Type Email ID(s) Separated by Commas here" style="background:none;" />
+                <img src="/images/address_icon.png" style="margin: 6px 0pt 0pt -22px; cursor: default; z-index: 999999; position: absolute;" title="Add Email ID(s) to Collaborate"/>
+              </div>
+            <%end%>
+           <% end %>
+        </div>
+      </div>
+      <div class="createfolder_butwrapper">
+        <div style="margin-left: 200px;" class="greenbutton">
+          <a href="javascript:;" onclick="if(blank_folder_name('folder_name') && check_radio_private_status() && add_collab_list_if_parent_not_shared()) { jQuery('#upload_form1').submit(); }" id="fol_button">Create</a><span>&nbsp;</span>
+        </div>
+        <div class="graybutton"><a href="javascript:;" onclick="close_control_model();">Cancel</a><span>&nbsp;</span></div>
+      </div>
+      <div class="bot"></div>
+    <% end %>
+    <iframe id="upload_frame" name="upload_frame" style="display: none"></iframe>
+  </div>
+  <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+
+
+  <script>
+    cur_email = '<%= current_user.email %>';
+    property_collaborators_arr = [];
+    parent_collaborators_arr = [];
+    property_collaborators = '<%=find_property_folder_members(@folder).join(",") rescue '' %>';
+    parent_collaborators = '<%=find_parent_folder_members(@folder).join(",") rescue '' %>';
+    property_collaborators_arr = property_collaborators.split(',');
+    parent_collaborators_arr = parent_collaborators.split(',');
+    diff_arr = property_collaborators_arr.diff(parent_collaborators_arr);
+  </script>

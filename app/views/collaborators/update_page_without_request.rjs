@@ -1,0 +1,28 @@
+if(params[:action] == "share_folder"	|| params[:action] == "unshare" || params[:action] =="share_file" || params[:action] == "share_filename" || (params[:list] == "shared_list" && params[:is_missing_file]=="true")) && (params[:from_property_edit] != 'true' || params[:users_form_close] == "true")
+  page.hide 'modal_container'
+  page.hide 'modal_overlay'
+end
+if params[:call_from_variances] == "true" && (params[:variances_form_close] == "true" ||  params[:users_mail_form_close] == "true" || params[:users_form_close] == 'true')
+  variances_exp_comment  
+  elsif  params[:from_debt_summary] == 'true' && (params[:variances_form_close] == "true" ||  params[:users_mail_form_close] == "true" || params[:users_form_close] == "true")
+  loan_details
+elsif params[:from_property_details] == 'true' && (params[:variances_form_close] == "true" ||  params[:users_mail_form_close] == "true"  || params[:users_form_close] == "true")
+   property_view
+elsif params[:from_property_edit] == "true" && params[:users_form_close] != "true" && params[:variances_form_close] != "true" && params[:users_mail_form_close] != "true"
+   @tab = params[:tab_id]
+   form = params[:form_txt] + "_form"
+  	@property = RealEstateProperty.find_real_estate_property(params[:property_id])  if params[:property_id]
+    update_respond_to_parent("#{form}","#{@tab}",@msg,page)
+elsif @folder && ( @folder.name == "my_files" || @folder.name == "my_deal_room") && @folder.parent_id == 0
+  page.replace_html "show_assets_list",:partial=>'/collaboration_hub/my_files_assets_list'
+else
+  if params[:call_from_prop_files] == "true"
+   page.replace_html "show_assets_list",:partial=>"/properties/properties_and_files"
+   page.call 'highlight_datahub' if params[:highlight] == '1'
+  else
+    @partial = 	@partial.nil? ? '/properties/assets_list' : @partial
+    page.replace_html "show_assets_list",:partial=>"#{@partial}"
+  end
+
+end
+page.call "flash_writter", "#{@msg}" if @msg

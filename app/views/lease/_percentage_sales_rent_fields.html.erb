@@ -1,0 +1,81 @@
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<%
+pdf = @pdf
+pdf_convn_path = @pdf_convn_path%>
+<div class="fields">
+  <div style="margin-top:10px; display: block; float: left;" onmouseover="jQuery(this).css('background-color','#f6f6f6')" onmouseout="jQuery(this).css('background-color','#ffffff')" class="close">
+    <div class="per_sales_rent_class lsrowwrapper" style="padding-top:0;"><span class="closeme"><%= link_to_remove_sales_rent_fields "X", f%></span>Percentage Sales Rent <%=@percentage_sales_rent%></div>
+    <div class="lssectionwrapper noborder">
+      <div class="rentnamerow" style="margin-bottom:10px;">
+        <div class="rentname namefirst" style="text-align:right;">Suites</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%if pdf%>
+            <span style="width:78px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.suite_id == 0 ? 'All' : f.object.suite_id%></span>
+          <%else%>
+            <%= f.select :suite_id, "<option value=nil>All</option>\n"+options_from_collection_for_select(rent_page_all_suites(@lease), 'id', 'suite_no',f.object.suite_id),{},html_options = {:class => "rentselect percentage_sales_suite", :style=>"width:80px;"}%>
+          <%end%>
+        </div>
+        <div class="rentname" style="text-align:right;">Category</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :sales_category ,:type=>"text", :class=>"lstextfield", :style=>"width:70px"%>
+        </div>
+        <div class="rentname" style="text-align:right;">% of Sales Rent </div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :sales_rent_percentage ,:type=>"text", :class=>"lstextfield", :style=>"width:40px",:precision => 2%>
+        </div>
+        <div class="rentname" style="text-align:right;">Floor Amt $</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :floor_amt ,:type=>"text", :class=>"lstextfield", :style=>"width:70px;text-align:right;",:precision => 2%>
+        </div>
+        <div class="rentname" style="text-align:right;">Ceiling Amt $</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :ceiling_amt ,:type=>"text", :class=>"lstextfield", :style=>"width:70px;",:precision => 2%>
+        </div>
+      </div>
+      <div class="clear"></div>
+      <div class="rentnamerow" style="margin-bottom:10px;">
+        <div class="rentname namefirst" style="text-align:right;">Billing Freq</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%if pdf%>
+            <span style="width:78px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.billing_freq%></span>
+          <%else%>
+            <%= f.select :billing_freq, options_for_select( PercentageSalesRent::BILLING_PER,f.object.billing_freq),{},html_options = {:class => "rentselect", :style=>"width:80px;"}%>
+          <%end%>
+        </div>
+        <div class="rentname" style="text-align:right;">Sales Rent Due Date</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :sales_rent_due_date ,:type=>"text", :value => (f.object && f.object.sales_rent_due_date.present?) ? lease_date_format(f.object.try(:sales_rent_due_date)) : "mm/dd/yyyy",  :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:70px;",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+          <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img alt="sales_rent_due_date" style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+        </div>
+        <div class="rentname" style="text-align:right;">From</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :from_date ,:type=>"text", :value => (f.object && f.object.from_date.present?) ? lease_date_format(f.object.try(:from_date)) : "mm/dd/yyyy",  :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:70px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+          <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img alt="from_date" style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+        </div>
+        <div class="rentname" style="text-align:right;">To</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :to_date ,:type=>"text", :value => (f.object && f.object.to_date.present?) ? lease_date_format(f.object.try(:to_date)) : "mm/dd/yyyy",  :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:70px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+          <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img alt="to_date" style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+        </div>
+      </div>
+      <div class="clear"></div>
+      <div class="rentnamerow">
+        <div class="rentname namefirst" style="text-align:right;">Bill Type</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :bill_type ,:type=>"text", :class=>"lstextfield", :style=>"width:78px"%>
+        </div>
+        <div class="rentname" style="text-align:right;">Sales Rent Estimation for Base Yr</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :estimation_for_projection_sales_est ,:type=>"text", :class=>"lstextfield", :style=>"width:70px;",:precision => 2%>
+        </div>
+        <div class="rentname" style="text-align:right;">Est. Sales Escl/Yr %</div>
+        <div class="rentform" style="padding-left:5px;">
+          <%= f.text_field :est_sales_percentage_esc_year ,:type=>"text", :class=>"lstextfield", :style=>"width:70px",:precision => 2%>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%@percentage_sales_rent +=1 %>

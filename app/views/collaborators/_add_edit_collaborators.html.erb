@@ -1,0 +1,136 @@
+<script>
+  revoke = 0;
+  load_completer();
+  new_collaborators = [];
+  deleted_already_added_users = [];
+  cur_email = '<%= current_user.email %>'
+  added_users = '<%=mem_list%>';
+  if(file != true && folder != true)
+  {
+owner = "";
+  }
+  else
+  {
+    owner = "";
+  }
+
+  jQuery(document).ready(function() {
+    user_email_str="<%=get_emails_of_all_users_for_autocomplete%>";
+    user_emails=user_email_str.split("&lt;$&gt;");
+    jQuery("#collaborator_list").autocomplete(
+    {
+      width: 350,
+      delimiter: /(,)\s*/,
+      lookup: user_emails
+    });
+  });
+
+    asset_managers_and_collaborators_array = [];
+		<%find_collaborators_and_asset_managers%>
+		<%users_collection = @users_collection%>
+		<%if users_collection && !users_collection.empty?%>
+			var asset_managers_and_collaborators_collection = '<%=users_collection.join(',')%>';
+			asset_managers_and_collaborators_array = asset_managers_and_collaborators_collection.split(',');
+		<%end%>
+
+</script>
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<div class="totalsuitesbox" style="width:768px;margin-top:0px;">
+  <div class="variance_contentrow">
+    <%=hidden_field_tag :from_prop_setting,@from_prop_setting.nil? ? "" : @from_prop_setting%>
+    <%=hidden_field_tag :deleted_users,params[:deleting_user].nil? ? "" : params[:deleting_user]%>
+    <%=hidden_field_tag :from_assign_task,params[:from_assign_task]%>
+    <%=hidden_field_tag :show_past_shared,params[:show_past_shared]%>
+    <%=hidden_field_tag :parent_delete,params[:parent_delete]%>
+    <%=hidden_field_tag :del_files,params[:del_files]%>
+    <%=hidden_field_tag :add_contacts,params[:add_contacts].nil? ? "" : params[:add_contacts]%>
+    <%=hidden_field_tag :from_dash_board,params[:from_dash_board].nil? ? "" : params[:from_dash_board]%>
+    <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+    <%=hidden_field_tag :from_property_edit,"true"%>
+    <%=hidden_field_tag :folder_id,@folder.id%>
+    <%=hidden_field_tag :folder_revoke,"true"%>
+    <%=hidden_field_tag :already_added_users,!params[:collaborators_list].nil? ? params[:collaborators_list] : ""%>
+    <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+    <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+    <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+    <input type="hidden" name="pid" value = <%=params[:id]%> > </input>
+    <input type="hidden" name="note_add_edit" value = "true" > </input>
+    <input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+    <%if property_collection && !property_collection.id.nil?%>
+      <input type="hidden" name="property_id" value = <%=property_collection.id%> > </input>
+    <%end%>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="5" />
+    <input type="hidden" id = "form_txt" name="form_txt" value ="users" />
+    <input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+    <input type="hidden" name="users_form_submit" value = "true" id="users_form_submit" > </input>
+    <input type="hidden" name="users_form_close" value = "false"  id ="users_form_close"> </input>
+    <input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+    <input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+    <input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+    <input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+		<%=hidden_field_tag :notification_alert,1%>
+    <div class="add_users_headercol">Invite Property Users to this property.</div>
+    <div class="add_users_fieldrow" style="width:800px;">
+      <input type="text" value="Enter email addresses here" style="color:gray;" onclick="if(this.value == 'Enter email addresses here'){this.value = '';this.style.color='black';}" onblur="if(/\S/.test(this.value) == false){this.value = 'Enter email addresses here';this.style.color='gray';}" class="add_users_fieldinput" name="collaborator_list"  id="collaborator_list"/>
+    </div>
+    <% if (folder_collection && folder_collection.parent_id == 0 && !folder_collection.is_master && folder_collection.name !='my_files') %>
+      <div class="addpropertyrow" style="margin-top: 9px;"><a href="javascript:;" onclick='jQuery("#errmsg").empty();add_collaborators_list_for_property("<%=check_is_property_user ? 'true' : 'false'%>","<%=params[:from_debt_summary]%>","<%=params[:edit_inside_asset]%>","<%=params[:from_property_details]%>","<%=params[:call_from_prop_files]%>");return false'><img border="0" width="16" height="16" src="/images/add.png" />Add </a>
+      <% else %>
+        <div class="addpropertyrow" style="margin-top: 9px;"><a href="javascript:;" onclick='jQuery("#errmsg").empty();if(add_collab_list_if_parent_not_shared("<%=folder_collection.id%>")) {add_collaborators_list();return false;}'><img border="0" width="16" height="16" src="/images/add.png" />Add </a>
+        <% end %>
+        <span style="color: red; align: center;" id="errmsg"></span>
+      </div>
+      <div class="variance_collaboraterow" style="margin-top:0px;">
+        <div class="addusers_coll" id="addpropertyrow_to" >
+          <div class="add_users_headercol">To</div>
+        </div>
+        <!--   <div class="add_files_scroll" style="width:790px;margin-bottom:15px;">-->
+        <div class="add_users_collaboraterow" >
+	 <%members = @members%>
+  			  <div id="file_collaborators_list" class="add_files_scroll" style="width: 680px; margin-top: 5px; overflow-y: auto;height:<%=(members && members.length >=8 ? 96 : 63)%>px;">
+            <%= raw(data)%>
+           <%= raw(@leasing_agents_data)%>
+						</div>
+        </div>
+        <!--			</div>-->
+      </div>
+    </div>
+  </div>
+  <div class="totalsuitesbox" style="display:block;padding-bottom:10px;width:768px;">
+    <div class="add_users_contentrow">
+      <div class="add_users_headercol">Send a comment with your invitation<span class="litegreycolor">(optional)</span></div>
+      <div class="add_users_fieldrow">
+        <textarea style="height: 50px;" rows="3" cols="83" name="textarea"></textarea>
+      </div>
+    </div>
+    <div class="buttonwrapper2" id="save_cancel_button" style ="margin-left:300px">
+  <div id="save_button" class="greenbutton">
+    <a href="javascript:;" onclick="<%if check_is_property_user%>property_folder=true;<%else%>property_folder=false;<%end%>if(restrict_empty_collaborators(property_folder)){load_writter();jQuery('#collaborator_list').val('');document.forms.users_form.submit();return false;}">Save</a>
+    <span>&nbsp;</span></div>
+  <!-- COMMENTED CANCEL BUTTON IN LIGHTBOX
+  <%#link = params[:edit_inside_asset] == "true" ? "show_data_hub_docs_real_estate(#{portfolio_collection.id},selected_item,'hide_del','true','true');return false;" : "Control.Modal.close();refresh_page_after_close_prop(#{portfolio_collection.id},#{find_by_real_estate_property_id(property_collection.id).parent_id},'hide_del',#{params[:list] ? params[:list] : '0'},#{params[:highlight]},'#{params[:show_past_shared]}','#{params[:from_debt_summary]}','#{params[:from_property_details]}',#{property_collection.id},'#{params[:call_from_variances]}','#{params[:month]}','#{params[:document_id]}','#{params[:tl_month]}')"%>
+  <div class="graybutton"><a onClick="<%#=link%>" style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+  -->
+  <div class="bot"></div>
+  </div>
+
+</div>
+
+  <script>
+    property_collaborators_arr = [];
+    parent_collaborators_arr = [];
+    property_collaborators = '<%= folder_collection.parent_id == 0 ? "" : find_property_folder_members(folder_collection).join(",") %>';
+    parent_collaborators = '<%= folder_collection.parent_id == 0 ? "" : find_parent_folder_members(folder_collection).join(",") %>';
+    property_collaborators_arr = property_collaborators.split(',');
+    parent_collaborators_arr = parent_collaborators.split(',');
+    diff_arr = property_collaborators_arr.diff(parent_collaborators_arr);
+    load_completer();
+    cur_email = '<%= current_user.email %>';
+    if(new_collaborators.length==0 && added_users=="")
+      jQuery('#addpropertyrow_to').hide();
+    else
+      jQuery('#addpropertyrow_to').show();
+  </script>

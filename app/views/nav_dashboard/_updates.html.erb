@@ -1,0 +1,28 @@
+	<%if !(@events.nil? || @events.blank?) %>
+			<% for event in @events.first(8) %>
+			<% event_data = display_event(event) %>
+				<% unless event_data.blank? %>
+					<div class="marginT10">
+						<div class="floatL marginRB10"><img src="<%= user_profile_image(event_user_id(event)) %>" width="33" height="33" alt="" title="" /></div>
+						<div class="commenticon">
+									<span><%= raw(event_data) %></span><br />
+									<span class="textgry"><%=display_event_time(event) if !display_event(event).nil? %></span>
+								</div>
+								</div>
+				<%end%>
+			<%end%>
+	<%else%>
+		<h2 class="textAC textgry lineH345">No updates</h2>
+	<%end%>
+	<% if @events.present? && @events.count > 6 %>
+			<%  shared_folders_collection, shared_docs_collection, shared_and_owned_properties_collection, folder = dashboard_update_display%>			
+			<%#= link_to "View More", {:controller => "events", :action => "view_events_folder",:folder_id => folder, :shared_folders => shared_folders_collection, :shared_docs => shared_docs_collection, :owned_and_shared_properties => shared_and_owned_properties_collection,:dashboard_update => 'true'}, :remote => true, :class=>"floatR vmore" %>
+			
+			<%if session[:property__id].present? || params[:property_id].present?%>
+				<a href="/collaboration_hub?portfolio_id=<%=params[:portfolio_id]%>&property_id=<%=params[:property_id]%>&folder_id=<%=Folder.folder_of_a_portfolio(params[:portfolio_id]).try(:id)%>&from_nav_dash=true" class="floatR vmore loader_event">View More</a>
+			<%else%>										
+				<a href="/collaboration_hub?portfolio_id=<%=params[:portfolio_id]%>&folder_id=<%=Folder.folder_of_a_portfolio(params[:portfolio_id]).try(:id)%>&from_nav_dash=true" class="floatR vmore loader_event">View More</a>
+			<%end%>
+			
+	<%end%>
+

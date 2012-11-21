@@ -1,0 +1,1103 @@
+<style type="text/css">
+    textarea {
+        clear: both;
+        display: block;
+        font-family: arial;
+        font-size: 1em;
+        width: 40em;
+        padding: 2px 4px;
+    }
+</style>
+<% prop_lease_suite,total_added_suites = params_formation %>
+<script type="text/javascript">
+                                                                                                                                                                                                                                    form_name = "#mgmt_projection_form"
+                                                                                                                                                                                                                                    form_txt = "projection"
+                                                                                                                                                                                                                                    tab = "6"
+                                                                                                                                                                                                                                    //yield_calender('true');
+                                                                                                                                                                                                                                    activive_tab(form_txt);
+                                                                                                                                                                                                                                    pdf_click = 'false';
+                                                                                                                                                                                                                                     trm_suite_ids = <%=@lease.try(:property_lease_suite).try(:suite_ids).present? ? true : false%>;
+</script>
+<%if @pdf && !params[:partial_pages].split(',').index('1') %>
+<%=render :partial => "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection} %>
+<%end %>
+<div class="clear">
+</div>
+<%= form_for @lease,:url=>{:controller=>"lease",:action=>"update1",:portfolio_id=>@portfolio_collection.id,:property_id=>params[:property_id], :lease_id => @lease.try(:id)}, :html=>{:target => "lease_projection_frame",:id=>"mgmt_projection_form"} do |lease_form| -%>
+<div class="alertbody"<%if @pdf %> style='border:1px solid #E3DFDF'<%end %>>
+    <div class="lebredcomseow2" style="float:right;padding:10px 0 0;">
+        <a href="#"></a>
+    </div>
+    <div class="lssectionwrapper">
+        <div id="InformationSummary" style="width:375px; float:left">
+            <div class="lsrowwrapper" style="width:370px; float:none; text-align:center">
+                <span style="text-align:center;display:block; padding-right:20px">Terms</span>
+            </div>
+            <div style="width:370px">
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Property Name
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%=@property_name %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Building  SF
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= display_currency_overview(@building_sqft, precision_count=2) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Tenant
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:center !important" value="<%= @tenant.try(:tenant_legal_name) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Suites
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= @suite_nos.join(',') rescue nil%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Lease RSF
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:center !important" value="<%= display_currency_overview(@lease_rentable_sqft, precision_count=2) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        % of Building
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(@percentage_of_building, :precision => 2)) %>%" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Commencement Date
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%=lease_date_format(@lease.try(:commencement))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Expiration Date
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%=lease_date_format(@lease.try(:expiration))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Lease Type
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= @lease.try(:occupancy_type) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Use
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= @info.try(:use)%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Security Deposit
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@cap_ex.try(:security_deposit_amount), :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Options
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:center !important" value="<%= @option_types %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="CashFlowSummary" style="width:350px; float:right">
+            <div class="lsrowwrapper" style="width:350px; float:none; text-align:center">
+                <span style="text-align:center;display:block; padding-right:35px">Cash Flow ($)</span>
+            </div>
+            <div style="width:350px">
+                <!-- <div class="incomenamerow">
+                <div class="incomename">
+                Total Base Rent Revenue
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_base_rent_revenue, :precision => 2))%>" readonly="readonly"/>
+                </div>
+                <div class="clear">
+                </div>
+                </div>
+                <div class="incomenamerow">
+                <div class="incomename">
+                Total Escalation Revenue
+                </div>
+                <div class="lsfiledactive" style="float:right">
+                <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_escalation_revenue, :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="clear">
+                </div>
+                </div>-->
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Total Rent Revenue
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input2" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@rent_schedules_total_rent_revenue, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Other Revenue
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input76" type="text" class="lstextfield" style="width:190px;text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_other_revenue, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Parking Revenue
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input85" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_parking_revenue, :precision => 2))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Sales Revenue
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input86" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%=number_with_delimiter(number_with_precision(@sales_revenue, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Total Lease Revenue
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input id= "total_lease_revenue" name="input87" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_lease_revenue, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Tenant Improvements
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input88" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%=number_with_delimiter(number_with_precision(@tenant_improvements_total_amount, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Leasing Commissions
+                        <br/>
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input89" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@display_leasing_commissions_total_amount, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Other Lease Cap Costs
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input90" type="text" class="lstextfield" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@other_exps_total_amount, :precision => 2))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Total Lease Capital Costs
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input91" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@total_lease_capital_costs, :precision => 2))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Net Lease Cash Flow
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input92" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@net_lease_cash_flow, :precision => 2))%>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename boldtxt row145">
+                        Net Lease Cash Flow PSF
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <input name="input93" type="text" class="lstextfield boldtxt highlighted-inputbox" style="width:190px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@net_lease_cash_flow_psf, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <%= lease_form.fields_for :income_projection do |income_projection_form| %>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        Annual Discount Rate
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <%=income_projection_form.text_field :annual_discount_rate, :value => @lease.try(:income_projection).try(:annual_discount_rate),  :class =>"lstextfield income_projection_text_align_right", :size => "29", :style=>"width:190px;", :precision => 2 %>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        NPV Actual
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <%=income_projection_form.text_field :npv_actual, :value => number_with_delimiter(number_with_precision(@lease.try(:income_projection).try(:npv_actual),:precision => 2)),  :class =>"lstextfield income_projection_text_align_right", :size => "29" , :onblur => "get_npv_differential()", :style=>"width:190px;", :precision => 2 %>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        NPV Budget/ProForma
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <%=income_projection_form.text_field :npv_budget_or_proforma, :value => number_with_delimiter(number_with_precision(@lease.try(:income_projection).try(:npv_budget_or_proforma),:precision => 2)),  :class =>"lstextfield income_projection_text_align_right",  :size => "29", :onblur => "get_npv_differential()" , :style=>"width:190px;", :precision => 2 %>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="incomenamerow">
+                    <div class="incomename row145">
+                        NPV Differential
+                    </div>
+                    <div class="lsfiledactive" style="float:right">
+                        <%=income_projection_form.text_field :npv_differential, :value => number_with_delimiter(number_with_precision(IncomeProjection.npv_differential(@lease.try(:income_projection).try(:npv_actual), @lease.try(:income_projection).try(:npv_budget_or_proforma)),:precision => 2)),  :class =>"lstextfield income_projection_text_align_right", :size => "29", :readonly => true, :style=>"width:190px;", :precision => 2 %>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <% end %>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% if @rent_schedules.present? %>
+    <div id="RentSchedule">
+        <div class="lsrowwrapper">
+            <% title = @lease.rent.is_cpi_escalation? ? "Rent Schedule with CPI Escalations" : "Rent Schedule with Flat Rent or Fixed Escalations" %>
+            <%=@pdf && @rent_schedules.present? ? title  :  (!@pdf ? title : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:90px; margin-right:15px !important;">
+                    Options
+                </div>
+                <div class="incomename boldtxt" style="width:77px;">
+                    From
+                </div>
+                <div class="incomename boldtxt" style="width:75px;">
+                    To
+                </div>
+                <div style="width: 42px;" class="incomename boldtxt">
+                    No.of
+                    <br>
+                    mo
+                </div>
+                <div class="incomename boldtxt" style="width:78px;">
+                    <% if  @lease.rent.is_cpi_escalation? %>
+                    CPI Adjusted
+                    <br>
+                    Rate PSF/mo<% else %>
+                    Rent
+                    <br>
+                    PSF/mo<% end %>
+                </div>
+                <div class="incomename boldtxt" style="width:82px;">
+                    <% if  @lease.rent.is_cpi_escalation? %>
+                    CPI Adjusted
+                    <br>
+                    Rent/mo<% else %>
+                    Rent
+                    <br>
+                    Amt/mo<% end %>
+                </div>
+                <div class="incomename boldtxt" style="width: 84px;">
+                    <% if  @lease.rent.is_cpi_escalation? %>CPI Adjusted
+                    <br>
+                    Annualized PSF <%else %>Annualized PSF <%end %>
+                </div>
+                <div class="incomename boldtxt" style="width:82px;">
+                    Total Rent
+                    <br/>
+                    Revenue
+                </div>
+                <% if ( !(@listing_leasing_commission_total_amount==0)  ||  !(@procurement_leasing_commission_total_amount==0)) %>
+                <div class="incomename boldtxt" style="width:82px; margin:0">
+                    Leasing
+                    <br/>
+                    Commission
+                </div>
+                <% end %>
+                <div class="clear">
+                </div>
+            </div>
+            <% @rent_schedules.each do |rent_schedule| %>
+            <div class="incomenamerow2">
+                <div class="incomeform namefirst" style="margin-right:20px !important;">
+                    <input name="input4" type="text" class="lstextfield" style="width:87px; text-align:center !important" value="<%= Suite.find_by_id(rent_schedule[:suite_id]).try(:suite_no)  || @suite_nos.join(',') rescue nil %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input3" type="text" class="lstextfield" style="width:75px; text-align:center !important" value="<%= rent_schedule[:from_date].strftime('%m/%d/%y') rescue nil %>" readonly="readonly">
+                </div>
+                <div class="incomeform">
+                    <input name="input81" type="text" class="lstextfield" style="width:70px; text-align:center !important" value="<%= rent_schedule[:to_date].strftime('%m/%d/%y') rescue nil  %>" readonly="readonly" />
+                </div>
+                <div class="incomeform">
+                    <input type="text" readonly="readonly" value="<%= RentSchedule.get_rent_schedule_period(rent_schedule[:from_date], rent_schedule[:to_date]) %>" style="text-align: center ! important; width: 40px;" class="lstextfield" name="input62">
+                </div>
+                <div class="incomeform">
+                    <input name="input82" type="text" class="lstextfield" style="width:77px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(sprintf('%.2f',(rent_schedule[:amount_per_month_per_sqft]||0)), :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input19" type="text" class="lstextfield" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision((rent_schedule[:amount_per_month] || 0), :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input type="text" readonly="readonly" value="<%= number_with_delimiter(number_with_precision(sprintf('%.2f',(cpi_adjusted_annualized_psf(rent_schedule[:amount_per_month_per_sqft]||0))), :precision => 2)) %>" style="text-align: right ! important; width: 80px;" class="lstextfield" name="input19">
+                </div>
+                <div class="incomeform">
+                    <input name="input20" type="text" class="lstextfield rentschedule_rent_revenue" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(rent_schedule[:rent_revenue], :precision => 2)) %>" readonly="readonly"/>
+                </div><% if ( !(@listing_leasing_commission_total_amount==0)  ||  !(@procurement_leasing_commission_total_amount==0)) %>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input20" type="text" class="lstextfield rentschedule_leasing_commission" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(rent_schedule[:leasing_commission], :precision => 2)) %>" readonly="readonly"/>
+                </div><% end %>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:87px; margin-right:232px;">
+                    Total
+                </div>
+                <div class="incomeform">
+                    <input name="input165" type="text" class="lstextfield" style="width:77px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(sprintf('%.2f',(@rent_schedules_total_amount_per_month_per_sqft||0)), :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input165" type="text" class="lstextfield" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@rent_schedules_total_amount_per_month, :precision => 2))%>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input165" type="text" class="lstextfield" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(sprintf('%.2f',(cpi_adjusted_annualized_psf(@rent_schedules_total_amount_per_month_per_sqft||0))), :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input id="rent_schedule_rent_revenue_input" name="input165" type="text" class="lstextfield" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@rent_schedules_total_rent_revenue, :precision => 2))%>" readonly="readonly"/>
+                </div><% if ( !(@listing_leasing_commission_total_amount==0)  ||  !(@procurement_leasing_commission_total_amount==0)) %>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input165" type="text" class="lstextfield" style="width:80px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@rent_schedules_leasing_commissions_total_amount, :precision => 2))%>" readonly="readonly"/>
+                </div><% end %>
+                <div class="clear">
+                </div>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <%if @pdf %>
+    <div class="pdf_break_page" style="float:left;width:100%;">
+        <div style="z-index:18900;margin-bottom: 0px;padding-bottom: 10px;border-bottom: none;">
+        </div>
+    </div>
+    <%end %>
+    <% if  @other_revenues.present? %>
+    <div id="OtherRevenue">
+        <div class="lsrowwrapper">
+            <%=@pdf && @other_revenues.present? ? "Other Revenue" :  (!@pdf ? 'Other Revenue' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:164px">
+                    Type
+                </div>
+                <div class="incomename boldtxt" style="width:80px">
+                    Billable SF
+                </div>
+                <div class="incomename boldtxt" style="width:80px">
+                    From
+                </div>
+                <div class="incomename boldtxt" style="width:80px">
+                    To
+                </div>
+                <div style="width: 42px;" class="incomename boldtxt">
+                    No.
+                    of
+                    <br/>
+                    mo
+                </div>
+                <div class="incomename boldtxt" style="width:87px;">
+                    Rent
+                    <br/>
+                    PSF/mo($)
+                </div>
+                <div class="incomename boldtxt" style="width:87px">
+                    Total
+                    <br/>
+                    Amt/mo($)
+                </div>
+                <div class="incomename boldtxt" style="width:87px; margin:0;">
+                    Total
+                    <br/>
+                    Other Rev($)
+                </div>
+            </div>
+            <% @other_revenues.each do |other_revenue| %>
+            <div class="incomenamerow2">
+                <div class="incomeform">
+                    <input name="input6" type="text" class="lstextfield" style="width:162px; text-align:right !important" value="<%= other_revenue.other_revenue_type %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input7" type="text" class="lstextfield" style="width:78px; text-align:center !important" value="<%= display_currency_overview_from_lease_helper(other_revenue.billable_sqft, precision_count=2) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input8" type="text" class="lstextfield" style="width:78px; text-align:center !important" value="<%= other_revenue.from_date.strftime('%m/%d/%y') rescue nil %>" readonly="readonly" />
+                </div>
+                <div class="incomeform">
+                    <input name="input9" type="text" class="lstextfield" style="width:78px; text-align:center !important" value="<%= other_revenue.to_date.strftime('%m/%d/%y') rescue nil %>" readonly="readonly" />
+                </div>
+                <div class="incomeform">
+                    <input type="text" readonly="readonly" value="<%= get_other_revenue_period(other_revenue.from_date, other_revenue.to_date) %>" style="text-align: center ! important; width: 40px;" class="lstextfield" name="input43" />
+                </div>
+                <div class="incomeform">
+                    <input name="input10" type="text" class="lstextfield" style="width:85px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(other_revenue.amount_per_month_per_sqft, :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input15" type="text" class="lstextfield" style="width:85px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(other_revenue.amount_per_month, :precision => 2))%>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input16" type="text" class="lstextfield" style="width:85px; text-align:right !important" value="<%= display_currency_overview_from_lease_helper(other_revenue.total_other_revenue_per_month(other_revenue.try(:from_date), other_revenue.try(:to_date), other_revenue.amount_per_month), precision_count=2) %>" readonly="readonly"/>
+                </div>
+            </div><% end %>
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="margin:0 6px 0 507px;line-height:20px; white-space: nowrap; width:150px; text-align:right">
+                    Total Other Revenue($)
+                </div>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input21" type="text" class="lstextfield" style="width:85px; text-align:right !important" value="<%= display_total_other_revenue(@total_other_revenue)%>" readonly="readonly"/>
+                </div>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <% if  @parkings.present? %>
+    <div id="ParkingRevenue">
+        <div class="lsrowwrapper">
+            <%=@pdf &&  @parkings.present? ? "Parking Revenue" :  (!@pdf ? 'Parking Revenue' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt inpark-head-1">
+                    Reserved
+                </div>
+                <div class="incomename boldtxt inpark-head-1" style="border-bottom: 1px solid #EEEEEE; width:185px; color:#000 !important; margin-left:28px;">
+                    Unreserved
+                </div>
+            </div>
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:62px;">
+                    #
+                </div>
+                <div class="incomename boldtxt" style="width:117px; margin:0">
+                    $/Space/mo
+                </div>
+                <div class="incomename boldtxt" style="width:62px; margin-left:28px;">
+                    #
+                </div>
+                <div class="incomename boldtxt" style="width:117px;margin:0">
+                    $/Space/mo
+                </div>
+                <div class="incomename boldtxt" style="width:117px; margin-left:112px;">
+                    Tot $/mo
+                </div>
+                <div class="incomename boldtxt" style="width:117px; margin:0;">
+                    Tot Parking Rev($)
+                </div>
+            </div>
+            <% @parkings.each do |parking| %>
+            <div class="incomenamerow2">
+                <div class="incomeform">
+                    <input name="input54" type="text" class="lstextfield" style="width:60px; text-align:center !important" readonly="readonly" value="<%= parking.reserved_number %>" />
+                </div>
+                <div class="incomeform" style="margin-right:28px">
+                    <input name="input55" type="text" class="lstextfield" style="width:115px; text-align:right !important" value="<%= precission_with_delimeter(parking.reserver_amount_per_space_per_month) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input56" type="text" class="lstextfield" style="width:60px; text-align:center !important; margin-left:28px;" readonly="readonly" value="<%= parking.unreserved_number %>" />
+                </div>
+                <div class="incomeform" style=" margin-right:112px;">
+                    <input name="input57" type="text" class="lstextfield" style="width:115px; text-align:right !important" value="<%= precission_with_delimeter(parking.unreserved_amount_per_space_per_month)  %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input58" type="text" class="lstextfield" style="width:115px; text-align:right !important" value="<%= precission_with_delimeter(parking.total_monthly) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style=" margin:0;">
+                    <input name="input59" type="text" class="lstextfield" style="width:115px; text-align:right !important" value="<%= precission_with_delimeter(get_parking_revenue(parking,@lease.try(:expiration), @lease.try(:commencement), parking.total_monthly)) %>" readonly="readonly"/>
+                </div>
+            </div><% end %>
+        </div>
+    </div><% end %>
+    <% if @displayed_percentage_sales_rents.present? %>
+    <div id="OtherRevenue">
+        <div class="lsrowwrapper">
+            <%=@pdf && @displayed_percentage_sales_rents.present? ? "Percentage Sales Revenue" :  (!@pdf ? 'Percentage Sales Revenue' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:80px; margin-right:20px;">
+                    Period
+                </div>
+                <div class="incomename boldtxt" style="width:153px">
+                    Est Sales
+                </div>
+                <div class="incomename boldtxt" style="width:173px">
+                    Est Sales Above Floor Amt.
+                </div>
+                <div class="incomename boldtxt" style="width:153px">
+                    Sales %
+                </div>
+                <div class="incomename boldtxt" style="width:153px; margin:0;">
+                    Sales Rent Rev
+                </div>
+            </div>
+            <% @displayed_percentage_sales_rents.each_with_index do |percentage_sales_rent,i| %>
+            <div class="incomenamerow2">
+                <div class="incomename" style="width:80px; margin-right:20px;">
+                    Yr <%= i + 1 %>
+                </div>
+                <div class="incomeform">
+                    <input name="input22" type="text" class="lstextfield" style="width:151px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(percentage_sales_rent[:est_sales], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input23" type="text" class="lstextfield" style="width:171px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(percentage_sales_rent[:est_sales_above_floor_amt], :precision => 2))%>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input24" type="text" class="lstextfield" style="width:151px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(percentage_sales_rent[:sales_percentage], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style="margin:0">
+                    <input name="input25" type="text" class="lstextfield" style="width:151px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(percentage_sales_rent[:sales_rent_rev], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+            </div><% end %>
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:80px; margin-right:20px;">
+                    Total
+                </div>
+                <div class="incomeform">
+                    <input name="input51" type="text" class="lstextfield" style="width:151px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@final_percentage_sales_rent[:est_sales], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input53" type="text" class="lstextfield" style="width:171px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@final_percentage_sales_rent[:est_sales_above_floor_amt], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input32" type="text" class="lstextfield" style="width:151px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(@final_percentage_sales_rent[:sales_percentage], :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style="margin:0">
+                    <span class="incomeform" style="margin:0"><input name="input49" type="text" class="lstextfield" style="width:151px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@final_percentage_sales_rent[:sales_rent_rev], :precision => 2))  %>" readonly="readonly"/></span>
+                </div>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <% if @tenant_improvements.present? %>
+    <div id="OtherRevenue">
+        <div class="lsrowwrapper">
+            <%=@pdf && @tenant_improvements.present?  ? "Tenant Improvements" :  (!@pdf ? 'Tenant Improvements' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="width:60px;">
+                    Suite
+                </div>
+                <div class="incomename boldtxt" style="width:140px">
+                    Name
+                </div>
+                <div class="incomename boldtxt" style="width:140px">
+                    Start of Work Date
+                </div>
+                <div class="incomename boldtxt" style="width:180px">
+                    Notes
+                </div>
+                <div class="incomename boldtxt" style="width:100px;">
+                    Amt PSF($)
+                </div>
+                <div class="incomename boldtxt" style="width:100px; margin:0;">
+                    Tot Amt($)
+                </div>
+            </div>
+            <% @tenant_improvements.each do |tenant_improvement| %>
+            <div class="incomenamerow2">
+                <div class="incomeform">
+                    <input name="input33" type="text" class="lstextfield" style="width:58px; text-align:center !important" value="<%= @suite_nos.join(',') rescue nil %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input35" type="text" class="lstextfield" style="width:138px; text-align:center !important" value="<%= tenant_improvement.name %> " readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input36" type="text" class="lstextfield" style="width:138px; text-align:center !important" value="<%= tenant_improvement.work_start_date.strftime('%m/%d/%y') rescue nil %>" readonly="readonly" />
+                </div>
+                <div class="incomeform">
+                    <input name="input37" type="text" class="lstextfield" style="width:178px; text-align:center !important;" value="<%= tenant_improvement.note.try(:content) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform">
+                    <input name="input38" type="text" class="lstextfield" style="width:98px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(tenant_improvement.amount_psf, :precision => 2))%>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input39" type="text" class="lstextfield" style="width:98px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(tenant_improvement.total_amount, :precision => 2))%>" readonly="readonly"/>
+                </div>
+            </div><% end %>
+            <div class="incomenamerow2">
+                <div class="incomename boldtxt" style="line-height:20px; white-space:nowrap; margin:0 6px 0 438px; width:100px; text-align:right">
+                    Total($)
+                </div>
+                <div class="incomeform">
+                    <input name="input42" type="text" class="lstextfield" style="width:98px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@tenant_improvements_total_amount_psf, :precision => 2)) %>" readonly="readonly"/>
+                </div>
+                <div class="incomeform" style="margin:0;">
+                    <input name="input41" type="text" class="lstextfield" style="width:98px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@tenant_improvements_total_amount, :precision => 2)) %>" readonly="readonly"/>
+                </div>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <% if @leasing_commissions.present? %>
+    <div id="LeasingCommission">
+        <div class="lsrowwrapper">
+            <%=@pdf && @procurement_and_listing_leasing_commissions.present?  ? "Leasing Commission" :  (!@pdf ? 'Leasing Commission' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow boldtxt">
+                <div class="incomename" style="margin:0 6px 0 0; text-align:center;line-height:20px; width:70px">
+                    <%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true %>Type<%else %>&nbsp;<%end %>
+                </div>
+                <div class="incomename " style="margin:0 6px 0 0; text-align:center;line-height:20px; width:486px">
+                    <%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true %>% Applied For Each Yr<%else %>&nbsp;<%end %>
+                </div>
+                <div class="incomename" style="<%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>margin:0 50px 0 0; text-align:center;line-height:20px;<%else%>margin: 0pt 67px 0pt 110px; line-height: 20px; width: -1px; text-align: right;<%end%>">
+                    Amt PSF($)
+                </div>
+                <div class="incomename" style="<%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>margin:0 6px 0 0; text-align:center;line-height:20px;<%else%>margin: 0pt 236px 0pt 5px; line-height: 20px; width: -1px; text-align: right;<%end%>">
+                    Tot Amt($)
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true %>
+            <div class="incomenamerow boldtxt">
+                <div class="leasnumber" style="margin:0 6px 0 76px; width:42px">
+                    1
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    2
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    3
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    4
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    5
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    6
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    7
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    8
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    9
+                </div>
+                <div class="leasnumber" style="margin:0 6px 0 0; width:42px">
+                    10
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <%end %>
+            <% @procurement_and_listing_leasing_commissions.each do |leasing_commission| %>
+            <div class="incomenamerow">
+                <div class="incomename boldtxt" style="<%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>margin:0 6px 0 0;line-height:20px; width:70px<%else%>margin: 0pt 54px 0pt 0px; line-height: 20px; width: 40px; text-align: left;<%end%>">
+                    <%= leasing_commission.leasing_commission_type %>
+                </div>
+                <%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true %>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input2" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_first_year, :precision => 2)) %>" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input65" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_second_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input66" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_third_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input67" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_fourth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input68" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_fifth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input69" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_sixth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input70" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_seventh_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input71" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_eighth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input72" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_ninth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="leasnumber">
+                    <div class="lsfiledactive">
+                        <input name="input73" type="text" class="lstextfield" style="width:40px; text-align:center !important" value="<%= number_with_delimiter(number_with_precision(leasing_commission.percentage_for_tenth_year, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div><%end %>
+                <% if leasing_commission.try(:leasing_commission_type).eql?("Listing") %>
+                <div class="incomename">
+                    <div class="lsfiledactive">
+                        <input name="input2" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@listing_leasing_commission_dollar_per_sqft, :precision => 2)) %>" readonly="readonly">
+                    </div>
+                </div>
+                <div class="incomename" style="margin:0;">
+                    <div class="lsfiledactive">
+                        <input name="input157" type="text" class="lstextfield leasing_commission_total_amount" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@listing_leasing_commission_total_amount, :precision => 2)) || '0.00' %>" readonly="readonly" />
+                    </div>
+                </div><% end %>
+                <% if leasing_commission.try(:leasing_commission_type).eql?("Procurement") %>
+                <div class="incomename">
+                    <div class="lsfiledactive">
+                        <input name="input2" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@procurement_leasing_commission_dollar_per_sqft, :precision => 2)) %>" readonly="readonly">
+                    </div>
+                </div>
+                <div class="incomename" style="margin:0;">
+                    <div class="lsfiledactive">
+                        <input name="input157" type="text" class="lstextfield leasing_commission_total_amount" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@procurement_leasing_commission_total_amount, :precision => 2)) || '0.00' %>" readonly="readonly" />
+                    </div>
+                </div><% end %>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+            <% if @bonus_leasing_commissions.present? %>
+            <% @bonus_leasing_commissions.each do |bonus_leasing_commission| %>
+            <div class="incomenamerow">
+                <div class="incomename boldtxt" style="<%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>margin:0 -10px 0 495px;line-height:20px; width:70px<%else%>margin: 0pt 53px 0px 0px; line-height: 20px; width: 40px; text-align: left;<%end%>">
+                    Bonus($)
+                </div>
+                <div class="incomename">
+                    <div class="lsfiledactive">
+                        <input name="input159" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@bonus_leasing_commission_dollar_per_sqft, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="incomename" style="margin:0;">
+                    <div class="lsfiledactive">
+                        <input name="input63" type="text" class="lstextfield leasing_commission_total_amount" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(bonus_leasing_commission.try(:total_amount), :precision => 2)) || '0.00' %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+            <% end %>
+            <% if @procurement_and_listing_leasing_commissions.present? || @bonus_leasing_commissions.present? %>
+            <div class="incomenamerow">
+                <div class="incomename boldtxt" style="<%if @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>margin:0 -10px 0 495px;line-height:20px; width:70px<%else%>margin: 0pt 53px 5px 0px; line-height: 20px; width: 40px; text-align: left;<%end%>">
+                    Total($)
+                </div>
+                <div class="incomename">
+                    <div class="lsfiledactive">
+                        <input name="input160" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@leasing_commission_total_dollar_per_sqft, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="incomename" style="margin:0;">
+                    <div class="lsfiledactive">
+                        <input name="input160" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(@display_leasing_commissions_total_amount, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <% if @other_exps.present? %>
+    <div id="OtherLeaseCapitalExpenditures">
+        <div class="lsrowwrapper">
+            <%=@pdf && @other_exps.present?  ? "Other Lease Capital Expenditures" :  (!@pdf ? 'Other Lease Capital Expenditures' : '' ) %>
+        </div>
+        <div class="lssectionwrapper">
+            <div class="incomenamerow boldtxt">
+                <div class="incomename" style="margin:0 6px 0 0; width:125px;text-align:center !important;">
+                    Name
+                </div>
+                <div class="incomename" style="margin:0 6px 0 425px; text-align:right !important;line-height:20px; width:94px">
+                    Amt PSF($)
+                </div>
+                <div class="incomename" style="margin:0; text-align:right !important;line-height:20px; width:93px">
+                    Tot Amt($)
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <% @other_exps.each do |other_exp| %>
+            <div id="OtherLeaseCap-1" class="incomenamerow">
+                <div class="incomename" style="margin:0 6px 0 0; text-align:center;line-height:20px; width:110px">
+                    <input name="input162" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%=other_exp.name %>" readonly="readonly" />
+                </div>
+                <div class="incomename" style="margin-left:440px">
+                    <div class="lsfiledactive">
+                        <input name="input162" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%=number_with_delimiter(number_with_precision(other_exp.amt_psf, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="incomename" style="margin:0;">
+                    <div class="lsfiledactive">
+                        <input name="input64" type="text" class="lstextfield" style="width:92px; text-align:right !important" value="<%= number_with_delimiter(number_with_precision(other_exp.tot_amt, :precision => 2)) %>" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <% end %>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <% end %>
+    <input type="hidden" id = "param_pipeline" name="param_pipeline" value ="<%=params[:param_pipeline]%>">
+    </input><input type="hidden" id = "tab_id" name="tab_id" value ="6"><input type="hidden" id = "real_estate_property_id" name="tab_id" value ="<%= params[:property_id]%>">
+    </input><input type="hidden" id = "form_txt" name="form_txt" value ="projection">
+    </input><input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>">
+    </input><input type="hidden" id = "projection_form" name="projection_form" value ="false">
+    </input><input type="hidden" id = "lease_id" name="lease_id" value ="<%=params[:lease_id]%>">
+    </input><input type="hidden" id = "current_lease_id" name="current_lease_id" value ="<%=@lease.try(:id)%>">
+    </input><input type="hidden" id = "save_and_approve" name="save_and_approve"><input type="hidden" id = "from_pdf" name="from_pdf" value ="<%=params[:from_pdf]%>">
+    </input>
+    </input><%= render "tmp_params", :params => params %>
+    <!-------- Comments and Approvals Starting from Here ----->
+    <div class="lssectionwrapper">
+        <div id="ReviewApprovals">
+            <div class="lsrowwrapper" style="float: none;">
+                Comments and Approvals
+            </div>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Comments
+                </div>
+                <div class="lsfiledactive" style="float: right;">
+                    <textarea class="expand25-300  textarea" cols="80" id="lease_income_projection_comments" name="lease[income_projection][comments]" rows="3" style="width:585px;text-align:left !important">
+                        <%= @lease.try(:income_projection).try(:comments) %>
+                    </textarea>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Review Notes
+                </div>
+                <div class="lsfiledactive" style="float: right;">
+                    <textarea class="expand25-300 textarea" cols="80" id="lease_income_projection_note_content" name="lease[income_projection][note][content]" rows="3" style="width:585px;">
+                        <%= @lease.try(:income_projection).try(:note).try(:content) %>
+                    </textarea>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <div class="incomenamerow">
+                <div class="incomename">
+                    Approval
+                </div>
+                <div style="margin: 0pt 0pt 0pt 94px;" class="incomename">
+                    By:
+                </div>
+                <div style="background-color: white; padding-left: 4px;" class="lsfiledactive">
+                    <input size="30" name="lease[income_projection][approval_by]" id="lease_income_projection_approval_by" class="lstextfield" type="text" value = '<%= (@lease.try(:income_projection).try(:approval_by)) %>'>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+            <div class="incomenamerow">
+                <div style="margin: 0pt 0pt 0pt 133px;" class="incomename">
+                    Date:
+                </div>
+                <div style="background-color: white; padding-left: 4px;" class="lsfiledactive">
+                    <input type="text" style="width:80px" size="12" name="lease[income_projection][approval_date]" id="lease_income_projection_approval_date" value = '<%=(@lease && @lease.income_projection && @lease.income_projection.approval_date.present?) ? (@lease.try(:income_projection).try(:approval_date).strftime("%d %b %Y") rescue nil) : "mm/dd/yyyy"%>' class="lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput" onchange ="if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}" ,  onblur = "if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}"onclick = "if(this.value == 'mm/dd/yyyy'){this.value = ''}"><%if @pdf %><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"></a><%end %>
+                </div>
+                <div class="clear">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-------- Comments and Approvals  End of  Here ----->
+</div>
+<div class="button-box">
+<%unless @pdf || @lease.is_archived%>
+    <input type="button" class="button-green" value="Save" onclick="jQuery('#mgmt_projection_form').submit();"/><%if !@lease.try(:id).blank? %>
+    <% @lease_collection = Lease.find(@lease.id) %>
+    <span style="display:none" id ="approve_id"><input type="button" class="button-gray" value="Save &amp; Move to Approval" onclick="if(trm_suite_ids){if(confirm('Are you sure you want to move this lease to the Pending Approvals list?')){jQuery('#mgmt_projection_form').submit();mark_as_executed(<%= @lease_collection.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'interested_suite','approve');}return false;}else{flash_writter('<%=FLASH_MESSAGES['leases']['115']%>');return false;}"/></span><%unless is_leasing_agent %>
+    <span style="display:none" id ="execute_id"><%lease = @lease_collection %>
+        <%expiration = !lease.expiration.nil? ? lease.expiration : 'false' %>
+        <%commencement = !lease.commencement.nil? ? lease.commencement : 'false' %>
+        <%if expiration!= 'false' && commencement != 'false' %>
+        <%vars =  expiration < Date.today ? 'status_inactive' : 'execute' %>
+        <%else %>
+        <%vars = 'false' %>
+        <%end %>
+        <%check = (!lease.commencement.nil? && !lease.expiration.nil?) ? lease.commencement < lease.expiration : 'false' %>
+        <%check_status = check_suite_status(prop_lease_suite,params[:property_id],"pipeline") %>
+        <input type="button" class="button-gray" value="Save &amp; Mark as Executed" onclick="<%if check_status%> alert('<%=FLASH_MESSAGES['leases']['123']%>'); <%else%> if (<%=lease.is_detailed_view == true%> && <%=vars != 'false'%> && <%=check%> && <%=!lease.property_lease_suite.nil?%> && <%=tot_square_feet(lease) > 0%>) { if(confirm('Are you sure you want to mark this lease as executed?')){jQuery('#mgmt_projection_form').submit(); mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=params[:property_id]%>,'negotiated_suite','<%=vars%>');} return false;} else{alert(' Please confirm to fill the following details \n 1) Lease start date should be lesser than end date,\n 2) Should have atleast 1 suite, \n 3) Total rent sqft should be greater than 0 \n \n Note: All the above points are mandatory'); return false;}<%end%>"/></span><%end %>
+    <%end %>
+	<%end %>
+</div>
+
+<% end %>
+<%= render "tmp_params", :params => params %>
+<script type="text/javascript">
+    function yield_calender(type){
+        Date.firstDayOfWeek = 0;
+        Date.format = 'mm/dd/yyyy';
+        jQuery(function(){
+            if (type == 'false') {
+                jQuery('.date-pick').datePicker();
+            }
+            else {
+                jQuery('.date-pick').datePicker({
+                    startDate: '01/01/2000'
+                });
+            }
+            jQuery('#start-date').bind('dpClosed', function(e, selectedDates){
+                var d = selectedDates[0];
+                if (d) {
+                    d = new Date(d);
+                    jQuery('#end-date').dpSetStartDate(d.addDays(1).asString());
+                }
+            });
+        });
+    }
+
+    yield_calender('true');
+
+    var flip = 0;
+    jQuery(document).ready(function(){
+        jQuery("dates_note_txt[class*=expand]").TextAreaExpander();
+        jQuery("info_note_txt[class*=expand]").TextAreaExpander();
+        if (variable == "nego_pipeline") {
+            jQuery('#execute_id').show();
+        }
+        if (variable == "inters_pipeline") {
+            jQuery('#approve_id').show();
+        }
+    });// JavaScript Document
+</script>
+<iframe id="lease_projection_frame" name="lease_projection_frame" style="display: none">
+</iframe>
+<script>
+    /* The purpose of this code is to summ all rent_revenues of rent schedules and display final total
+     rent_revenue_input = 0
+     jQuery(".rentschedule_rent_revenue").each(function(){
+     rent_revenue_val = jQuery(this).val().replace(",", "")
+     rent_revenue_input = rent_revenue_input + parseInt(rent_revenue_val)
+     })
+     rent_revenue_input = formatMoney(rent_revenue_input, 2, '.', ',')
+     jQuery("#rent_schedule_rent_revenue_input").val(rent_revenue_input)
+     if (variable == "nego_pipeline") {
+     jQuery('#execute_id').show();
+     }
+     if (variable == "inters_pipeline") {
+     jQuery('#approve_id').show();
+     }*/
+</script>

@@ -1,0 +1,142 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<%
+note_collection = @note
+variance_task_document = @variance_task_document
+month_folder = @month_folder
+accounts_folder = @accounts_folder
+year_folder = @year_folder
+month_collection = @month
+%>
+<% variance_task_cap_exp_12_month,cap_or_cash = !@variance_task_document_month_budget.nil? ? [@variance_task_document_month_budget,"cash_flow"] : [@variance_task_document_capital_improvement,"cap_exp"] %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+	last_renderer == 'variances';
+  partial_page="variances"
+  active_call="performance_review"
+</script>
+  <% unless pdf_collection %>
+    <div class="pdf_link_financial" style="right:142px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+				 <span style=" border-right-color: #000000;border-right-width: 1px;border-right-style:solid;">&nbsp;</span>
+		</div>
+		<script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+ <div class="executiveinputrow" style="z-index:22000;position:absolute;top:186px;right:0;">
+      <div class="notesalelf"></div>
+      <div class="executiveinputmid" id="id_for_variance_threshold" style="top:-76px;padding-right:-1px;">
+        <ul class="inputcoll2" id="cssdropdown">
+          <li class="headlink3" id="id_for_modify_threshold" style ="margin-top:6px;">
+            <div class="morebutton_label">
+                <a href="/real_estates/add_property/<%=note_collection.portfolio_id%>/?property_id=<%=note_collection.id%>&call_from_variances=true" method="put" style="width:119px;*width:128px;width:128px\9;height:16px;border:0px;">Variance Thresholds</a>
+
+						<%#= link_to "Variance Thresholds", {:action =>'add_property',:controller => "real_estates",:id =>note_collection.portfolio_id,:property_id=>note_collection.id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:call_from_variances=>true,:tl_month=>params[:tl_month],:document_id=>params[:document_id],:month=>params[:month],:period=>params[:period],:tl_period=>params[:tl_period]},{:id => "edit_note_box_#{note_collection.id}"}%></div>
+					<script>//new Control.Modal($("edit_note_box_<%#=note_collection.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+          <span></span>
+          </li>
+        </ul>
+      </div>
+      <div class="notesalelf" style="z-index:-1"></div>
+    </div>
+		<%end%>
+<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+
+<%if note_collection %>
+<div style="padding-left: 108px;" class="rhscontentrow">
+<script>
+	open_variance_for_remote_property(<%= note_collection.portfolio_id%>,<%= note_collection.id%>,'true',<%=month_collection%>,'<%= request.request_uri %>','<%= cap_or_cash %>')</script>
+</div>
+<%#else%>
+<%#if variance_task_document || @without_variance_task_document%>
+<%#text = variance_task_document.nil? ? "Please create a variance task to add explanations at variance task zone" : "Click to view explanations at variance task zone "%>
+      <!--  <div style="padding-left: 108px;" class="rhscontentrow">
+                <%#if variance_task_document && !variance_task_document.nil?%>
+                   <%#if variance_task_cap_exp_12_month.variance_task.user_id == current_user.id%>
+											<script>//open_edit_variance_task(<%#=variance_task_cap_exp_12_month.id %>,<%#= month_folder.portfolio_id%>,<%#= month_folder.id%>,'true',<%#=month_collection%>,'<%#= request.request_uri %>','<%#= cap_or_cash %>',<%#= note_collection.id%>)</script>
+											<%#else%>
+											<script>//open_edit_variance_task(<%#=variance_task_cap_exp_12_month.id %>,<%#= month_folder.portfolio_id%>,<%#= month_folder.id%>,'true',<%#=month_collection%>,'<%#= request.request_uri %>','<%#= cap_or_cash %>',<%#= note_collection.id%>)</script>
+									<%#end%>
+								<%#lse%>
+									<script>//open_new_variance_task(<%#=@without_variance_task_document.id %>,<%#= month_folder.portfolio_id%>,<%#= month_folder.id%>,'true',<%#=month_collection%>,'<%#= request.request_uri %>',<%#= note_collection.id%>)</script>
+								<%#end%>
+                </div> -->
+<%else%>
+        <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+                    <%if year_folder.nil? && accounts_folder%>
+             <span style="font-size:13px;">Please upload Accounts files at
+
+						 <!--<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= accounts_folder.id %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+						 <%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+						 .</span>
+                        <%elsif month_folder%>
+             <span style="font-size:13px;">Please upload Accounts files at
+
+						 <!--<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#=month_folder.id %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+						 <%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						 .</span>
+            <%elsif  year_folder%>
+             <span style="font-size:13px;">Please upload Accounts files at
+
+						 <!-- <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= year_folder.id %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+						 <%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						 .</span>
+            <%end%>
+                </div>
+<%end%>
+<%#end%>
+<script>
+    <% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%=(Date.today.month == 1 && (params[:period] != "7" &&  params[:tl_period] != "7")) ? 24 : (navigation_start_position ? (navigation_start_position + 1) : 6) %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').hide();
+  jQuery('#yrForecast').hide();
+  jQuery('#weekly_display').hide();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+	   jQuery('#quarterly_message').hide();
+
+</script>

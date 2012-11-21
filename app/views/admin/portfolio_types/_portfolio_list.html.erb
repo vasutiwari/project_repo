@@ -1,0 +1,40 @@
+<div class="adpsectiontitle" id >Portfolio Types:</div>
+<div class="adprowwrapper">
+	<%unless portfolio_type.empty?%>
+		<div class="tabulardataborder">
+		<div class="adpsectionheadblue" style="background-image:none">
+			<div class="adptabularcol1" style="width:100px;">S.No</div>
+			<div class="adptabularcol1" style="width:350px;">Portfolio Type</div>
+			<!--<div class="adptabularcol1" style="width:150px;">Action</div>-->
+			<div class="adptabularcol1" style="width:250px;">Master Template</div>
+			<div class="adptabularcol1" style="width:100px;">Threshold Setup </div>
+		</div>
+		<% i = 0 %>
+		<% portfolio_type.each_with_index do |p, count| %>
+			<% class_name = (count % 2 == 0) ? 'adpsectionheadwhite' : 'adpsectionheadlightgray' %>
+			<% bg_img = (count % 2 == 0) ? 'adp_white_bg1.gif' : 'adp_lightgray_bg1.gif' %>
+			<!--<div class=<%=class_name%> style="background-image:url(/images/<%= bg_img %>)">-->
+			<div class=<%=class_name%> style="background-image:none">
+			<div class="adptabularcol1" style="width:100px;"><%= i+= 1 %></div>
+			<div class="adptabularcol1" style="width:350px;"><span title="<%= p.name %>"><%= p.name %></span></div>
+			<!--<div class="adptabularcol1" style="width:150px;"><%#=link_to image_tag("/images/edit.png", :alt=>"Edit", :border=>"0", :title=>'Edit'), edit_admin_portfolio_type_path(p.id)%> &nbsp; <%#=link_to image_tag("/images/new_icon_delete.gif", :alt=>"Delete", :border=>"0", :title=>'Delete'), admin_portfolio_type_path(p.id), :confirm => 'Are you sure, you want to delete', :method => :delete %></div>-->
+			<div class="adptabularcol1" style="width:250px;"><% if p.master_folders.blank? && p.master_filenames.blank? %><%= link_to "Create", edit_admin_master_folder_path(p.id) %><%else%><%= link_to "Edit", edit_admin_master_folder_path(p.id) ,:class=>"bluecolor"%><%end%></div>
+
+   <%if p.id ==2%>
+			<div class="adptabularcol1" style="width:100px;">
+             <%= link_to "Set",{:controller=>"asset_managers",:action=>"add_variance",:id=>p.id},:class=>"bluecolor",:id=>"add_variance_#{p.id}" %>
+            <script>new Control.Modal($('add_variance_<%=p.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>			
+			</div>
+		<%end%>	
+			
+			</div>
+		<%end%>
+		</div>
+			<div class="bottomrow">
+				<%=will_paginate portfolio_type,:renderer => 'RemoteLinkRenderer'  %>
+			</div>
+	<%else%>
+		<h3>There are no portfolio type is available to display !!</h3>
+	<%end%>
+</div>
+<br class="spacer" />

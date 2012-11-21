@@ -1,0 +1,60 @@
+<script type="text/javascript">
+  yield_calender('true');
+  current_real_id = '<%=params[:property_id]%>';
+</script>
+<div class="fields">
+  <div class="close" onmouseover="jQuery(this).css('background-color','#f6f6f6');" onmouseout="jQuery(this).css('background-color','#ffffff');">
+    <div class="parking_suite lsrowwrapper" style="padding-top:0"><span class="closeme"><%= link_to_remove_parking_fields "X", f%></span>Parking <%=@rent_parking_charges%></div>
+    <div class="rent-col-3">
+      <div class="rentnamerowhead boldtxt">Reserved</div>
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:42px">#</div>
+        <div class="rentname" style="width:97px;">$/Space/Mo</div>
+        <div class="rentname" style="width:97px;">Tot $/Mo</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%= f.text_field :reserved_number ,:type=>"text", :class=>"lstextfield", :style=>"width:40px",:onblur=>"parking_calc(jQuery(this).attr('id'),current_real_id)"%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :reserver_amount_per_space_per_month ,:type=>"text", :class=>"lstextfield", :style=>"width:95px;",:precision => 2,:onblur=>"parking_calc(jQuery(this).attr('id'),current_real_id)"%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :reserved_total_amount ,:type=>"text", :class=>"lstextfield", :style=>"width:95px;",:precision => 2,:readonly=>true%>
+        </div>
+      </div>
+    </div>
+    <div class="rent-col-4">
+      <div class="rentnamerowhead boldtxt">Unreserved</div>
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:42px">#</div>
+        <div class="rentname" style="width:97px;">$/Space/Mo</div>
+        <div class="rentname" style="width:97px;">Tot $/Mo</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%= f.text_field :unreserved_number ,:type=>"text", :class=>"lstextfield", :style=>"width:40px",:onblur=>"parking_calc(jQuery(this).attr('id'),current_real_id)"%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :unreserved_amount_per_space_per_month ,:type=>"text", :class=>"lstextfield", :style=>"width:95px;",:precision => 2,:onblur=>"parking_calc(jQuery(this).attr('id'),current_real_id)"%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :unreserver_total_amount ,:type=>"text", :class=>"lstextfield", :style=>"width:95px;",:precision => 2,:readonly=>true%>
+        </div>
+      </div>
+    </div>
+    <div class="rent-col-5">
+      <div class="rentnamerowhead" style="border-color:#eee;">&nbsp;</div>
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:107px;">Total Parking/Mo($)</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%= f.text_field :total_monthly,:type=>"text", :class=>"lstextfield", :style=>"width:105px;",:precision => 2,:readonly=>true%>
+        </div>
+      </div>
+    </div>
+    <div class="clear"></div>
+  </div>
+</div>
+<%@rent_parking_charges +=1 %>

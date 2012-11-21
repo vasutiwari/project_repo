@@ -1,0 +1,179 @@
+<style>
+.exec_class {
+    cursor: pointer;
+    min-height: 70px;
+}
+</style>
+<%= javascript_include_tag :ckeditor %>
+<div class="wrsTab wrsTab-das fltLeft">
+      <ul>
+     <!--   <li id="financialinfo1" class="wrsTabSelect-das" onclick="selectTab('financialinfo', 'financialinfoContent', 'wrsTabSelect-das', 3, '1')"><a href="#"  class="financial_info_tab" value=4>&nbsp; YTD &nbsp;</a></li>-->
+        <li id="financialinfo1" class="wrsTabSelect-das financial_info_tab_li"><a href="javascript:void(0);"  id="ytd_tab" class="financial_info_tab loader_event" value=4>&nbsp; YTD &nbsp;</a></li>
+        <!--<li id="financialinfo2" onclick="selectTab('financialinfo', 'financialinfoContent', 'wrsTabSelect-das', 3, '2')"><a href="#" class="borLRG financial_info_tab" value=11>Trailing 12 Months</a></li>-->
+        <li id="financialinfo2" class="financial_info_tab_li"><a href="javascript:void(0);" class="borLRG financial_info_tab loader_event" value=11>Trailing 12 Months</a></li>
+       <!--  <li id="financialinfo3"  onclick="selectTab('financialinfo', 'financialinfoContent', 'wrsTabSelect-das', 3, '3')"><a href="#" class="wth53 financial_info_tab" value=3>Last Year</a></li>-->
+        <li id="financialinfo3" class="financial_info_tab_li"><a href="javascript:void(0);" class="wth53 financial_info_tab loader_event" value=3>Last Year</a></li>
+      </ul>
+</div>
+<div class="clearfloat"></div>
+<div class="clearfloat"></div>
+<div class="box-1col borRLT0px">
+<%portfolio = Portfolio.find_by_id(params[:portfolio_id])%>
+<%property_id = params[:property_id].present? ? params[:property_id] : portfolio.try(:real_estate_properties).try(:first).try(:id)%>
+<%graph_property_id = property_id%>
+<%graph_portfolio_id = params[:portfolio_id]%>
+<%first_two_digit_year=Time.now.year.to_s.first(2)%>
+<%if !params[:tl_period]%>
+<%params[:tl_period] = "4"%>
+<%end%>
+<%find_data_for_operating_trend%>
+<%find_data_for_noi_variances%>
+<%financial_ytd_occupancy_display%>
+<%
+calc_for_financial_data_display
+if (params[:tl_period] == "4" || params[:tl_period] == "11")
+store_income_and_cash_flow_statement
+elsif params[:tl_period] == "3"
+params[:tl_year] = Date.today.prev_year.year
+store_income_and_cash_flow_statement_for_prev_year
+end
+%>
+<div class="dashboard_graphs">
+<%=render :partial => "dashboard_graphs",:locals=>{:operating_trend_rev =>@operating_trend['op rev'], :operating_trend_exp=>@operating_trend["operating expenses"],:operating_trend_noi=>@operating_trend['noi'],:operating_trend_cap=>@operating_trend['capital expenditures'],:operating_trend_cash => @operating_trend['net cash flow'] , :operating_trend_maint => @operating_trend['maintenance projects'],:month_array=>@month_array,:month_array_string=>@month_array_string,:financial_month=>@financial_month,:graph_property_id=>graph_property_id,:graph_portfolio_id=>graph_portfolio_id,:first_two_digit_year=>first_two_digit_year,:property_id=>property_id,:value_noi =>@value_noi,:month_array_noi=>@month_array_noi,:positive_variance=>@positive_variance,:negative_variance=>@negative_variance,:rent_sqft => @rent_sqft,:occupied_percentage => @occupied_percentage,:sqft_variance => @sqft_variance,:sqft_var_percent => @sqft_var_percent,:diff => @diff,:operating_statement =>@operating_statement,:note => @note,:sqft_var_percent_check => @sqft_var_percent_check}%>
+</div>
+
+</div>
+<div class="clearfloat"></div>
+<div class="box-1col">
+  <%if !@operating_statement.nil? && @operating_statement.length >1 %>
+ 	  <!-- <div class="fltrt padR5"><span class="select-lbl">Value</span>
+        <select name="">
+          <option selected="selected">Per SqFt</option>
+        </select>
+      </div> -->
+  <%end%>
+
+  <div class="box-title"><span class="title">Actual vs Budget Comparison</span></div>
+	<div>
+	<table width="100%" class="padL5 padR5" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+  <%find_month_options_values%>
+  <%calc_for_financial_data_display%>
+  <% if params[:portfolio_id].present?  && !params[:property_id].present?
+    @portfolio = Portfolio.find_by_id(params[:portfolio_id])
+    @resource = "'Portfolio'"
+    @note = @portfolio.real_estate_properties.first
+  %>
+  <%end%>
+  <%if @actual == true%>
+    <%params[:tl_period] = "4"
+    store_income_and_cash_flow_statement%>
+  <%end%>
+	  	<td id="actual" valign="top" style="padding-right: 10px;">
+				<div id="actual_budget_item" >
+  <%= render :partial=> "actual_budget_comparison",:locals=>{:note_collection=>@note,:operating_statement => @operating_statement,:expense_title=>@expense_title,:portfolio_obj=>params[:portfolio_id],:property_obj=>property_id,:month_string=>@month_string,:year_string=>@year_string,:quarter_string=>@quarter_string,:financial_month=>@financial_month,:financial_year=>@financial_year}%>
+	</div>
+	</td>
+  <% if params[:portfolio_id].present?  && !params[:property_id].present?
+    @portfolio = Portfolio.find_by_id(params[:portfolio_id])
+    @resource = "'Portfolio'"
+    @note = @portfolio.real_estate_properties.first
+  %>
+  <%end%>
+  <%if @actual1 == true%>
+    <%params[:tl_period] = "5"
+    store_income_and_cash_flow_statement_for_month(month_val=nil,year=nil)%>
+  <%end%>
+	<td id="budget" valign="top">
+<div id="actual_budget_item_part">
+  <%= render :partial=> "actual_budget_comparison_part",:locals=>{:note_collection=>@note,:operating_statement => @operating_statement,:expense_title=>@expense_title,:portfolio_obj=>params[:portfolio_id],:property_obj=>params[:property_id],:month_string=>@month_string,:year_string=>@year_string,:quarter_string=>@quarter_string,:financial_month=>@financial_month,:financial_year=>@financial_year}%>
+		</div>
+			</td>
+		</tr>
+	</table>
+</div>
+  <div class="nospace"></div>
+</div>
+<%= render :partial => "dashboard/exec_summary_for_leasing_info" %>
+<script>
+jQuery(".financial_info_tab").click(function(){
+jQuery(".financial_info_tab_li").removeClass("wrsTabSelect-das")
+jQuery(this).parent("li").addClass("wrsTabSelect-das")
+ jQuery.ajax({
+                          url: '/dashboard/dashboard_graphs',
+																																				 data:'tl_period='+ jQuery(this).attr("value")+'&portfolio_id='+<%=params[:portfolio_id]%>+'&property_id='+<%=property_id%>,
+
+                                                                                success: function(data){
+																																								load_completer();
+																																										jQuery(".dashboard_graphs").html(data)
+                                                                                }
+            });
+});
+  jQuery('#year_options1').val(<%= @financial_year%>);
+  jQuery('#year_options').val(<%= @financial_year%>);
+  jQuery('#month_options1').val(<%= @financial_month%>);
+  jQuery('#month_options').val(<%= @financial_month%>);
+			jQuery(document).ready(function() {
+
+			if (jQuery('#textarea_div').html() != 'Click here to Enter Executive Summary' )
+      {
+  			jQuery('#textarea_div').removeClass('clickH');
+        jQuery('#textarea_div').addClass('exec_class');
+			}
+      else
+      {
+			  jQuery('#textarea_div').removeClass('exec_class');
+        jQuery('#textarea_div').addClass('clickH');
+			}
+			<%if params[:ckeditor]%>
+			  jQuery(window).scrollTop(1000);
+			<%end%>
+			<%if params[:access]%>
+			flash_writter("You don't have access to view this Property")
+			<%end%>
+			<%if params[:port_access]%>
+			  flash_writter("You don't have access to view this Portfolio")
+			<%end%>});
+/*
+if (CKEDITOR.instances['page_notes_editor'])
+{
+   CKEDITOR.instances['page_notes_editor'].destroy();
+}
+				CKEDITOR.replace( 'page_notes_editor', {
+					extraPlugins : 'autogrow',
+					autoGrow_maxHeight : 800,
+					removePlugins : 'resize'
+				});
+*/
+
+function expand($tbl){
+	if($tbl == "actual"){
+		document.getElementById("budgetTbl").className = "";
+		document.getElementById("actualTbl").className = "visibleTbl table hovertr widt925";
+		document.getElementById("budget").style.display = "none";
+		document.getElementById("actualHeader").className = "visibleHeader";
+	}
+	else if($tbl == "budget"){
+		document.getElementById("actualTbl").className = "";
+		document.getElementById("budgetTbl").className = "visibleTbl table hovertr";
+		document.getElementById("actual").style.display = "none";
+		document.getElementById("budgetHeader").className = "visibleHeader";
+	}
+}
+
+function restore($tbl){
+	if($tbl == "actual"){
+		document.getElementById("budgetTbl").className = "table hovertr";
+		document.getElementById("actualTbl").className = "table hovertr";
+		document.getElementById("actualHeader").className = "table hovertr";
+		document.getElementById("budget").style.display = "table-cell";
+	}
+	else if($tbl == "budget"){
+		document.getElementById("actualTbl").className = "table hovertr";
+		document.getElementById("budgetTbl").className = "table hovertr ";
+		document.getElementById("budgetHeader").className = "table hovertr";
+		document.getElementById("actual").style.display = "table-cell";
+	}
+}
+
+</script>

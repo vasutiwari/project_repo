@@ -1,0 +1,21 @@
+<% content_for :title, 'AMP - Asset manager Creation' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <div class="middlewrapper2">
+    <div class="sectiontitle"><span style="float:left;">Create Asset Manager</span> <span style="float: right"><%=link_to "<<< Back <<<",admin_asset_managers_path%></span></div>
+    <div class="rowwrapper"><font color="red"><%=  flash.now[:error] %></font>
+      <%= form_for :user, :url => { :action => :create } do -%>
+        <%=render :partial=>"form" ,:locals=>{:user_collection => @user}%>
+      <%end%>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><a onclick="document.forms[0].submit();" style="cursor: pointer;"><img src="/images/btn_submit.gif" width="117" height="32" alt="Submit" border="0" /></a></div>
+    </div>
+  </div>
+</div>
+
+
+

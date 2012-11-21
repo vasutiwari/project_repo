@@ -1,0 +1,14 @@
+#~ page.replace_html 'profile_last_changed',"Last updated: #{@user.updated_at.strftime("%b %d, %Y")}"
+#~ page.call("do_user_name_update","#{params[:field]}","#{params[:name]}")
+if params[:field] == "name"
+  page.replace_html "replace_user_name_render",:partial => "collaboration_hub/user_name_render",:locals => {:user_collection => @user}
+elsif params[:field] == "comment"
+  page.replace_html "description_render",:partial => "collaboration_hub/description_render",:locals => {:user_collection => @user}
+elsif params[:field] == "phone_number"
+  page.replace_html "phone_number_render",:partial => "collaboration_hub/edit_phone_number",:locals => {:user_collection => @user}
+elsif params[:field] == "designation"
+  page.replace_html "job_title_render",:partial => "collaboration_hub/edit_job_title",:locals => {:user_collection => @user}
+else
+  page.replace_html "profile_details",:partial => "collaboration_hub/render_profile",:locals => {:user_collection => @user}
+end
+page.replace_html "profile_last_changed",:partial => "collaboration_hub/render_updated_date",:locals => {:user_collection => @user}

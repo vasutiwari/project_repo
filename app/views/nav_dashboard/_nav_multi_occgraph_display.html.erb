@@ -1,0 +1,102 @@
+		<%if !(occ_floor.nil? || occ_floor.empty?) %>
+ <div class="floatR ocupancyTable">
+            	<table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+                <tbody>
+                	<tr class="fb-tr-head">
+                    	<th class="bdrLde td50L">Floor Plan, Units</th>
+                        <th class="td170L">
+                        	<div>Occupancy <%= timeline_msg%></div>
+                            <div class="grTxt">(Scale: 0%-100%)</div>
+                         </th>
+                        <th class="td50">Vacant</th>
+                    </tr>
+                  </tbody>
+                </table>
+								<div class="overflow130">
+								<%if occ_floor.try(:size) <= 4 %>
+                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb table">							
+								<%for i in 0...occ_floor.try(:size) %>
+								<tbody>
+                	<tr class="fb-tr-head">
+                    	<td class="bdr-lt-gry td55L"><%=occ_floor[i] %>, <%=occ_floor_plan[i] %></td>
+											 <% floor_plan = occ_floor_plan[i].present? ? occ_floor_plan[i].to_f : 1 %>
+                        <%occu_per = "#{100 - (suite_plan[i] .to_f * 100 / floor_plan).round(2)}%" %>
+                        <td class="bdr-lt-gry td170L">
+                        	<div class="valuebar">
+                        	<div class="greenbar">																								
+                        		<span><%= occu_per %></span> 
+                                <img src="/images/greenbar.jpg"  height="15px "width="<%= bar_percentage_calc(i,'summary_occupancy_per',occu_per)%>" title="" alt="" />
+                            </div>
+                        </div>
+                        </td>
+                        <td align="right" class="bdr-lt-gry bdr-rt-gry" style="width:43px;"><%= (suite_plan[i].nil? || suite_plan[i].blank?) ? 0 : suite_plan[i] %></td>
+                    </tr>
+                </tbody>
+								<%end%>							
+                </table>
+								</div>
+                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+                <tbody>
+                	<tr class="fb-tr-head">
+                    	<th class="bdrLde td50L">Total = <%="#{occ_total_floor}" %></th>
+											 <%total_floor = occ_total_floor.present? ? occ_total_floor.to_f : 1 %>
+											 <%tot_occu_per = "#{100 - (total_suite.to_f* 100 / total_floor).round(2)}%" %>
+                        <th class="td175L">
+                        <div class="valuebar">
+                        	<div class="greenbar">
+                        		<span><%= tot_occu_per %></span> 
+                                <img src="/images/greenbar.jpg"  height="15px "width="<%= bar_percentage_calc(i,'summary_occupancy_per',tot_occu_per)%>" align="left" title="" alt="" />
+                            </div>
+                        </div>
+                        </th>
+                        <th class="td50"> <%= total_suite %></th>
+                    </tr>
+                  </tbody>
+                </table> 
+							<%else%>
+                <div class="overflow130">
+								                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb table">							
+								<%for i in 0...occ_floor.try(:size) %>
+								<tbody>
+                	<tr class="fb-tr-head">
+                    	<td class="bdr-lt-gry td55L"><%=occ_floor[i] %>, <%=occ_floor_plan[i] %></td>
+											 <% floor_plan = occ_floor_plan[i].present? ? occ_floor_plan[i].to_f : 1 %>
+                        <%occu_per = "#{100 - (suite_plan[i] .to_f * 100 / floor_plan).round(2)}%" %>
+                        <td class="bdr-lt-gry td170L">
+                        	<div class="valuebar">
+                        	<div class="greenbar">																								
+                        		<span><%= occu_per %></span> 
+                                <img src="/images/greenbar.jpg"  height="15px "width="<%= bar_percentage_calc(i,'summary_occupancy_per',occu_per)%>" title="" alt="" />
+                            </div>
+                        </div>
+                        </td>
+                        <td align="right" class="bdr-lt-gry bdr-rt-gry" style="width:43px;"><%= (suite_plan[i].nil? || suite_plan[i].blank?) ? 0 : suite_plan[i] %></td>
+                    </tr>
+                </tbody>
+								<%end%>							
+                </table>
+                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+                <tbody>
+                	<tr class="fb-tr-head">
+                    	<th class="bdrLde td50L">Total = <%="#{occ_total_floor}" %></th>
+											 <%total_floor = occ_total_floor.present? ? occ_total_floor.to_f : 1 %>
+											 <%tot_occu_per = "#{100 - (total_suite.to_f* 100 / total_floor).round(2)}%" %>
+                        <th class="td175L">
+                        <div class="valuebar">
+                        	<div class="greenbar">
+                        		<span><%= tot_occu_per %></span> 
+                                <img src="/images/greenbar.jpg"  height="15px "width="<%= bar_percentage_calc(i,'summary_occupancy_per',tot_occu_per)%>" align="left" title="" alt="" />
+                            </div>
+                        </div>
+                        </th>
+                        <th class="td50"> <%= total_suite %></th>
+                    </tr>
+                  </tbody>
+                </table> 
+							<%end%>
+        </div>	
+				<%else%>
+				<div class="graph floatR">
+			<h2 class="lineH194 textgry textAC">No data available</h2>
+			</div>
+<%end%>

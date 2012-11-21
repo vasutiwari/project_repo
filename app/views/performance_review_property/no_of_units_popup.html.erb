@@ -1,0 +1,60 @@
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+<%if params[:financial_sub]%>
+   <%params[:financial_sub] = params[:financial_sub].gsub("'","?")%>
+ <%end%>
+		<%if @rep.try(:class).eql?(Portfolio) && @rep.gross_rentable_area.eql?(0)%>
+	<div id="sbox-content" style="visibility: visible; opacity: 1;color:black;width:550px;" class="sbox-content-iframe">
+		<div class="dialog_light_center">
+			Please add No Of Units for all the properties of the Portfolio for Per Unit.
+		</div>
+		</div>
+	<%else%>
+	<%= form_tag({:controller=>"performance_review_property",  :action => "no_of_units_popup", :id=>@rep.id ,:from =>params[:from],:financial_sub=>params[:financial_sub],:financial_subid =>params[:financial_subid]}, :target => "upload_frame", :id => "upload_form1")  do %>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black;width:550px;" class="sbox-content-iframe">
+		<div class="dialog_light_center">
+				<div class="dialog_second_center">
+					<div class="uploadwrapper">
+						<div class="uploadheaderow bottompadding">
+							<div class="uploadheadercoll">Confirm Value</div>
+						</div>
+						<div class="uploadrow" style="width:485px;">
+							<div class="uploadlabelrow">
+								<div class="newfolder_fieldlabel" style="margin-top:3px;">No Of Units:</div>
+								<div class="newfolder_fieldinput" style="width:226px;">
+									<input type="text" class="newfolder_fieldinput" name="no_of_units" id="no_of_units" value='<%= get_no_of_units(@rep).eql?(0) ? "" : get_no_of_units(@rep) %>' />
+								</div>
+								</div>
+				     <div style="color:#666666;font-size:11px;padding-top:27px;width:485px;">
+							You can edit this value later in the Property Settings accessible via the Physical Details Tab.
+							</div>
+						</div>
+						<span id="success_error_msg" style="font-size:12px;padding-left:33px;"></span>
+						<div class="uploadbutwrapper">
+							<div style="margin-left: 92px;" class="greenbutton">
+								<a href="javascript:;" onclick="if(blank_gross_rentable_area('no_of_units')) { jQuery('#upload_form1').submit(); }" id="fol_button">Confirm</a><span>&nbsp;</span>
+							</div>
+	
+							<div class="graybutton"><a href="javascript:;" onclick="Control.Modal.close(); performanceReviewCalls('<%=params[:from]%>',{financial_sub:'<%=params[:financial_sub]%>',financial_subid:'<%=params[:financial_subid]%>'},'undefined','undefined')">Cancel</a><span>&nbsp;</span></div><br/></br/><br/>
+			
+						</div>
+					</div>
+			</div>
+		</div>
+  </div>
+	<% end %>
+		<% end %>
+	<iframe id="upload_frame" name="upload_frame" style="display: none"></iframe>
+	<a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+<script>
+	jQuery(document).ready(function() {
+		jQuery("a#sbox-btn-close").click(function(){
+			performanceReviewCalls('<%=params[:from]%>',{financial_sub:'<%=params[:financial_sub]%>',financial_subid:'<%=params[:financial_subid]%>'},'undefined','undefined')
+			return false;
+		});
+	})
+</script>

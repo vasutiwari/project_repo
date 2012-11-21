@@ -1,0 +1,9 @@
+if !params[:value].blank?
+  f = MasterFile.find(params[:id])
+  f.update_attributes(:filename=>params[:value])
+  page.call("do_file_update","#{params[:id]}","#{f.filename}", 0)
+  page.call "flash_writter", "File name has been changed."
+else
+  page.call("do_file_update","#{params[:id]}","#{params[:value]}", 0)
+  page.call "flash_writter", "File name cant be blank."
+end

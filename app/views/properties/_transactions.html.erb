@@ -1,0 +1,53 @@
+<div class="glheadcol2" style="z-index:18900;margin-bottom: 0px;padding-bottom: 0px;border-bottom: none;"><span class="gl_for_title">
+            <div class="executivesubheadcol"><%=@income_cash_flow_item.account_code%> - <%=@income_cash_flow_item.title%></div>
+            </span>
+            <div class="executiveinputrow" style="z-index:1600;">
+              <div class="notesalelf"></div>
+              <div class="executiveinputmid" id="id_for_variance_threshold"> </div>
+              <div class="notesalelf" style="z-index:-1"></div>
+            </div>
+          </div>
+					
+	<%if @transaction_details && !@transaction_details.empty?%>				
+		<div class="gl_tablewrapper" style="background-image: url(/images/asset_financials_tablebg_gl.png); border:1px solid #EEEEEE;">
+      <div style="z-index: 1450;" class="renttableheaderow headerBlueBg">
+        <div class="gl_tablelabel">Post Date</div>
+        <div class="gl_tablelabel2">Description</div>
+        <div class="gl_tablelabel3">Notes/Remarks</div>
+        <div class="gl_tablelabel4">Debits $</div>
+        <div class="gl_tablelabel5">Credit $</div>
+        <div class="gl_tablelabel6">Balance $</div>
+      </div>
+      <div style="z-index: 1450;" class="tablecontentrow gl_darkgrayrow">
+        <div class="gl_tablelabel7">&nbsp;</div>
+        <div class="gl_tablelabel8">==Beginning Balance==</div>
+        <div class="gl_tablelabel9"><%=display_currency_overview(find_beginning_balance)%></div>
+      </div>
+			
+		<div> 	
+		<div class="gl_multboxarea" style="height:<%=(@transaction_details && @transaction_details.length >11 ? "301 px" : "auto")%>; overflow-x:hidden;" onmouseover="jQuery('.gl_multboxarea').css('overflow-y','scroll');" onmouseout="jQuery('.gl_multboxarea').css('overflow-y','hidden');">
+		<%@transaction_details.compact.each do |transaction|%>
+      <div style="z-index: 1300;" class="tablecontentrow">
+        <div class="gl_tablelabel"><%if transaction.post_date.nil? || transaction.post_date.blank?%>&nbsp;<%else%><%=transaction.post_date.to_date.strftime('%m/%d/%y') %><%end%></div>
+        <div class="gl_tablelabel2" title="<%=transaction.discription%>"><%if transaction.discription.nil? || transaction.discription.blank?%>&nbsp;<%else%><%= lengthy_word_simplification(transaction.discription, 20, 0) %><%end%></div>
+        <div class="gl_tablelabel3"><%if transaction.notes.nil? || transaction.notes.blank?%>&nbsp;<%else%><%=transaction.notes%><%end%></div>
+        <div class="gl_tablelabel4"><%if transaction.debit.nil? || transaction.debit == '0'%>&nbsp;<%else%><%=display_currency_overview(transaction.debit.to_f)%><%end%></div>
+        <div class="gl_tablelabel5"><%if transaction.credit.nil? || transaction.credit == '0'%>&nbsp;<%else%><%=display_currency_overview(transaction.credit.to_f)%><%end%></div>
+        <div class="gl_tablelabel6"><%=display_currency_overview(find_transaction_balance(transaction))%></div>
+      </div>
+		<%end%>
+		</div>
+
+      <div style="z-index: 1450;" class="tablecontentrow gl_darkgrayrow">
+        <div class="gl_tablelabel7">&nbsp;</div>
+        <div class="gl_tablelabel8">==Ending Balance==</div>
+        <div class="gl_tablelabel9"><%=display_currency_overview(@beginning_cash.to_f)%></div>
+      </div>
+			</div>
+
+<%else%>
+         <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+          <span style="font-size:13px;">Data Unavailable</span>
+      </div>
+<%end%>
+

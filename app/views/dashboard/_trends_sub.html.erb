@@ -1,0 +1,54 @@
+<%@trend_graph = true%>
+<div class="wrsTab wrsTab-das fltLeft">
+  <ul>
+    <li id="financialinfo1" class="wrsTabSelect-das financial_info_tab_li"><a href="javascript:void(0);"  id="ytd_tab" class="financial_info_tab loader_event trend_ytd" value=4>&nbsp; YTD &nbsp;</a></li>
+    <li id="financialinfo2" class="financial_info_tab_li"><a href="javascript:void(0);" class="borLRG financial_info_tab loader_event trend_trailing" value=11>Trailing 12 Months</a></li>
+    <li id="financialinfo3" class="financial_info_tab_li"><a href="javascript:void(0);" class="wth53 financial_info_tab loader_event trend_last_year" value=3>Last Year</a></li>
+  </ul>
+</div>
+<div class="clearfloat"></div>
+<div class="clearfloat"></div>
+<div id="trend_sub">
+  <%=render :partial => "trend_grouping",:locals=>{:operating_trend_rev =>@operating_trend['op rev'], :operating_trend_exp=>@operating_trend["operating expenses"],:operating_trend_noi=>@operating_trend['noi'],:operating_trend_cap=>@operating_trend['capital expenditures'],:operating_trend_cash => @operating_trend['net cash flow'] , :operating_trend_maint => @operating_trend['maintenance projects'],:month_array=>@month_array,:month_array_string=>@month_array_string,:financial_month=>@financial_month,:graph_property_id=>graph_property_id,:graph_portfolio_id=>graph_portfolio_id,:first_two_digit_year=>first_two_digit_year,:property_id=>property_id,:value_noi =>@value_noi,:month_array_noi=>@month_array_noi,:positive_variance=>@positive_variance,:negative_variance=>@negative_variance,:rent_sqft => @rent_sqft,:occupied_percentage => @occupied_percentage,:sqft_variance => @sqft_variance,:sqft_var_percent => @sqft_var_percent,:diff => @diff,:operating_statement =>operating_statement,:note => @note,:trend_graph => true,:operating_trend_graph => @operating_trend,:operating_trend_graph1 => @operating_trend1,:sqft_var_percent_check => @sqft_var_percent_check}%>
+</div>
+<!--tooltip-->
+<%tmp_prop_var = (session[:property__id].present? && session[:portfolio__id].blank?) ? '&portfolio_id='+params[:portfolio_id]+'&property_id='+@property_id : '&portfolio_id='+params[:portfolio_id] %>
+ <script>
+  jQuery(".financial_info_tab").click(function(){
+    jQuery(".financial_info_tab_li").removeClass("wrsTabSelect-das");
+    jQuery(this).parent("li").addClass("wrsTabSelect-das");
+    params = {}
+    params.tl_period = jQuery(this).attr("value");
+    params.trend_graph = true;
+    params.selected_link = '<%= params[:selected_link].strip %>';
+    params.parent_title= '<%=params[:parent_title]%>'
+<%if session[:property__id].present? && session[:portfolio__id].blank?%>
+      params.portfolio_id = <%=params[:portfolio_id] %>;
+      params.property_id = <%=@property_id%>;
+<%else%>
+      params.portfolio_id = <%=params[:portfolio_id] %>;
+<%end%>
+    jQuery.ajax({
+      url: '/dashboard/trends',
+      data:params,
+      beforeSend: function(){
+        load_writter();
+      },
+      success: function(data){
+        load_completer();
+        //jQuery(".dashboard_graphs").html(data)
+      }
+    });
+  });
+  var period = '<%= params[:tl_period] %>';
+  var tmp_hash = {"4":"trend_ytd","3":"trend_last_year","11":"trend_trailing"}
+  jQuery(".financial_info_tab_li").removeClass("wrsTabSelect-das");
+  jQuery("."+tmp_hash[period]).parent("li").addClass("wrsTabSelect-das");
+</script>
+<%
+a = {"income detail"  => "Operating Revenue","operating income"  => "Operating Revenues"}
+title = a[params[:selected_link]].present? ? a[params[:selected_link]] : params[:selected_link]
+%>
+<script>
+  close_nodes('','<%= title.titleize%>');
+</script>

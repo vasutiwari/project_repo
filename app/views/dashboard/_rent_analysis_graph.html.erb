@@ -1,0 +1,19 @@
+<% get_market_and_lease_rent_graph %>
+<div class="box1-colWhite">
+    <div class="box-title">
+        <span class="title">Market vs Lease Rent</span>
+    </div>
+    <% if check_empty_values(@base_rent) || check_empty_values(@effective_rate) %>
+    <div id="market_and_lease_rent_graph">
+        <script>
+            myChart = new FusionCharts("/FusionCharts/MSCombiDY2D.swf", 'FactorySum2', 894, 310, 0, 0);
+            myChart.setDataXML("<chart  showValues='0' sNumberSuffix='%' numberPrefix='$'  decimals='3' setAdaptiveYMin='1' setAdaptiveSYMin='1' lineThickness='3' showSecondaryLimits='0' showDivLineSecondaryValue='0'>    <categories>        <%@dispaly_months.present? && @dispaly_months.each do |dispaly_month| %><category label= '<%= dispaly_month.titleize%>'/><%end %>    </categories>    <dataset seriesname='Avg Market Rent' color='#3f82c6' parentYAxis='P' renderAs='Line'>         <%@base_rent.present? && @base_rent.each do |base_rent| %><set value='<%= base_rent%>' /><%end %>    </dataset>    <dataset parentYAxis='P' seriesname='Avg Lease Rent' color='#089364' renderAs = 'Line'>         <%@effective_rate.present? && @effective_rate.each do |effective_rate| %><set value='<%= effective_rate %>' /><%end %>    </dataset></chart>")
+            myChart.render("market_and_lease_rent_graph");
+        </script>
+    </div>
+    <% else %>
+    <div style="text-align: center; height: 40px;width: 277px; line-height: 60px;">
+        No data available.
+    </div>
+    <% end %>
+</div>

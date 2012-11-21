@@ -1,0 +1,22 @@
+<div class="navSubmenu fileSubMenu" style="<%if params[:action].eql?("notify_admin") || params[:no_properties]%>margin-left:183px !important; margin-top:35px;padding-top:10px;<%elsif !(current_user.has_role?("Asset Manager") && is_leasing_agent)%>margin-left:-79px !important; margin-top:35px;padding-top:10px; <%elsif !(current_user.has_role?("Asset Manager") && is_leasing_agent)%>margin-left:79px !important; margin-top:35px;padding-top:10px; <%else%>margin-left:3px !important;<%end%>visibility:hidden;"  id="files_sub_tab">
+			<a href='/collaboration_hub' class="<%= (controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] != 'true' ? 'selected' : '' %>">Other Files</a>|<a href="/transaction?deal_room=true" class="<%= (controller_name == 'transaction' || controller_name == 'shared_users' || controller_name =='collaboration_hub') && params[:deal_room] == 'true' ? 'selected' : '' %> ">Deal Rooms</a>
+		</div>
+		
+<script>
+jQuery(document).ready(function()
+	{
+	 if (jQuery('#files_id').attr('class').indexOf('selected') !== -1)
+	 { jQuery('#files_sub_tab').css('visibility','visible');
+		jQuery('#show_assets_list').show(); }
+	}
+	);
+	
+	 jQuery('#files_sub_tab').mouseover(function()
+	{
+    mousehover('files_id','files')
+	});
+	
+	jQuery('#files_sub_tab').mouseout(function(){
+    delayed_mouseout('files_id');
+});
+</script>

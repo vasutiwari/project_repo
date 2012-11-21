@@ -1,0 +1,12 @@
+<% roles_users = current_user.user_role(current_user.try(:id)) %>
+<% if roles_users == "Client Admin" %>
+ <% path = admin_client_admins_path %>
+<%elsif roles_users == "Server Admin" %>
+ <% path = "#"%>
+<%end%>
+<%if current_user %>
+<% check_user_logo = current_user.client_logo_image.nil? %>
+  <a href="<%= path %>"><img border="0" id="logo_img" <% if !check_user_logo %>width="172"<% end %> <% if !check_user_logo %>height="83"<% end %> src="<%= check_user_logo ? (find_client_logo_extension.nil? ? "/images/logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.client_logo_image.public_filename %>?time=<%= Time.now.to_i %>" /> </a>
+<%else%>
+  <a href="<%= login_path %>"><img border="0" id="logo_img" src="/images/logo.png" /></a>
+<%end%>

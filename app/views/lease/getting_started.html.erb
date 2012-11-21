@@ -1,0 +1,55 @@
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+		<div class="dialog_light_center">
+				<div class="dialog_second_center">
+  					<div class="uploadheaderow">
+						</div>
+					<div class="uploadwrapper">
+						<div class="uploadrow" style="width:457px;padding-top:0px;">
+							<div class="uploadlabelrow">
+									<div class="newfolder_fieldlabel" style="font-weight:normal;">
+ 									 <%if params[:item] == 'leasing_agent'%>
+									 <b><p style='font-size:14px;'>Add Leasing Agents</p></b>
+	 You can easily add Leasing Agent and provide permission to view and update leases to the pipeline tab.<br><br>
+    &nbsp;&nbsp;1.Go to <b>Pipeline</b> Tab.<br><br>
+		&nbsp;&nbsp;2.On a top of <b>Pending Approval & Negotiation Leases</b> table, under Share to Agent section, click on "Add Agent".
+		                   <p style='padding-left:20px;'><img src='/images/agent_text.png' /></p>
+		&nbsp;&nbsp;3.In the <b>Invite Leasing Agent box</b>, type the mailing address of Leasing Agent(s)to whom you want to add.<br><br>
+<b><img src='/images/note_icon.jpg'  style="width:12px;" />&nbsp;Note:-</b> You can add multiple Leasing agents' email id as per your requirement in the Invite <b>Leasing Agent box</b>.<br><br>
+<%elsif params[:item] == 'vacant_suites'%>
+<b><p style='font-size:14px;'>Edit/Check your list of Vacant Suites</p></b>
+	Under Pipeline tab, you will get the list of Prosptect/under 6 months expirations / Vacant suites. You can sort this list as per your need.<br><br>
+ &nbsp;&nbsp;1.Go to <b>Pipeline tab</b>.<br><br>
+ &nbsp;&nbsp;2.Click <b>Proposal</b> under <b>Interested Prospect table</b> on the specific Prospect record to open Proposal. <br><br>
+<%elsif params[:item] == 'executed_leases'%>
+ <b><p style='font-size:14px;'>Edit/Check if your list of executed leases are upto date</p></b>
+  This is important to alert your leasing agent of upcoming <br><br>expirations / renewals.This can be done in your Executed Leases tab<br>
+<%elsif params[:item] == 'projection_features'%>
+<b><p style='font-size:14px;'>Use Approval & Projection features</p></b>
+1.Go to <b>Pipeline tab</b>.<br><br>
+2.Click on any lease (tenant name) under <b>Interested Prospect table</b> to the Proposal.<br><br>
+3.In the <b>Proposal</b>, you can do the following for lease approval-<br><br>
+		&nbsp;&nbsp;&nbsp;a) Terms <br><br>
+		&nbsp;&nbsp;&nbsp;b) Rent<br><br>
+		&nbsp;&nbsp;&nbsp;c) CapEx & Dep<br><br>
+		&nbsp;&nbsp;&nbsp;d) Insurance<br><br>
+		&nbsp;&nbsp;&nbsp;e) Clauses<br><br>
+		&nbsp;&nbsp;&nbsp;f) Income Projections<br><br>
+		&nbsp;&nbsp;&nbsp;g) Docs<br><br>
+<b><img src='/images/note_icon.jpg'  style="width:12px;" />&nbsp;Note:-</b> <b>Summary</b> and <b>Rent Projection</b> will be automatically created. This can be accessed in the <b>Summary Projection tab</b>.<br><br>
+4.Next, click on Print PDF button to print your custom Lease Approval form (and/or) click on <b>Save</b> button to save the changes made to leases.<br><br>
+5.You can also send lease directly for approval by clicking on <b>Save & Mark for Approval</b> button.
+<%end%>
+              </div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+  </div>
+	<a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>

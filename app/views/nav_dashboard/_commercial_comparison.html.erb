@@ -1,0 +1,154 @@
+<%
+commercial = @commercial
+comm_count = @comm_count
+%>
+<script>
+  dashboard_portfoio_id = <%= params[:portfolio_id] %>
+</script>
+<script type="text/javascript">
+	jQuery(function(){
+	  jQuery('#slider1').bxSlider({
+		auto: false,
+		pager: false,
+		infiniteLoop: false,
+	  });
+	});
+</script>
+<%financial_access = current_user.try(:client).try(:is_financials_required)%>
+<div class="sliderbox" id="sliderbox_loading" style="display:none;">
+	 <div class="height40">
+		<span class="fontgry22 floatL">Rank by</span>
+			
+	 </div>
+		<div class=" width472 floatL">
+		<div class="clearfloat"></div>
+					<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10"/>
+					</div>
+	 </div>
+			<div class="performbox floatR">
+			<div class="clearfloat"></div>
+			<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10 bdrnone"/>
+			</div>
+			
+			</div>
+</div>
+<div class="sliderbox" id="sliderbox">
+	  <div class="height40" style="width:460px">
+		<span class="fontgry22 floatL">Rank by</span>
+			<div class="floatR padd4">
+				<%if financial_access%>
+						<%=select_tag 'select', options_for_select(Recovery::RANK_COMPARISON_FINANCIAL_ACCESS, (params[:sort_type] && params[:sort_type]!= "neg_noi_percentage") ? find_sort_type(params[:sort_type],financial_access) : 'YTD - NOI Variances'), :onchange => 'onchange_handler_for_portfolios(this.value);'%>
+				<%else%>
+						<%=select_tag 'select', options_for_select(Recovery::RANK_COMPARISON_WITHOUT_FINANCIAL_ACCESS, (params[:sort_type] && params[:sort_type]!= "neg_noi_percentage") ? find_sort_type(params[:sort_type],financial_access) : 'Vacancy'), :onchange => 'onchange_handler_for_portfolios(this.value);'%>
+				<%end%>
+			</div>
+	 </div>
+		<!-- slider view start-->
+			<div class="floatL">
+			<div class="clearfloat"></div>
+				<div id="slider1" style="width:472px;">
+				<!-- data display start-->	
+				<%comm_array_slice = commercial.each_slice(8).to_a%>
+				<%comm_array_slice.each_with_index{|commercial_property,index|%>
+				   <%comm_array = commercial_all_lease_display_new(commercial_property)%>
+				   <div class="<%if comm_count <= 4%>marginT80<%end%>">
+						<%if comm_count <= 4%><div class="<%if comm_count == 1%>marginL190<%elsif comm_count == 2%>marginL120<%elsif comm_count == 3%>marginL60<%end%>"><%end%>
+								<%comm_array.each_with_index{|i,index|%>
+									<%unless i.comm_property.nil?%>
+											<div class="pName">
+												<%url = find_url_for_nav_dashboard_commercial_property(i.comm_property.portfolio_id, i.comm_property.id,params[:sort_type].present? ? params[:sort_type] : "false",financial_access.eql?(true) ? financial_access : "false")%>
+													<h4><a href="<%= url%>" title="<%= i.comm_property.property_name%>"> <%= display_truncated_chars(i.comm_property.property_name,10,true)%></a></h4>
+														<!--<div class="countNo">888</div>-->														
+														<%property = i.comm_property%>
+														<%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+														<%image_src = (image!=nil) ? image.public_filename : "/images/property_img.png"%>
+														<a href="<%= url%>" class="imgPLM"><img src="<%= image_src%>" height="55" width="55"  title=""  alt="" border="0"/></a>
+														<%if params[:sort_type] || !financial_access%>
+																<div class="pValue">
+																		<%if params[:sort_type].eql?("neg_noi_percentage")%>
+																			<!-- For YTD - NOI Variances start-->
+																					<% color_icon = i.net_income_de.nil? || i.net_income_de['diff_style'] == 'greenrow' ? 'multgreenarrow' : 'downarrow_red2' %>
+																					<% noi_per = i.net_income_de.nil? ? 0 : i.net_income_de['diff_per']%>
+																					  <span>$<%= i.noi.nil? ? 0 : dashboard_currency_display(i.noi[:actuals],'false') %></span>
+																						<div class="varlabel">
+																							<div class="floatL">Var &nbsp;</div>
+																							<div class="floatL <%if color_icon.eql?('multgreenarrow')%>above<%elsif color_icon.eql?('downarrow_red2')%>below<%end%>"><%=display_currency_real_estate_overview_for_percent(noi_per)%></div>
+																							<div class="clear"></div>
+																						</div>
+																					 <span style="<%if color_icon.eql?('multgreenarrow')%>color: #006600<%elsif color_icon.eql?('downarrow_red2')%>color: #A43030<%end%>"> $<%= i.noi.nil? ? 0 : dashboard_currency_display(-(i.noi[:variant]),'false')%></span>
+																			<!-- For YTD - NOI Variances end-->
+																		<%elsif params[:sort_type].eql?("vacancy_sf") || (!financial_access && !params[:sort_type].eql?("expiration") && !params[:sort_type].eql?("tenant"))%>
+																					<span>Tot: <%= display_sqrt_real_estate_overview(i.real_prop)%></span>
+																						<div class="varlabel">
+																							<div class="floatL">Vac &nbsp;</div>
+																							<div class="floatL" ><%= bar_percentage_dashboard(i.leases[:current_vacant_percent][:actual])%></div>
+																							<div class="clear"></div>
+																						</div>
+																					<span><%= dashboard_currency_display(i.lease_actual) == "0" ? "0" : dashboard_currency_display(i.lease_actual)%> SF</span>
+																		<%elsif params[:sort_type].eql?("expiration")%>
+																					<span>Tot: <%= display_sqrt_real_estate_overview(i.real_prop)%></span>
+																					<span class="">Exp: <%= dashboard_currency_display(i.exp_val)%> SF</span>
+																		<%elsif params[:sort_type].eql?("tenant")%>
+																					<span class="">A/R>30d: </span>
+																					<span class="">$<%= dashboard_currency_display(i.total_tenant,true)%></span>
+																			<%end%>
+																</div>
+															<%else%>
+																<!-- For YTD - NOI Variances start-->
+																	<div class="pValue">
+																			<% color_icon = i.net_income_de.nil? || i.net_income_de['diff_style'] == 'greenrow' ? 'multgreenarrow' : 'downarrow_red2' %>
+																			<% noi_per = i.net_income_de.nil? ? 0 : i.net_income_de['diff_per']%>
+																					  <span>$<%= i.noi.nil? ? 0 : dashboard_currency_display(i.noi[:actuals],'false') %></span>
+																						<div class="varlabel">
+																							<div class="floatL">Var &nbsp;</div>
+																							<div class="floatL <%if color_icon.eql?('multgreenarrow')%>above<%elsif color_icon.eql?('downarrow_red2')%>below<%end%>"><%=display_currency_real_estate_overview_for_percent(noi_per)%></div>
+																							<div class="clear"></div>
+																						</div>
+																					 <span style="<%if color_icon.eql?('multgreenarrow')%>color: #006600<%elsif color_icon.eql?('downarrow_red2')%>color: #A43030<%end%>"> $<%= i.noi.nil? ? 0 : dashboard_currency_display(-(i.noi[:variant]),'false')%></span>
+																	</div>
+																<!-- For YTD - NOI Variances end-->
+															<%end%>
+												</div>
+								<%end%>
+								<%#if (index%4).eql?(0) && index!=0%><%if index.eql?(3)%><div class="clearfloat"></div><%end%>
+							<%}%> 
+					 <%if comm_count <= 4%></div><%end%>
+					</div> 
+       <%}%> 
+
+				<!-- data display end-->
+					<!--<div class="marginT147">
+						<div class="marginL190">
+								<img src="/images/loading_amp.gif" />
+								<div class="clearfloat"></div>    
+						</div>
+					</div>-->
+				</div>
+				<!--
+				<%#financial_access = current_user.try(:client).try(:is_financials_required)%>
+			<a href="/dashboard/<%#= params[:portfolio_id]%>/properties?view_more=true&sort_type=<%#= params[:sort_type].present? ? params[:sort_type] : financial_access ? "neg_noi_percentage" : "vacancy_sf" %>&obj_id=<%#= params[:obj_id].present? ? params[:obj_id] : financial_access ? "minus_noi_var" : "vacancy_li"%>" class="floatR vmore">View More</a>
+			-->
+		<!--Legends start-->
+      <div class="clearfloat"></div>
+      <div class="floatL" style="<%if comm_count<=4%>margin-top:45px;<%end%>"><%if financial_access && ((params[:sort_type] && params[:sort_type].eql?("neg_noi_percentage")) || (params[:sort_type].nil?))%><span class="above">Above Budget</span> | <span class="below">Below Budget</span><%end%></div>
+			<a href="/dashboard/<%= params[:portfolio_id]%>/properties?view_more=true&sort_type=<%= params[:sort_type].present? ? params[:sort_type] : financial_access ? "neg_noi_percentage" : "vacancy_sf" %>&obj_id=<%= params[:obj_id].present? ? params[:obj_id] : financial_access ? "minus_noi_var" : "vacancy_li"%>" class="floatR" style="padding-right:37px;<%if comm_count<=4%>margin-top:45px;<%end%>">View More</a>
+      <div class="clear"></div>
+      <!--Legend End-->
+			</div>
+		<!-- slider view end-->
+		<div class="performbox floatR">
+			<%params[:sort_type] = params[:sort_type].present? ?  params[:sort_type]  :"neg_noi_percentage" %>
+			<span class="floatR mrgnR17"><% if params[:sort_type].eql?("neg_noi_percentage") %>YTD - NOI Variances <%elsif  params[:sort_type].eql?("vacancy_sf")%>Vacancy<%elsif params[:sort_type].eql?("expiration")%>Expirations<%elsif params[:sort_type].eql?("tenant")%>TenantA/R<%end%></span>
+				<div id="occupancyTabContent6"></div>
+		<%if params[:sort_type]%>
+				<script>
+        myChart = new FusionCharts("/FusionCharts/ScrollColumn2D.swf",'Factorycomm', 450, 280, 0, 0);
+        myChart.setDataXML("<chart showAlternateHGridColor='1' alternateHGridColor='F7FBFC' showValues='0' <%if params[:sort_type].eql?("neg_noi_percentage") || params[:sort_type].eql?("vacancy_sf")%> numberSuffix='%' <%elsif params[:sort_type].eql?("tenant") %>numberPrefix='$' <%else%>numberSuffix=' SF' <%end%>showPercentInToolTip='1' useRoundEdges='1' legendBorderAlpha='100' showBorder='0' bgColor='EEFAFF' bgAlpha='100' bgSWFAlpha='100'><categories><%comm_array_slice = commercial.each_slice(8).to_a%><%comm_array_slice.each_with_index{|commercial_property,index|%> <%comm_array = commercial_all_lease_display_new(commercial_property)%><%comm_array.each_with_index{|i,index|%><%unless i.comm_property.nil?%><category label='<%= (i.comm_property.property_name)%>' /><%end%><%}%> <%}%>  </categories><dataset seriesName='2011' color='D2D2CF'><%comm_array_slice = commercial.each_slice(8).to_a%><%comm_array_slice.each_with_index{|commercial_property,index|%> <%comm_array = commercial_all_lease_display_new(commercial_property,true)%><%comm_array.each_with_index{|i,index|%><%unless i.comm_property.nil?%><%if params[:sort_type].eql?("neg_noi_percentage")%><% noi_per = i.net_income_de.nil? ? 0 : i.net_income_de['diff_per']%><set value='<%= noi_per.round%>'/><%elsif params[:sort_type].eql?("vacancy_sf")%><set value='<%= (i.leases[:current_vacant_percent][:actual])%>'/><%elsif params[:sort_type].eql?("expiration")%><set value='<%= dashboard_currency_display(i.exp_val)%>'/><%elsif params[:sort_type].eql?("tenant")%><set value='<%= dashboard_number_display(i.total_tenant,true)%>'/><%end%><%end%><%}%> <%}%></dataset><dataset seriesName='2012' color='0C7F99'><%comm_array_slice = commercial.each_slice(8).to_a%><%comm_array_slice.each_with_index{|commercial_property,index|%> <%comm_array = commercial_all_lease_display_new(commercial_property)%><%comm_array.each_with_index{|i,index|%><%unless i.comm_property.nil?%><%if params[:sort_type].eql?("neg_noi_percentage")%><% noi_per = i.net_income_de.nil? ? 0 : i.net_income_de['diff_per']%><set value='<%= noi_per.round%>'/><%elsif params[:sort_type].eql?("vacancy_sf")%><set value='<%= (i.leases[:current_vacant_percent][:actual])%>'/><%elsif params[:sort_type].eql?("expiration")%><set value='<%= i.exp_val%>'/><%elsif params[:sort_type].eql?("tenant")%><set value='<%= dashboard_number_display(i.total_tenant,true)%>'/><%end%><%end%><%}%> <%}%></dataset></chart>");
+        myChart.render("occupancyTabContent6");
+      </script>
+			<%end%>
+		</div>
+				
+</div>

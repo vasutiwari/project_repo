@@ -1,0 +1,165 @@
+<%
+images_collection = @images
+property_collection = @property
+pdf_collection = @pdf
+%>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  jQuery("div#basic").slideViewerPro();
+  active_call="property_view";
+</script>
+<div id="show_assets_list">
+  <div class="rhscontentrow" >
+    <div id="overview">
+      <div class="viewingperiodrow"><%= get_address(property_collection) %>
+        <% unless pdf_collection %>
+				<%unless (is_leasing_agent)%>
+          <span class="breadcrumbrow" style="padding-left:592px;*padding-left:579px;margin-top:-17px;*margin-top:-16px;width:180px; font-size:12px; font-weight:normal;font-family:Verdana,Arial,sans-serif">
+            <%=render :partial=>"properties/edit_property",:locals=>{:edit_inside_asset=>"false",:from_debt_summary=>'false',:from_property_details=>'true'}%>
+          </span>
+				<% end %>
+        <% end %>
+        <br />
+      </div>
+      <div class="rhscontentrow" style="<% if pdf_collection %> border-bottom: 1px solid #b5b5b5 <% end %>">
+        <div class="flashrow">
+          <div class="flashimagerow">
+            <%property_image = PortfolioImage.find(:all,:conditions=>['attachable_id = ? and attachable_type = ? and is_property_picture = ?',property_collection.id,"RealEstateProperty",true])%>
+            <%images_collection = find_property_images(property_collection.id)%>
+            <%if !property_image.nil?%>
+              <%#images_collection = images_collection + property_image %>
+            <%end%>
+           <%images_collection = property_image %>
+            <%if images_collection && !images_collection.empty?%>
+              <% if pdf_collection %>
+                <img width="413" height="350" alt="Property Image"  src="<%= pdf_conv_path %><%= images_collection.first.class =="PortfolioImage" ? images_collection.first : images_collection.first.public_filename%>" />
+								<div id="ui1" style="width: 413px; display: block;">
+								<center>
+									<div style="padding-top:3px;">
+								<% images_collection.first(5).each do |itr| %>
+								<img width="46" height="38" src="<%= pdf_conv_path %><%= itr.class =="PortfolioImage" ? itr : itr.public_filename%>"/>
+							<%end%>
+						    </div>
+                </center>
+								</div>
+              <% else %>
+                <div id="basic" class="svwp">
+                  <ul>
+                    <!-- <img width="413" height="350" alt="Property Image"  src="<%#= pdf_conv_path %><%#= images_collection.first.class =="PortfolioImage" ? images_collection.first : images_collection.first.public_filename%>" /> -->
+                    <% images_collection.each do |itr| %>
+                      <li><img width="413" height="350" alt="Property Image"  src="<%= pdf_conv_path %><%= itr.class =="PortfolioImage" ? itr : itr.public_filename%>" /></li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+            <%else%><% req_physical_property_folder = fetch_req_physical_property_folder(property_collection.id) %>
+              <p style="text-align: center;">
+							<span style="font-size:13px;">
+							<%if is_leasing_agent%>
+							  No Pictures Added
+							<%else%>
+							Please add pictures at
+              <a href="/real_estate/<%= @folder.portfolio_id %>/properties/<%=@folder.real_estate_property_id%>?partial_disp=property_settings&from_property_details=true&folder_id = <%=@folder.id%>" method="put" title= "Edit <%=@folder.name%>" style="width:16,height:16,border:0;">Property Pictures</a>
+             <%end%>
+							<%#=link_to "Property Pictures", { :action =>'add_property',:controller => "real_estates",:id =>@folder.portfolio_id,:property_id=>@folder.real_estate_property_id,:edit_inside_asset=>'false',:from_debt_summary=>'false',:from_property_details=>'true',:folder_id => @folder.id},{:id => "edit_notes_box_#{@folder.id + 1}",:style=>{:width=>"16",:height=>"16",:border=>"0"},:title=>"Edit #{@folder.name}"}%>
+					<script>//new Control.Modal($("edit_notes_box_<%=@folder.id + 1%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+							</span></p>
+           <%end%>
+          </div>
+        </div>
+        <div class="descriptionrow">
+          <div class="propertydetails">
+            <div class="label1">Property Name</div>
+            <div class="label2" title="<%=property_collection.nil? ? "" : (property_collection.property_name)%>">: <%=property_collection.nil? ? "-" : lengthy_word_simplification(property_collection.property_name,10,10)%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Property Type</div>
+            <div class="label2">: <%=property_collection.nil? || property_collection.property_type.nil? ? "-" : property_collection.property_type.name %> </div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Address</div>
+            <div class="label2">: <%=property_collection.nil? ? "-" : property_collection.desc == '' ? '' :  property_collection.desc %></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">City</div>
+            <div class="label2">:  <%=property_collection.nil? ? "-" : property_collection.city == '' ? '' : property_collection.city %></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">State</div>
+            <div class="label2">:  <%=property_collection.nil? ? "-" : property_collection.province == '' ? '-' : property_collection.province %></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Zip</div>
+            <div class="label2">:  <%=property_collection.nil? ? "-" : property_collection == '' ? '' : (property_collection.zip.blank? ? "" : property_collection.zip.to_i) %></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Purchase Price</div>
+            <div class="label2">: <%= property_collection.nil? ?  "-" : (display_currency(property_collection.purchase_price) == "$0.00" ? "" : display_currency(property_collection.purchase_price))%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Property Size</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.property_size%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Gross Land Area</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.gross_land_area%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Net Rentable Area</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.gross_rentable_area%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">No. of Units</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.no_of_units%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Year Built</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.year_built%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Number of Floors</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.number_of_floors%></div>
+          </div>
+          <div class="propertydetails">
+            <div class="label1">Construction Type</div>
+            <div class="label2">: <%= property_collection.nil? ? "-" : property_collection.construction_type%></div>
+          </div>
+          <div class="descriptioncol" >
+            <div class="descriptionheadcol">Description : </div>
+            <div class="descriptioncontent"><%= property_collection.nil? ? "-" : property_collection.property_description%></div>
+          </div>
+        </div>
+      </div>
+      <% unless pdf_collection %>
+        <div class="detailedrhsbar">
+          <div class="detailedactbutwrapper">
+            <div class="notesalelf" id = "img_map_left"><img src="/images/but_avtive_lf.png"  width="9" height="30"/></div>
+            <div class="detailedactbutmid " id = "active">
+              <div id="mview">
+                <a  id="mvlink" href="javascript:;" class=""  <%unless property_collection.nil?%>onclick="initialize('<%=property_collection.address.txt.gsub(".",",").strip.to_s%>,<%= property_collection.city %>,<%= property_collection.province %>,<%=property_collection.zip%>'); return false"   <%end%>
+                    >Map View</a>
+              </div>
+            </div>
+            <div class="notesalelf" id = "img_map_right"><img src="/images/butactivert.png"  width="7" height="30"/></div>
+          </div>
+          <div class="detaileddeactbutwrapper">
+            <div class="notesalelf" id="img_street_left"><img src="/images/detailed_budget_dealf.png"  width="5" height="28"/></div>
+            <div class="detaileddeactbutmid" id ="deactive">
+              <div  id="sview">
+                <a   id="svlink" href="javascript:;" <%unless property_collection.nil?%>onclick="replace_street_view('<%= property_collection.desc.gsub(".",",").strip.to_s %>, <%= property_collection.city %>,<%= property_collection.province %>, <%= property_collection.zip %>'); return false" <%end%> >Street View</a>
+              </div>
+            </div>
+            <div class="notesalelf" id="img_street_right"><img src="/images/detailed_budget_deactrt.png" width="6" height="28" /></div>
+          </div>
+        </div>
+
+        <div class="locationmaprow">
+          <!--  <img src="/images/staticimg.jpg" width="782" height="433" />-->
+          <div id="map" style="width: 780px; height: 300px;display:none"></div>
+          <div id="streetview" style="width: 780px; height: 300px;display:none"></div>
+          <div id="map_canvas" style="width: 780px; height: 300px;display:block"></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

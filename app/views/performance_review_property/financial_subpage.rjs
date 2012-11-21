@@ -1,0 +1,26 @@
+if params[:from_performance_review] == "true"
+  page << "jQuery('#time_line_selector').show();"
+  page << "jQuery('.subheaderwarpper').show();"
+elsif params[:from_performance_review] != "true"
+     if(params[:tl_period] == "4"  ||  params[:period] == "4") &&  ((params[:tl_month].nil? || params[:tl_month].blank?) )   
+        replace_time_line_selector(page)
+     else
+       page << "jQuery('#time_line_selector').show();"
+	   end
+  page << "jQuery('.subheaderwarpper').show();"
+  page.assign "active_sub_call", "financial_subpage"
+  bread_crumb = breadcrumb_in_financial(params[:financial_sub],params[:financial_subid])
+  if bread_crumb.match(/Operating revenue/) or bread_crumb.match(/Net operating income/)
+    @color_display = "income"
+  elsif bread_crumb.match(/Operating Expenses/) or bread_crumb.match(/Capital expenditures/)
+    @color_display = "expense"
+  end
+  page << "jQuery('.executiveheadcol_for_title').html('#{bread_crumb}')"
+  page << "jQuery('#id_for_modify_threshold').hide();"
+  #~ page << "jQuery('#id_for_variance_threshold').html('<ul class=inputcoll2 id=cssdropdown><li class=headlink3 id=id_for_modify_threshold><div class=morebutton_label><a id=modify_threshold_#{@note.id} href=#{new_threshold_explanation_path(@note.id)}>Variance Thresholds</a></div><span></span></li></ul>');"
+  #~ page << "new Control.Modal($('modify_threshold_#{@note.id}'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'post'});"
+end
+page << "jQuery('.sqft_for_breadcrumb').hide();"
+page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/property_financial_sub_page",:locals=>{:month_collection => @month,
+    :time_line_actual => @time_line_actual,:asset_details_collection => @asset_details,:note_collection => @note,:start_date => @start_date,:color_display => @color_display,
+    :portfolio_collection => @portfolio}

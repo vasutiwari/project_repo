@@ -1,0 +1,164 @@
+<%
+pdf_collection = @pdf
+pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public'
+#multi_prop_tot_units,multi_op_rev_total,multi_vac_tot_units,net_avail_total,net_avail_vacant_tot,multi_rev_total,multi_noi_total,multi_cash_total = 0,0,0,0,0,0,0,0
+#total_deposit_val,total_traffic_val,total_lease_rent = 0,0,0
+multi = @multi
+#multi_array = []
+%>
+<%if multi_count >= 7%>
+<script>
+	//window.onload=function(){
+  //var multibox_id = document.getElementById("check_multibox_area");
+  //multibox_id.style.overflowY="scroll";
+	jQuery('.exp').attr('style','width:114px');
+  }
+</script>
+<%end%>
+
+<%#Removing the scroll option#%>
+<%#if multi_count >= 7 %>
+  <!-- <div id="check_multibox_area" class="multboxarea" style="height: 363px; overflow: hidden; width:100%" onmouseover="jQuery('.multboxarea').css('overflow-y','scroll'); jQuery('.multrow1, .multrow2').css('width','875px');jQuery('.exp').attr('style','width:114px');" onmouseout="jQuery('.multboxarea').css('overflow-y','hidden'); jQuery('.multrow1, .multrow2').css('width','892px');jQuery('.exp').attr('style','width:131px');"> -->
+
+  <%#else%>
+    <div id="check_multibox_area" class="multboxarea" style="height: auto;  width:100%">
+    <%#end%>
+
+    <%multi_array,multi_prop_tot_units,multi_op_rev_total,multi_vac_tot_units,net_avail_total,net_avail_vacant_tot,multi_noi_total,multi_cash_total,total_deposit_val,total_traffic_val,total_lease_rent,total_vacant_units =  multifamily_all_lease_display(multi)  %>
+		<!-- total display start-->
+		    <table cellspacing="0" cellpadding="6" border="0" width="100%" style="table-layout: fixed; position: relative;float:left;" class="tablefb font12">
+      <tbody>
+        <tr class="tableppTotal">
+          <td align="center" style="height:45px;" class="bdr-lt-gry bdr-rt-gry td35">
+            <div class="multtotal" style="font-size:12px;">Total</div>
+          </td>
+          <td class="bdr-rt-gry" style="width: 150px;">
+            <div class="multtotal2" style="font-size:12px;text-align: center;padding-left:14px;"><%=display_units(multi_prop_tot_units)%></div>
+          </td>
+          <td align="center" valign="top" class="bdr-rt-gry" style="width: 99px;height: 45px;">
+            <div class="value-bar-outerSml fltlft">
+              <div class="value-barSml"><span class="fltrt">
+                 <%= net_avail_vacant_tot == 0 ? "0%" : "#{number_with_precision((total_vacant_units.to_f / net_avail_vacant_tot.to_f)*100, :precision => 1)}%" %>
+                </span>
+                <img src="/images/vacancygrbg.png" height="14" align="left"  style="width:<%=bar_percentage_dashboard((net_avail_vacant_tot == 0 ? 0 : (total_vacant_units.to_f / net_avail_vacant_tot.to_f)*100).round,'true')%>;"/>
+              </div>
+              <div class="value-bar-secondlevel">
+                <%=display_units(total_vacant_units)%>
+            </div>
+            </div>
+          </td>
+          <td align="center" class="bdr-rt-gry" style="width: 89px;">
+            <div class=""><%=net_avail_vacant_tot.eql?(0) ? "0%" : "#{number_with_precision(((net_avail_total)/net_avail_vacant_tot.to_f)*100, :precision => 1)}%" %><br />
+              <%=display_units(net_avail_total)%></div>
+          </td>
+          <td align="right" style="width: 105px;" class="bdr-rt-gry" >
+            <div class="multcolytdop mulspace"><%=dashboard_currency_display(multi_op_rev_total,'false')%><br /></div>
+          </td>
+          <td align="right" class="bdr-rt-gry" style="width: 105px;">
+            <div class="multcolytdop mulspace"><%=dashboard_currency_display(multi_noi_total,'false')%><br /></div>
+          </td>
+          <td align="center" class="bdr-rt-gry" style="width: 105px;">
+            <div class="multcolytdcash"><%=dashboard_currency_display(multi_cash_total,'false')%></div>
+          </td>
+          <td align="center" class="bdr-rt-gry exp" style="width: 131px;">
+            <div class="multcoldeposits"><%=dashboard_currency_display(total_traffic_val,'false')%></div>
+            <div class="multcoldeposits"><%=dashboard_currency_display(total_deposit_val,'false')%></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- total display end-->		
+      <%multi_array.each_with_index{|i,index|%>
+    <%#unless i.nil?%>
+        <table cellspacing="0" cellpadding="6" border="0" width="100%" style="table-layout: fixed;" class="tablefb font12">
+          <tbody>
+            <tr class="<%=cycle('tablefbAlternate', '') %>">
+              <td align="center" class="bdr-lt-gry bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry" style="width: 35px;">
+                <%=index+1%>
+              </td>
+              <td style="width: 150px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry"><a class="TxtBold" href="#">
+									<a href="/dashboard/<%=i.multi_property.portfolio_id%>/financial_info/<%=i.multi_property.id%>/financial_info" class="imgPLM"><img src="<%=real_estate_property_image(i.multi_property.id)%>"  border="0" width="42" height="26" alt="no image" /></a>
+									<a href="/dashboard/<%=i.multi_property.portfolio_id%>/financial_info/<%=i.multi_property.id%>/financial_info" title="<%=i.multi_property.property_name%>" class="TxtBold"> <%=display_truncated_chars(i.multi_property.property_name,15,true)%></a>
+                </a><br />
+                <%=display_units(i.wres_leases)%>
+              </td>
+              <td align="center" valign="top" style="width: 99px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry">
+                <% floor = (i.wres_leases.blank? || i.wres_leases.eql?(0)) ? 1 : i.wres_leases.to_f %>
+                <%vac_per = i.total_suite.nil? ? 0 : (i.total_suite.to_f* 100 / floor).round%>
+                <div class="value-bar-outerSml fltlft">
+                  <div class="value-barSml"><span class="fltrt">
+                      <%=i.vacant_units_percent.eql?(0) ? "0%" : "#{number_with_precision((i.vacant_units_percent), :precision => 1)}%"%> 
+                    </span>
+                    <img src="/images/vacancygrbg.png" align="left" height="14"  style="width:<%=bar_percentage_dashboard(i.vacant_units_percent,'true')%>;"/>
+                  </div>
+                  <div class="value-bar-secondlevel">
+                    <%=display_units(i.vacant_units_display)%>
+                  </div>
+                </div>
+              </td>
+
+              <td align="center" style="width: 89px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry">
+                <%=i.date.nil? ? "0%" : i.net_units_per%><br />
+                <%=i.date.nil? ? 0 : i.net_avail_crnt%> Units
+              </td>
+
+              <%income_title = map_title("Operating Revenue")%>
+              <%revenue = i.operating_statement[income_title]%>
+              <% rev_val =  revenue.nil? ? 0 : revenue[:actuals] %>
+              <%multi_op_rev_total += rev_val.to_i%>
+
+              <td align="right" style="width: 106px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry">
+                <%= dashboard_currency_display(rev_val,'false') %>
+                <%revenue_act,revenue_bud,revenue_per,revenue_var = revenue_calc(revenue)%>
+                <% icon_direction,use_color,color_flag,color_icon = dashboard_icon_color(revenue_act,revenue_bud)%>
+                <br />
+								<span style="<%if use_color.eql?('green')%>color: #006600;<%elsif use_color.eql?('red')%>color: #A43030;<%end%>">
+                  <img src="<%= pdf_conv_path%>/images/<%= color_icon %>.png" width="8" height="8" border="0"/>&nbsp;<%=display_currency_real_estate_overview_for_percent(revenue_per)%>, <%= dashboard_currency_display(-(revenue_var.to_i),'false')%>
+    <%#noi_title = map_title("NOI")%>
+    <%#noi = i.operating_statement[noi_title]%>
+                  <%noi_val =  i.noi.nil? ? 0 : i.noi[:actuals] %>
+                  <%noi_bud =  i.noi.nil? ? 0 : i.noi[:budget] %>
+                  <%multi_noi_total += noi_val.to_i%>
+                </span>
+              </td>
+              <td align="right" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry" style="width: 105px;">
+                <%= dashboard_currency_display(noi_val,'false') %>
+                <%net_income_de = i.net_income_de.nil? ? 0 : i.net_income_de%>
+                <% color_icon = net_income_de == 0 ? 'downarrow_red2' : net_income_de['diff_style'] == 'greenrow' ? 'multgreenarrow' : 'downarrow_red2' %>
+                <br><span style="<%if color_icon.eql?('multgreenarrow')%>color: #006600;<%elsif color_icon.eql?('downarrow_red2')%>color: #A43030;<%end%>">
+                  <img src="<%= pdf_conv_path %>/images/<%= color_icon %>.png" width="8" height="8" border="0"/>&nbsp;<%=display_currency_real_estate_overview_for_percent(net_income_de == 0 ? 0 : net_income_de['diff_per'])%>, <%=params[:sqft_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff']) /(i.multi_property.gross_rentable_area ? i.multi_property.gross_rentable_area : 1)) : (params[:unit_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff'])  / (i.multi_property.no_of_units ? i.multi_property.no_of_units : 1)) : dashboard_currency_display(net_income_de == 0 ? 0 : (noi_val - noi_bud),'false'))%>
+                </span>
+              </td>
+              <%unless remote_property(i.multi_property.accounting_system_type_id)%>
+                <%cash_val = i.operating_statement['CASH FLOW STATEMENT'].nil? ? 0 : i.operating_statement['CASH FLOW STATEMENT'][:actuals]%>
+              <%else%>
+                <%cash_val = i.remote_cash_actual%>
+              <%end%>
+              <%multi_cash_total += cash_val.to_i%>
+              <td align="right" style="width: 105px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry">
+                <%= remote_property(i.multi_property.accounting_system_type_id) ? dashboard_currency_display(i.remote_cash_actual,'false') : i.operating_statement['CASH FLOW STATEMENT'].nil? ? 0 : "#{dashboard_currency_display(i.operating_statement['CASH FLOW STATEMENT'][:actuals],'false')}" %><br />
+                <%  if remote_property(i.multi_property.accounting_system_type_id)%>
+                  <% icon_direction,use_color,color_flag,color_icon = dashboard_icon_color(i.remote_cash_actual,i.remote_cash_budget)%>
+                  <span style="<%if use_color.eql?('green')%>color: #006600;<%elsif use_color.eql?('red')%>color: #A43030;<%end%>"><img  src="<%= pdf_conv_path%>/images/<%= color_icon %>.png" width="8" height="8" border="0"/>&nbsp;<%=display_currency_real_estate_overview_for_percent(i.remote_cash_percent)%>, <%= dashboard_currency_display(i.remote_cash_variance)%></span>
+                <%else%>
+                  <%net_cash,cash_type = find_net_cash(i.operating_statement)%>
+                  <%net_cash_flow_actual,net_cash_flow_budget,net_cash_flow_variant,net_cash_flow_percent = net_cash_calc(i.cash_flow_statement,cash_type)%>
+                  <% icon_direction,use_color,color_flag,color_icon = dashboard_icon_color(net_cash_flow_actual,net_cash_flow_budget)%>
+                  <span style="<%if use_color.eql?('green')%>color: #006600;<%elsif use_color.eql?('red')%>color: #A43030;<%end%>"><img  src="<%= pdf_conv_path%>/images/<%= color_icon %>.png" width="8" height="8" border="0"/>&nbsp;<%=display_currency_real_estate_overview_for_percent(net_cash_flow_percent)%>, <%= dashboard_currency_display(net_cash_flow_variant)%></span>
+
+
+              </td>
+
+
+              <td align="center" style="width: 131px;" class="bdr-rt-gry <%if multi_array.last == i%>bdr-bottom-gry<%end%> bdr-TD-gry exp">
+                <div class="multdeposits"><%=@traffic_pi[index].nil? ? 0 : @traffic_pi[index]%></div>
+                <div class="multdeposits"><%=@traffic_dep[index].nil? ? 0 : @traffic_dep[index]%></div></div>
+                <!--  <div class="multytdcash multent">Tenant $</div> -->
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      <%end%>
+    <%}%>
+
+

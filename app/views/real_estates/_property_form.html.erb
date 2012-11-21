@@ -1,0 +1,221 @@
+<%
+property_collection = @property
+%>
+<script type="text/javascript">
+  form_name ="#property_form";
+  tab = "2";
+  AddedFiles = [];
+</script>
+<%@property_types = find_property_type()%>
+<%pid=params[:pid] ? params[:pid] : (params[:id] ? params[:id] : " ")%>
+<%= form_for property_collection,:url=>{:controller=>"properties",:action=>"show_asset_docs",:property_id=>property_collection.id,:data_hub=>"asset_data_and_documents",:pid=>pid,:note_add_edit => "true",:parent_delete=>params[:parent_delete],:edit_inside_asset=>params[:edit_inside_asset]}, :html=>{:target => "upload_property",:multipart=>true,:id=>"property_form"} do |p| -%>
+  <div class="totalsuitesbox" style="width:768px; height:410px">
+    <div class="add_prop_fieldwrapper1">
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Purchase Price $</div>
+        <div class="lightbox_fieldinput">
+				<%p p.object.purchase_price%>
+          <%=p.text_field  :purchase_price ,:size=>"18",:class=>"add_prop_prop_input purchase_price", :value =>p.object.purchase_price %>
+        </div>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Property Size</div>
+        <div class="lightbox_fieldinput">
+          <%=p.text_field :property_size,:size=>"18",:class=>"add_prop_prop_input"%>
+        </div>
+        <div class="sqft_col">Sqft</div>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Gross Land Area</div>
+        <div class="lightbox_fieldinput">
+          <%=p.text_field  :gross_land_area,:size=>"18",:class=>"add_prop_prop_input" %>
+        </div>
+        <div class="sqft_col">Sqft</div>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Year Built</div>
+        <div class="lightbox_fieldinput">
+				<%puts p.object.year_built.inspect%>
+          <%=p.text_field  :year_built,:size=>"18",:class=>"add_prop_prop_input", :value => p.object.year_built %>
+        </div>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Gross Rentable Area</div>
+        <span class="lightbox_fieldinput">
+          <%=p.text_field :gross_rentable_area ,:size=>"18",:class=>"add_prop_prop_input"%>
+        </span>
+        <div class="sqft_col">Sqft</div>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">No. of Units</div>
+        <span class="lightbox_fieldinput">
+          <%=p.text_field :no_of_units  ,:size=>"18",:class=>"add_prop_prop_input"%>
+        </span>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Number of Floors</div>
+        <span class="lightbox_fieldinput">
+          <%=p.text_field :number_of_floors  ,:size=>"18",:class=>"add_prop_prop_input"%>
+        </span>
+      </div>
+      <div class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Construction Type</div>
+        <span class="lightbox_fieldinput">
+          <%=p.text_field :construction_type  ,:size=>"18",:class=>"add_prop_prop_input"%>
+        </span>
+      </div>
+    </div>
+    <div class="add_prop_fieldwrapper2">
+      <div style="width: 375px;" class="add_prop_fieldrow">
+        <div class="add_prop_fieldlabel">Description</div>
+        <div class="description_textarea">
+          <%=p.text_area :property_description,:class=>"description_textareainput",:rows=>4%>
+        </div>
+      </div>
+      <%find_uploaded_property_pictures%>
+
+    <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+    <input type="hidden" name="pid" value = <%=pid%> > </input>
+    <input type="hidden" name="note_add_edit" value = "true" > </input>
+    <input type="hidden" name="property_form" value = "true" > </input>
+    <%if property_collection && !property_collection.id.nil?%>
+      <input type="hidden" name="property_id" value = <%=property_collection.id%> > </input>
+    <%end%>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="2" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="property" > </input>
+    <input type="hidden" name="property_form_submit" value = "true" id="property_form_submit" > </input>
+    <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+    <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+    <input type="hidden" name="prop_form_close" value = "false"  id ="prop_form_close"> </input>
+    <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+    <input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+    <input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+    <input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+    <input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+    <input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+    <input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+    <input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+  </div>
+<div class="butwrapper" style ="float:right">
+    <div class="greenbutton" style="margin-left:230px">
+      <a href="javascript:;" onclick="jQuery('#property_form').submit();load_writter();return false;">Save</a>
+      <span>&nbsp;</span>
+    </div>
+    <!-- COMMENTED CANCEL BUTTON IN LIGHTBOX
+    <div class="graybutton">
+
+      <%#if property_collection.new_record? %>
+        <a onClick='Control.Modal.close();return false;' style="cursor: pointer;">Cancel</a>
+      <%#else%>
+        <%#link = params[:edit_inside_asset] == "true" ? "show_data_hub_docs_real_estate(port_id,selected_item,'hide_del','true','true');return false;" : "Control.Modal.close();refresh_page_after_close_prop(#{@portfolio.id},#{find_by_real_estate_property_id(property_collection.id).parent_id},'hide_del',#{params[:list] ? params[:list] : '0'},#{params[:highlight]},'#{params[:show_past_shared]}','#{params[:from_debt_summary]}','#{params[:from_property_details]}',#{property_collection.id},'#{params[:call_from_variances]}','#{params[:month]}','#{params[:document_id]}','#{params[:tl_month]}','#{params[:tl_period]}','#{params[:period]}')"%>
+        <a onClick="<%#=link%>" style="cursor: pointer;">Cancel</a>
+      <%#end%>
+
+      <span>&nbsp;</span>
+    </div>
+     -->
+  </div>
+  </div>
+
+<%end%>
+<iframe id="upload_property" name="upload_property" style="display: none"></iframe>
+<div class="add_prop_fieldwrapper2" style="padding-top:0px;">
+<div class="add_prop_fieldrow add_ie_field_row">
+  <div class="add_prop_fieldlabel">Upload Picture</div>
+  <div class="lightbox_fieldinput">
+    <%= form_tag({:action => "single_file_upload_in_add_property",:controller => "properties",:swf_upload => "",:folder_id => params[:folder_id],:task_id =>params[:task_id]}, :multipart => true, :target => "upload_frame_task_add_files_using_tree3", :id => "upload_form6")  do %>
+      <input type="file" name="file"  id="fileUpAddFiles" onchange="if(find_file_already_added_in_addFiles()){if(check_image_type_in_property()){document.forms.upload_form6.submit();load_writter();}}"/>
+      <div id="upload_files_list">
+        <input type="hidden" name="already_upload_file" id="already_upload_file" value=""/>
+      </div>
+      <input type='hidden' value="<%=params[:from_portfolio_summary]%>" id='from_portfolio_summary' name='from_portfolio_summary'/>
+      <input type='hidden' name='task_id' value='<%=params[:task_id]%>' id="task_id" />
+      <input type="hidden" name="folder_id" id="folder_id" value="<%=params[:folder_id]%>"/>
+      <div id='all_uploaded_files_list'> 	<input type="hidden" name="all_already_upload_file" id="all_already_upload_file" value="<%=params[:already_uploaded]%>" />  </div>
+      <div id='all_tree_selected_file'> 	<input type="hidden" name="all_tree_structure_file" id="all_tree_structure_file" value="<%=params[:tree_structure_list]%>" />  </div>
+      <input type="hidden" name = "recently_added_files_by_tree" value="<%= params[:recently_added_files_by_tree].blank? ? '' : params[:recently_added_files_by_tree]%>" id="recently_added_files_by_tree" />
+
+			    <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+    <input type="hidden" name="pid" value = <%=pid%> > </input>
+    <input type="hidden" name="note_add_edit" value = "true" > </input>
+    <input type="hidden" name="property_form" value = "true" > </input>
+    <%if property_collection && !property_collection.id.nil?%>
+      <input type="hidden" name="property_id" value = <%=property_collection.id%> > </input>
+    <%end%>
+    <input type="hidden" id = "tab_id" name="tab_id" value ="2" > </input>
+    <input type="hidden" id = "form_txt" name="form_txt" value ="property" > </input>
+    <input type="hidden" name="property_form_submit" value = "true" id="property_form_submit" > </input>
+    <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+    <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+    <input type="hidden" name="prop_form_close" value = "false"  id ="prop_form_close"> </input>
+    <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+    <input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+    <input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+    <input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+    <input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+    <input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+    <input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+    <input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+
+
+
+    <%end%>
+
+  </div>
+
+	<div id='property_pictures_list' style='display:block;'>
+        <div style="width: 380px;" class="add_prop_fieldrow">
+          <div class="add_prop_fieldlabel">&nbsp;</div>
+          <div class="uploadedcol uploadcol_ie">
+            <div class="edit_headercol">
+              Uploaded Picture(s)</div>
+            <div style="width: 238px; margin-top: 5px;overflow-y:auto;" class="add_files_scroll" id="single_file_upload_list">
+              <ul id='images_list'>
+                <%@pictures.each do |picture|%>
+                  <li id='property_picture_<%=picture.id%>'>
+                    <a onclick="if (confirm('Are you sure you want to remove this file ?')){jQuery('#property_picture_<%=picture.id%>').remove();remove_selected_picture(<%=picture.id%>,<%=@property.id%>,'<%=picture.filename%>');} return false" href="#"><img border="0" width="7" height="7" src="/images/del_icon.png"/></a>
+                    <%=picture.filename%>
+                  </li>
+                <%end%>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+		</div>
+
+
+
+
+
+</div>
+
+
+			<iframe id="upload_frame_task_add_files_using_tree3" name="upload_frame_task_add_files_using_tree3" style="display: none"></iframe>
+
+<div class="bot"></div>
+<script type="text/javascript">
+  yield_calender('true');
+  customize_startDate("#property_first_payment_date");
+  customize_startDate("#property_last_payment_date");
+  customize_startDate("#property_maturity_date");
+	<%if @pictures.nil? ||  (@pictures && @pictures.empty?)%>
+	 jQuery('#property_pictures_list').hide();
+	<%end%>
+
+<%if @pictures && !@pictures.empty?%>
+     <%@pictures.each do |picture|%>
+  	      AddedFiles.push('<%=picture.filename%>');
+			<%end%>
+<%end%>
+
+if(jQuery('.purchase_price').val() == "0.0")
+{
+jQuery('.purchase_price').val("")
+}
+
+</script>
+
+
+
+

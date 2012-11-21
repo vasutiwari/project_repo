@@ -1,0 +1,443 @@
+<%
+prev_sunday = (Time.now.to_date-Time.now.wday).strftime("%Y-%m-%d")
+operating_stmt_instance=[]
+property_week_vacant_total,property_week_floor,property_week_units,property_week_prelsd = calculate_property_weekly_display_data(@currently_selected_sunday)
+first_property = RealEstateProperty.find_by_id(@portfolio.real_estate_properties.first)
+acc_type = account_system_type_name(first_property.try(:accounting_system_type_id))
+count = property_week_vacant_total.count %>
+<%vacant_units_total,vacant_gross_total,vacant_rented_total,vacant_net_total,vacant_gross_per,vacant_net_per = property_weekly_display_total(count) %>
+<div class="box1-colWhite">
+    <div class="box-title">
+        <span class="title">Metrics by Week</span>
+    </div>
+    <%= render :partial => "/dashboard/portfolio_time_line_selector" %>
+    <div class="clearfloat">
+    </div>
+    <% if property_week_vacant_total.present? && !property_week_vacant_total.uniq.eql?(0) %>
+    <%#= render :partial => "/dashboard/time_line_selector" %>
+    <div class="fltLeft box2-Tbl ">
+        <!--Vacant-->
+        <div>
+            <div class="box-title">
+                <span class="title">Vacant</span>
+            </div>
+            <table width="435px" cellspacing="0" cellpadding="3" border="0" class="table2">
+                <thead>
+                    <tr class="db-tr-head">
+                        <th align="center" class="bdr-rt-gry bdr-lt-gry td40">
+                            &nbsp;
+                        </th>
+                        <th align="center" class="bdr-rt-gry td60">
+                            Units
+                        </th>
+                        <th align="center" class="bdr-rt-gry td60">
+                            Gross
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Rented
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Net
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Gross %
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Net %
+                        </th>
+                    </tr>
+                </thead>
+                <%for i in 0...count %>
+                <tbody>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            <%=property_week_floor[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_week_units[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_week_vacant_total[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_week_prelsd[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_weekly_display(i,'vacant_net').to_i %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_weekly_display(i,'vacant_gross_per') %>
+                        </td>
+                        <%vacant_net_per = property_weekly_display(i,'vacant_net_per') %>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_net_per %>
+                        </td>
+                    </tr>
+                </tbody>
+                <% end %>
+                <tfoot>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            Total
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_units_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_gross_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_rented_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_net_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_gross_per %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_net_per %>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div>
+            &nbsp;
+        </div>
+        <!--Net Units Avail-->
+        <div>
+            <div class="box-title">
+                <span class="title">Net Units Avail</span>
+            </div>
+            <table cellspacing="0" cellpadding="3" border="0" class="table2 tableBg td435">
+                <thead>
+                    <tr>
+                        <th align="center" class="bdr-rt-gry bdr-lt-gry td40">
+                            &nbsp;
+                        </th>
+                        <th align="center" class="bdr-rt-gry padzero bdr-bottom-gry" colspan="3">
+                            Net Units Avail
+                        </th>
+                        <th colspan="3" class="bdr-bottom-gry">
+                            Net Units Avail %
+                        </th>
+                    </tr>
+                    <tr>
+                        <th align="center" class="bdr-rt-gry bdr-lt-gry bdr-bottom-gry">
+                            &nbsp;
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry">
+                            Crnt
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry">
+                            1 Wk
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry">
+                            4 Wk
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry">
+                            Crnt
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry">
+                            1 Wk
+                        </th>
+                        <th class="bdr-bottom-gry">
+                            4 Wk
+                        </th>
+                    </tr>
+                </thead>
+                <%for i in 0...count %>
+                <tbody>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            <%=property_week_floor[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@current[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=acc_type == 'YARDI V1' ? raw("&nbsp;") : @wk1[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=acc_type == 'YARDI V1' ? raw("&nbsp;") : @wk4[i] %>
+                        </td>
+                        <%prop_week_net_units = property_weekly_display_net_units(i,'crnt') %>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=prop_week_net_units %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :property_weekly_display_net_units(i,'wk1') %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") : property_weekly_display_net_units(i,'wk4') %>
+                        </td>
+                    </tr>
+                </tbody>
+                <% end %>
+                <tfoot>
+                    <tr>
+                        <td width="30px" align="right" class="bdr-rt-gry">
+                            Total
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@netunits_avail_crnt_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk1_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk4_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@netunits_avail_crnt_per %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk1_per %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk4_per %>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div>
+            &nbsp;
+        </div>
+        <!--Traffic-->
+        <div>
+            <div class="box-title">
+                <span class="title">Traffic</span>
+            </div>
+            <table cellspacing="0" cellpadding="3" border="0" class="table2 tableBg td435">
+                <thead>
+                    <tr>
+                        <th align="center" class="bdr-rt-gry td33">
+                            &nbsp;
+                        </th>
+                        <th colspan="2" class="bdr-bottom-gry bdr-rt-gry">
+                            Traffic
+                        </th>
+                        <th colspan="3" class="bdr-bottom-gry">
+                            Dep
+                        </th>
+                    </tr>
+                    <tr>
+                        <th align="center" class="bdr-rt-gry bdr-bottom-gry">
+                            &nbsp;
+                        </th>
+                        <th align="center" class="bdr-rt-gry bdr-bottom-gry td60">
+                            PI
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry td60">
+                            WI
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry td60">
+                            Total
+                        </th>
+                        <th class="bdr-rt-gry bdr-bottom-gry td60">
+                            Rej
+                        </th>
+                        <th class="bdr-bottom-gry td60">
+                            Canc
+                        </th>
+                    </tr>
+                </thead>
+                <%for i in 0...count %>
+                <tbody>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            <%=property_week_floor[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@pi_total[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@wi_total[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@dep_total[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@dep_rej[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@dep_canc[i] %>
+                        </td>
+                    </tr>
+                </tbody>
+                <%end %>
+                <tfoot>
+                    <tr>
+                        <td width="30px" align="right" class="bdr-rt-gry">
+                            Total
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@trafic_pi_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@trafic_wi_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@trafic_dep_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@trafic_rej_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@trafic_canc_total %>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div class="fltrt box2-Tbl ">
+        <!--Notice-->
+        <div>
+            <div class="box-title">
+                <span class="title">Notice</span>
+            </div>
+            <table cellspacing="0" cellpadding="3" border="0" class="table2 td435">
+                <thead>
+                    <tr class="db-tr-head">
+                        <th align="center" class="bdr-rt-gry bdr-lt-gry td35">
+                            &nbsp;
+                        </th>
+                        <th align="center" class="bdr-rt-gry td60">
+                            Gross
+                        </th>
+                        <th align="center" class="bdr-rt-gry td60">
+                            Rented
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Net
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Gross %
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td60">
+                            Net %
+                        </th>
+                    </tr>
+                </thead>
+                <%for i in 0...count %>
+                <tbody>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            <%=property_week_floor[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@property_weekly_ntv[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@property_week_prelsd2[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_weekly_display(i,'notice_net') %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=property_weekly_display(i,'notice_gross_per') %>
+                        </td>
+                        <%vacant_net_per = property_weekly_display(i,'vacant_net_per') %>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=vacant_net_per %>
+                        </td>
+                    </tr>
+                </tbody>
+                <% end %>
+                <tfoot>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            Total
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@notice_gross_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@notice_rented_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@notice_net_total %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@notice_gross_per %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%=@notice_net_per %>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div>
+            &nbsp;
+        </div>
+        <!--Rent-->
+        <div>
+            <div class="box-title">
+                <span class="title">Rent</span>
+            </div>
+            <table cellspacing="0" cellpadding="3" border="0" class="table2 td435">
+                <thead>
+                    <tr class="db-tr-head">
+                        <th align="center" class="bdr-rt-gry bdr-lt-gry td40">
+                            &nbsp;
+                        </th>
+                        <th align="center" class="bdr-rt-gry td90">
+                            RTR
+                        </th>
+                        <th align="center" class="bdr-rt-gry td90">
+                            Min Rent
+                        </th>
+                        <th valign="top" class="bdr-rt-gry td90">
+                            Max Rent
+                        </th>
+                    </tr>
+                </thead>
+                <%for i in 0...count %>
+                <tbody>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            <%=property_week_floor[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@rtr[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@min_rent[i] %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@max_rent[i] %>
+                        </td>
+                    </tr>
+                </tbody>
+                <% end %>
+                <tfoot>
+                    <tr>
+                        <td align="right" class="bdr-rt-gry bdr-lt-gry">
+                            Total
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_rtr %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_min_rent %>
+                        </td>
+                        <td align="right" class="bdr-rt-gry">
+                            <%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_max_rent %>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <% else %>
+    <div style="text-align: center; height: 40px; line-height: 60px;">
+        Data Unavailable. Please Upload Weekly Data
+    </div>
+    <% end %>
+    <div class="clearfloat">
+    </div>
+</div>

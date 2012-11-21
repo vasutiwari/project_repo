@@ -1,0 +1,20 @@
+<script>
+  share  = false;
+	file = false;
+	folder = false;
+</script>
+<div class="basicbodycontainer" style="height:auto;width:775px;">
+	<div id="sbox-window" style="" class="">
+		<div class="sbox-bg-wrap">
+			<div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+			<div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+			<div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+			<%= form_tag({:action => @action ,:controller => "collaborators",:folder_id => params[:folder_id],:document_id => params[:document_id], :task_id=>@task.nil? ? '' : @task.id }, :target => "upload_frame_add_collab", :id => "upload_form7", :onsubmit=>'return restrict_empty_collaborators()')  do %>
+         <%=render :partial=>"/collaborators/share_add_collab",:locals=>{:folder_collection =>@folder,:action =>@action,:mem_list =>@mem_list,:data=>@data}%>
+		<%end%>
+				<h4> &nbsp;</h4>
+			<iframe id="upload_frame_add_collab" name="upload_frame_add_collab" style="display: none"></iframe>	
+	    <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+ 			</div>
+	</div>
+</div>

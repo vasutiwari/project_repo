@@ -1,0 +1,5 @@
+page.hide 'modal_container'
+page.hide 'modal_overlay'
+page[:select_one1].innerHTML = "Threshold details has been saved successfully"
+page.visual_effect(:highlight,'select_one1', :duration => 6.0,:startcolor=>"#E5FDD0")#earlier E5FDD0
+page.visual_effect :fade,'select_one1',:duration => 6.0

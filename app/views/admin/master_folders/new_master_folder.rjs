@@ -1,0 +1,22 @@
+if @prev_folder.nil?
+  page['upload_form1'].reset
+  page.hide 'modal_container'
+  page.hide 'modal_overlay'
+  page.show 'select_one'
+  page.replace_html "folder_head",:partial=>'folder_head',:locals=>{:parent_record=>@parent_record,:portfolio_type=>@portfolio_type}
+  if params[:parent_id].to_i == 0
+    page.replace_html "stored_assets_docs_display",:partial=>'folders_content',:locals=>{:parent_record => @parent_record,:portfolio_type => @portfolio_type,
+    :portfolio_files => @portfolio_files,:portfolio_folder => @portfolio_folder,:portfolio_filename => @portfolio_filename}
+  else
+    page.replace_html "stored_assets_docs_display",:partial=>'head_for_uploads'
+    page[:select_one1].innerHTML = FLASH_MESSAGES['masterfolder']['5003']
+    page.visual_effect(:highlight,'select_one1', :duration => 6.0,:startcolor=>"#E5FDD0")#earlier E5FDD0
+    page.visual_effect :fade,'select_one1',:duration => 6.0
+  end
+  page[:select_one].innerHTML = FLASH_MESSAGES['masterfolder']['5003']
+  page.visual_effect(:highlight,'select_one', :duration => 6.0,:startcolor=>"#E5FDD0")#earlier E5FDD0
+  page.visual_effect :fade,'select_one',:duration => 6.0
+
+else
+  page.replace_html 'error_display', "#{@prev_folder.name} folder already exist"
+end

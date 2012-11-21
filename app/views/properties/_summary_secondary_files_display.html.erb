@@ -1,0 +1,37 @@
+<% pdf_conv_path = @pdf.blank? ? "" : "#{Rails.root.to_s}/public" %>
+<%find_added_scondary_files%>
+<% added_secondary_files = @added_secondary_files%>
+<div class="summary_comment_row">
+  <div class="subrow4">
+    <h1 class="coll1">Files & General Ledger</h1>
+    <div class="summary_comment_wrapper">
+      <div class="toggle_container3">
+        <div class="block5">
+          <%if  added_secondary_files && !added_secondary_files.empty?%>
+            <% added_secondary_files.each do |secondary_file|%>
+              <div class="coll3">
+                <div class="collabdelcol" style="padding-top:2px;<%if secondary_file.user_id != current_user.id%>margin-left:7px;<%end%>">
+                  <%if secondary_file.user_id == current_user.id%>
+                    <a href="javascript:;" style ="padding-right:3px;"	onclick="if(confirm('Are you sure you want to permanently delete this file <%=secondary_file.filename%> ?')){delete_asset_doc_or_folder_real_estate(<%=secondary_file.folder.portfolio_id %>,<%=secondary_file.id %>,'document','del','Permanently delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','<%=params[:show_missing_file]%>','false','false','true');} return false;">
+                      <img src="<%= pdf_conv_path %>/images/del_icon.png" width="7" height="7" border="0"  title="Remove File"/>
+                    </a>
+                  <%end%>
+                  <a href="javascript:;" onclick="make_downloads('<%=secondary_file.id %>'); return false;" style="font-size: 11px;color: #025B8D;text-decoration:none;"><%=secondary_file.filename%></a>
+                </div>
+              </div>
+            <%end%>
+          <%end%>
+          <div class="coll3">
+            <div class="coll3">
+              <div class="addpropertyrow">
+                <%= link_to raw("<img border=\"0\" width=\"15\" height=\"16\" src=\"#{pdf_conv_path}/images/attachment.png\" />Attach file(s)"), {:controller => "tree_view",:action => "task_add_files_using_tree",:folder_id =>@folder.id,:from_portfolio_summary=>true}, :id=>"add_files_task"  %>
+                <script type="text/javascript"> new Control.Modal($('add_files_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                <span>&nbsp;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

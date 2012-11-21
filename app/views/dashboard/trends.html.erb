@@ -1,0 +1,12 @@
+<div id="bubble_tooltip">
+  <div class="bubble_top"><span>Click here to edit</span></div>
+  <div class="bubble_middle"><span id="bubble_tooltip_content"></span></div>
+  <div class="bubble_bottom"></div>
+</div>
+<div id="trend_content">
+<%=render :partial => "trends"%>
+</div>
+<script>
+close_nodes("",'<%=params[:selected_link]%>')
+</script>
+

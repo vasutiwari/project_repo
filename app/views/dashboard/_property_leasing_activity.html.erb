@@ -1,0 +1,125 @@
+<div class="box-3colTbl fltrt">
+  <div class="">
+    <table cellspacing="0" cellpadding="3" border="0" width="605px" class="table2">
+      <thead>
+        <tr class="db-tr-head">
+          <th class="bdr-rt-gry bdr-lt-gry" width="143" align="left">Leasing Activity</th>
+          <th class="bdr-rt-gry" width="70" align="right">Actual </th>
+          <th class="bdr-rt-gry" width="70" align="right">Budget </th>
+          <th colspan="2" valign="top" class="bdr-rt-gry padzero" width="100px"> <table  width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <th colspan="2" class="tdbgNone">Variance</th>
+              </tr>
+              <tr>
+                <th class="tdbgNoneBdrR" style="width:85px;">%</th>
+                <th class="tdbgNoneBdrL">SF</th>
+              </tr>
+            </table>
+          </th>
+        </tr>
+      </thead>
+      <%
+      real_ids = defined?(prop_ids) ? prop_ids.join(',') : note_collection.try(:id)
+      #occ_rentable_sqft = occupancy_start_of_year(real_ids)
+    %>
+
+  <%exp_actual = leases_collection.present? && leases_collection[:expirations].present? ? leases_collection[:expirations][:actual] : 0%>
+  <%exp_budget = leases_collection.present? && leases_collection[:expirations].present? ? leases_collection[:expirations][:budget] : 0%>
+  <%ren_actual = leases_collection.present? && leases_collection[:renewals].present? ? leases_collection[:renewals][:actual] : 0%>
+  <%ren_budget = leases_collection.present? && leases_collection[:renewals].present? ? leases_collection[:renewals][:budget] : 0%>
+  <%new_actual = leases_collection.present? && leases_collection[:new_leases].present? ? leases_collection[:new_leases][:actual] : 0%>
+  <%new_budget = leases_collection.present? && leases_collection[:new_leases].present? ? leases_collection[:new_leases][:budget] : 0%>
+  <%cur_actual = leases_collection.present? && leases_collection[:current_occupancy].present? ? leases_collection[:current_occupancy][:actual] : 0%>
+  <%cur_budget = leases_collection.present? && leases_collection[:current_occupancy].present? ? leases_collection[:current_occupancy][:budget] : 0%>
+  <%cur_occ_actual = leases_collection.present? && leases_collection[:current_occupancy_percent].present? ? leases_collection[:current_occupancy_percent][:actual] : 0%>
+  <%cur_occ_budget = leases_collection.present? && leases_collection[:current_occupancy_percent].present? ? leases_collection[:current_occupancy_percent][:budget] : 0%>
+      <tbody>
+        <tr>
+          <%vari = form_hash_of_data_for_occupancy(exp_actual.to_f, exp_actual.to_f)%>
+          <%if session[:portfolio__id].present? && session[:property__id].blank?%>
+            <td class="bdr-rt-gry bdr-lt-gry">Expirations</td>
+          <%else%>
+            <td class="bdr-rt-gry bdr-lt-gry"><a href="/lease/<%=note_collection.portfolio_id%>/rent_roll/<%=note_collection.id%>/property_rentroll?rent_roll_filter=expirations">Expirations</a></td>
+          <%end%>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview( exp_actual)%></td>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview( exp_budget)%></td>
+          <% use_color = (exp_actual.to_f > exp_budget.to_f) ? "below" : "above"%>
+          <td class="bdr-rt-gry" width="56px" align="right"><span class="<%= use_color%>"><%= display_currency_real_estate_overview_for_percent(vari.present? ? vari[:percent] : 0)%></span></td>
+          <td class="bdr-rt-gry td50"  align="right"><span class="<%= use_color%>"><%=display_sqrt_real_estate_overview(vari.present? ? vari[:variant] : 0)%></span></td>
+        </tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+          <%vari = form_hash_of_data_for_occupancy(ren_actual.to_f,ren_budget.to_f)%>
+          <%if session[:portfolio__id].present? && session[:property__id].blank?%>
+            <td class="bdr-rt-gry bdr-lt-gry">Renewals</td>
+          <%else%>
+            <td class="bdr-rt-gry bdr-lt-gry"><a href="/lease/<%=note_collection.portfolio_id%>/rent_roll/<%=note_collection.id%>/property_rentroll?rent_roll_filter=renewals">Renewals</a></td>
+          <%end%>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(ren_actual)%></td>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(ren_budget)%></td>
+           <% use_color = (ren_actual.to_f >= ren_budget.to_f) ? "above" : "below"%>
+          <%# use_color = income_color(ren_actual.to_f, ren_budget.to_f) %>
+          <td class="bdr-rt-gry" align="right"><span class="<%= use_color%>"><%= display_currency_real_estate_overview_for_percent(vari.present? ? vari[:percent] : 0)%></span></td>
+          <td class="bdr-rt-gry" align="right"><span class="<%= use_color%>"><%= display_sqrt_real_estate_overview(vari.present? ? vari[:variant] : 0)%></span></td>
+        </tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+          <%vari = form_hash_of_data_for_occupancy(new_actual.to_f, new_budget.to_f)%>
+          <%if session[:portfolio__id].present? && session[:property__id].blank?%>
+            <td class="bdr-rt-gry bdr-lt-gry">New Leases</td>
+          <%else%>
+            <td class="bdr-rt-gry bdr-lt-gry"><a href="/lease/<%=note_collection.portfolio_id%>/rent_roll/<%=note_collection.id%>/property_rentroll?rent_roll_filter=new_leases">New Leases</a></td>
+          <%end%>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(new_actual)%> </td>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(new_budget)%></td>
+          <% use_color = (new_actual.to_f >= new_budget.to_f) ? "above" : "below"%>
+          <td class="bdr-rt-gry" align="right"><span class="<%=use_color%>"><%= display_currency_real_estate_overview_for_percent(vari.present? ? vari[:percent] : 0)%></span></td>
+          <td class="bdr-rt-gry" align="right"><span class="<%=use_color%>"><%=display_sqrt_real_estate_overview(vari.present? ? vari[:variant] : 0)%></span></td>
+        </tr>
+      </tbody>
+      <% lease_records = new_lease_not_commenced(real_ids) %>
+      <tbody>
+        <tr>
+<%#if session[:portfolio__id].present? && session[:property__id].blank?%>
+          <td class="bdr-rt-gry bdr-lt-gry">New Leases Not Commenced</td>
+<%#else%>
+<%#*<td class="bdr-rt-gry bdr-lt-gry"><a href="">- New Leases Not Commenced</a></td>%>
+<%#end%>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(lease_records.present? ? lease_records.sum(&:sqft) : 0)%></td>
+          <td class="bdr-rt-gry" align="right">&nbsp;</td>
+          <td class="bdr-rt-gry" align="right">&nbsp;</td>
+          <td class="bdr-rt-gry" align="right">&nbsp;</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <%vari = form_hash_of_data_for_occupancy(cur_actual.to_f, cur_budget.to_f)%>
+          <td class="bdr-rt-gry bdr-lt-gry" height="25px">Occupancy SF</td>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(cur_actual)%></td>
+          <td class="bdr-rt-gry" align="right"><%=display_sqrt_real_estate_overview(cur_budget)%></td>
+          <% use_color = (cur_actual.to_f >= cur_budget.to_f) ? "above" : "below"%>
+          <td class="bdr-rt-gry" align="right"><span class="<%=use_color%>"><%= display_currency_real_estate_overview_for_percent(vari.present? ? vari[:percent] : 0)%></span></td>
+          <td class="bdr-rt-gry" align="right"><span class="<%=use_color%>"><%=display_sqrt_real_estate_overview(vari.present? ? vari[:variant] : 0)%></span></td>
+        </tr>
+        <tr>
+          <%vari = form_hash_of_data_for_occupancy(cur_occ_actual.to_f, cur_occ_budget.to_f)%>
+          <td class="bdr-rt-gry bdr-lt-gry" height="25px">Occupancy %</td>
+          <td class="bdr-rt-gry" align="right"><%= cur_occ_actual%><%= '%' %></td>
+          <td class="bdr-rt-gry" align="right"><%= cur_occ_budget%><%= '%' %></td>
+          <% use_color = (cur_occ_actual.to_f >= cur_occ_budget.to_f) ? "above" : "below"%>
+          <td class="bdr-rt-gry" align="right"><span class="<%=use_color%>"><%= display_currency_real_estate_overview_for_percent(vari.present? ? vari[:percent] : 0)%></span></td>
+          <td class="bdr-rt-gry" align="right">&nbsp;</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+<div class="clearfloat"></div>
+
+<%if params[:action].eql?("property_commercial_leasing_info")%>
+</div>
+<%end%>

@@ -1,0 +1,9 @@
+if @parent_id.to_i == 0
+  page.replace_html "stored_assets_docs_display",:partial=>'folders_content',:locals=>{:parent_record => @parent_record,:portfolio_type => @portfolio_type,
+    :portfolio_files => @portfolio_files,:portfolio_folder => @portfolio_folder,:portfolio_filename => @portfolio_filename}
+else
+  page.replace_html "stored_assets_docs_display",:partial=>'head_for_uploads'
+  page[:select_one1].innerHTML = "Folder deleted"
+  page.visual_effect(:highlight,'select_one1', :duration => 6.0,:startcolor=>"#E5FDD0")#earlier E5FDD0
+  page.visual_effect :fade,'select_one1',:duration => 6.0
+end

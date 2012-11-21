@@ -1,0 +1,198 @@
+<style type="text/css">
+    tr.yellow td {
+        border-top: 1px solid #FB7A31;
+        border-bottom: 1px solid #FB7A31;
+        background: #FFC !important;
+    }
+
+    .budget_select_box {
+        font-size: 14px !important;
+        width: 76px;
+        text-align: center;
+        line-height: 140%;
+    }
+
+    .budget_fields_background_color {
+        background-color: #FFFFCC !important;
+    }
+</style>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(".change_occupancy_beginning_of_period").each(function(){
+            current_id = jQuery(this).attr('id').split("_").last();
+            if (current_id % 2 == 0) {
+                jQuery("#leasing_budget_occupancy_beginning_of_period_" + current_id).css("background-color", "#EEEEEE");
+            }
+        });
+
+         jQuery('#leasing_budget_submit').mouseover(function(){
+            jQuery("#leasing_budget_submit").css({
+                "background": "#3c7dbe",
+                "border": "solid 1px #277ca2"
+            })
+        });
+
+        jQuery('#leasing_budget_submit').mouseout(function(){
+            jQuery("#leasing_budget_submit").css({
+                "background": "-moz-linear-gradient(center top , #6EDBF5 1%, #4086C2 100%) repeat scroll 0 0 transparent",
+                "border": "1px solid #75C8E9"
+            });
+        });
+
+        jQuery("#current_selected_year").addClass("budget_select_box");
+
+        if (jQuery.browser.msie)
+            jQuery("select").css("font-size", "1em");
+
+
+    });// JavaScript Document
+</script>
+<%= form_for @leasing_budget, :url => lease_budget_path(params[:portfolio_id], params[:property_id]),  :html => {:id => "leasing_budget_form" } do |leasing_budget| %>
+<div class="box-1col">
+    <div class="box-title-inner">
+        <span class="titleBlack">Monthly Leasing Activity Budget in Square Foot</span>
+    </div>
+    <div class="clearfloat">
+    </div>
+    <div class="">
+        <div class="fltLeft">
+            <span class="TxtBold" style="font-size:13px;">Select Year:</span>
+            <%=select_tag(:current_selected_year, options_for_select(LeasingBudget::YEAR.sort, :selected => @leasing_budget.try(:selected_year), :class => "select_box_font_size" ),:onchange => "display_budget_form_for_selected_year(jQuery(this).val(), #{@total_property}, #{params[:portfolio_id]}, #{params[:property_id]})", :class => "select_box_font_size") %>
+            <%=leasing_budget.hidden_field(:selected_year, :value => (@leasing_budget.try(:selected_year) || Time.now.year)) %>
+        </div>
+    </div>
+    <div class="clearfloat">
+    </div>
+    <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+        <thead>
+            <tr class="fb-tr-head yellow">
+                <th class="bdr-lt-gry bdr-rt-wht" style="width:90px;">
+                    Period
+                </th>
+                <th class="bdr-rt-wht" style="width:150px;">
+                    Occupancy Beginning
+                    <br/>
+                    of Period
+                </th>
+                <th class="bdr-rt-wht" style="width:150px;">
+                    Lease Expirations
+                </th>
+                <th class="bdr-rt-wht" style="width:150px;">
+                    Existing Lease
+                    <br/>
+                    Renewals
+                </th>
+                <th class="bdr-rt-wht" style="width:150px;">
+                    New Leases
+                </th>
+							
+                <th class="padzero td150 bdrNone" align="center" colspan="2">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                            <th colspan="2" class="bdrBnone">
+                                Budgeted Occupancy
+                                <br/>
+                                End of Period
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="bdr-rt-wht td80 bgNone">
+                                Area (RSF)
+                            </th>
+                            <th class="td75 bgNone">
+                                Area (%)
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="GreyTD bdr-lt-gry bdr-rt-gry bdr-top-gry">
+                    Start of <span id="update_budget_start_date"><%= @leasing_budget.try(:selected_year) %></span>
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[occupancy_beginning_of_period[#{0}]]", "#{@leasing_budget.occupancy_beginning_of_period['0'] || 0 rescue 0 }", :class => "inptGryTR", :onfocus => "remove_default_value_from_budget_fields(jQuery(this).attr('id'), jQuery(this).val());", :onblur => "update_budget_table_data(jQuery(this).val(), #{@total_property});" %>
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    &nbsp;
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    &nbsp;
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    &nbsp;
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_rsf[#{0}]]", "#{@leasing_budget.area_rsf['0'] || 0 rescue 0 }", :class => "inptGryTR", :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;", :readonly => true %>
+                </td>
+                <td align="right" class="GreyTD bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_percentage[#{0}]]", "#{@leasing_budget.area_percentage['0'] || 0 rescue 0 }", :class => "inptGryTR", :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;", :readonly => true %>
+                    <%= leasing_budget.hidden_field :real_estate_property_id, :value => params[:property_id] %>
+                </td>
+            </tr>
+        </tbody>
+        <% (1..12).each do |k| %>
+        <tbody>
+            <tr class="<%=cycle("","tablefbAlternate")%>">
+                <td class="bdr-lt-gry bdr-rt-gry bdr-top-gry">
+                    <%= LeasingBudget::PERIOD[k] %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[occupancy_beginning_of_period[#{k}]]", "#{@leasing_budget.occupancy_beginning_of_period["#{k}"] || 0 rescue 0 }", :class => "inptGryTR change_occupancy_beginning_of_period", :readonly => true, :style=>"border:none !important;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[lease_expirations[#{k}]]", "#{@leasing_budget.lease_expirations["#{k}"] || 0 rescue 0 }", :class => "inptGryTR changing_budget_field_value", :onfocus => "remove_default_value_from_budget_fields(jQuery(this).attr('id'), jQuery(this).val());", :onblur => "update_budget_fields(jQuery(this).attr('id'),jQuery(this).val(), #{@total_property} )" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[existing_lease_renewals[#{k}]]", "#{@leasing_budget.existing_lease_renewals["#{k}"] || 0 rescue 0 }", :class =>  "inptGryTR", :onfocus => "remove_default_value_from_budget_fields(jQuery(this).attr('id'), jQuery(this).val());", :onblur => "update_budget_fields(jQuery(this).attr('id'),jQuery(this).val(), #{@total_property})" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[new_leases[#{k}]]", "#{@leasing_budget.new_leases["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR", :onfocus => "remove_default_value_from_budget_fields(jQuery(this).attr('id'), jQuery(this).val());", :onblur => "update_budget_fields(jQuery(this).attr('id'),jQuery(this).val(), #{@total_property})" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_rsf[#{k}]]", "#{@leasing_budget.area_rsf["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR", :readonly => true %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_percentage[#{k}]]", "#{@leasing_budget.area_percentage["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR check_area_percentage_values", :readonly => true %>
+                </td>
+            </tr>
+        </tbody>
+        <% end %>
+        <% k = 13 %>
+        <tfoot>
+            <tr>
+                <td class="bdr-lt-gry bdr-rt-gry bdr-top-gry">
+                    <%= LeasingBudget::PERIOD[k] %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[occupancy_beginning_of_period[#{k}]]", "#{@leasing_budget.occupancy_beginning_of_period["#{k}"] || 0 rescue 0 }", :class => "inptGryTR change_occupancy_beginning_of_period", :readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[lease_expirations[#{k}]]", "#{@leasing_budget.lease_expirations["#{k}"] || 0 rescue 0 }", :class => "inptGryTR changing_budget_field_value",:readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[existing_lease_renewals[#{k}]]", "#{@leasing_budget.existing_lease_renewals["#{k}"] || 0 rescue 0 }", :class =>  "inptGryTR", :readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[new_leases[#{k}]]", "#{@leasing_budget.new_leases["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR", :readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_rsf[#{k}]]", "#{@leasing_budget.area_rsf["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR", :readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+                <td align="right" class="bdr-rt-gry bdr-top-gry">
+                    <%= text_field_tag "leasing_budget[area_percentage[#{k}]]", "#{@leasing_budget.area_percentage["#{k}"] || 0 rescue 0}", :class =>  "inptGryTR check_area_percentage_values", :readonly => true, :style=>"border:none !important;background-color:#DEDEDE;font-weight:bold;" %>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <div class="clearfloat">
+    </div>
+    <div class="button fltrt">
+        <%= leasing_budget.submit "Save", :onclick => "return check_occupancy_beginning_of_period(#{@total_property});",:class=>"blue_buttom_ex" %>
+    </div>
+    <div class="clearfloat">
+    </div>
+</div>
+<% end %>

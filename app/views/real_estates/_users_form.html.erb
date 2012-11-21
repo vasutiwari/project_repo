@@ -1,0 +1,19 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<script type="text/javascript">
+  form_name ="#users_form";
+  tab = "5";
+  share  = false;
+	file = false;
+	folder = false;
+</script>
+<%@folder = find_by_real_estate_property_id(property_collection.id)%>
+<%@from_prop_setting = params[:from_prop_setting]%>
+<%display_collaborators%>
+		<%= form_tag({:action =>"share_folder" ,:controller => "collaborators",:portfolio_id=>portfolio_collection.id,:folder_id => params[:folder_id],:document_id => params[:document_id], :task_id=>@task.nil? ? '' : @task.id }, :target => "upload_frame_add_collab", :id => "users_form")  do %>
+         <%=render :partial=>"/collaborators/add_edit_collaborators",:locals=>{:folder_collection =>@folder,:action =>@action,:mem_list =>@mem_list,:data=>@data}%>
+		<%end%>
+				<h4> &nbsp;</h4>
+			<iframe id="upload_frame_add_collab" name="upload_frame_add_collab" style="display: none"></iframe>	

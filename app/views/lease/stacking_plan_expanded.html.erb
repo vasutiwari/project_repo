@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<%if params[:user] == 'false'%>
+    <title>AMP: Lease Stacking Plan</title>
+    <%else%>
+    <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP: Lease Stacking Plan" : current_user.name %></title>
+<%end%>
+<link rel="stylesheet" type="text/css" href="/stylesheets/stacking_plan.css" />
+<style>
+body{padding:0;margin:0;font-family:Arial, Helvetica, sans-serif;font-size:11px;}
+a{color:#025b8d;text-decoration:none;}
+textarea {
+	clear: both;
+	display: block;
+	font-family: arial;
+	font-size: 1em;
+	width:40em;
+	padding: 2px 4px;
+}
+</style>
+</head>
+
+<body>
+<div id="callout"></div>
+<div id="widgetQuad"></div>
+<div id="printable"></div>
+<script language="javascript" type="text/javascript" src="/javascripts/stacking_plan.js"></script>
+</body>
+</html>
+
+
+<script type="text/javascript">
+// "refer http://jystewart.net/2006/08/22/namespaces-attributes-and-content-in-rxml"
+<%if  (@floors && !@floors.empty?) || (@suites_without_floor && !@suites_without_floor.empty?) %>
+  stacking_plan_display('<%=params[:portfolio_id]%>','<%=params[:property_id]%>','<%=is_leasing_agent ? true : false %>');
+  msg_display('<%=params[:portfolio_id]%>','<%=params[:property_id]%>');
+  stack_drawWidget('<%=is_leasing_agent ? true : false %>');
+<%end	%>
+
+IE = document.all?true:false;
+if (!IE) document.captureEvents(Event.MOUSEMOVE);
+document.onmousemove = getMouseXY;
+</script>

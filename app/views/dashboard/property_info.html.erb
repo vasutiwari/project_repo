@@ -1,0 +1,194 @@
+<script src="http://maps.google.com/maps?file=api&amp;v=3&amp;key=<%= get_google_key %>" type="text/javascript"></script>
+<style>
+  ul {list-style-type :none;padding: 0px;margin:0px}
+  li {list-style-type :none;padding: 0px;margin:0px}
+</style>
+<!--<script type="text/javascript" src="/javascripts/slideshow/jquery.slideViewerPro.1.0.js"></script>-->
+<script type="text/javascript" src="/javascripts/slideshow/jquery.timers-1.2.js"></script>
+<link href="/stylesheets/svwp_style.css" rel="stylesheet" type="text/css" />
+<script>jQuery.noConflict();
+ jQuery(window).bind("load", function() {
+    jQuery("div#basic").slideViewerPro();
+  });
+</script>
+<%@property = RealEstateProperty.find_by_id(params[:property_id]) %>
+<%
+images_collection = @images
+property_collection = @property
+pdf_collection = @pdf
+%>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  jQuery("div#basic").slideViewerPro();
+  active_call="property_view";
+</script>
+<div id="show_assets_list">
+  <div class="content">
+    <div class="box-1col">
+	  <div class="fltLeft propertyImgDiv">
+        	<p class="propertAdd"><%= get_address(property_collection) %></p>
+						<%property_image = PortfolioImage.find(:all,:conditions=>['attachable_id = ? and attachable_type = ? and is_property_picture = ?',property_collection.id,"RealEstateProperty",true])%>
+            <%images_collection = find_property_images(property_collection.id)%>
+            <%if !property_image.nil?%>
+              <%#images_collection = images_collection + property_image %>
+            <%end%>
+           <%images_collection = property_image %>
+					  <%if images_collection && !images_collection.empty?%>
+							<span class="fltrt"><a href="/real_estates/add_property/<%=params[:portfolio_id]%>/?property_id=<%=property_collection.id%>&from_property_details=true" class="iconeditImg">Upload Photos</a></span>
+						<% end %>
+            <div class="clear"></div>
+       <div class="flashrow">
+          <div class="flashimagerow">
+            <%if images_collection && !images_collection.empty?%>
+              <% if pdf_collection %>
+                <img width="413" height="350" alt="Property Image"  src="<%= pdf_conv_path %><%= images_collection.first.class =="PortfolioImage" ? images_collection.first : images_collection.first.public_filename%>" />
+								<div id="ui1" style="width: 413px; display: block;">
+								<center>
+									<div style="padding-top:3px;">
+								<% images_collection.first(5).each do |itr| %>
+								<img width="46" height="38" src="<%= pdf_conv_path %><%= itr.class =="PortfolioImage" ? itr : itr.public_filename%>"/>
+							<%end%>
+						    </div>
+                </center>
+								</div>
+              <% else %>
+                <div id="basic" class="svwp">
+                  <ul>
+                    <!-- <img width="413" height="350" alt="Property Image"  src="<%#= pdf_conv_path %><%#= images_collection.first.class =="PortfolioImage" ? images_collection.first : images_collection.first.public_filename%>" /> -->
+                    <% images_collection.each do |itr| %>
+                      <li><img width="413" height="350" alt="Property Image"  src="<%= pdf_conv_path %><%= itr.class =="PortfolioImage" ? itr : itr.public_filename%>" /></li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+            <%else%><% req_physical_property_folder = fetch_req_physical_property_folder(property_collection.id) %>
+              <p style="text-align: center;">
+							<span style="font-size:13px;">
+							<%if is_leasing_agent%>
+							  No Pictures Added
+							<%else%>
+							Please add pictures at <a href= "/real_estates/add_property/<%=params[:portfolio_id]%>/?property_id=<%=property_collection.id%>&from_property_details=true" class="<%= (controller_name == 'real_estates') ? 'selected' : '' %>" >Property Pictures</a>
+             <%end%>
+							</span></p>
+							<div style="width:413px;height:251px;font-size: 20px;margin-top: 125px;text-align: center;">No Pictures Added</div>
+           <%end%>
+          </div>
+        </div>
+
+            <div class="clearfloat"></div>
+
+            <div class="discrpt" style="word-wrap:break-word;">
+            	<h4>Description: </h4>
+                <p><%= property_collection.nil? ? "-" : property_collection.property_description%></p>
+            </div>
+      </div>
+        <div class="fltrt">
+        		<table cellspacing="0" cellpadding="6" border="0" class="tablefb pad12 td475">
+        	<tbody>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry td150">Property Name</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry" title="<%=property_collection.nil? ? "-" : property_collection.property_name %>"><%=property_collection.nil? ? "-" : lengthy_word_simplification(property_collection.property_name,50,50)%></td>
+                 </tr>
+               </tbody>
+              <tbody>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Property Type</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%=property_collection.nil? || property_collection.property_type.nil? ? "-" : property_collection.property_type.name %></td>
+                 </tr>
+               </tbody>
+               <tbody>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Address</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%=property_collection.nil? ? "-" : property_collection.desc == '' ? '' :  property_collection.desc %></td>
+                 </tr>
+               </tbody>
+              <tbody>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">City</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%=property_collection.nil? ? "-" : property_collection.city == '' ? '' : property_collection.city %></td>
+                 </tr>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">State</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%=property_collection.nil? ? "-" : property_collection.province == '' ? '-' : property_collection.province %></td>
+                </tr>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Zip</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%=property_collection.nil? ? "-" : property_collection == '' ? '' : (property_collection.zip.blank? ? "" : property_collection.zip.to_i) %></td>
+                </tr>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Purchase Price</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ?  "-" : (display_currency(property_collection.purchase_price) == "$0.00" ? "" : display_currency(property_collection.purchase_price))%></td>
+                </tr>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Property Size</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.property_size%></td>
+                </tr>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Gross Land Area</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.gross_land_area%></td>
+                </tr>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Net Rentable Area</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.gross_rentable_area%></td>
+                </tr>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">No. of Units</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.no_of_units%></td>
+                </tr>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Year Built</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.year_built%></td>
+                </tr>
+                <tr class="tablefbAlternate">
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Number of Floors</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.number_of_floors%></td>
+                </tr>
+                <tr>
+                  <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-top-gry">Construction Type</td>
+                  <td align="left" class="bdr-rt-gry bdr-top-gry"><%= property_collection.nil? ? "-" : property_collection.construction_type%></td>
+                </tr>
+               </tbody>
+        </table>
+        </div>
+        <div class="clearfloat"></div>
+
+    </div>
+    <div class="clearfloat"></div>
+    <!--Map View-->
+<% unless pdf_collection %>
+        <div class="box-1col">
+          <div class="fltLeft">
+            <div class="notesalelf" id = "img_map_left"><img src="/images/but_avtive_lf.png"  width="9" height="30"/></div>
+            <div class="detailedactbutmid " id = "active">
+              <div id="mview">
+                <a  id="mvlink" href="javascript:;" class=""  <%unless property_collection.nil?%>onclick="initialize('<%=property_collection.address.txt.gsub(".",",").strip.to_s%>,<%= property_collection.city %>,<%= property_collection.province %>,<%=property_collection.zip%>'); return false"   <%end%>
+                    >Map View</a>
+              </div>
+            </div>
+            <div class="notesalelf" id = "img_map_right"><img src="/images/butactivert.png"  width="7" height="30"/></div>
+
+          <div class="detaileddeactbutwrapper" style="margin-top: 1px;">
+            <div class="notesalelf" id="img_street_left"><img src="/images/detailed_budget_dealf.png"  width="5" height="28"/></div>
+            <div class="detaileddeactbutmid" id ="deactive">
+              <div  id="sview">
+                <a   id="svlink" href="javascript:;" <%unless property_collection.nil?%>onclick="replace_street_view('<%= property_collection.desc.gsub(".",",").strip.to_s %>, <%= property_collection.city %>,<%= property_collection.province %>, <%= property_collection.zip %>'); return false" <%end%> >Street View</a>
+              </div>
+            </div>
+            <div class="notesalelf" id="img_street_right"><img src="/images/detailed_budget_deactrt.png" width="6" height="28" /></div>
+          </div>
+        </div>
+				<div class="clearfloat"></div>
+        <div>
+          <!--  <img src="/images/staticimg.jpg" width="782" height="433" />-->
+          <div id="map" class="box1-colWhite" style="width: 900px; height: 300px;display:none"></div>
+          <div id="streetview" class="box1-colWhite" style="width: 900px; height: 300px;display:none"></div>
+          <div id="map_canvas" class="box1-colWhite" style="width: 900px; height: 300px;display:block"></div>
+        </div>
+				</div>
+
+      <% end %>
+    <!--Map View End-->
+    <div class="clearfloat"></div>
+    <div class="clearfloat"></div>
+  </div>
+	<script>load_map11("<%= @address%>")</script>

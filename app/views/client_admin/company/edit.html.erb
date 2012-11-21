@@ -1,0 +1,134 @@
+<%= form_for @portfolio_image, :url => client_admin_company_path(@user, @client), :html=>{:multipart => true} do |portfolio_image_fields| %>
+<div class="box-1col">
+    <table cellspacing="0" cellpadding="4" border="0" style="width:500px;">
+        <%= fields_for :client_admin_form,@user do |client_admin_form| %>
+        <tbody>
+            <tr>
+                <td style="width: 150px;">
+                    Company Name:<span class="txtRed">*</span>
+
+                    <%= client_admin_form.text_field :company_name , :class => "inpt210",:readonly =>true %>
+                </td>
+                <!--<td style="width:20px; visibility:hidden;color: red; font-size: 12px;" id="company_name">
+                    Company Name can't be blank
+                </td> -->
+
+								<td style="width: 20px;">&nbsp;</td>
+
+								<td>
+                    Browse Logo:<span class="txtRed">*</span>
+
+                    <%= portfolio_image_fields.file_field :uploaded_data ,  :size => "25" %>
+                </td>
+
+
+								<td id="image_id">
+								<% image= @portfolio_image.filename.eql?("amp-logo.png") ? '' : @portfolio_image.public_filename(:thumb) rescue nil%>
+                  <img src="<%= image%>" style="height:40px;width:70px;margin-left:90px;margin-right:120px;"/>
+									</td>
+
+            </tr>
+        </tbody>
+
+
+				<tbody>
+            <tr>
+                	<td id="company_name"  style="visibility:hidden; color: red; font-size: 12px;">Company name can't be blank</td>
+
+								<td style="width: 20px;">&nbsp;</td>
+
+                <td id="company_image" style="visibility:hidden; color: red; font-size: 12px;">Please add image</td>
+								<td id="company_image_format" style="visibility:hidden; color: red; font-size: 12px;">Invalid image format</td>
+
+								<td style="width: 20px;">&nbsp;</td>
+
+
+
+            </tr>
+        </tbody>
+
+
+
+
+        <tbody>
+            <tr>
+
+								<td style="width: 150px;">
+                    Phone Number:
+
+                    <%= client_admin_form.text_field :phone_number , :class => "inpt210" %>
+                </td>
+								<td style="width: 20px;">&nbsp;</td>
+								<% end %>
+
+									<!-- <td style="width:20px; display:none;color: red; font-size: 12px;" id="company_image">
+                    Please add image
+                </td> -->
+                <td>
+                    Contact Person:
+
+                    <%= fields_for :client,@client do |client_fields| %>
+                    <%= client_fields.text_field :contact_person , :class => "inpt210"  %>
+                    <% end %>
+                </td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <td>
+                    List of Accounting Systems Mapped to AMP:
+
+                    <textarea class="inptTxt150" readonly="readonly"><% @accounting_type_names.each do |accounting_type_name| %><%= accounting_type_name %>&#10;<% end %></textarea>
+                </td>
+                <td>
+                </td>
+                <td>
+                    Address:
+
+					<%= fields_for :client_admin_form,@user do |client_admin_form| %>
+                    <%= client_admin_form.text_area(:company_address, :class => "inptTxt150") %>
+					<% end %>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <div >
+                        <%#= portfolio_image_fields.submit "submit" %>
+												<a href="javascript:void(0)" class="button blue" onclick="jQuery('#company_name').css('visibility','hidden');jQuery('#company_image').css('visibility','hidden'); validation_company_submit();">SUBMIT</a>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="clearfloat">
+    </div>
+</div>
+<% end %>
+
+
+<script>
+<%if (params[:action].eql?('update'))%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['406']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['client_admin']['114']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+
+</script>

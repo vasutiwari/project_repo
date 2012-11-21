@@ -1,0 +1,121 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+
+
+<script type="text/javascript">
+	highlight_explanation(temp_exp,temp_period);
+	jQuery("#tot_per_val").hide();
+  comment_place = "&comment_place=inside task";
+  yield_calender('false');
+  tooltip_loaders = []
+	partial_page='variances';
+  enable_disable_tab('variances',active_sub_call);
+	active_sub_call = 'variances'
+	
+	</script>
+<%action_name = controller.action_name
+
+  task_value = false
+%>
+<script>
+  if (jQuery("#portfolio_dropbox_view").length>0)
+    document.getElementById('portfolio_dropbox_view').style.clear = "both"
+</script>
+  <% unless pdf_collection %>
+    <div class="pdf_link_financial" style="">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+				 <span style=" border-right-color: #000000;border-right-width: 1px;border-right-style:solid;">&nbsp;</span>
+		</div>
+		<script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+ <div class="executiveinputrow" style="z-index:22000;position:absolute;top:186px;right:0;">
+      <div class="notesalelf"></div>
+      <div class="executiveinputmid" id="id_for_variance_threshold" style="top:-76px;padding-right:-1px">
+        <ul class="inputcoll2" id="cssdropdown">
+          <li class="headlink3" id="id_for_modify_threshold">
+            <div class="morebutton_label">
+						<a href="/real_estates/add_property/<%=note_collection.portfolio_id%>/?property_id=<%=note_collection.id%>&call_from_variances=true" method="put" style="width:16,height:16,border:0;">Variance Thresholds</a>
+
+						<%#= link_to "Variance Thresholds", {:action =>'add_property',:controller => "real_estates",:id =>note_collection.portfolio_id,:property_id=>note_collection.id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:call_from_variances=>true,:tl_month=>params[:tl_month],:document_id=>params[:document_id],:month=>params[:month],:period=>params[:period],:tl_period=>params[:tl_period]},{:id => "edit_note_box_#{note_collection.id}"}%></div>
+					<script>//new Control.Modal($("edit_note_box_<%#=note_collection.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+					<span></span>
+          </li>
+        </ul>
+      </div>
+      <div class="notesalelf" style="z-index:-1"></div>
+    </div>
+		<%end%>
+<div id ="show_assets_list" class="<%= 'collab_left' if (current_user.has_role?('Asset Manager') && session[:role] == 'Asset Manager')%>">
+    <div class="collabscontentrow">
+			<%find_user_for_remote(note_collection.id)%>
+			<%if !@members.blank?%>
+			 <div class="dummy_var" onmouseover="this.className='userwrapperon_var'" onmouseout="this.className='dummy_var'">
+						<div class="datausers" style="margin-top: -4px;"></div>
+						<span title='<%= (@members[0].name.blank? ? @members[0].email.split(/@/)[0] : @members[0].name).titleize%>'> <%= display_prop_user%> </span>
+							<div class="userdrop_var">
+              <div class="userheader"> Property Users </div>
+              <% @members && @members.each do |u|%>
+                <div class="userheaderrow">><span title='<%=(u.name.blank? ? u.email.split(/@/)[0] : u.name).titleize%>'><%=display_truncated_chars((u.name.blank? ? u.email.split(/@/)[0] : u.name).titleize,18,true)%></span></div>
+              <%end%>
+								</div>
+								</div>
+							<%end%>
+					<%= render :partial => "/performance_review_property/variances_cash",:locals =>{:expln_req_props_ytd_cash => expln_req_props_ytd_collection,:expln_req_props_cash=>expln_req_props_collection,:month_options => month_option,:note_collection=>note_collection,:pdf_conv_path=>pdf_conv_path,:pdf_collection=>pdf_collection}%>
+					<%= render :partial => "/performance_review_property/variances_capexp",:locals =>{:expln_req_props_ytd_cap_exp=> expln_req_props_cap_ytd,:expln_req_props_cap_exp =>expln_req_props_cap_collection,:month_options => month_option,:note_collection=>note_collection,:pdf_conv_path=>pdf_conv_path,:pdf_collection=>pdf_collection}%>
+					<%if ((params[:period] == "7" || params[:tl_period] == "7"|| params[:period] == "4" || params[:tl_period] == "4") && (params[:tl_month].blank? || params[:tl_month].nil?)) || (params[:tl_month].blank? || params[:tl_month].nil?) %>
+					<% var_display= (expln_req_props_ytd_collection.count.zero? && expln_req_props_cap_ytd.count.zero?) ? "false" : "true"%>
+					<%elsif (params[:period] != "7" && params[:tl_period] != "7" || params[:period] != "4" && params[:tl_period] != "4") && !(params[:tl_month].blank? || params[:tl_month].nil?)  %>
+										<% var_display= (expln_req_props_collection.count.zero? && expln_req_props_cap_collection.count.zero?) ? "false" : "true"%>
+					<%end%>
+					<% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+				<% if var_display == "true"%>
+				<%unless pdf_collection%>
+            <div class="buttonswrapper2 margin_updown button_with_task_complete" style ="padding-left:1px;"><span style="float:left;padding-top:6px;padding-right:6px;">	User Notification :	</span>
+						<span>&nbsp;</span><span><div class="greenbutton">
+						<%= link_to "Send Message",{:controller=>"performance_review_property",:action=>"notification_to_prop_users",:id=>note_collection.id,:note_id=>note_collection.id},:id=>"notify_users"%>
+							<script>new Control.Modal($('notify_users'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+							<span>&nbsp;</span></div></span>
+            </div>
+						<%end%>
+						<%else%>
+						<div style="padding-left: 245px;" class="rhscontentrow rhscontentrowtime">
+						 <span style="font-size:13px;"> No item beyond variance threshold.</span>
+						<%end%>
+      </div>
+  </div>
+</div>
+<%if action_name == 'edit_task' && task_value%>
+  <script>
+    task_value = <%=task_value%>;
+    if(task_value){
+      document.getElementById("add_collaborators_link").style.visibility='hidden';
+      var divs = document.getElementsByClassName('addpropertyrow');
+      for(var i=0; i<divs.length; i++) {
+        divs[i].style.visibility='hidden';
+      }
+      document.getElementById('task_instruction').disabled=true;
+      var task_variance = document.getElementsByClassName('variance_inputfield');
+      for(var i=0; i<task_variance.length; i++) {
+        task_variance[i].style.disabled=true;
+      }
+    }
+  </script>
+<%end%>
+<iframe id="upload_frame_assign_new_task" name="upload_frame_assign_new_task" style="display: none"></iframe>
+<script>
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+    //  new Ajax.Request("/properties/tool_tip_loaders",{asynchronous:true, evalScripts:true, parameters:{items:tooltip_loaders.join(',') <%= ', is_cap_exp:true' if params[:from_assign_task] == 'cap_exp' %>}});
+  });// JavaScript Document
+</script>
+<script>
+  task_value = <%=task_value%>;
+  comment_type = '<%=note_collection.class%>';
+  view_task_complete_page(task_value,"doer","variance_task");
+</script>
+<!--[if IE]>
+<style tyle=""text/css>
+  body .ie_style_class{padding-left:12px;}
+</style>
+<![endif]-->
+

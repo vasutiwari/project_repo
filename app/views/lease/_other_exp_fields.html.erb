@@ -1,0 +1,44 @@
+<%suite_ids = @lease.try(:property_lease_suite).try(:suite_ids)
+rent_sqft = 0
+rent_sqft = Suite.find_all_by_id_and_real_estate_property_id(suite_ids, params[:property_id]).map(&:rentable_sqft).compact.sum if suite_ids.present? %>
+<div class="capexnamerow close" onmouseover="if(<%=@otherexp_add_item%> != 1){jQuery(this).css('background-color','#f6f6f6');}" onmouseout="jQuery(this).css('background-color','#ffffff');">
+
+  <div class="capexform namefirst">
+    <%= f.text_field :name ,:type=>"text", :class=>"lstextfield", :style=>"width:108px;" %>
+  </div>
+  <div class="capexform">
+    <%= f.text_field :amt_psf ,:type=>"text", :class=>"lstextfield", :style=>"width:108px;", :precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'other_exp_tot_calc')" %>
+  </div>
+  <div class="capexform">
+    <%= f.text_field :tot_amt ,:type=>"text", :class=>"lstextfield other_tot_amt", :style=>"width:108px;",:precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'other_exp_psf_calc')" %>
+  </div>
+  <%= f.fields_for :note do |other_exp_note| %>
+    <div class="capexform">	
+			<%if @pdf%>
+				<%= other_exp_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 lstextfield2 taskfieldinput2",:style=>"width:357px;height:25px;"%>			
+			<%else%>
+			<%= other_exp_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 lstextfield2 taskfieldinput2",:style=>"width:357px"%>
+			<%end%>
+    </div>
+  <%end %>
+
+  <%if @otherexp_add_item != 1 %>
+    <%if f.object.new_record? %>
+      <span class="closeme" style="margin-top:-25px"><%= link_to_remove_other_exp_fields "X", f %>
+      </span>
+    <%else %>
+      <span class="closeme" id="closeme_otherexp" value="1" style="margin-top:-25px"><%= link_to_remove_other_exp_fields "X", f %>
+      </span>
+    <%end %>
+  <%end %>
+
+</div>
+<%@otherexp_add_item += 1 %>
+<script>
+  jQuery(document).ready(function(){
+	  jQuery("textarea[class*=expand]").TextAreaExpander();
+    jQuery('.other_tot_amt').each(function(){
+      capx_calc(jQuery(this).attr('id'), jQuery(this).val(), '<%=rent_sqft%>', 'other_exp_psf_calc');
+    });
+  });// JavaScript Document
+</script>

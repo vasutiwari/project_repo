@@ -1,0 +1,316 @@
+<%
+folder=@folder;
+portfolio=@portfolio;
+show_deleted=@show_deleted;
+%>
+<%= stylesheet_link_tag "ampnew"  %>
+<%= stylesheet_link_tag "advance_due_v2.css"  %>
+<%= stylesheet_link_tag "amp_rf"  %>
+<script>
+  comment_place = '';
+  AddedFiles = [];
+<%if current_user.has_role?("Shared User")  && session[:role] == 'Shared User'%>
+  <%if ((controller.controller_name == 'shared_users' && controller.action_name == "index") || params[:list] == "shared_list") && (controller.controller_name != 'properties' && controller.action_name != "show_asset_files")%>
+      document.getElementById('real_estate_block').style.display = "block";
+  <%else%>
+      ( document.getElementById('real_estate') == null ) ? '' : document.getElementById('real_estate').style.display = "none";
+  <%end%>
+<%end%>
+  active_call="datahub";
+</script>
+
+
+<%if @folder && (params[:parent_delete] == 'true' || params[:is_property_folder] == 'true') && request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?('collaboration_hub') && params[:show_past_shared] != 'true' && params[:del_files] !='true'%>
+  <%@folder = find_by_parent_id_and_portfolio_id(@folder.portfolio_id)%>
+<%end%>
+<%if @folder%>
+  <%find_past_shared_folders_documents_tasks('true')%>
+<%end%>
+<div class="collabscontentrow align_folder_structure_padding_left" >
+  <div id="portfolio_overview_property_graph">
+    <div class="rhs align_folder_structure_padding_right">
+      <div id ="portfolio_dropbox_view">
+        <div class="align_margin_padding_ie7" style="margin-left:-11px;<%if !params[:portfolio_id].present?%>margin-top:5px;<%end%>">
+          <!-- show past shared folders -->
+          <%if params[:show_past_shared]=="true"  && params[:parent_delete] != "true"%>
+            <%pid = params[:portfolio_id] ? params[:portfolio_id] : params[:pid]%>
+            <div class="" style="z-index:10000;">
+              <div class="collab_hub_navbar bottompadding" id="head_for_del_icons">
+                <div class="folderlabel" id = "head_for_del_icons">
+                  <%if params[:deal_room] == 'true'%>
+                    <a href="javascript:;"   onclick="load_writter();show_hide_asset_docs1_real_estate_for_deal_room(<%=folder.portfolio_id %>,<%= folder.id %>,'hide_del');load_completer();return false;">
+                      <img src="/images/asset_folder_icon2.png"  width="20" height="20" border="0"/>
+                      <div class="folderlabelcol">Show Files</div>
+                    </a>
+                  <%else%>
+                    <a href="javascript:;"   onclick="load_writter();show_hide_asset_docs1_real_estate(<%=folder.portfolio_id %>,<%= folder.id %>,'hide_del');load_completer();return false;">
+                      <img src="/images/asset_folder_icon2.png"  width="20" height="20" border="0"/>
+                      <div class="folderlabelcol">Show Files</div>
+                    </a>
+                  <%end%>
+                  <span>
+                    <img src="/images/upllodright.png"  width="2" height="27"/>
+                  </span>
+                  <span id="select_one"></span>
+                </div>
+              </div>
+  </div>
+
+<%end%>
+          <!-- show past shared folders end -->
+          <%if params[:show_past_shared]!="true" %>
+            <% if !folder.nil?  && params[:parent_delete] != "true" && params[:folder_id] != "0" && params[:list] !='shared_list' && params[:is_property_folder] != 'true'%>
+              <%if !(request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("collaboration_hub") && folder.parent_id == -1)%>
+                <div class="" style="z-index:10000;">
+                  <%unless params[:user] == 'false'%>
+									<%gate= ((params[:data_hub].present? && !params[:Filename].present? && !(params[:fn].eql?("true") || params[:fn].eql?("false")) && !params[:folder_name].present?  && !params[:attachment].present? && !action_name.eql?("delete_folder")) || params[:hide_var].present?)%>
+									<%gate_val = gate.eql?(true) ? true : false %>
+									  <div class="collab_hub_navbar bottompadding edit_property_view" id="head_for_del_icons" style=<%= gate_val ? "display:none;" : "display:block;" %>>
+                      <% if folder  %>
+                        <% portfolio = (!portfolio.nil?) ? portfolio : folder.portfolio %>
+                        <div class="folderlabel" >
+                          <%if (params[:deal_room] && params[:deal_room] == 'true')%>
+                            <%unless (params[:add_file_deal] == 'true' && folder.parent_id == 0)%>
+                              <%= link_to raw("<img border=\"0\" width=\"20\" height=\"20\" src=\"/images/collaboration_hub_new_uplodeimg.png\" /><div class=\"folderlabelcol\">Upload</div>"), {:controller => "tree_view",:action => "task_add_files_using_tree",:folder_id =>@folder.id,:from_portfolio_summary=>true,:deal_room=>params[:deal_room]}, :id=>"advanced",:style => "text-decoration: none;"  %>
+                            <%else%>
+                              <%= link_to raw("<img border=\"0\" width=\"20\" height=\"20\" src=\"/images/collaboration_hub_new_uplodeimg.png\" /><div class=\"folderlabelcol\">Upload</div>"), {:controller => "tree_view",:action => "task_add_files_using_tree",:folder_id =>@folder.id,:from_portfolio_summary=>true,:deal_room=>params[:deal_room]}, :id=>"advanced",:style => "text-decoration: none;"  %>
+                            <%end%>
+                          <script type="text/javascript"> new Control.Modal($('advanced'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                          <span><img src="/images/upllodright.png"  width="2" height="27" border="0"/></span></div>
+                          <%else%>
+                            <a id="advanced" href="/documents/upload_asset_files?pid=<%= portfolio.id %>&folder_id=<%=   folder.id  %>&del_files=<%=params[:del_files]%><%= '&bulk_upload=true' if params[:bulk_upload] %>"  style="text-decoration:none;">
+                              <img src="/images/collaboration_hub_new_uplodeimg.png"  width="20" height="20" border="0"/>
+                              <div class="folderlabelcol">Upload</div>
+                            </a>
+                         <script type="text/javascript"> new Control.Modal($('advanced'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                          <span><img src="/images/upllodright.png"  width="2" height="27" border="0"/></span></div>
+                          <%end%>
+                      <%end%>
+
+
+
+                      <%if params[:deal_room] == 'true'%>
+                        <div class="folderlabel">
+                              <%if folder.name == 'my_deal_room' && folder.parent_id.eql?(0)%>
+                                <a style="text-decoration:none;" href="/folders/view_folder?folder_id=<%=folder.id%>&pid=<%=portfolio.id%>&del_files=<%=params[:del_files]%>&deal_room=<%=params[:deal_room]%>"  id="upload_folder_<%=folder.id%>">
+                                  <img src="/images/dealroom_icon_new.png"  border="0" />
+                                  <div class="folderlabelcol">New Deal Room</div>
+                                </a>
+                              <%else%>
+                                <a style="text-decoration:none;" href="/folders/view_folder?folder_id=<%=folder.id%>&pid=<%=portfolio.id%>&del_files=<%=params[:del_files]%>&deal_room=<%=params[:deal_room]%>"  id="upload_folder_<%=folder.id%>">
+                                  <img src="/images/collaboration_hub_new_floder.png"  width="24" height="24" border="0"/>
+                                  <div class="folderlabelcol">New Folder</div>
+                                </a>
+                              <%end%>
+                              <script>new Control.Modal($('upload_folder_<%= folder.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                              <span><img src="/images/asset_folder_rf.png"  width="2" height="28"/></span>
+                            </div>
+                      <%else%>
+                        <div class="folderlabel">
+                          <a style="text-decoration:none;" href="/folders/view_folder?folder_id=<%=folder.id%>&pid=<%=portfolio.id%>&del_files=<%=params[:del_files]%><%= '&bulk_upload=true' if params[:bulk_upload] %>"  id="upload_folder_<%=folder.id%>">
+                            <img src="/images/collaboration_hub_new_floder.png"  width="20" height="20" border="0"/>
+                            <div class="folderlabelcol">New Folder</div>
+                          </a>
+                          <script>new Control.Modal($('upload_folder_<%= folder.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                          <span><img src="/images/upllodright.png"  width="2" height="27"/></span></div>
+                      <%end%>
+										<%if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("dispositions")%>
+                        <div class="folderlabel">
+                          <a href="javascript:;"  onclick="if(confirm('Are you sure you want to De-Select the selected item(s) ?')){deselect_real_estate('asset_folders[]','asset_docs[]','asset_docnames[]','<%= folder.id %>','<%= portfolio.id %>','<%=params[:del_files]%>','De-Select'); return false;}">
+                            <img src="/images/dispositions_due_icon2.png"  width="22" height="24" border="0"/>
+                            <div class="folderlabelcol">De-Select</div>
+                          </a><span><img src="/images/asset_folder_rf.png"  width="2" height="28"/></span></div>
+                        <div class="folderlabel">
+                          <a href="javascript:;"  onclick="if(confirm('Are you sure you want to Select the selected item(s) ?')){deselect_real_estate('asset_folders[]','asset_docs[]','asset_docnames[]','<%= folder.id %>','<%= portfolio.id %>','<%=params[:del_files]%>','Select'); return false;}">
+                            <img class="icon_no_hover sprite s_add icon_no_hover" src="/images/icon_spacer.gif" width="22" height="24" border="0" />
+                            <div class="folderlabelcol">Select</div>
+                          </a><span><img src="/images/asset_folder_rf.png"  width="2" height="28"/></span></div>
+                      <%end%>
+                      <% if !folder.nil? and folder.is_master !=1 %>
+                        <%if params[:deal_room] == 'true'%>
+                          <div class="folderlabel"><a style="text-decoration:none;" href="javascript:;"  onclick="show_events_for_deal(<%=folder.id %>);return false;">
+                              <img src="/images/collaboration_hub_new_updates.png"  width="20" height="20" border="0"/>
+                              <div class="folderlabelcol">Updates</div>
+                            </a><span><img src="/images/upllodright.png"  width="2" height="27"/></span>
+                          </div>
+                        <%else%>
+                          <% if params[:bulk_upload] != 'true'%>
+                            <div class="folderlabel"><a style="text-decoration:none;" href="javascript:;"  onclick="show_events(<%=folder.id %>);return false;">
+                                <img src="/images/collaboration_hub_new_updates.png"  width="20" height="20" border="0"/>
+                                <div class="folderlabelcol">Updates</div>
+                              </a><span><img src="/images/upllodright.png"  width="2" height="27"/></span>
+                            </div>
+                          <% end %>
+                        <%end%>
+                      <%end%>
+                      <%# unless params[:bulk_upload] %>
+											<%display_more_actions = (params[:bulk_upload] == 'true' && contains_deleted_files(folder)) ?  'true' : (params[:bulk_upload] != 'true' ? 'true' : 'false') %>
+											<%if display_more_actions == 'true'%>
+                        <ul id="cssdropdown" class="folderlabel" name="cssdropdown" style="margin-top:1px;">
+                          <span class="asset_iconrow3 iefix" style="left:96px;<%#else%><%#end%>" >
+                            <img src="/images/downarrow_black.png" width="6" height="3" border="0" />
+                          </span>
+                          <li class="headlink">
+                            <span>
+                              <img src="/images/uplodleft.png" width="2" height="27" border="0" />
+                            </span>
+                            <a>More Actions </a>
+                            <span>
+                              <img src="/images/upllodright_last.png"  width="31" height="27" border="0"/>
+                            </span>
+                            <!--
+          <span class="asset_iconrow">
+          <img src="/images/asset_folder_downarrow.png" width="12" height="7" border="0" />
+          </span>
+                                                                                                          -->
+                            <ul style="z-index:950000;">
+                               <li>
+                                  <a style="text-decoration:none;" href="<%=folder_download_folder_path(folder.id)%>"> <img src="/images/download-_icon.png"  width="14" height="14" border="0"/>Download Current Folder</a>
+                                </li>
+                              <%if !show_deleted && contains_deleted_files(folder)%>
+                                <li>
+                                  <a style="text-decoration:none;" href="javascript:;" onClick="show_hide_asset_docs1_real_estate(<%=portfolio.id %>,<%=folder.id %>,'show_del');"  <img class="icon_no_hover sprite s_show_del icon_no_hover" src="/images/icon_spacer.gif" style="border:none;" /> Show Deleted Files</a>
+                                </li>
+                              <% elsif  contains_deleted_files(folder) %>
+                                <li>
+                                  <a style="text-decoration:none;" href="javascript:;" onClick="show_hide_asset_docs1_real_estate(<%=portfolio.id %>,<%=folder.id %>,'hide_del');return false;" >
+                                    <img class="icon_no_hover sprite s_show_del icon_no_hover" src="/images/icon_spacer.gif" style="border:none;" />
+                                    Hide Deleted Files</a>
+                                </li>
+                              <% end %>
+                              <% if !folder.nil? and folder.is_master !=1  && params[:bulk_upload] != 'true'%>
+                                <li>
+                                  <%pid = params[:portfolio_id] ? params[:portfolio_id] : params[:pid]%>
+                                  <%if folder || params[:parent_delete] == "true"%>
+                                    <span>
+                                      <%if params[:deal_room] == 'true'%>
+                                        <a  style="text-decoration: none;" onclick="new Ajax.Request('/properties/show_asset_docs?asset_id=<%=folder.id%>&amp;data_hub=asset_data_and_documents&amp;pid=<%=pid%>&amp;portfolio_id=<%=pid%>&amp;show_past_shared=true&amp;deal_room=true', {asynchronous:true, evalScripts:true, onComplete:function(request){load_completer()}, onLoading:function(request){load_writter()}}); return false;" href="javascript:;"> <img  class="sprite hotbutton-icon s_folder_user" alt="" src="/images/icon_spacer.gif"   width="15" height="16" border="0" />Shared Items I Own</a>
+                                      <%else%>
+                                        <a  style="text-decoration: none;" onclick="new Ajax.Request('/properties/show_asset_docs?asset_id=<%=folder.id%>&amp;data_hub=asset_data_and_documents&amp;pid=<%=pid%>&amp;portfolio_id=<%=pid%>&amp;show_past_shared=true', {asynchronous:true, evalScripts:true, onComplete:function(request){load_completer()}, onLoading:function(request){load_writter()}}); return false;" href="javascript:;"> <img  class="sprite hotbutton-icon s_folder_user" alt="" src="/images/icon_spacer.gif"   width="15" height="16" border="0" />Shared Items I Own</a>
+                                      <%end%>
+                                    </span>
+                                  <%end%>
+                                </li>
+                              <%end%>
+                              <%if @folder.real_estate_property && (current_user.has_role?("Asset Manager") and !(@folder.real_estate_property.property_name == "property_created_by_system" or  @folder.real_estate_property.property_name == "property_created_by_system_for_deal_room" or @folder.real_estate_property.property_name == "property_created_by_system_for_bulk_upload" or @folder.real_estate_property.property_name == "property_created_by_system_for_bulk_upload")) %>
+                                <li><%# this is commented for 1.3 b ...will be added in 1.3b %>
+                                  <a style="text-decoration:none;" href="javascript:;" onClick="showParsingLogs(<%=folder.real_estate_property_id %>,<%=folder.id %>);" > <img style="border:0px;float:left;margin-right:2px;margin-top:1px;padding-left:0px;" src="/images/collaboration_hub_new_uplodeimg.png"/> File Upload Status</a>
+                                </li>
+                              <% end %>
+                            </ul>
+                          </li>
+                        </ul>
+												<%end%>
+                      <% #end %>
+											<!-- contacts starts here -->
+							  <ul id="cssdropdown" class="folderlabel" name="cssdropdown" style="margin-left:10px;margin-top:1px;">
+                <span class="asset_iconrow" style="left:58px;">
+                  <img src="/images/downarrow_black.png" width="6" height="3" border="0" />
+                </span>
+                <li class="headlink">
+                  <span>
+                    <img src="/images/uplodleft.png" width="2" height="27" border="0" />
+                  </span>
+                  <a>Users</a>
+                  <span>
+                    <img src="/images/upllodright_last.png"  width="31" height="27" border="0"/>
+                  </span>
+                  <ul style="z-index:950000;">
+                      <li>
+                     <a id="view_contact_<%=@folder.id%>"  style="text-decoration:none;width:300px;" 	href="/collaborators/view_contacts?folder_id=<%=@folder.id%>&pid=<%=@folder.portfolio_id%>&del_files=<%=params[:del_files]%>" > <img style='margin-top:1px;border:none;' src="/images/view.jpg" style="border:none;" /><span id='contact_count_display'>View Users&nbsp;<%="(#{find_contact_details.count})"%></span></a>
+		                <script>new Control.Modal($('view_contact_<%=@folder.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                      </li>
+                     <li>
+ 			<a id="upload_form_add_contact" style="text-decoration:none;width:300px;" 	href="/users/add_contacts?from_dash_board='false'" ><img class="sprite hotbutton-icon s_folder_user" src="/images/add_contacts_icon.jpg" style="border:none;background-image:none;" />
+Invite user to join AMP for file storage and chat
+</a>
+            <script>new Control.Modal($('upload_form_add_contact'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                     </li>
+                  </ul>
+                </li>
+              </ul>
+				<!-- contacts end here -->
+
+									<%end%>
+									</div>
+                <%end%>
+              <%end%>
+            <%end%>
+
+            <div id="stored_assets_docs_display">
+              <!-- breadcrumb display start -->
+              <%if params[:user] == 'false'%>
+                <div class='breadicon'><img width='18' height='18' src='/images/collaboration_hub_new_floder.png'/></div><div class='bread1'><%=Folder.find(params[:folder_id]).name %></div>
+              <%else%>
+                <div class="breadcrumbbar"  id="folder_title" style="<%=params[:show_past_shared]=='true' ? 'margin-left:12px;' : ''%>">
+                  <%if params[:parent_delete] != "true" ||  (request.env['HTTP_REFERER'] && (request.env['HTTP_REFERER']).include?('collaboration_hub')) %>
+                    <div class="breadicon" style="margin-left:0px;display:none;">
+                      <img src="/images/asset_breedcrumb_icon.png" width="16" height="16" border="0" />
+                    </div>
+                    <%=raw(breadcrump_display_asset_manager_real_estate(folder,'false')) %>&nbsp;<span id="loader_info" style="display:none;"><img src="/images/upload_spinner.gif" /></span>
+                    <% if (request.env['HTTP_REFERER'] && (request.env['HTTP_REFERER']).include?('properties')) %><% ast = 'true' %><% else %><% ast = 'false' %><% end %>
+										<!--code removed for edit property link-->
+                  </div>
+                <%end%>
+              <% end %>
+              <!-- breadcrumb display end -->
+
+              <%if params[:action] != 'view_events_folder' || (@folder && @folder.parent_id == 0 && @folder.is_master == false && !(request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("collaboration_hub")))%>
+                <%if params[:show_past_shared] == 'true'%>
+                  <div class="propertyrow <%if params[:show_past_shared] == 'true'%>for_ie7<%end%>" style="margin-top:0px;padding-bottom:0px;<%if(@folder && @folder.parent_id == 0 && @folder.is_master == false && !(request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("collaboration_hub")))%>padding-bottom:4px;<%end%>"  id="my_files_tasks">
+                    <div class="setupsubheadrow" style="border-bottom:none;padding-top:4px;">
+                      <div class="eventscol1" style="">
+                        <div class="subheadcol4">Shared Items I Own</div>
+                        <div class="setupnaviconlast"></div>
+                      </div>
+                    </div>
+                  </div>
+                <%end%>
+              <%end%>
+
+
+              <%= render :partial => '/properties/docs_list' %>
+            </div>
+            <form id="download_trigger" method="post">
+              <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"></input>
+            </form>
+          </div>
+
+          <%if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("property_dispositions")%>
+            <script type="text/javascript">
+          active_call = "war_room";
+            </script>
+            <div class="dispositionbuttonwrapper" style="padding-top: 10px;">
+              <div class="detailsgreenbutton">
+                <div class="detailsgreenbutton">
+                  <a id="d_hub" href="javascript:;" onclick="if(confirm('Are you sure you want to share this folders/Documents ?')){load_writter();confirm_sharing_property(<%=folder.id%>,<%=folder.real_estate_property_id%>,<%= params[:sharing_prop] %>);return false;}" >
+                    <span>Save Changes</span></a>
+                </div>
+              </div>
+            <%end%>
+          </div>
+        </div>
+      </div>
+		</div>
+  <!--</div>-->
+
+<style type="text/css">
+  .folder_file_structure_asset_view{padding-left:12px;}
+  .breadcrum_padding_ie7{padding-left:17px;}
+  .padding_for_edit_ie7{padding-left:600px;margin-top: -58px;}
+  .for_ie7{margin-left:14px;}
+  .for_ie7_padding{padding-top:205px;text-align:center;}
+</style>
+
+<!--[if IE 7]>
+<style type="text/css">
+  body .folder_file_structure_asset_view{padding-left:0px;}
+  .align_margin_padding_ie7{margin-left:-20px;padding-left:10px;}
+  body .breadcrum_padding_ie7{padding-left:5px;}
+  body .padding_for_edit_ie7{padding-left:558px;}
+  body .for_ie7{margin-left:0px;}
+  body .for_ie7_padding{padding-top:0px;}
+	body .iefix{top:4px;}
+  .asset_iconrow{top:3px;}
+</style>
+<![endif]-->

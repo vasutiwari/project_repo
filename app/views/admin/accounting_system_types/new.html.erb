@@ -1,0 +1,29 @@
+<% content_for :title, 'AMP - Logo settings' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  <div class="middlewrapper2">
+  <%= form_for :accounting_system_type, :url => {:controller=>:accounting_system_types,:action => :create},:html=>{:multipart => true} do |f| %>
+    <div class="sectiontitle"><span style="float:left">Add New Accounting System Type <span style="font-size:14px;">(Accounting System Type once created can not be updated or deleted.)</span></span><span style="float:right;"><%=link_to "<<< Back <<<",admin_accounting_system_types_path%></span></div>
+    <div class="rowwrapper">
+        <div class="fieldiconcol"><img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/></div>
+        <div class="fieldrow">
+          <div class="fieldlabel">Accounting System Name:<font color=red>*</font> </div>
+          <div class="fieldinput"><%= f.text_field :type_name %>
+          <br /><span class="errorprompt"><%= error_message_on(:accounting_system_type,:type_name) %></span>
+          </div>
+        </div>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><%= image_submit_tag '/images/create.png', :title => "Submit", :border => "0", :width=>"117", :height=>"32" %><%#=submit_tag "Create" %></div>
+      <div class="nextbtn"><a href="<%= admin_accounting_system_types_path %>"><img src="/images/btn_cancel.gif" border = "0" width="117" height="32" alt="Cancel"/></a></div>
+    </div>
+  </div>
+	<%end%>
+</div>
+<style type="text/css">
+.myclass{margin-top:20px;}
+</style>

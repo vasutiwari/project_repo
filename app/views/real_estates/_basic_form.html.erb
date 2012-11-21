@@ -1,0 +1,266 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<script type="text/javascript">
+  form_name ="#basic_details_form"
+  tab = "1"
+  yield_calender('true');
+</script>
+<%
+arr=["Multifamily", "Student Housing", "Senior Housing (Assisted Living)"]
+property_set_one=PropertyType.all.select{|x| !arr.include?(x.name)}.map{|x| [x.name,x.id]}
+property_set_two=PropertyType.all.select{|x| arr.include?(x.name)}.map{|x| [x.name,x.id]}
+@property_types = if (portfolio_collection.leasing_type.nil? || portfolio_collection.leasing_type=="Commercial")
+  property_set_one
+else
+  property_set_two
+end
+%>
+<%= form_for property_collection,:url=>{:controller=>"properties",:action=>"show_asset_docs",:data_hub=>"asset_data_and_documents",:pid=>portfolio_collection.id,:note_add_edit => "true",:property_id=>params[:property_id],:parent_delete=>params[:parent_delete],:edit_inside_asset=>params[:edit_inside_asset]}, :html=>{:target => "upload_note",:multipart=>true,:id=>"basic_details_form"} do |p| -%>
+<div class="totalsuitesbox" style="margin-bottom:20px;width:768px; height:392px">
+          <div class="lightbox_fieldwrapper">
+            <div class="lightbox_fieldrow">
+              <div class="lightbox_fieldlabel" style="">Property Name <span class="redcolor">*</span></div>
+              <div class="lightbox_fieldinput">
+                <%=p.text_field :property_name,:size=>"16",:class=>"lightbox_input", :style=>"width:201px;"%>
+              </div>
+            </div>
+            <div class="lightbox_fieldrow">
+              <div class="lightbox_fieldlabel">Property Type <span class="redcolor">*</span></div>
+              <div class="lightbox_fieldinput">
+                <%=p.select  :property_type_id, @property_types,{},:style=>"width: 204px;" %>
+              </div>
+            </div>
+            <%= p.fields_for 'address',property_collection.address do |a| -%>
+              <div class="lightbox_fieldrow">
+                <div class="lightbox_fieldlabel">Address </div>
+                <div class="lightbox_fieldinput">
+                  <%=a.text_area :txt,:size=>"18",:class=>"lightbox_textinput",:style=>"height: 50px;width:201px" %>
+                </div>
+              </div>
+              <div class="lightbox_fieldrow">
+                <div class="lightbox_fieldlabel">City </div>
+                <div class="lightbox_fieldinput">
+                  <%=a.text_field  :city,:size=>"23",:class=>"lightbox_input",:style=>"width: 201px;" %>
+                </div>
+              </div>
+              <div class="lightbox_fieldrow">
+                <div class="lightbox_fieldlabel">State <span class="redcolor">*</span></div>
+                <div class="lightbox_fieldinput">
+                  <%=a.text_field  :province,:size=>"23",:style=>"width: 201px;" %>
+                </div>
+              </div>
+              <div class="lightbox_fieldrow">
+                <div class="lightbox_fieldlabel">Zip </div>
+                <div class="lightbox_fieldinput">
+                  <%=a.text_field  :zip,:size=>"23",:class=>"lightbox_input",:style=>"width: 201px;" %>
+                </div>
+              </div>
+              <div class="lightbox_fieldwrapper upload_width">
+								<div class="lightbox_fieldrow" style="margin-left: 12px">
+								<div class="uploadlabel">Upload Picture</div>
+								<div class="fieldinputrow">
+									<div class="filefield"><%=file_field "attachment", "uploaded_data", :size=>'12' %></div>
+								</div>
+							</div>
+							<div class="uploadpicrow" style="margin-top:-50px;padding-left:40px;">
+								<div class="top"></div>
+									<%if property_collection.id !=nil%>										
+										<%image = real_estate_property_image(property_collection.id) %>										
+										<%property = property_collection%>
+										<%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+										<%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>										
+										<%if image_src !=nil%>
+											<div class="mid">
+												<img src="<%=image_src %>" width="108" height="67" />
+											</div>
+										<%end%>
+									<%else%>
+										<div class="mid" style="width:108px;height:67px;">
+											<img src="/images/property1.jpg" width="108" height="67" />
+										</div>
+									<%end%>
+									<div class="bot"></div>
+								</div>
+							</div>
+						<%end%>
+          </div>
+					<%
+					property  = RealEstateProperty.find_by_id(params[:property_id])
+          pf_id=params[:portfolio_id]  ?  params[:portfolio_id] : ((controller.action_name=="add_property" || controller.action_name=="new_property")  ? params[:id] : property.present? ? property.portfolio_id : params[:pid])
+          real_prop= RealEstateProperty.find_properties_by_portfolio_id(pf_id)
+          acc_sys_typ=real_prop.map(&:accounting_system_type_id).compact.uniq
+          acc_typ=real_prop.map(&:accounting_type).compact.uniq
+          %>
+					<div class="lightbox_fieldwrapper">
+          <div class="lightbox_fieldrow">
+            <div class="lightbox_rhsfieldlabel">Accounting System Type <span class="redcolor">*</span></div>
+            <div class="lightbox_fieldinput">
+              <%if property_collection.accounting_system_type_id.nil? || property_collection.accounting_system_type_id.blank?%>
+                <%
+                client_ext=ClientSetting.find_by_extension(User.current.email.split('@').last.strip)
+                acc_sys_types=if client_ext && client_ext.accounting_system_type_ids && !client_ext.accounting_system_type_ids.empty?
+                  AccountingSystemType.find(client_ext.accounting_system_type_ids).collect{|x| [x.type_name,x.id]}
+                else
+                  AccountingSystemType.all.collect{|x| [x.type_name,x.id]}
+                end
+                multifamily_collection=["AMP Excel","Real Page", "YARDI V1"]
+                commercial_collection=["AMP Excel","MRI, SWIG","MRI"]
+                if portfolio_collection.leasing_type=="Commercial"
+                  acc_sys_types.reject!{|x| !commercial_collection.include?(x[0])}
+                else
+                  acc_sys_types.reject!{|x| !multifamily_collection.include?(x[0])}
+                end
+								settings = ClientSetting.find(:first,:conditions=>["separate_email = '#{current_user.email}' or  extension = \'#{current_user.email.split('@')[1]}\'"])
+						    if settings && !settings.nil? && !settings.accounting_system_type_ids.empty?
+								  acc_syst_types = AccountingSystemType.find(:all,:conditions=>["id in (?)",settings.accounting_system_type_ids])
+									acc_syst_types_collection = []
+									if acc_syst_types && !acc_syst_types.empty?
+									   acc_syst_types.each do |acc_syst_type|
+										    acc_syst_types_collection <<  acc_syst_type.type_name
+                     end
+									end
+								end
+								acc_type = []
+								acc = AccountingSystemType.find(:all)
+								acc.each do |ac|
+									acc_type << ac.type_name
+								end
+								if acc_syst_types_collection && acc_syst_types_collection == acc_type
+									com_mri=["MRI, SWIG"]
+									acc_syst_types_collection = acc_syst_types_collection - com_mri
+								end
+                 if portfolio_collection && portfolio_collection.leasing_type == "Multifamily"  && acc_syst_types_collection
+								 	if acc_syst_types_collection.include?("AMP Excel")
+											multy_ex = ["AMP Excel"]
+											acc_sys_types_commercial =  acc_syst_types_collection - commercial_collection + multy_ex
+											acc_sys_types1 = acc_sys_types_commercial
+											else
+											acc_sys_types_commercial =  acc_syst_types_collection - commercial_collection
+											acc_sys_types1 = acc_sys_types_commercial
+											end
+								 elsif acc_syst_types_collection
+									if acc_syst_types_collection.include?("AMP Excel")
+											multy_ex = ["AMP Excel"]
+											acc_sys_types_multifamily =  acc_syst_types_collection - multifamily_collection + multy_ex
+											acc_sys_types1 = acc_sys_types_multifamily
+									else
+											acc_sys_types_multifamily =  acc_syst_types_collection - multifamily_collection
+											acc_sys_types1 = acc_sys_types_multifamily
+									end
+							  end
+								if acc_sys_types1 && !acc_sys_types1.empty?
+								                acc_sys_types=  AccountingSystemType.find(:all,:conditions=>['type_name in (?)',acc_sys_types1]).collect{|x| [x.type_name,x.id]}
+                 end
+     							acc_sys_types = acc_sys_types.uniq
+                %>
+                <%=p.select  :accounting_system_type_id, acc_sys_types,{},:style=>"width: 150px;", :onchange=>"matchAccountingType(this.value,'#{portfolio_collection.leasing_type}');create_fields(this.value)" %>
+              <%else%>
+                <span style="margin-left:20px;"><%= AccountingSystemType.find_by_id(property_collection.accounting_system_type_id).type_name %></span>
+              <%end%>
+            </div>
+          </div>
+          <div class="lightbox_fieldrow">
+            <div class="lightbox_rhsfieldlabel">Accounting Type <span class="redcolor">*</span></div>
+            <div class="lightbox_fieldinput">
+              <%if property_collection.accounting_type.nil? || property_collection.accounting_type.blank?%>
+                <%=p.select  :accounting_type, ["Accrual","Cash"],{},:style=>"width: 150px;" %>
+              <%else%>
+                <span style="margin-left:20px;"><%= property_collection.accounting_type %></span>
+              <%end%>
+            </div>
+          </div>
+          <div class="lightbox_fieldrow">
+            <div class="lightbox_rhsfieldlabel">Leasing Type <span class="redcolor">*</span></div>
+            <div class="lightbox_fieldinput">
+               <span style="margin-left:20px;"><%= portfolio_collection.leasing_type %></span>
+                <%unless property_collection.leasing_type%>
+                  <%=p.hidden_field  :leasing_type, :value=>portfolio_collection.leasing_type %>
+                <%end%>
+            </div>
+          </div>
+							<%if property_collection && !property_collection.remote_property_name.nil? && !property_collection.remote_property_name.blank?%>
+    							<div class="lightbox_fieldrow" style="width:400px;">
+                   <div class="lightbox_rhsfieldlabel">Remote Property Name<span class="redcolor">*</span></div>
+                     <div class="lightbox_fieldinput">
+                        <span style="margin-left:20px;"><%= property_collection.remote_property_name %></span>
+										</div>
+									</div>
+							<%end%>
+							<%if property_collection && !property_collection.property_code.nil? && !property_collection.property_code.blank?%>
+    							<div class="lightbox_fieldrow" style="width:400px;">
+                   <div class="lightbox_rhsfieldlabel">Property Code<span class="redcolor">*</span></div>
+                     <div class="lightbox_fieldinput">
+                        <span style="margin-left:20px;"><%= property_collection.property_code%></span>
+										</div>
+									</div>
+							<%end%>
+					<div class="lightbox_fieldrow" id='remote_property_name' style="display:none;">
+            <div class="lightbox_rhsfieldlabel">Remote Property Name<span class="redcolor">*</span></div>
+            <div class="lightbox_fieldinput">
+                <%=p.text_field :remote_property_name,:size=>"10",:class=>"lightbox_input", :style=>"width:150px;"%>
+            </div>
+          </div>
+					<div class="lightbox_fieldrow" id="property_code" style="display:none;">
+            <div class="lightbox_rhsfieldlabel">Property Code<span class="redcolor">*</span></div>
+            <div class="lightbox_fieldinput">
+                <%=p.text_field :property_code,:size=>"10",:class=>"lightbox_input", :style=>"width:150px;"%>
+            </div>
+          </div>
+       </div>
+     <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+      <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+      <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+      <input type="hidden" name="pid" value = <%=params[:id]%> > </input>
+      <input type="hidden" name="note_add_edit" value = "true" > </input>
+      <input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+      <input type="hidden" name="basic_form_submit" value = "true" id="basic_form_submit" > </input>
+      <input type="hidden" name="basic_form_close" value = "false"  id ="basic_form_close"> </input>
+			<input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"> </input>
+      <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+			<input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+			<input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+			<input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+			<input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+			<input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+			<input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+
+      <%if property_collection && !property_collection.id.nil?%>
+        <input type="hidden" name="property_id" value = <%=property_collection.id%> > </input>
+      <%end%>
+      <input type="hidden" id = "tab_id" name="tab_id" value ="1" > </input>
+      <input type="hidden" id = "form_txt" name="form_txt" value ="basic" > </input>
+     <div class="butwrapper" style ="float:right">
+
+				<div class="greenbutton" style="margin-left:230px">
+          <a href="javascript:;" onclick="remove_extra_space();if(check_image_type()){jQuery('#basic_details_form').submit();load_writter();}">Save</a>
+          <span>&nbsp;</span></div>
+
+        <%if property_collection.new_record? %>
+          <div class="graybutton"> <a onClick='Control.Modal.close();return false;' style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+        <%end%>
+      </div>
+      <div class="bot"></div>
+						</div>
+
+<%end%>
+<iframe id="upload_note" name="upload_note" style="display: none"></iframe>
+<script type="text/javascript">
+  customize_startDate("#property_first_payment_date");
+  customize_startDate("#property_last_payment_date");
+  customize_startDate("#property_maturity_date");
+  jQuery(document).ready(function() {
+    leaseType="<%=portfolio_collection.leasing_type%>"
+    if (leaseType=="Multifamily") {
+      if (jQuery("#real_estate_property_accounting_system_type_id option:first").html()=="Real Page") {
+          jQuery("#real_estate_property_accounting_type option[value=Accrual]").remove();
+      }
+    }
+    else if (leaseType=="Commercial") {
+      if (jQuery("#real_estate_property_accounting_system_type_id option:first").html()=="MRI, SWIG") {
+          jQuery("#real_estate_property_accounting_type option[value=Cash]").remove();
+      }
+    }
+  })
+</script>

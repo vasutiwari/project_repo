@@ -1,0 +1,5 @@
+	<%#if params[:suite_filter].present?%>
+		<%#=render :partial =>"/lease/partial_suite",:locals => {:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+	<%#else%>
+		<%=render :partial => "/lease/suites_form", :locals => {:rent_roll_swig => @rent_roll_swig, :note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+	<%#end%>

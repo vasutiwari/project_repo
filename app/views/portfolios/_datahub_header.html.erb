@@ -1,0 +1,42 @@
+<script type="text/javascript">
+  orig_portfolio_name = ''; // here freeze null to enable edit after uncomplted rename
+</script>
+<div id="show_assets_list">
+  <% if @portfolio.nil? %>
+		<div class="rhscontentrow">
+			<div class="newfieldbody">
+				<%= form_tag({:controller => "portfolios",:action => "create" },{:method =>:post,:multipart => true}) do%>
+					<div class="newfieldhead">Add Portfolio</div>
+					<div class="newfieldrow">
+						<div class="newfieldlabel">Portfolio Name:</div>
+						<div class="newfielditem"><%=text_field :portfolio,:name,:size=>17, :class=>"newfieldinput"%></div>
+						<div class="newfieldlabel2" id="portfolio_error"><%= error_message_on :portfolio,:name %></div>
+					</div>
+					<div class="newfieldrow">
+						<div class="newfieldlabel">Image:</div>
+						<div class="newfielditem">
+							<%= file_field :portfolio_image,:uploaded_data, :class=>"newfieldinput", :size=>20 %>
+						</div>
+					</div>
+					<div class="newfieldrow">
+						<div class="newfieldlabel">Leasing type:</div>
+						<div class="newfielditem">
+							<select name="portfolio[leasing_type]" id="select" class="newfieldinput">
+								<option value="Commercial">Commercial</option>
+								<option value="Multifamily">Multifamily</option>
+							</select>
+						</div>
+						<div class="newfieldlabel2">Reports will be customized to the Leasing Type.<br />This Cannot be changed once Set for a Portfolio. </div>
+					</div>
+					<%= hidden_field :portfolio,:portfolio_type_id, :value=>@portfolio_id%>
+					<div class="newfieldrow">
+						<div class="newfieldlabel">&nbsp;</div>
+						<div class="newfielditem"><div class="greenbutton2"><input type="image" src="/images/addbutton1.png" alt="Add" title="Add" onclick="return image_check();"/></div></div>
+						<div class="newfieldlabel2">&nbsp;</div>
+					</div>
+					<div class="newfieldfooter">&nbsp;</div>
+				<% end %>
+			</div>
+		</div>
+  <% end %>
+</div>

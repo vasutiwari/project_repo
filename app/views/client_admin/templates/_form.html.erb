@@ -1,0 +1,84 @@
+<table align="left" cellpadding="2" cellspacing="4" border="0" width="400px">
+  <tbody>
+    <tr>
+      <td align="right" width="70%">Template Name :<span class="txtRed"> *</span></td>
+      <td width="5%"></td>
+      <td width="10%"><%=text_field :template_name,:class=>"inpt150"%></td>
+    </tr>
+	 </tbody>
+	  <tbody>
+     <tr>
+      <td align="right" width="11%">Folder Name :<span class="txtRed"> *</span></td>
+      <td width="5%"></td>
+      <td width="10%"><%=text_field :folder_name,:class=>"inpt150"%></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td align="right">Property Type:<span class="txtRed"> *</span></td>
+      <td ></td>
+      <td><%=collection_select(:post, :name, PropertyType.all, :name, :name, {} ,{:onchange => ""})%> </td> 
+	</tr>
+	 </tbody>
+	 <tbody>
+	<tr>
+      <td align="right">Parent Id:<span class="txtRed"> *</span></td>
+       <td ></td>
+	  <td> <select name="post[parent_name]">
+  <option>Please Select</option>
+  <option>AMP Files</option>
+  <option>Lease Files</option>
+	<option>Floor Plans</option>
+	<option>Report Docs</option>
+	<option>Property Pictures</option>
+	<option>Excel Uploads</option>
+	<option>Sample Templates</option>
+	<option>2012</option>
+	<option>Jan</option>
+	<option>Feb</option>
+	<option>Mar</option>
+	<option>Apr</option>
+	<option>May</option>
+	<option>Jun</option>
+	<option>Jul</option>
+	<option>Aug</option>
+	<option>Sep</option>
+	<option>Oct</option>
+	<option>Nov</option>
+	<option>Dec</option>
+</select></td>
+	  </tr>
+  </tbody>
+   <tbody>
+     <tr>
+      <td align="right" width="11%">Description :<span class="txtRed"> *</span></td>
+      <td width="5%"></td>
+      <td width="10%"><%=p.text_field :description,:class=>"inpt150"%></td>
+    </tr>
+  </tbody>
+  
+ <tbody>
+    <tr>
+      <td align="right"></td>
+      <td ></td>
+      <td></td>
+      <td align="right"></td>
+      <td ></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td align="right"></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<div class="clearfloat"></div>
+ 
+<%url = "/client_admin/#{current_user.id}/templates"%>
+
+<div class="" align="center"><a href="javascript:void(0)" class="button blue" onclick="validate_template_submit('<%=form_name%>');">Save</a>
+  <span>&nbsp;</span><a href="<%=url%>" class="button grey">CANCEL</a></div>
+
+

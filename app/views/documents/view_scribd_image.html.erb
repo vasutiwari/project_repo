@@ -1,0 +1,25 @@
+
+<%unless params[:permalink]%>
+<div id="sbox-window" style="" class="">
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+    <a style="cursor: pointer;" onclick="Control.Modal.close();return false;" id="sbox-btn-close"></a>
+    <%=@document.filename%><br/><br/>
+    <div class="dialog_light_center">
+      <div class="dialog_second_center">
+                                <img  alt="" src="<%=@document.public_filename %>" />
+        </div>
+    </div>
+  </div>
+</div>
+<%else%>
+   <%=@document.filename%><br/><br/>
+    <div class="dialog_light_center1">
+      <div class="dialog_second_center1">
+        <img  alt="" src="<%=@document.public_filename %>" style="width: 930px;" />
+        </div>
+    </div>
+<%end%>
+
+<script>
+window.onunload = load_completer();
+		</script>

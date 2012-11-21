@@ -1,0 +1,14 @@
+<div class="capital_fields" >
+<div id="capital">
+            <div class="tblDiv">
+                <div class="titleRow">Item:</div>
+                <div class="contentRow"><%=f.select :account_id,@income_statement_value%>
+								<%if @capital_count!=1%>
+      <%= link_to_remove_capital_expenditures "Remove", f %>
+		<%end%>
+								</div>
+										<%=f.hidden_field :item_name,:value=>"Item_Capital_#{@count}"%>
+										<%=f.hidden_field :client_id,:value=>current_user.client_id%></div>
+                <div class="clear"></div>
+		</div>
+ </div>

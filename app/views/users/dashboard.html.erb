@@ -1,0 +1,284 @@
+<%financial_access = current_user.try(:client).try(:is_financials_required)%>
+<script>var countnews=0;
+leasing_activity = 'false';
+  dashboard_portfoio_id = <%= params[:portfolio_id] %>
+  var financial_access = <%= financial_access %>
+</script>
+<%
+comm = @comm_count
+multi = @multi_count
+portfolio = @portfolio_count
+%>
+<script src="http://www.google.com/jsapi?key=ABQIAAAAU56ZFcAOyP6OikynVICIzBTJQa0g3IQ9GZqIMmInSLzwtGDKaBRAO0fO_M7krxYlHM4pGJEIfDSC8A" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load("feeds", "1");
+  String.prototype.truncate = function(length) {
+    if (this.length > length) {
+      return this.slice(0, length - 3) + "...";
+    } else {
+      return this;
+    }
+  };
+  // Our callback function, for when a feed is loaded.
+  function feedLoaded(result) {
+    if (!result.error) {
+      var div_content = jQuery('#content').get();
+      //jQuery(div_content).empty()
+      for (var i = 0; i < result.feed.entries.length; i++) {
+        var entry = result.feed.entries[i];
+        var myString = entry.link;
+        s=myString.substr(myString.length - 1);
+        if (s=="/"){
+          entry.link=myString.substring(0, myString.length - 1)
+        }
+        var pub_date = entry.publishedDate;
+        var str2 = ", "
+        var pub_date_final = pub_date.substr(8,4) + pub_date.substr(5,2) + str2 + pub_date.substr(12,5);
+        countnews=countnews+1;
+        a='<div class="newscontentrow"><div class="newscontentimg"><img src="/images/newsimg.png" width="26" height="26" border="0" /></div><div class="newscontenttext"> <span class="newsview newsemail"><a href="/home/news?dash_link='+entry.link+' &id='+countnews+'" class = "dash_news_link" title="'+entry.title+'" value = '+entry.link+'>' +entry.title.truncate(50) + '</a></span><br />'+pub_date_final+'</div> </div>'
+        jQuery(a).appendTo(div_content);
+      }
+    }
+  }
+
+  function OnLoad(val) {
+    // Create a feed instance that will grab Digg's feed.
+    var feed = new google.feeds.Feed(val);
+    feed.setNumEntries(1);
+    // Calling load sends the request off.  It requires a callback function.
+    feed.load(feedLoaded);
+  }
+  //~ google.setOnLoadCallback(OnLoad);
+</script>
+<div class="bodywrapperrow arial box-1col">
+
+    <div class=""> <!-- removed this class because of box-1col     "contentwrapper2" -->
+      <div class="multiheading" style="width:935px;">
+        <!--     <div class="multmainheading" style="font-weight: bold;"> Property Performance </div>-->
+
+        <div class="box-title"><span class="title">Property Performance</span></div>
+        <div class="clearfloat"></div>
+
+
+        <!--
+<div class="tableheading">
+<div class="headingleft">
+  <div class="multheadactive">
+    <div class="radiobutton" style="*margin-top:0px">
+<%#if session[:cur_selection] == 'Multifamily' || (comm.eql?(0) && multi != 0)%>
+        <input name="1" type="radio" value="" onClick="show_dashboard_commercial()"/>
+<%#else%>
+        <input name="1" type="radio" value="" checked onClick="show_dashboard_commercial()"/>
+<%#end%>
+    </div>
+    <div id = "name1" class="rowdeactiveheading">Commercial (<%#= comm %>)</div>
+  </div>
+</div>
+<div class="headingleft">
+  <div class="multheadactive">
+    <div class="radiobutton" style="*margin-top:0px">
+<%#if session[:cur_selection] == 'Multifamily' || (comm.eql?(0) && multi != 0)%>
+        <input name="1" type="radio" value="" checked onClick="show_multifamily_table();"/>
+<%#else%>
+        <input name="1" type="radio" value="" onClick="show_multifamily_table();"/>
+<%#end%>
+    </div>
+    <div id = "name2" class="rowactiveheading">Multifamily (<%#= multi%>)</div>
+  </div>
+</div>
+				-->
+        <!--
+        <div class="headingrightbox">
+          <div class="sortby">Sort by</div>
+          <div class="subtabactiverow2">
+            <div class="timelf2"></div>
+            <div class="subactvmid2 "><a href="#">Vacancies</a></div>
+            <div class="timert2"></div>
+          </div>
+          <div class="subtabdeactiverow2">
+            <div class="timelf2"></div>
+            <div class="subactvmid2 "><a href="#">NoI Variances</a></div>
+            <div class="timert2"></div>
+          </div>
+          <div class="subtabdeactiverow2" style="margin-right:0px;">
+            <div class="timelf2"></div>
+            <div class="subactvmid2 "><a href="#">A/R</a></div>
+            <div class="timert2"></div>
+          </div>
+        </div>
+      </div>
+			-->
+
+        <%portfolio = Portfolio.find_portfolio(portfolio_id)%>
+        <div class="fltLeft marginT5">
+
+          <!--
+      	<label class="radioTab">
+				<input type="radio" value="1" class="valign" name="pageNum">
+				All</label>
+				-->
+
+          <%if portfolio.try(:leasing_type).eql?("Commercial")%>
+             <% if financial_access%>
+            <label class="radioTab">
+						<%call_function_all_metrics = (params[:sort_type].present? && params[:obj_id].present? ) ? "show_dashboard_commercial('#{params[:sort_type]}','#{params[:obj_id]}');" : "show_dashboard_commercial();"%>
+              <input id="comm_all" name="1" type="radio" class="valign all_metrices" name="pageNum" checked value="" onClick="leasing_activity='false'; jQuery('.submenu-ops').hide(); <%=call_function_all_metrics%>"/>
+                                                  All Metrics
+            </label>
+                                <%end%>
+            <label class="radioTab">
+              <!--
+  <%#if session[:cur_selection] == 'Multifamily' || (comm.eql?(0) && multi != 0)%>
+  <input name="1" type="radio" class="valign" name="pageNum" value="" onClick="show_dashboard_commercial()"/>
+                                                                  Commercial (<%#= comm %>)
+  <%#else%>
+  <input name="1" type="radio" value="" class="valign" name="pageNum" checked onClick="show_dashboard_commercial()"/>
+                                                                  Commercial (<%#= comm %>)
+  <%#end%>
+                                                          -->
+						<%call_function_lease_metrics = (params[:sort_type].present? && params[:obj_id].present? ) ? "show_dashboard_commercial_leases('#{params[:sort_type]}','#{params[:obj_id]}');" : "show_dashboard_commercial_leases();"%>
+              <input id="comm_ind" name="1" type="radio" class="valign lease_activity" name="pageNum" value="" onClick="leasing_activity='true'; jQuery('.submenu-ops').hide();<%=call_function_lease_metrics%>"/>
+                                                                  Leasing Activity
+
+            </label>
+          <%end%>
+
+         <%if portfolio.try(:leasing_type).eql?("Multifamily")%>
+				    <!--for portfolio weekly data display start-->
+                                    <% if financial_access%>
+							<label class="radioTab">
+								<%=radio_button_tag 'All', "", true, :class => "valign all_multifamily", :name => 1,:id=>"mul_all",:onClick=>"jQuery('#rank_by_weekly').hide();jQuery('#rank_by_highest').show();jQuery('#plus_noi_var').show();jQuery('#minus_noi_var').show();jQuery('#vacancy_li').show();show_multifamily_table();"%> All
+							</label>
+                                    <%end%>
+							<label class="radioTab">
+								<%=radio_button_tag 'All', "", false, :class => "valign weekly_multifamily", :name => 1,:id=>"mul_weekly",:onClick=>"period = '9';jQuery('.submenu-ops').hide();jQuery('#rank_by_highest').hide();jQuery('#plus_noi_var').hide();jQuery('#minus_noi_var').hide();jQuery('#vacancy_li').hide();call_timeline_filter_real_overview(#{params[:portfolio_id]},9,'portfolio_real_overview')"%> Weekly Occupancy Analysis
+							</label>
+						<!--for portfolio weekly data display end-->
+            <!--<label class="radioTab">
+  <%#if session[:cur_selection] == 'Multifamily' || (comm.eql?(0) && multi != 0)%>
+              <input id="mul_all" name="1" type="radio" value="" class="valign" checked name="pageNum" onClick="show_multifamily_table();"/>
+                                                                  All</label>
+  <%#else%>
+	<label class="radioTab">
+
+                 <input id="mul_weekly" name="1" type="radio" value="" class="valign" name="pageNum" onClick="period = '9';call_timeline_filter_real_overview(<%#= params[:portfolio_id] %>,9,'portfolio_real_overview');current_selection=9;return false;" href="javascript:;"/>
+																																	Weekly Occupancy State Analysis
+  <%#end%>
+            </label>-->
+          <%end%>
+
+
+          <!--<label class="radioTab"><input type="radio" value="2" class="valign" name="pageNum"> Commercial Leases</label>-->
+        </div>
+				<div id="show_assets_list">
+
+        <div class="wrsTab fltrt" style="position:relative;margin-bottom: 40px;">
+          <%#if portfolio.try(:leasing_type).eql?("Commercial")%>
+            <ul>
+              <li id="plus_noi_var" class="commercial_tab"><a href="#"  onClick="select_rank_by_highest('plus_noi_var'); jQuery('#veNOIContent2').hide();  jQuery('#veNOIContent3').hide(); jQuery('#veNOIContent1').show(); jQuery('.positive_noi_var_percentage').trigger('click');"><span class="positiveV">NOI Variances</span></a></li>
+              <li id="minus_noi_var" class="commercial_tab"><a  href="#"><span class="nagetiveV" onClick="select_rank_by_highest('minus_noi_var'); jQuery('#veNOIContent3').hide(); jQuery('#veNOIContent1').hide(); jQuery('#veNOIContent2').show();  jQuery('.negative_noi_var_percentage').trigger('click');">NOI Variances</span></a></li>
+              <li id="vacancy_li" class="commercial_tab"><a  href="#" onClick=" select_rank_by_highest('vacancy_li'); jQuery('#veNOIContent2').hide(); jQuery('#veNOIContent1').hide(); jQuery('#veNOIContent3').show();if(jQuery('#comm_all').is(':checked') == false){<%if portfolio.try(:leasing_type).eql?("Commercial")%>jQuery('#vacancy_li').addClass('w83'); jQuery('#expirations_li').addClass('w83');  jQuery('#veNOIContent3').attr('style','width:161px;');<%end%>} else {jQuery('#veNOIContent3').attr('style','width:411px;');} jQuery('.vacancy_percentage').trigger('click');">Vacancy</a></li>
+							<%if portfolio.try(:leasing_type).eql?("Commercial")%>
+              <li id="expirations_li" class="commercial_tab"><a  href="#" onClick="jQuery('#veNOIContent2').hide();  jQuery('#veNOIContent3').hide();  jQuery('#veNOIContent1').hide(); if(jQuery('#comm_all').is(':checked') == false) show_dashboard_commercial_leases('expiration','expirations_li'); else show_dashboard_commercial('expiration','expirations_li');">Expirations</a></li>
+              <li id="tenant_ar" class="commercial_tab" style="border-right:none"><a href="#" onClick="jQuery('#veNOIContent2').hide();  jQuery('#veNOIContent3').hide();  jQuery('#veNOIContent1').hide();  show_dashboard_commercial('tenant','tenant_ar');">Tenant A/R</a></li>
+							 <%end%>
+            </ul>
+          <%#else%>
+            <!--<ul>
+              <li id="plus_noi_var" class="commercial_tab"><a href="#" onClick="show_multifamily_table('pos_noi','plus_noi_var');"><span class="positiveV">NOI Variances</span></a></li>
+              <li id="minus_noi_var" class="commercial_tab"><a href="#" onClick="show_multifamily_table('neg_noi','minus_noi_var');"><span class="nagetiveV">NOI Variances</span></a></li>
+              <li id="vacancy_li" class="commercial_tab"><a href="#" onClick="show_multifamily_table('vacancy','vacancy_li');">Vacancy</a></li>
+            </ul>-->
+          <%#end%>
+					<!-- added for sorting of +ve and -ve noi variances,vacancy percentage start-->
+						<div id="veNOIContent1"  class="submenu-ops" style="display:none; <%if portfolio.try(:leasing_type).eql?("Multifamily")%>width:261px;<%end%>">
+							<label><input type="radio" name="venoiplus" class="valign" value="1" onClick="<%if portfolio.try(:leasing_type).eql?("Commercial")%> show_dashboard_commercial('pos_noi','plus_noi_var');<%else%>show_multifamily_table('pos_noi','plus_noi_var');<%end%>" /> $ (USD)</label>&nbsp;&nbsp;
+							<label><input type="radio" name="venoiplus" class="valign positive_noi_var_percentage" value="1" onClick=" <%if portfolio.try(:leasing_type).eql?("Commercial")%>show_dashboard_commercial('pos_noi_percentage','plus_noi_var');<%else%>show_multifamily_table('pos_noi_percentage','plus_noi_var');<%end%>" /> % (Percent)</label>
+						</div>
+						<div id="veNOIContent2"  class="submenu-ops" style="display:none; <%if portfolio.try(:leasing_type).eql?("Multifamily")%>width:261px;<%end%>">
+							<label><input type="radio" name="venoiplus" class="valign" value="1" onClick="<%if portfolio.try(:leasing_type).eql?("Commercial")%> show_dashboard_commercial('neg_noi','minus_noi_var');<%else%>show_multifamily_table('neg_noi','minus_noi_var');<%end%>"/> $ (USD)</label>&nbsp;&nbsp;
+							<label><input type="radio" name="venoiplus" class="valign negative_noi_var_percentage" value="1" onClick="<%if portfolio.try(:leasing_type).eql?("Commercial")%> show_dashboard_commercial('neg_noi_percentage','minus_noi_var');<%else%>show_multifamily_table('neg_noi_percentage','minus_noi_var');<%end%>"/> % (Percent)</label>
+						</div>
+						<div id="veNOIContent3"  class="submenu-ops" style="display:none; <%if portfolio.try(:leasing_type).eql?("Multifamily")%>width:261px;<%end%>">
+							<label><input type="radio" name="venoiplus" class="valignT" value="1" onClick="<%if portfolio.try(:leasing_type).eql?("Commercial")%> if(jQuery('#comm_all').is(':checked') == false) show_dashboard_commercial_leases('vacancy','vacancy_li'); else show_dashboard_commercial('vacancy','vacancy_li');<%else%>show_multifamily_table('vacancy','vacancy_li');<%end%>" /><%if portfolio.try(:leasing_type).eql?("Commercial")%> SF<%else%> Units<%end%></label>&nbsp;&nbsp;
+							<label><input type="radio" name="venoiplus" class="valignT vacancy_percentage" value="1" onClick=" <%if portfolio.try(:leasing_type).eql?("Commercial")%>if(jQuery('#comm_all').is(':checked') == false) show_dashboard_commercial_leases('vacancy_sf','vacancy_li'); else show_dashboard_commercial('vacancy_sf','vacancy_li'); <%else%>show_multifamily_table('vacancy_sf','vacancy_li');<%end%>" /> % (Percent)</label>
+						</div>
+				<!-- added for sorting of +ve and -ve noi variances,vacancy percentage end -->
+        </div>
+        <div class="fltrt rankby" id="rank_by_highest">Rank By Highest </div>
+
+
+        <div class="clearfloat"></div>
+			<div id="multifamily_data">
+				<div id="dashboard_comm_display"></div>
+				<div id="dashboard_comm_display_leases"></div>
+				<div id="display_multi"></div>
+			</div>
+			</div>
+    </div>
+	</div>
+  </div>
+
+<%= hidden_field_tag "vacant_sort" %>
+<%= hidden_field_tag "expiration_sort" %>
+<%= hidden_field_tag "tenant_sort" %>
+<%= hidden_field_tag "multi_vacant_sort" %>
+<!--[if IE 7]>
+<style type="text/css">
+body .iefix { padding-bottom:3px; margin-left:11px}
+</style>
+<![endif]-->
+<script>
+  if(<%=portfolio.try(:leasing_type).eql?("Multifamily")%>) {
+    jQuery('#commercial').hide();
+    if(financial_access)
+      jQuery('.all_multifamily').attr("checked", "checked");
+    else
+      jQuery('.weekly_multifamily').attr("checked", "checked");
+    jQuery('input[name=1]:checked:radio').trigger('click');
+    //jQuery('#mul_all').trigger('click')
+  }
+ else{
+    if(financial_access)
+      jQuery('.all_metrices').attr("checked", "checked");
+    else
+      jQuery('.lease_activity').attr("checked", "checked");
+   jQuery('input[name=1]:checked:radio').trigger('click');
+ }
+  if(<%= params[:from_view_port] == 'true' %>) {
+    if (<%= params[:asset_view] == 'true' %>){
+      flash_writter("Add a Portfolio to go to Property View");
+    }
+    else{flash_writter("Add a Portfolio to go to Portfolio View");}
+  }
+  if(<%= params[:from_view_coll] == 'true' %>) {
+    flash_writter("Add a Portfolio to go to Collaboration View");
+  }
+  jQuery('#multi_table').hide();
+  function show_commercial(){
+    jQuery('#commercial').show();
+    jQuery('#multi_table').hide();
+    jQuery('#comm_table').show();
+    jQuery('#name1').attr('className', 'rowdeactiveheading');
+    jQuery('#name2').attr('className', 'rowactiveheading');
+  }
+  function show_multifamily(){
+    jQuery('#comm_table').hide();
+    jQuery('#multi_table').show();
+    jQuery('#name2').attr('className', 'rowdeactiveheading');
+    jQuery('#name1').attr('className', 'rowactiveheading');
+  }
+
+</script>
+<script>
+<%#if !xmlUrl.nil?%>
+  // OnLoad("<%#= xmlUrl[0]%>")
+  // OnLoad("<%#= xmlUrl[1]%>")
+  // OnLoad("<%#= xmlUrl[2]%>")
+  // OnLoad("<%#= xmlUrl[3]%>")
+  // OnLoad("<%#= xmlUrl[4]%>")
+  // OnLoad("<%#= xmlUrl[5]%>")
+<%#else%>
+  // OnLoad("http://blog.cushwake.com/index.php/feed/")
+<%#end%>
+</script>

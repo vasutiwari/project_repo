@@ -1,0 +1,6 @@
+A <%= @exception.class %> occurred in <% if @controller.body && !@controller.body.empty? && @controller.body[:request] && @controller.body[:request].filtered_parameters && !@controller.body[:request].filtered_parameters.empty? %><%= @controller.body[:request].filtered_parameters['controller'] %>#<%= @controller.body[:request].filtered_parameters['action'] %>:<% else %>#<% end %>
+
+  <%= @exception.message %>
+  <%= @backtrace.first %>
+
+<%= @sections.map { |section| render_section(section) }.join %>

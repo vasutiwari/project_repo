@@ -1,0 +1,87 @@
+<script>
+  if ('<%=params[:param_pipeline]%>' == "nego_pipeline" )
+  {variable = "nego_pipeline"}
+  else if ('<%=params[:param_pipeline]%>' == "inters_pipeline")
+  {variable = "inters_pipeline"}
+</script>
+
+<%pdf_loop = @pdf_loop
+property_lease_suites_all = @property_lease_suites_all
+pdf= @pdf
+lease= @lease
+%>
+<%if pdf_loop.nil? || pdf_loop == 0%>
+  <div class="pipelineboxmain abstractviewtbl" id="abstractview" style="<%if pdf%>margin-bottom:15px;width:782px;<%end%>">
+    <div style="padding:4px 10px; background:#fff; border-bottom:1px solid #eee; background:#f9f9f9" class="boldtxt">
+      <%if ((params[:from_mgmt] == "true" || params[:main_head_call] == "true") && (params[:param_pipeline] == "inters_pipeline" || params[:param_pipeline] == "nego_pipeline" )) %>Proposal: <%else%>Abstract: <%end%><span style="color:#FF6600"><%=find_tenant_legal_name%></span>
+      <%unless pdf%><input  type="button" class="absrefresh" value="Save" name="input22" onclick="mgmt_tabs_form_submit(form_name);" /><%end%></div>
+    <div class="hoursbox2 boldtxt abstractviewhead">
+      <div style="border-right: 1px solid rgb(238, 238, 238); line-height: 38px; height: 40px; width: 80px;" class="suiteno">Suite</div>
+      <div class="sqft" style="border-right: 1px solid rgb(238, 238, 238); line-height: 38px; height: 40px; width: 101px;">SF</div>
+      <div style="border-right:1px solid #eee; height:40px; width:124px;" class="hoursbox2 lease">
+        <div style="border-bottom:1px solid #eee; width:122px; margin-left:1px;" class="lease">Lease</div>
+        <div style="width:61px;border-right:1px solid #eee; line-height:20px;" class="lease">Start</div>
+        <div style="width:62px; line-height:20px;" class="lease">End</div>
+      </div>
+      <div class="sqft" style="border-right: 1px solid rgb(238, 238, 238); line-height: 38px; height: 40px; width: 108px;">Tot Revenue</div>
+      <div class="sqft" style="border-right: 1px solid rgb(238, 238, 238); line-height: 38px; height: 40px; width: 108px;">Tot Costs</div>
+      <div class="hoursbox2 lease" style="height: 40px; width: <%if pdf%>252px;<%else%>254px;<%end%>">
+        <div style="border-bottom: 1px solid rgb(238, 238, 238); margin-left: 1px; width: 255px;" class="lease">Net Cash Flow</div>
+        <div style="border-right: 1px solid rgb(238, 238, 238); line-height: 20px; width: 85px;" class="lease">Actual: Total </div>
+        <div style="line-height: 20px; width: 85px; border-right: 1px solid rgb(238, 238, 238);" class="lease">Actual:  PSF</div>
+        <div style="line-height: 20px; width: <%if pdf%>80px;<%else%>80px;<%end%>" class="lease">Budget:PSF</div>
+      </div>
+    </div>
+    <%if lease_collection.present?%>
+      <% mgmt_lease_details(lease_collection)%>
+      <div style="padding:4px 0; margin:0; background:none;" class="pipelinerow2">
+			<%suite_nos= @suite_nos%>
+        <div style="width: 81px; word-wrap:break-word;" title="<%=suite_nos.present? ? (suite_nos.join(', ') rescue nil) : raw("&nbsp;")%>" class="suiteno"><%=suite_nos.present? ? (suite_nos.join(', ') rescue nil) : raw("&nbsp;")%></div>
+				<%lease_rentable_sqft= @lease_rentable_sqft%>
+        <div class="sqft" style="width: 102px;"> <%= lease_rentable_sqft.present?  ? display_currency_overview(lease_rentable_sqft, precision_count=2) :  raw("&nbsp;")%></div>
+        <div style="width:124px" class="hoursbox2 psf">
+          <div style="width:62px;" class="lease"> <%=@lease.try(:commencement).present? ? lease_date_format(@lease.try(:commencement)) : raw("&nbsp;") %></div>
+          <%if @lease.try(:mtm)%>
+            <div class="lease" style="width:62px;">
+              <span>MTM</span>
+            </div>
+          <%else%>
+					<div style="width:62px;" class="lease">
+					<%=lease.try(:expiration).present? ? lease_date_format(lease.try(:expiration)) : raw("&nbsp;")%>
+					</div>
+					<%end%>
+				</div>
+				<%total_lease_revenue= @total_lease_revenue
+             budget_psf= @budget_psf
+             total_lease_revenue= @total_lease_revenue
+             total_lease_capital_costs= @total_lease_capital_costs
+             net_lease_cash_flow= @net_lease_cash_flow
+             net_lease_cash_flow_psf= @net_lease_cash_flow_psf
+			  %>
+				<%total_lease_revenue = total_lease_revenue.nil?  ?  0 : total_lease_revenue%>
+				<%budget_psf = budget_psf.nil? ? 0  : budget_psf%>
+        <div class="sqft" style="width: 109px;"><%= total_lease_revenue.present? ? number_with_delimiter(number_with_precision(total_lease_revenue, :precision => 2)) : raw("&nbsp;") %></div>
+        <div class="sqft" style="width: 109px;"><%= total_lease_capital_costs.present? ?  number_with_delimiter(number_with_precision(total_lease_capital_costs, :precision => 2)) : raw("&nbsp;")%></div>
+        <div style="width: 86px;" class="lease"><%= net_lease_cash_flow.present? ? number_with_delimiter(number_with_precision(net_lease_cash_flow, :precision => 2)) : raw("&nbsp;")%></div>
+        <div style="width: 86px; font-size:13px !important" class="lease boldtxt"><%= net_lease_cash_flow_psf.present? ? number_with_delimiter(number_with_precision(net_lease_cash_flow_psf, :precision => 2)) : raw("&nbsp;") %></div>
+        <div class="lease boldtxt" style="width: 83px; font-size:13px !important"><%= budget_psf.present? ? number_with_delimiter(number_with_precision(budget_psf, :precision => 2)) : raw("&nbsp;")%> </div>
+      </div>
+    <%else%>
+      <div style="padding:4px 0; margin:0; background:none;" class="pipelinerow2">
+        <div style="width: 81px;" class="suiteno">&nbsp;</div>
+        <div class="sqft" style="width: 102px;">&nbsp;</div>
+        <div style="width:124px" class="hoursbox2 psf">
+          <div style="width:62px;" class="lease"> &nbsp;</div>
+          <div style="width:62px;" class="lease">&nbsp;</div>
+        </div>
+        <div class="sqft" style="width: 109px;">&nbsp;</div>
+        <div class="sqft" style="width: 109px;">&nbsp;</div>
+        <div style="width: 86px;" class="lease">&nbsp;</div>
+        <div style="width: 86px;" class="lease">&nbsp;</div>
+        <div class="lease" style="width: 85px;"> </div>
+      </div>
+    <%end%>
+    <div class="clear"></div>
+  </div>
+<%end%>
+<%lease_tab_data_push%>

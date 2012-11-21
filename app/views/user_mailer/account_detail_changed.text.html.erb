@@ -1,0 +1,52 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0"  bgcolor="#dddddd">
+  <tr>
+    <td height="100%" scope="col">
+      <table width="604" border="0" cellspacing="0" cellpadding="0" align="center">
+        <tr>
+          <td scope="col">
+            <table width="604" border="0" cellspacing="0" cellpadding="0">
+              <tr><td scope="col"  align="left"><a href='<%= "#{APP_CONFIG[:main_url]}" %>'><img style="border: 0" src='<%= "#{APP_CONFIG[:site_url]}/images/amp_logo_email.png" %>' width="172" height="83" /></a></td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td background='<%= "#{APP_CONFIG[:site_url]}/images/email_template_top.png" %>' width="604" height="7" align="center"></td></tr>
+        <tr>
+          <td background='<%= "#{APP_CONFIG[:site_url]}/images/email_template_mid.png" %>'>
+            <table width="600" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" align="left">
+              <tr>
+                <td>
+                  <table width="560" border="0" cellpadding="0" cellspacing="0" align="center">
+                    <tr><td height="10px">&nbsp;</td></tr>
+                    <tr><td  align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2px"> Hi <%= @user.name %>,</font></font></font></td></tr>
+                    <tr><td height="20px">&nbsp;</td></tr>
+                    <tr><td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2px">Your account details have been changed.</font></font></font></td></tr>
+                    <tr><td height="20px">&nbsp;</td></tr>
+                    <tr><td align="left"><font face="tahoma, Helvetica Light, verdana, arial"><font size="2px"><font color="#454545">Your new Email Id is&nbsp;<a href="javascript:;"><font color="#454545"><font style="text-decoration:none"><%="'#{@email}'"%></font></font></a></font></font></font></font></font> </td></tr>
+                    <tr><td height="20">&nbsp;</td></tr>
+                    <tr>
+                      <% if @user.password_code? %>
+                        <td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2">Please visit this URL to set your password and access AMP:</font></font></font><br/>
+                          <font face="Arial, Helvetica, sans-serif"><font size="2"><a href="<%= @url %>?enc_email=<%= Base64.encode64(@email)%>"><font color="#2A8AE4"><font style="text-decoration:none"> <%=h @url %></font></font></a></font></font><br />
+                        </td>
+                      <% else %>
+                        <td align="left">
+                          <font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2">Please visit this URL to login:</font></font></font><br/>
+                          <font face="Arial, Helvetica, sans-serif"><font size="2"><a href="<%=h @url %>"><font color="#2A8AE4"><font style="text-decoration:none"> <%=h @url %></font></font></a></font></font><br />
+                        </td>
+                      <% end %>
+                    </tr>
+                    <tr><td height="50">&nbsp;</td></tr>
+                    <tr><td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2">- AMP Team</font></font></font></td></tr>
+                    <tr><td height="20">&nbsp;</td></tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td><img src='<%= "#{APP_CONFIG[:site_url]}/images/email_template_bot.png" %>' /></td></tr>
+        <tr><td height="25">&nbsp; </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>

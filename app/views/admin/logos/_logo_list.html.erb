@@ -1,0 +1,67 @@
+<div class="adpsectiontitle" id>
+	Client settings :
+</div>
+<div class="adprowwrapper">
+	<%unless logo.empty? %>
+	<div class="tabulardataborder">
+		<div class="adpsectionheadblue" style="background-image: none">
+			<div class="adptabularcol1" style="width:20px;">
+				S.No
+			</div>
+			
+			<div class="adptabularcol1"style="">
+				Accounting System Type
+			</div>
+			<div class="adptabularcol1"style="">
+				Logo Image
+			</div>
+			<div class="adptabularcol1"style="">
+				Admin Name
+			</div>
+			<div class="adptabularcol1"style="width:160px;">
+				Admin Email
+			</div>
+			<div class="adptabularcol1"style="">
+				Company Name
+			</div>
+			<div class="adptabularcol1" style="">
+				Action
+			</div>
+		</div>
+		<% logo.each_with_index do |p, count| %>
+		<div class="<%= cycle('adpsectionheadwhite', 'adpsectionheadlightgray') %>" style="background-image: none">
+			<div class="adptabularcol1" style="width:20px;">
+				<%= params[:page] ? (10*(params[:page].to_i-1)+count+1) : (count+1) %>
+			</div>
+			<div class="adptabularcol1" style="">
+				<%= display_type_names(p)%>
+			</div>
+			<div class="adptabularcol1" style="">
+				<img src="<%= p.public_filename %>" style="width:70px;height:70px;"/>
+			</div>
+			<div class="adptabularcol1">
+				<%= p.user.try(:name) %>
+			</div>
+			<div class="adptabularcol1" style="width:160px;"  title = <%=p.user.try(:email)%>>
+				<%= truncate(p.user.try(:email), :length=>16)  %>
+			</div>
+			<div class="adptabularcol1" style="">
+				<%= p.user.try(:company_name) %>
+			</div>
+			<div class="adptabularcol1" style="">
+				<%= link_to image_tag("/images/edit.png", :alt=>"Edit",:border=>"0", :title=>'Edit'),edit_admin_logo_path(:id=>p, :user_id => p.user_id, :from=>params[:page]) %>&nbsp;&nbsp;<%= link_to image_tag("/images/new_icon_delete.gif", :alt=>"Delete",:border=>"0", :title=>'Delete'),admin_logo_path(p),:method=>:delete,:confirm => "Are you sure to delete the client's users and related properties?" %>
+			</div>
+		</div>
+		<%end %>
+	</div>
+	<div class="bottomrow" style="background-image: none; float: right">
+		<%= will_paginate logo , :renderer => PaginationListLinkRenderer,:previous_label => "Previous",:next_label => "Next",:class => "bottomcol" %>
+	</div>
+	<%else %> <h3>There is no Client Settings in the list...add one now !!</h3>
+	<%end %>
+</div>
+<style type="text/css">
+	.adptabularcol1 {
+		width: 90px;
+	}
+</style>

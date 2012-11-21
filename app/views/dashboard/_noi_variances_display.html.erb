@@ -1,0 +1,22 @@
+<%
+ a = {"income detail"  => "Operating Revenue","operating income"  => "Operating Revenues"}
+ txt = params[:selected_link].present? && a[params[:selected_link].strip].present? ? a[params[:selected_link].strip].titleize : (params[:selected_link].present? ? params[:selected_link].strip.gsub(' detail','').gsub(' Detail','').titleize : 'NOI')
+%>
+<div class="fltrt marginL20">
+  <%if params[:selected_link].present?%>
+  <div class="box-title"><span class="title"<%if params[:tl_period] == "11"%>title="<%= txt.titleize %> Variance: Trailing 12 Months"<%end%>><%if  !params[:tl_period].present? || params[:tl_period] == "4"%><%= txt.titleize %> <%= params[:tl_year]%><%elsif params[:tl_period] == "3"%><%= txt.titleize %> <%= params[:tl_year]%> <%elsif params[:tl_period] == "11"%><%= txt.titleize %> Variance: T 12 Mo<%end%></span></div>
+  <%else%>
+  <div class="box-title"><span class="title"><%if  !params[:tl_period].present? || params[:tl_period] == "4"%><%= txt %> Variances: YTD<%elsif params[:tl_period] == "3"%><%= txt %> Variances: Last Year <%elsif params[:tl_period] == "11"%><%= txt %> Variances: Trailing 12 Months<%end%></span></div>
+  <%end%>
+  <%if value_noi.present? && value_noi.values.sum != 0 %>
+    <div class="graph padR5" id="variancesGraph1"></div>
+    <div class="graph" id="variancesGraph2" style="display:none;"><img src="/images/trend-graph.jpg" width="434" height="275" /></div>
+    <script>
+      myChart = new FusionCharts("/FusionCharts/MSColumnLine3D.swf",'NoiVariance', 431, 275, 0, 0);
+      myChart.setDataXML("<chart canvasBgColor='FFFFFF' showBorder ='1' borderColor='DEDEDE' canvasBaseColor='ffffff' clustered='0' zeroPlaneMesh='0' zeroPlaneColor='FFFFFF' zeroPlaneAlpha='50' palette='3' bgColor='FFFFFF,FFFFFF,FFFFFF' divLineEffect='none' numDivLines='3' legendBgAlpha='90' legendShadow='0' intensity='.02' startAngX='4.5' startAngY='-6.6' endAngX='4.5' endAngY='-6.6' exeTime='2' numberPrefix='$' sNumberSuffix='%'  showValues='0'><categories ><%month_array_noi.present? && month_array_noi.each do |month|%><category label= '<%= month.titleize%>'/><%end%></categories><dataset seriesName='Pos. Var.' color='4f81be' ><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month)%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=Time.now.year%><set value='<%= positive_variance[month] %>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>'/><%end%></dataset><dataset seriesName='Neg. Var.' color='dd4947' ><%month_array.present? && month_array.each_with_index do |month,i|%><%month_selected = find_graph_month(month)%><%tl_period = (financial_month == month_selected) ? 5:10 %><%tl_month=month_selected%><%tl_year=Time.now.year%><set value='<%= negative_variance[month] %>' link='/real_estate/<%=graph_portfolio_id%>/properties/<%=graph_property_id%>?tl_period=<%=tl_period%>&tl_month=<%=tl_month%>&tl_year=<%=tl_year%>'/><%end%></dataset><dataset seriesName='Cumulative' parentYAxis='S' renderAs = 'Line' color='ffb526'><%month_array.present? && month_array.each do |month|%><set value='<%=value_noi[month]%>'/><%end%></dataset><styles><definition><style name='captionFont' type='font' size='15' /></definition><application><apply toObject='caption' styles='captionfont' /></application></styles></chart>");
+      myChart.render("variancesGraph1");
+    </script>
+  <%else%>
+    <div style="text-align: center; height: 251px;width: 434px; line-height: 219px;">No data available </div>
+  <%end%>
+</div>

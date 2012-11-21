@@ -1,0 +1,9 @@
+  page << "jQuery('.subheaderwarpper').show();"
+  page.assign "active_sub_call", "balance_sheet_sub_page"
+  bread_crumb = breadcrumb_in_financial(params[:financial_sub],params[:financial_subid])
+  @color_display = "income"
+  page << "jQuery('.executiveheadcol_for_title').html('#{bread_crumb}')"
+  page << "jQuery('#id_for_modify_threshold').hide();"
+page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/balance_sheet_sub_page",:locals=>{:month_collection => @month,
+    :time_line_actual => @time_line_actual,:asset_details_collection => @asset_details,:note_collection => @note,:start_date => @start_date,:color_display => @color_display,
+    :portfolio_collection => @portfolio}

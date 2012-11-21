@@ -1,0 +1,135 @@
+<script>
+  grossRent='undefined';
+	noOfUnits='undefined';
+</script>
+
+<%explanation = false%>
+<div id ="portfolio_overview_property_graph">
+ <% if note_collection.accounting_type == 'Cash'%>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <span style="color: black;font-size:13px;"> Data unavailable, as you have selected the 'Accounting Type' as 'Cash'.</span>
+    </div>
+<%else%>
+  <% if !(asset_details_collection.nil? || asset_details_collection.empty?) %>
+    <div class="tableheaderow assetview headerBlueBg">
+      <div class="cashtablecol1" style="text-align:left;left:13px;">&nbsp;</div>
+      <div class="cashtablecol3">Actuals $</div>
+      <div class="cashtablecol3">Budget $</div>
+      <div class="cashtablecol4 padleft50M" style="text-align:left;"><span>Variance?</span><span style="padding-left:70px;"> $ </span></div>
+      <div class="tablecol5"></div>
+    </div>
+    <%flag = 0%>
+    <div class="cashtablerow">
+      <% for asset_detail in asset_details_collection%>
+        <% icon_direction,use_color,color_flag,color_icon = (((remote_property(note_collection.accounting_system_type_id) && params[:cash_item_title] && params[:cash_item_title].strip.downcase.include?('income') &&  !asset_detail.title.downcase.include?('expense')  ) ) ||  (asset_detail.title.downcase.include?('net income') &&  !asset_detail.title.downcase.include?('non-cash items included in net income'))) ? find_color_direction_and_icon_income(asset_detail.actual.to_f, asset_detail.budget.to_f) : find_color_direction_and_icon(asset_detail.actual.to_f, asset_detail.budget.to_f)%>
+
+
+        <div class="tablecontentrow">
+          <%if flag == 0%>
+          <div class="cashtablecol1"><%if asset_detail.title == 'OPERATING EXPENSES'%> - <%else%> &nbsp;&nbsp;&nbsp;<%end%><%=raw find_link_to(asset_detail.title,asset_detail.node)%></div>
+          <%else%>
+          <div class="cashtablecol1"><%if remote_property(note_collection.accounting_system_type_id) && asset_detail.title != 'OPERATING EXPENSES'%> &nbsp;&nbsp;&nbsp;<%else%>+<%end%><%=raw find_link_to(asset_detail.title,asset_detail.node)%></div>
+          <%end%>
+          <%flag+=1%>
+          <div class="cashtablecol3"><%= display_currency_overview(asset_detail.actual.to_f)%></div>
+
+          <div class="cashtablecol3"><%= display_currency_overview(asset_detail.budget.to_f) %></div>
+          <div class="cashtablecol4 padleft50M">
+            <% vari = form_hash_of_data_for_occupancy(asset_detail.actual.to_f,asset_detail.budget.to_f)%>
+            <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(vari[:percent])%> </div>
+            <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%></div>
+          </div>
+          <% explan = "cash_receivable_#{asset_detail.title.gsub(" ","_")}" %>
+          <!-- Explanation for cash and recievables sub graph is not available -->
+          <% if explanation == true %>
+            <% if financial_explanation(asset_detail.node,current_time_period.month).nil?  %>
+              <div onclick="show_explanation('<%=explan%>');" onmouseover="document.getElementById('non_<%=explan%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_<%=explan%>').style.backgroundColor='';"  class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;padding-bottom:6px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars(financial_explanation(asset_detail.node,current_time_period.month)) %>&nbsp;</span>
+                <div class="more" id="<%=explan%>_more">
+                  <% if !(financial_explanation(asset_detail.node,current_time_period.month)).blank?%>
+                    <a href="javascript:;">More</a>
+                  <% end %>
+                </div>
+                <div id="<%=explan%>_text"  style="display:none" >
+                  <textarea id="<%=explan%>_box" name="<%=explan%>_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('<%=explan%>');save_financial_exp(this.value,<%= asset_detail.Record_id %>,<%= month_collection %>)"><%= financial_explanation(asset_detail.node,current_time_period.month) %></textarea>
+                </div>
+              </div>
+            <% else %>
+              <% variance_thres = VarianceThreshold.find_thresholds_value(note_collection.id) %>
+              <% explanation_doc_id = financial_explanation_doc(asset_detail.node,current_time_period.month) %>
+              <% @doc = find_document_id(explanation_doc_id) %>
+              <% and_or = variance_thres.and_or %>
+              <% val = "(variance_thres.variance_percentage.to_i < display_currency_real_estate_overview_for_percent_for_exp(vari[:percent]).to_i) #{and_or} (variance_thres.variance_amount.to_i < display_currency_real_estate_variance_for_exp(vari[:variant]).to_i) "%>
+              <% if  eval(val) and !explanation_doc_id.nil? and  !check_if_doc_variance_task(explanation_doc_id).nil? %>
+                <div class="tablecol5" ><span id="non_<%=explan%>" style="padding-top:1px;padding-bottom:6px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;"><%= truncate_extra_chars(financial_explanation(asset_detail.node,current_time_period.month)) %>&nbsp;</span>
+                  <div class="more" id="<%=explan%>_more">
+                    <% if !(financial_explanation(asset_detail.node,current_time_period.month)).blank?%>
+                      <%= link_to "More", edit_task_tasks_path(:id=>explanation_doc_id,:portfolio_id=>portfolio_collection.id,:folder_id=>@doc.folder_id,:from_assign_task=>'cash_flow', :month=>month_collection),:remote=>true, :loading=>"load_writter()", :complete=>"load_completer()" %>
+                    <% end %>
+                  </div>
+                </div>
+              <% else %>
+                <div  class="tablecol5">
+                  <span id="non_<%=explan%>" style="padding-top:1px;padding-bottom:6px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                    <%= truncate_extra_chars(financial_explanation(asset_detail.node,current_time_period.month)) %>&nbsp;
+                  </span>
+                  <div class="more" id="<%=explan%>_more">
+                    <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+asset_detail.title.to_s+'&actual_explanation='+"#{asset_detail.actual}"+'&budget_explanation='+"#{asset_detail.budget}"+'&text_explanation='+financial_explanation(asset_detail.node,current_time_period.month).to_s+'&var_per_explanation='+"#{vari[:percent]}"+'&var_amt_explanation='+"#{vari[:variant]}"+'&id_explanation='+asset_detail.node.to_s+'&month_explanation='+current_time_period.month.to_s+'&user_id_explanation='+financial_explanation_user_id(asset_detail.node,current_time_period.month).to_s+'&use_color='+"#{use_color}" %>"  id="<%=explan%>_task" >
+                      More</a>
+                    <script>new Control.Modal($('<%=explan%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                  </div>
+                </div>
+              <% end%>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+      <% for asset_detail in asset_details_for_total_collection%>
+			<% icon_direction,use_color,color_flag,color_icon = (((remote_property(note_collection.accounting_system_type_id) && params[:cash_item_title] && params[:cash_item_title].strip.downcase.include?('income') && !asset_detail.title.downcase.include?('expense') ) )  || (asset_detail.title.downcase.include?('net income') &&  !asset_detail.title.downcase.include?('non-cash items included in net income') && !asset_detail.title.downcase.include?('non cash items in net income'))) ? find_color_direction_and_icon_income(asset_detail.actual.to_f, asset_detail.budget.to_f) : find_color_direction_and_icon(asset_detail.actual.to_f, asset_detail.budget.to_f)%>
+      <div class="tablecontentrow" style="color: black;">
+      <div class="cashtablecol1">= <%=raw total_cap_display(asset_detail.title,asset_detail.node)%></div>
+          <div class="cashtablecol3"><%= display_currency_overview(asset_detail.actual.to_f)%></div>
+
+          <div class="cashtablecol3"><%= display_currency_overview(asset_detail.budget.to_f) %></div>
+          <div class="cashtablecol4 padleft50M">
+            <% vari = form_hash_of_data_for_occupancy(asset_detail.actual.to_f,asset_detail.budget.to_f)%>
+            <div class="tablecol4_sub<%= color_flag %>col1 captablecol4"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%=display_currency_real_estate_overview_for_percent(vari[:percent])%> </div>
+            <div class="tablecol4_sub<%= color_flag %>col2 captablecol4"><%= display_currency_variance(vari[:variant])%></div>
+          </div>
+      </div>
+      <%end%>
+    </div>
+  <% else %>
+    <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+      <% if note_collection.class == RealEstateProperty %>
+        <% note_name = note_collection.property_name %>
+      <% else %>
+        <% note_name = note_collection.note_id %>
+      <% end %>
+      <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+        <span style="color: black;font-size:13px;">Data Unavailable. Please add Asset Financial data at
+				<!--
+				<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>
+				-->
+
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+				.</span>
+      <% else %>
+        <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+</div>
+<script>
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+</script>

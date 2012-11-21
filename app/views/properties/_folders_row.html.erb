@@ -1,0 +1,397 @@
+<script>
+selected_portfolio =jQuery('.portfolio_selected').attr('id');
+if (selected_portfolio !=undefined){selected_portfolio = selected_portfolio}else{selected_portfolio=jQuery('#news_id').attr('value');}
+</script>
+<%
+past_shared_folders = @past_shared_folders
+%>
+<%if check_is_folder_shared(a) == "true"%>
+  <%folder_members = find_folder_member(a) %>
+  <% folder_structure_show =  check_folder_functionality(a.id)%>
+  <%no_of_files = shared_no_of_files_of_asset_folder(a.id, true) %>
+  <%no_of_missed_files = no_of_missing_files_of_asset_folder_real_estate(a.id, true) %>
+  <%f_color = a.is_deselected == true ? "#996633" : a.is_deleted ? "#999999" : "#025B8D"%>
+  <%params[:parent_delete] = (a.parent_id == 0 && !a.is_master) ? "true" : "false"%>
+  <div class="rowinactive" onmouseover="this.className='activerow'" onmouseout="this.className='rowinactive'" style="z-index:<%=folder_index%>;<%if params[:show_past_shared] == 'true'%> margin-left:14px;<%end%>" id="folder<%= a.id %>" shared="<%= (a.user_id != current_user.id || a.user_id == current_user.id && past_shared_folders && past_shared_folders.index(a) || params[:shared] == "yes") ? "yes" : "no" %>">
+    <!-- folder start-->
+    <div class="dataicon">
+      <%if folder_members.empty?%>
+        <%if a.is_deleted%>
+          <img src="/images/asset_folder_icon_deleted.png"/>
+        <%else%>
+          <% img_src = (a.parent_id != 0 || a.is_master?) ? '/images/collaboration_hub_new_dataicon1.png' : "#{property_image(a.real_estate_property_id)}" %>
+          <%if params[:deal_room] == 'true' && params[:user] == 'false' %>
+            <img src="<%=img_src%>" width="32" height="32"    onclick="shared_link_show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;" style="cursor:pointer;" />
+          <%elsif params[:deal_room] == 'true' && params[:user] != 'false' %>
+            <img src="<%=img_src%>" width="32" height="32"    onclick="show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;" style="cursor:pointer;" />
+          <%elsif params[:user] == 'false'%>
+            <img src="<%=img_src%>" width="32" height="32"    onclick="shared_link_show_hide_asset_docs1_real_estate(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;" style="cursor:pointer;" />
+          <%else%>
+            <img src="<%=img_src%>" width="32" height="32" onclick="if (selected_portfolio !=undefined){selected_portfolio = selected_portfolio}else{selected_portfolio=<%=a.portfolio.id%>};show_hide_asset_docs1_real_estate(selected_portfolio,<%=a.id %>,'hide_del');return false;" style="cursor:pointer;" />
+          <%end%>
+        <%end%>
+      <%else%>
+        <%if a.is_deleted%>
+          <%if a.user_id != current_user.id || (a.user_id == current_user.id && past_shared_folders && past_shared_folders.index(a)) || params[:shared] == "yes" %>
+            <img src="/images/asset_folder_shared_del_icon.png"/>
+          <%else%>
+            <img src="/images/asset_folder_icon_deleted.png"/>
+          <%end%>
+        <%else%>
+          <% img_src = (a.parent_id != 0 || a.is_master?) ? ((a.user_id != current_user.id) || (a.user_id == current_user.id && past_shared_folders && past_shared_folders.index(a) || params[:shared] == "yes") ? '/images/collaboration_hub_new_dataicon2.png' : '/images/collaboration_hub_new_dataicon1.png') : "#{property_image(a.real_estate_property_id)}" %>
+          <%if params[:deal_room] == 'true' && params[:user] == 'false' %>
+            <img src="<%=img_src%>" width="32" height="32"  id="<%='image_folder_name_a_id'+a.id.to_s%>"  onclick="shared_link_show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"   style="cursor:pointer;"  />
+          <%elsif params[:deal_room] == 'true' && params[:user] != 'false' %>
+            <img src="<%=img_src%>" width="32" height="32"  id="<%='image_folder_name_a_id'+a.id.to_s%>"  onclick="show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"   style="cursor:pointer;"  />
+          <%elsif params[:user] == 'false'%>
+            <img src="<%=img_src%>" width="32" height="32"  id="<%='image_folder_name_a_id'+a.id.to_s%>"  onclick="shared_link_show_hide_asset_docs1_real_estate(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"   style="cursor:pointer;"  />
+          <%else%>
+            <img src="<%=img_src%>" width="32" height="32"  id="<%='image_folder_name_a_id'+a.id.to_s%>"  onclick="if (selected_portfolio !=undefined){selected_portfolio = selected_portfolio}else{selected_portfolio=<%=a.portfolio.id%>};show_hide_asset_docs1_real_estate(<%#=a.portfolio.id %>selected_portfolio,<%=a.id %>,'hide_del');return false;" style="cursor:pointer;"  />
+          <%end%>
+        <%end%>
+      <%end%>
+    </div>
+    <!-- folder end-->
+    <div class="databox" style="<%=(a.is_deleted && (a.user_id != current_user.id || (a.user_id == current_user.id && past_shared_folders && past_shared_folders.index(a)) || params[:shared] == 'yes')) ? 'width:496px' : ''%>;"><!-- width:476px modified because of show deleted files design issue-->
+      <!-- folder name start-->
+      <div class="dataname">
+        <% if !a.is_deleted %>
+          <span id="<%=  't_foldername_'+a.id.to_s %>">
+            <%if params[:deal_room] == 'true' && params[:user] == 'false'%>
+              <a href=""  style="color:<%=f_color%>;text-decoration:none;" id="<%='folder_name_a_id'+a.id.to_s%>"  onclick="shared_link_show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"  ><%#=display_truncated_chars(a.name,35,true) %><%= lengthy_word_simplification(a.name,25,10)%></a>
+            <%elsif params[:deal_room] == 'true' && params[:user] != 'false'%>
+              <a href=""  style="color:<%=f_color%>;text-decoration:none;" id="<%='folder_name_a_id'+a.id.to_s%>"  onclick="show_hide_asset_docs1_real_estate_for_deal_room(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"  ><%#=display_truncated_chars(a.name,35,true) %><%= lengthy_word_simplification(a.name,25,10)%></a>
+            <%elsif params[:user] == 'false'%>
+              <a href=""  style="color:<%=f_color%>;text-decoration:none;" id="<%='folder_name_a_id'+a.id.to_s%>"  onclick="shared_link_show_hide_asset_docs1_real_estate(<%=a.portfolio.id %>,<%=a.id %>,'hide_del');return false;"  ><%#=display_truncated_chars(a.name,35,true) %><%= lengthy_word_simplification(a.name,25,10)%></a>
+            <%else%>
+              <a href=""  style="color:<%=f_color%>;text-decoration:none;" id="<%='folder_name_a_id'+a.id.to_s%>"  onclick="if (selected_portfolio !=undefined){selected_portfolio = selected_portfolio}else{selected_portfolio=<%=a.portfolio.id%>};show_hide_asset_docs1_real_estate(<%#=a.portfolio.id %>selected_portfolio,<%=a.id %>,'hide_del');return false;"><%#=display_truncated_chars(a.name,35,true) %><%= lengthy_word_simplification(a.name,25,10)%></a>
+            <%end%>
+            <span style="display:none;height:0px;width:0px;"><%= a.name %></span>
+          </span>
+        <%else%>
+          <font color=<%=f_color%>><%#=display_truncated_chars(a.name,35,true) %><%= lengthy_word_simplification(a.name,25,10)%></color>
+          <%end%>
+      </div>
+      <!-- folder name end-->
+      <!-- Number of files start -->
+      <div class="datadet">
+        <div class="datadetails">
+          Modified &nbsp;
+          <span title = "<%= a.updated_at.strftime(" %b %d %Y") %>"><%= a.updated_at.strftime("%b %d") %>
+          </span>&nbsp;,&nbsp;<% if !a.is_deleted %><%= file_count(no_of_files) %><% else %><%= file_count(no_of_files_of_deleted_asset_folder(a.id,true)) %><% end %>
+        </div>
+      </div>
+      <!-- Number of files end -->
+    </div>
+
+    <%unless params[:user] == 'false'%>
+      <!-- Following share link functionality hided for 1.3b also image hided in ampnew.css (.datashare ans .datasharelink)-->
+      <!-- <div class="<%#=a.permalink.blank? ? 'datasharelink' : 'datashare'%>" style="<%#=a.is_deleted ? 'background:none;' : ''%>"> -->
+      <div class="datashare" style="background:none;">
+        <ul class="subindex">
+          <li style="list-style-type:none;">
+    <%#unless a.is_deleted%>
+    <%#permalink_generation_for_folder(a.id)%>
+    <%#= link_to raw("&nbsp;&nbsp;&nbsp;"),{:controller=>"collaborators",:action=>"share_link_folder",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:deal_room => params[:deal_room]},:id=>"collaborators_#{a.id}", :title=>((a.parent_id==0 && a.is_master.eql?(false)) ? 'Share this Property' : 'Share this Folder')%>
+            <script>//new Control.Modal($('collaborators_<%#=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+    <%#end%>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Collaborators start-->
+      <%title_text,property_folder,img_name = title_text_and_img_name(a)%>
+      <%if a.is_deleted or params[:bulk_upload] == 'true' || (is_leasing_agent && property_folder) %>
+        <div class="userbox"><div class="userwrapper"><div class="datausers" style="background:none;"></div></div></div>
+        <div class="userdrop"></div>
+      <%else%>
+        <div class="userbox">
+          <div class="dummy" onmouseover="this.className='userwrapperon'" onmouseout="this.className='dummy'">
+            <%member_link =  folder_members.length == 0 ? "+" : folder_members.length %>
+            <div class="userwrapper">
+              <div class="<%if (params[:deal_room] && params[:deal_room] == 'true') %>dealroomuser<%else%>datausers<%end%>">
+                <ul class="subindex">
+                  <li style="list-style-type:none;">
+                    <%if property_folder == true%>
+
+                      <a href="/real_estates/add_property/<%=a.portfolio_id%>/?property_id=<%=a.real_estate_property_id%>&highlight_users_form=true&is_property_folder=<%=property_folder%>&folder_revoke=true&folder_id=<%=a.id%>" method="put"  title= '<%= "#{(folder_members && folder_members.empty?) ? 'Add' : 'Add / Edit'} #{title_text}"%>' style="width:16,height:16,border:0;"><%=raw("&nbsp;&nbsp;&nbsp;")%></a>
+
+                      <!--COMMENTED LIGHTBOX starts here
+
+        <%#=link_to raw("&nbsp;&nbsp;&nbsp;"), { :action =>'add_property',:controller => "real_estates",:id =>a.portfolio_id,:property_id=>a.real_estate_property_id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:is_property_folder =>property_folder,:folder_id=>a.id,:folder_revoke=>true},{:id => "share_filebox_tip_#{a.id}", :title=>"#{(folder_members && folder_members.empty?) ? 'Add' : 'Add / Edit'} #{title_text}",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+                                                                                                        <script>//new Control.Modal($('share_filebox_tip_<%#=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                      COMMENTED LIGHTBOX ends here -->
+
+
+                    <%else%>
+                      <%= link_to raw("&nbsp;&nbsp;&nbsp;"),{:controller=>"collaborators",:action=>"view_share",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>"true",:parent_delete=>params[:parent_delete],:is_property_folder => property_folder,:deal_room => params[:deal_room]},{:id=>"share_filebox_tip_#{a.id}", :title=>"#{(folder_members && folder_members.empty?) ? 'Add' : 'Add / Edit'} #{title_text}",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+                      <script>new Control.Modal($('share_filebox_tip_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    <%end%>
+                  </li>
+                </ul>
+              </div>
+              <div class="usertext">
+                <%if property_folder == true%>
+
+                  <%link_text = ""%>
+                  <%link_text = (((folder_members && !folder_members.empty?) ? (folder_members.length>1 ? (display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,9,true) + ' + ' + (folder_members.length-1).to_s) : display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,12,true)) : ""))%>
+
+                  <a href="/real_estates/add_property/<%=a.portfolio_id%>/?property_id=<%=a.real_estate_property_id%>&highlight_users_form=true&is_property_folder=<%=property_folder%>&folder_revoke=true&folder_id=<%=a.id%>" method="put"  style="width:16,height:16,border:0;text-decoration:none;"><%=link_text%></a>
+
+
+        <%#=link_to (((folder_members && !folder_members.empty?) ? (folder_members.length>1 ? (display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,9,true) + ' + ' + (folder_members.length-1).to_s) : display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,12,true)) : "")),{ :action =>'add_property',:controller => "real_estates",:id =>a.portfolio_id,:property_id=>a.real_estate_property_id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:is_property_folder =>property_folder,:folder_id=>a.id,:folder_revoke=>true},:id => "share_filebox_name_#{a.id}" ,:style=>"text-decoration:none;",:title=>((folder_members && !folder_members.empty?) ? ((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize) : "")%>
+                  <script>//new Control.Modal($('share_filebox_name_<%#=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+                <%else%>
+                  <%=link_to (((folder_members && !folder_members.empty?) ? (folder_members.length>1 ? (display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,9,true) + ' + ' + (folder_members.length-1).to_s) : display_truncated_chars((folder_members[0].name.blank? ? folder_members[0].email.split(/@/)[0] : folder_members[0].name).titleize,12,true)) : "")),{:controller=>"collaborators",:action=>"view_share",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:parent_delete=>params[:parent_delete],:is_property_folder => property_folder,:deal_room => params[:deal_room]},:id=>"share_filebox_name_#{a.id}", :style=>"text-decoration:none;", :title=>""%>
+                  <script>new Control.Modal($('share_filebox_name_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                <%end%>
+              </div>
+            </div>
+            <div class="userdrop">
+              <div class="userheader"><%if property_folder%> Property Users <%else%> Collaborators<%end%></div>
+              <% folder_members && folder_members.each do |u|%>
+                <div class="userheaderrow">><span title='<%=((u.name.blank?) ? u.email.split(/@/)[0] : u.name).try(:titleize)%>'><%=display_truncated_chars(((u.name.blank?) ? u.email.split(/@/)[0] : u.name).try(:titleize),12,true)%></span></div>
+              <%end%>
+              <div class="useradd">
+
+                <%if property_folder == true%>
+
+                  <%if(folder_members && folder_members.empty?)%>
+
+                    <a href="/real_estates/add_property/<%=a.portfolio_id%>/?property_id=<%=a.real_estate_property_id%>&highlight_users_form=true&is_property_folder=<%=property_folder%>&folder_revoke=true&folder_id=<%=a.id%>"  method="put" style="width:16,height:16,border:0;">Add</a>
+                  <%else%>
+                    <a href="/real_estates/add_property/<%=a.portfolio_id%>/?property_id=<%=a.real_estate_property_id%>&highlight_users_form=true&is_property_folder=<%=property_folder%>&folder_revoke=true&folder_id=<%=a.id%>"  method="put" style="width:16,height:16,border:0;">Add/Edit</a>
+                  <%end%>
+
+
+                  <!--COMMENTED LIGHTBOX
+        <%#=link_to "#{(folder_members && folder_members.empty?) ? 'Add' : 'Add/Edit'}", { :action =>'add_property',:controller => "real_estates",:id =>a.portfolio_id,:property_id=>a.real_estate_property_id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:is_property_folder =>property_folder,:folder_id=>a.id,:folder_revoke=>true},{:id => "share_filebox_#{a.id}",:style=>{:width=>"16",:height=>"16",:border=>"0"}, :title=> "#{(folder_members && folder_members.empty?) ? 'Add' : 'Add / Edit'} #{title_text}" }%>
+                                                  <script>//new Control.Modal($('share_filebox_<%#=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+                  COMMENTED LIGHTBOX ends here-->
+
+                <%else%>
+                  <%= link_to "#{(folder_members && folder_members.empty?) ? 'Add' : 'Add/Edit'}",{:controller=>"collaborators",:action=>"view_share",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:parent_delete=>params[:parent_delete],:is_property_folder => property_folder,:deal_room => params[:deal_room]},:id=>"share_filebox_#{a.id}", :title=> "" %>
+                  <script>new Control.Modal($('share_filebox_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                <%end%>
+              </div>
+            </div>
+          </div>
+        </div>
+      <%end%>
+    <%end%>
+
+    <!-- Collaborators end-->
+
+    <div class="dummy" onmouseover="this.className='userwrapperon'" onmouseout="this.className='dummy'">
+      <div class="userwrapper"><span class="dataoption"><a href="javascript:;"></a>
+          <div class="userdrop2">
+            <div class="row2">
+              <div class="iconl3"><img src="/images/download-_icon.png"  width="14" height="14" border="0"/></div>
+              <%unless params[:user] == 'false'%>
+                <div class="iconl3"><%=link_to "Download",folder_download_folder_path(a.id)%></div>
+              <%else%>
+                <div class="iconl3"><%=link_to "Download",{:controller => "folders",:action => "download_folder_for_share_link", :id=>a.id}%></div>
+              <%end%>
+            </div>
+            <%financial_access = current_user.try(:client).try(:is_financials_required)%>
+            <%unless params[:user] == 'false'%>
+              <% if a.parent_id == 0 && !a.is_master %>
+                <% if !(find_property_folder(a).nil? || find_property_folder(a).blank?) %>
+                  <%if financial_access%>
+                    <div class="row2">
+                      <div class="iconl3"><img src="/images/view.jpg"  width="14" height="14" border="0"/></div>
+                      <div class="iconl3">
+                        <%if is_leasing_agent%>
+                          <a href="/lease/show_pipeline/<%=a.real_estate_property_id%>?property_selection=true" method="put">Detailed View</a>
+                        <%else%>
+                          <%href = "/real_estate/#{a.portfolio_id}/properties/#{a.real_estate_property_id}?prop_folder=true&property_selection=true"%>
+                          <a href="<%=href%>" method="put">Detailed View</a>
+                        <%end%>
+                      </div>
+                    </div>
+                  <%end%>
+                <% else %>
+                  <%if financial_access%>
+                    <div class="row2">
+                      <div class="iconl3"><img src="/images/view.jpg"  width="14" height="14" border="0"/></div>
+                      <div class="iconl3">
+                        <%if is_leasing_agent%>
+                          <a href="/lease/show_pipeline/<%=a.real_estate_property_id%>?property_selection=true" method="put">Detailed View</a>
+                        <%else%>
+                          <%href = "/real_estate/#{a.portfolio_id}/properties/#{a.real_estate_property_id}?property_selection=true"%>
+                          <a href="<%=href%>" method="put">Detailed View</a>
+                        <%end%>
+                      </div>
+                    </div>
+                  <%end%>
+                <% end %>
+              <%end%>
+              <% if a.is_deleted == false && folder_structure_show && params[:bulk_upload] != 'true' && !is_leasing_agent%>
+                <div class="row2">
+                  <div class="iconl3">
+                    <%if(a.parent_id == 0 && !a.is_master)%>
+                      <img  alt="" src="/images/asset_manager_icon.png" width="16" height="16" border="0" />
+                    <%else%>
+                      <img class="sprite hotbutton-icon s_folder_user" alt="" src="/images/icon_spacer.gif" width="16" height="16" border="0" />
+                    <%end%>
+                  </div>
+                  <div class="iconl3">
+                    <%if params[:deal_room] == 'true'%>
+                      <%= link_to "Add Collaborator",{:controller=>"collaborators",:action=>"view_share",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:is_property_folder => property_folder,:parent_delete=>params[:parent_delete],:deal_room=>params[:deal_room]},:id=>"sharedfiles_filebox_#{a.id}" %>
+                    <%else%>
+                      <%if property_folder == true%>
+
+                        <%if(a.parent_id == 0 && !a.is_master)%>
+
+                          <a href="/real_estates/add_property/<%=a.portfolio_id%>/?property_id=<%=a.real_estate_property_id%>&highlight_users_form=true&is_property_folder=<%=property_folder%>&folder_revoke=true&folder_id=<%=a.id%>" method="put" style="width:16,height:16,border:0;">Add Property Users</a>
+                        <%else%>
+                          <a href="/real_estate/<%= a.portfolio_id %>/properties/<%=a.real_estate_property_id%>?partial_disp=property_settings&highlight_users_form=true&folder_revoke=true&folder_id=<%=a.id%>" method="put" style="width:16,height:16,border:0;">Add Collaborator</a>
+                        <%end%>
+
+                        <!--COMMENTED LIGHTBOX
+          <%#=link_to (a.parent_id == 0 && !a.is_master) ?  "Add Property Users" : "Add Collaborator", { :action =>'add_property',:controller => "real_estates",:id =>a.portfolio_id,:property_id=>a.real_estate_property_id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:is_property_folder =>property_folder,:folder_id=>a.id,:folder_revoke=>true},{:id => "sharedfiles_filebox_#{a.id}",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+                                                                                                                                              <script>//new Control.Modal($('sharedfiles_filebox_<%#=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+                        COMMENTED LIGHTBOX ends here-->
+                      <%else%>
+                        <%= link_to (a.parent_id == 0 && !a.is_master) ?  "Add Property Users" : "Add Collaborator",{:controller=>"collaborators",:action=>"view_share",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:is_property_folder => property_folder,:parent_delete=>params[:parent_delete]},:id=>"sharedfiles_filebox_#{a.id}" %>
+                        <script>new Control.Modal($('sharedfiles_filebox_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+
+                      <%end%>
+
+                    <%end%>
+                  </div>
+                </div>
+              <%end%>
+              <%if a.is_deleted == false && folder_structure_show && params[:bulk_upload] != 'true'%>
+                <div class="row2">
+                  <div class="iconl3"><img  src="<%=a.permalink.blank? ? '/images/collaboration_hub_new_datashare.png' : '/images/collaboration_hub_new_datasharebrake.png'%>" width="15" height="16" border="0"/></div>
+                  <div class="iconl3">
+                    <%= link_to "Get Link",{:controller=>"collaborators",:action=>"share_link_folder",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:deal_room => params[:deal_room]},:id=>"collaborators_#{a.id}", :title=>''%>
+                    <script>new Control.Modal($('collaborators_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                  </div>
+                </div>
+              <%end%>
+              <%if a.parent_id != 0 && !a.is_master && a.is_deleted == false && folder_structure_show%>
+                <%if a.user_id == current_user.id%>
+                  <div class="row2">
+                    <div class="iconl3"><img src="/images/moveto_icon.png"  width="15" height="16" border="0"/></div>
+                    <div class="iconl3">
+                      <% if params[:bulk_upload] == 'true'%>
+                        <%= link_to "Move To",{:controller=>"tree_view",:action=>"move_action",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:operation => "move",:deal_room => params[:deal_room], :bulk_upload=> true },:id=>"move_action_#{a.id}"%>
+                      <% else %>
+                        <%= link_to "Move To",{:controller=>"tree_view",:action=>"move_action",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:operation => "move",:deal_room => params[:deal_room] },:id=>"move_action_#{a.id}"%>
+                      <% end %>
+                      <script>new Control.Modal($('move_action_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <%end%>
+              <%end%>
+              <% if a.parent_id != 0 && a.is_deleted == false %>
+                <div class="row2">
+                  <div class="iconl3"><img src="/images/copyto_icon.png"  width="16" height="15" border="0"/></div>
+                  <div class="iconl3">
+                    <% if params[:bulk_upload] == 'true'%>
+                      <%= link_to "Copy To",{:controller=>"tree_view",:action=>"move_action",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:operation => "copy",:deal_room => params[:deal_room], :bulk_upload=> true},:id=>"copy_action_#{a.id}" %>
+                    <% else %>
+                      <%= link_to "Copy To",{:controller=>"tree_view",:action=>"move_action",:id=>a.id,:portfolio_id=>a.portfolio.id,:folder_id=>a.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true,:operation => "copy",:deal_room => params[:deal_room]},:id=>"copy_action_#{a.id}" %>
+                    <% end %>
+                    <script>new Control.Modal($('copy_action_<%=a.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                  </div>
+                </div>
+              <%end %>
+              <% if a.parent_id != 0 && !a.is_deleted && folder_structure_show && !a.is_master?%>
+                <div class="row2">
+                  <div class="iconl3"><img src="/images/rename_icon.png"  width="15" height="15" border="0"/></div>
+                  <div class="iconl3">
+                    <a href="javascript:;" onclick="edit_folder_name_real_estate(document.getElementById('t_foldername_<%=  a.id.to_s %>'),<%=  a.parent_id.to_s %>,0,'<%=a.name%>','<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');return false;" >
+                      Rename
+                    </a>
+                  </div>
+                </div>
+              <%end%>
+              <% if a.parent_id == 0 && !a.is_master && current_user.email == find_folder_owner_by_obj(a) %><%# && folder_structure_show %> <!-- this rails line is commented since this helper is not needed-->
+                <div class="row2">
+                  <div class="iconl3"><img class="icon_no_hover sprite s_purge icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                  <div class="iconl3">
+                    <a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this property?')){load_writter();delete_asset_doc_or_folder_real_estate('<%= a.portfolio.id %>','<%= a.id %>','folder','del','Permanently delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','','true','','','','<%=params[:bulk_upload]%>');} return false;" >Permanently Delete
+                    </a>
+                  </div>
+                </div>
+              <%end%>
+              <% if a.parent_id != 0 && !a.is_master && folder_structure_show && a.is_deleted?%>
+                <div class="row2">
+                  <div class="iconl3"><img class="icon_no_hover sprite s_basket_remove icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                  <div class="iconl3">
+                    <a href="javascript:;" onclick="if(confirm('Are you sure you want to undelete this folder <%= a.name %>?')){delete_asset_doc_or_folder_real_estate(<%= a.portfolio.id %>,<%= a.id %>,'folder','revert','Delete','sub_list','<%=params[:del_files]%>','','','','','','<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" >Undelete</a>
+                  </div>
+                </div>
+              <%end%>
+              <% if folder_structure_show && (!a.is_master? && a.parent_id != 0) && !a.is_deleted?%>
+                <div class="row2">
+                  <div class="iconl3">
+                    <img src="/images/delete.png"  width="16" height="16" border="0"/></div>
+                  <div class="iconl3">
+                    <a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this folder <%=a.name%>  ?')){delete_asset_doc_or_folder_real_estate(<%= a.portfolio.id %>,<%= a.id %>,'folder','del','Delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','','','','','<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" >Delete</a>
+                  </div>
+                </div>
+              <%end%>
+              <% if folder_structure_show && (!a.is_master? && a.parent_id != 0) && a.is_deleted? && current_user.email == find_folder_owner_by_obj(a)%>
+                <div class="row2">
+                  <div class="iconl3">
+                    <img class="icon_no_hover sprite s_purge icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                  <div class="iconl3">
+                    <a href="javascript:;" onclick="if(confirm('Are you sure you want to Permanently delete this folder <%=a.name%>  ?')){delete_asset_doc_or_folder_real_estate(<%= a.portfolio.id %>,<%= a.id %>,'folder','del','Permanently delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','','','','','<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" >Permanently Delete</a>
+                  </div>
+                </div>
+              <%end%>
+            <%end%>
+          </div>
+        </span>
+      </div>
+    </div>
+    <%unless params[:user] == 'false'%>
+      <%unless a.is_deleted%>
+        <div class="trigger2" id="property_folder_<%= a.id %>">
+          <ul class="subindex"><li style="list-style-type:none;"><a href="javascript:;" id="prop_folder_<%= a.id %>" title="Add Comment"><%= a.comments_finder.count == 0 ? '+' :  a.comments_finder.count  %></a></li></ul>
+        </div>
+        <div class="toggle_container2" id="folder_comment_<%= a.id %>"></div>
+        <script type="text/javascript">
+          jQuery('#property_folder_<%= a.id %>').bind('click',function(){
+            if(jQuery('#folder_comment_<%= a.id %>').html() ==''){ all_cmts='';call_to_comment(<%= a.id %>, 'folder');detect_comment_call=false;return false;}
+            else{ jQuery('#folder_comment_<%= a.id %>').html('');jQuery('#folder_comment_<%= a.id %>').hide();return false;}
+          });
+        </script>
+      <%end%>
+      <!-- To trigger comments when from the mail link -->
+      <%if  params[:mailer] == "true" && from_mailer == "true" && folder_for_mailer%>
+        <script>call_to_comment(<%= a.id %>, 'folder');</script>
+      <%end%>
+    <%end%>
+  </div>
+<%end%>
+
+<script>
+  jQuery(document).ready(function() {
+    jQuery('ul.subindex li a[title]').qtip({
+      position: {
+        corner: {
+          target: 'topRight',
+          tooltip: 'bottomMiddle'
+        }
+      },
+      style: {
+        name: 'cream',
+        padding: '3px',
+        width: {
+          max: 210,
+          min: 0
+        },
+        tip: true
+      }
+    });
+  });
+</script>

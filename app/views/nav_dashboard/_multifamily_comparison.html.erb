@@ -1,0 +1,148 @@
+<%
+multi = @multi
+multi_count = @multi_count
+%>
+<script>
+  dashboard_portfoio_id = <%= params[:portfolio_id] %>
+</script>
+<script type="text/javascript">
+	jQuery(function(){
+	  jQuery('#slider1').bxSlider({
+		auto: false,
+		pager: false,
+		infiniteLoop: false,
+	  });
+	});
+</script>
+<%financial_access = current_user.try(:client).try(:is_financials_required)%>
+<div class="sliderbox" id="sliderbox_loading" style="display:none;">
+	 <div class="height40">
+		<span class="fontgry22 floatL">Rank by</span>
+			
+	 </div>
+		<div class=" width472 floatL">
+			<div class="clearfloat"></div>
+					<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10"/>
+					</div>
+	 </div>
+			<div class="performbox floatR"><div class="clearfloat"></div>
+			<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10 bdrnone"/>
+			</div>
+			
+			</div>
+</div>
+<div class="sliderbox" id="sliderbox">
+	  <div class="height40" style="width:460px">
+		<span class="fontgry22 floatL">Rank by</span>
+			<div class="floatR padd4">
+				<%if financial_access%>
+						<%=select_tag 'select', options_for_select({"YTD - NOI Variances" => "YTD - NOI Variances", "Vacancy" => "Vacancy"}, (params[:sort_type] && params[:sort_type]!= "neg_noi_percentage") ? find_sort_type(params[:sort_type],financial_access) : 'YTD - NOI Variances'), :onchange => 'onchange_handler_for_portfolios(this.value);'%>
+				<%else%>
+						<%=select_tag 'select', options_for_select({"Vacancy" => "Vacancy"}, (params[:sort_type] && params[:sort_type]!= "neg_noi_percentage") ? find_sort_type(params[:sort_type],financial_access) : 'YTD - NOI Variances'), :onchange => 'onchange_handler_for_portfolios(this.value);'%>
+				<%end%>
+			</div>
+	 </div>
+		<!-- slider view start-->
+			<div class="floatL">
+				<div class="clearfloat"></div>
+				<div id="slider1" style="width:472px;">
+				<!-- data display start-->	
+				<%multi_array_slice = multi.each_slice(8).to_a%>
+				<%multi_array_slice.each_with_index{|multi_property,index_main|%>
+				   <%multi_array = multifamily_all_lease_display_new(multi_property)%>
+				   <div class="<%if multi_count <= 4%>marginT80<%end%>">
+							<%if multi_count <= 4%><div class="<%if multi_count == 1%>marginL190<%elsif multi_count == 2%>marginL120<%elsif multi_count == 3%>marginL60<%end%>"><%end%>
+								<%multi_array.each_with_index{|i,index|%>
+								<%#index += 1%>
+									<%#unless i.multi_property.nil?%>
+											<div class="pName">
+											<%url = find_url_for_nav_dashboard_multifamily_property(i.multi_property.portfolio_id, i.multi_property.id,params[:sort_type].present? ? params[:sort_type] : "false",financial_access.eql?(true) ? financial_access : "false")%>
+													<h4><a href="<%= url%>" title="<%=i.multi_property.property_name%>"> <%=display_truncated_chars(i.multi_property.property_name,10,true)%></a></h4>
+														<!--<div class="countNo">888</div>-->
+														<%property = i.multi_property%>
+														<%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+														<%image_src = (image!=nil) ? image.public_filename : "/images/property_img.png"%>
+														<a href="<%= url%>" class="imgPLM"><img src="<%=image_src%>" height="55" width="55"  title=""  alt="" border="0"/></a>
+														<%noi_val =  i.noi.nil? ? 0 : i.noi[:actuals] %>
+														<%noi_bud =  i.noi.nil? ? 0 : i.noi[:budget] %>
+														<%if params[:sort_type] || !financial_access%>
+																<div class="pValue">
+																		<%if params[:sort_type].eql?("neg_noi_percentage")%>
+																			<!-- For YTD - NOI Variances start-->
+																					<span>$<%= dashboard_currency_display(noi_val,'false') %></span>
+																					<%net_income_de = i.net_income_de.nil? ? 0 : i.net_income_de%>
+																					<% color_icon = net_income_de == 0 ? 'downarrow_red2' : net_income_de['diff_style'] == 'greenrow' ? 'multgreenarrow' : 'downarrow_red2' %>
+																					<div class="varlabel">
+																							<div class="floatL">Var &nbsp;</div>
+																							<div class="floatL <%if color_icon.eql?('multgreenarrow')%>above<%elsif color_icon.eql?('downarrow_red2')%>below<%end%>"><%=display_currency_real_estate_overview_for_percent(net_income_de == 0 ? 0 : net_income_de['diff_per'])%></div>
+																							<div class="clear"></div>
+																						</div>
+																					<span style="<%if color_icon.eql?('multgreenarrow')%>color: #006600<%elsif color_icon.eql?('downarrow_red2')%>color: #A43030<%end%>"> $<%=params[:sqft_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff']) /(i.multi_property.gross_rentable_area ? i.multi_property.gross_rentable_area : 1)) : (params[:unit_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff'])  / (i.multi_property.no_of_units ? i.multi_property.no_of_units : 1)) : dashboard_currency_display(net_income_de == 0 ? 0 : (noi_val - noi_bud),'false'))%></span>
+																			<!-- For YTD - NOI Variances end-->
+																		<%elsif params[:sort_type].eql?("vacancy_sf") || !financial_access%>
+																					<span>Tot: <%=display_units(i.wres_leases)%></span>
+																					<% floor = (i.wres_leases.blank? || i.wres_leases.eql?(0)) ? 1 : i.wres_leases.to_f %>
+																						<div class="varlabel">
+																							<div class="floatL">Vac &nbsp;</div>
+																							<div class="floatL"><%=bar_percentage_dashboard(i.total_suite.nil? ? 0 : (i.total_suite.to_f* 100 / floor).round)%></div>
+																							<div class="clear"></div>
+																						</div>
+																					<span><%=display_units(i.total_suite)%></span>
+																			<%end%>
+																</div>
+															<%else%>
+																<!-- For YTD - NOI Variances start-->
+																	<div class="pValue">
+																					<span>$<%= dashboard_currency_display(noi_val,'false') %></span>
+																					<%net_income_de = i.net_income_de.nil? ? 0 : i.net_income_de%>
+																					<% color_icon = net_income_de == 0 ? 'downarrow_red2' : net_income_de['diff_style'] == 'greenrow' ? 'multgreenarrow' : 'downarrow_red2' %>
+																					<div class="varlabel">
+																							<div class="floatL">Var &nbsp;</div>
+																							<div class="floatL <%if color_icon.eql?('multgreenarrow')%>above<%elsif color_icon.eql?('downarrow_red2')%>below<%end%>"><%=display_currency_real_estate_overview_for_percent(net_income_de == 0 ? 0 : net_income_de['diff_per'])%></div>
+																							<div class="clear"></div>
+																						</div>
+																					<span style="<%if color_icon.eql?('multgreenarrow')%>color: #006600<%elsif color_icon.eql?('downarrow_red2')%>color: #A43030<%end%>"> $<%=params[:sqft_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff']) /(i.multi_property.gross_rentable_area ? i.multi_property.gross_rentable_area : 1)) : (params[:unit_calc] ? display_currency_real_estate_overview((net_income_de == 0 ? 0 : net_income_de['diff'])  / (i.multi_property.no_of_units ? i.multi_property.no_of_units : 1)) : dashboard_currency_display(net_income_de == 0 ? 0 : (noi_val - noi_bud),'false'))%></span>
+																	</div>
+																<!-- For YTD - NOI Variances end-->
+															<%end%>
+												</div>
+								<%#end%>
+								<%#if (index%4).eql?(0)%><%if index.eql?(3)%><div class="clearfloat"></div><%end%>
+							<%}%> 
+							
+					  <%if multi_count <= 4%></div><%end%>
+					</div> 
+       <%}%> 
+
+				<!-- data display end-->
+					<!--<div class="marginT147">
+						<div class="marginL190">
+								<img src="/images/loading_amp.gif" />
+								<div class="clearfloat"></div>    
+						</div>
+					</div>-->
+				</div>
+			<!--Legends start-->
+      <div class="clearfloat"></div>
+      <div class="floatL" style="<%if multi_count<=4%>margin-top:64px;<%end%>"><%if financial_access && ((params[:sort_type] && params[:sort_type].eql?("neg_noi_percentage")) || (params[:sort_type].nil?))%><span class="above">Above Budget</span> | <span class="below">Below Budget</span><%end%></div>
+			<a href="/dashboard/<%= params[:portfolio_id]%>/properties?view_more=true&sort_type=<%= params[:sort_type].present? ? params[:sort_type] : financial_access ? "neg_noi_percentage" : "vacancy_sf" %>&obj_id=<%= params[:obj_id].present? ? params[:obj_id] : financial_access ? "minus_noi_var" : "vacancy_li"%>" class="floatR" style="padding-right:37px;<%if multi_count <=4%>margin-top:64px;<%end%>">View More</a>
+      <div class="clear"></div>
+      <!--Legend End-->
+			</div>
+		<!-- slider view end-->
+		<div class="performbox floatR"><div class="clearfloat"></div>
+		<%params[:sort_type] = params[:sort_type].present? ?  params[:sort_type]  :"neg_noi_percentage" %>
+		<span class="floatR mrgnR17"><% if params[:sort_type].eql?("neg_noi_percentage") %>YTD - NOI Variances <%elsif  params[:sort_type].eql?("vacancy_sf")%>Vacancy<%end%></span>
+			<div id="occupancyTabContent6"></div>		
+			<%if params[:sort_type] %>
+				<script>
+        myChart = new FusionCharts("/FusionCharts/ScrollColumn2D.swf",'Factorymulti', 450, 280, 0, 0);
+        myChart.setDataXML("<chart alternateHGridColor='F7FBFC' showValues='0' <%if params[:sort_type].eql?("neg_noi_percentage") || params[:sort_type].eql?("vacancy_sf")%>numberSuffix='%' <%else%>numberSuffix='SF' <%end%>showPercentInToolTip='1' useRoundEdges='1' legendBorderAlpha='100' showBorder='0' bgColor='EEFAFF' bgAlpha='100' bgSWFAlpha='100' ><categories><%multi_array_slice = multi.each_slice(8).to_a%><%multi_array_slice.each_with_index{|multi_property,index_main|%><%multi_array = multifamily_all_lease_display_new(multi_property)%><%multi_array.each_with_index{|i,index|%><category label='<%= (i.multi_property.property_name)%>' /><%}%> <%}%></categories><dataset seriesName='2011' color='D2D2CF'><%multi_array_slice = multi.each_slice(8).to_a%><%multi_array_slice.each_with_index{|multi_property,index_main|%><%multi_array = multifamily_all_lease_display_new(multi_property,true)%><%multi_array.each_with_index{|i,index|%><%if params[:sort_type].eql?("neg_noi_percentage")%><%net_income_de = i.net_income_de.nil? ? 0 : i.net_income_de%><set value='<%= net_income_de == 0 ? 0 : net_income_de['diff_per'].round%>'/><%elsif params[:sort_type].eql?("vacancy_sf")%><% floor = (i.wres_leases.blank? || i.wres_leases.eql?(0)) ? 1 : i.wres_leases.to_f %><set value='<%=(i.total_suite.nil? ? 0 : (i.total_suite.to_f* 100 / floor).round)%>'/><%end%><%}%> <%}%></dataset><dataset seriesName='2012' color='0C7F99'><%multi_array_slice = multi.each_slice(8).to_a%><%multi_array_slice.each_with_index{|multi_property,index_main|%> <%multi_array = multifamily_all_lease_display_new(multi_property)%><%multi_array.each_with_index{|i,index|%><%if params[:sort_type].eql?("neg_noi_percentage")%><%net_income_de = i.net_income_de.nil? ? 0 : i.net_income_de%><set value='<%=net_income_de == 0 ? 0 : net_income_de['diff_per'].round%>'/><%elsif params[:sort_type].eql?("vacancy_sf")%><% floor = (i.wres_leases.blank? || i.wres_leases.eql?(0)) ? 1 : i.wres_leases.to_f %><set value='<%=(i.total_suite.nil? ? 0 : (i.total_suite.to_f* 100 / floor).round)%>'/><%end%><%}%> <%}%> </dataset></chart>");
+        myChart.render("occupancyTabContent6");
+      </script>
+			<%end%>
+		</div>
+</div>
+        

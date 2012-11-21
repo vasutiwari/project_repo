@@ -1,0 +1,74 @@
+<div class="padL5 padR5 lineH16 marginT5">
+      <%if @comments.present?%>
+        <%@comments.includes(:user).each_with_index do |comment,index|%>
+			    <div class="<%= cycle('commetDivEven', 'commetDivOdd') %> <%=(current_user.try(:id) == comment.try(:user).try(:id)) ? 'hovehide' : ''%>" id="comment_id_<%=index%>">
+					  <%image_src= comment.try(:user).try(:profile_image_path)%>
+            <img width="32" height="32" align="left" class="maginR5" src="<%=(image_src.present?) ? image_src : '/images/noavatar.gif'%>">
+            <div class="fontCS"><%= comment.try(:user).name%></div><br />
+						<%comment_str=comment.try(:comment).gsub(/\n/, ',') %>
+						<%comment_arr=comment_str.split(',') %>
+            <div class="font12 padL40 marginT4" id="comments_each_<%=comment.try(:id)%>"><%comment_arr.each do |comnt| %><%=comnt%><%unless comment_arr.last == comnt%><br/><%end %><%end %></div>
+						<div class="divdate"><%= comment.try(:updated_at).strftime("%b %d, %Y at %I:%M%p")%></div>
+
+						<div class='appandHover' style="display:none;">
+						<%propty_id = params[:property_id].present? ? params[:property_id] : 'nil'%>
+						<a href='javascript:;' class='iconTrash' onclick='if (confirmSubmit()) delete_comment(<%=comment.try(:id)%>,<%=params[:portfolio_id]%>,"<%=propty_id%>",<%=@page.try(:month)%>,<%=@page.try(:year)%>);'>Delete</a>&nbsp; <label><a href='javascript:;' onclick='enable_disable_comment_edit(jQuery(this));' id="edit_link_<%=comment.try(:id)%>">Edit<span class='iconEdit'>&nbsp;</span></a></label></div>
+
+					</div>
+             
+						 <%port_or_prop_financial_info_comments_edit = params[:action].eql?("portfolio_multifamily_leasing_info") ? portfolio_multifamily_leasing_info_path(params[:portfolio_id], :form_edit=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : params[:action].eql?("portfolio_commercial_leasing_info") ? portfolio_commercial_leasing_info_path(params[:portfolio_id], :form_edit=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : (params[:action].eql?("financial_info") && session[:portfolio__id].present?) ? portfolio_financial_info_path(params[:portfolio_id],params[:property_id], :form_edit=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : financial_info_path(params[:portfolio_id],params[:property_id], :form_edit=>true, :month=>@page.try(:month), :year=>@page.try(:year))%>
+						 
+					<div class="commetDivEven padBzero" style="display:none;" id="edit_comment_id_<%=index%>">
+						<%form_for comment , :url => port_or_prop_financial_info_comments_edit, :remote=>true do |comment_form|%>
+						  <img width="32" height="32" align="left" class="maginR5" src="<%=(image_src.present?) ? image_src : '/images/noavatar.gif'%>">
+						  <div class="fltlft">
+						  	<%=comment_form.text_area :comment, :class=> "textAWH expand25-300", :id=>"comment_area_#{comment_form.object.try(:id)}"%>
+						  	<%=comment_form.hidden_field  :user_id, :value=> current_user.try(:id) %>
+					      <%=comment_form.hidden_field  :id, :value=> comment_form.object.try(:id) %>
+						  </div>
+						  <div class="fltLeft marginL10" style="margin-top:-6px;">
+						  	<%= comment_form.submit "Save", :class=>"btn-Com-save boldtxt", :onclick=>"return validation_for_comments_save_of_exec_summary('comment_area_'+#{comment_form.object.try(:id)});", :style=>"cursor:pointer;"%>
+						  	<%#= comment_form.submit "Cancel", :class=>"btn-Com-save marginL5", :onclick=>"cancel_button_on_comments(this);", :style=>"box-shadow:none !important;"%>
+								<input type="button" class="btn-Com-save marginL5" value="Cancel" onclick="cancel_button_on_comments(jQuery(this));" style = "box-shadow:none;">
+						  </div>
+						  <div class="clear"></div>
+						<%end%>
+          </div>
+				<div class="clear"></div>
+			  <%end%>
+			<%end%>
+
+
+<div class="commetDivEven padBzero" style="display:none;" id= "add_comments_id">
+		 <%image_src= current_user.try(:profile_image_path)%>
+		  <img width="32" height="32" align="left" class="maginR5" src="<%=(image_src.present?) ? image_src : '/images/noavatar.gif'%>">
+			
+			<%port_or_prop_financial_info_comments = params[:action].eql?("portfolio_multifamily_leasing_info") ? portfolio_multifamily_leasing_info_path(params[:portfolio_id], :form_comments=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : params[:action].eql?("portfolio_commercial_leasing_info") ? portfolio_commercial_leasing_info_path(params[:portfolio_id], :form_comments=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : (params[:action].eql?("financial_info") && session[:portfolio__id].present?) ? portfolio_financial_info_path(params[:portfolio_id], :form_comments=>true, :month=>@page.try(:month), :year=>@page.try(:year)) : financial_info_path(params[:portfolio_id],params[:property_id], :form_comments=>true, :month=>@page.try(:month), :year=>@page.try(:year))%>
+			
+			<%form_for @comment , :url => port_or_prop_financial_info_comments, :remote=>true do |comment_form|%>
+			  <div class="fltlft">
+					<%=comment_form.text_area :comment, :class=> "textAWH expand25-300",:id=>"comment_comment_user"%>
+					<%=comment_form.hidden_field  :user_id, :value=> current_user.try(:id) %>
+			  </div>
+        <div class="fltLeft marginL10 marginT5" style="margin-top:1px;">
+					<%= comment_form.submit "Comment", :class=>"blue_buttom_ex", :onclick=>"return validation_for_comments_of_exec_summary();"%>
+			  </div>
+			<%end%>
+      <div class="clear"></div>
+    </div>
+
+<script>
+jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+		if (jQuery.trim(jQuery('#textarea_div').html()) != 'Click here to Enter Executive Summary')
+		{
+		  jQuery('#add_comments_id').show();
+		}
+		else
+		{
+		jQuery('#add_comments_id').hide();
+		}
+
+  }); // JavaScript Document
+
+</script>

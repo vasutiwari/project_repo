@@ -1,0 +1,29 @@
+<% content_for :title, 'AMP - Portfolio builder' %>
+<br/>
+<br/>
+<div class="mainwrapper">
+  <!-- Steps Navigation ends -->
+  <div class="middlewrapper2">
+	<%= form_for :portfolio_type,@portfolio_type,:url=>{:action=>'update',:id=>@portfolio_type.id},:html=>{:method=>'put'} do |f| -%>
+    <div class="sectiontitle">Portfolio Type Edit </div>
+    <div class="rowwrapper">
+        <div class="fieldiconcol"><img src="/images/fieldlicon.jpg" width="82" height="85" alt=""/></div>
+        <div class="fieldrow">
+          <div class="fieldlabel">Portfolio Type :</div>
+          <div class="fieldinput"><%= f.text_field 'name', :class=>"inputstyle305"  %><br />
+            <span class="errorprompt"><%= error_message_on :portfolio_type, :name %></span></div>
+          <div class="fieldhint">Edit your desired portfolio type </div>
+        </div>
+    </div>
+  </div>
+  <div class="buttonswrapper">
+    <div class="buttonscontainer">
+      <div class="previousbtn"><%= image_submit_tag ("/images/sub_chbt.gif"), :title => "Edit", :border => "0", :width=>"117", :height=>"32" %></div>
+      <div class="nextbtn"><a href="<%= admin_portfolio_types_path %>"><img src="/images/btn_cancel.gif" border = "0" width="117" height="32" alt="Cancel"/></a></div>
+    </div>
+  </div>
+	<%end%>
+</div>
+
+
+

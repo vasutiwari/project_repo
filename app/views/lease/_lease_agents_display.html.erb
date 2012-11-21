@@ -1,0 +1,42 @@
+<%folder_collection =  @folder%>   						
+<%folder_members_collection =  @folder_members%>
+<%lease_agents = @lease_agents%>
+<%title_text,property_folder,img_name = title_text_and_img_name(folder_collection)%>
+						<div style="line-height:18px;">
+              <div style="color:#000 !important; padding-left:5px;">Shared to Agents <%unless @pdf%>(
+							<a href="#">
+							<%= link_to 'Add Agent',{:controller=>"collaborators",:action=>"view_share",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio.id,:folder_id=>folder_collection.id,:folder_revoke=>"true",:is_property_folder => 'true',:is_lease_agent => 'true'},{:id=>"share_filebox_tipp_#{folder_collection.id}", :title=>"#{(folder_members_collection && folder_members_collection.empty?) ? 'Add' : 'Add / Edit'} Leasing Agents",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+							<script>new Control.Modal($('share_filebox_tipp_<%=folder_collection.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+						</a>
+						):<%end%>						
+						</div>
+              <div class="commentrow" style="float:left;">
+							<%= link_to image_tag("#{@pdf_convn_path}/images/lease-agent-small.png",:width=>'21',:height=>'22',:style=>'margin-top: -1px;border:none;',:alt=>'add collaboraters'),{:controller=>"collaborators",:action=>"view_share",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio.id,:folder_id=>folder_collection.id,:folder_revoke=>"true",:is_property_folder => 'true',:is_lease_agent => 'true'},{:id=>"share_filebox_tips_#{folder_collection.id}", :title=>"#{(folder_members_collection && folder_members_collection.empty?) ? 'Add' : 'Add / Edit'} Leasing Agents",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+							<script>new Control.Modal($('share_filebox_tips_<%=folder_collection.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+							
+							<!--<img width="21" height="22" style="margin-top: 0px;" alt="add collaboraters" src="/images/lease_mgmt_loginicon.png">-->
+							
+                <div class="timerbutwrapper">
+                  <div class="timermonthview" style="margin-top:0; line-height:14px;">
+     		<%if (lease_agents && !lease_agents.empty?) || (lease_agents.nil?)%>
+     			   <%= link_to lease_agents.length,{:controller=>"collaborators",:action=>"view_share",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio.id,:folder_id=>folder_collection.id,:folder_revoke=>"true",:is_property_folder => 'true',:is_lease_agent => 'true'},{:id=>"share_filebox_tip_#{folder_collection.id}", :title=>"#{(folder_members_collection && folder_members_collection.empty?) ? 'Add' : 'Add / Edit'} Leasing Agents",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+<script>new Control.Modal($('share_filebox_tip_<%=folder_collection.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+									<%else%>
+										<%= link_to "0",{:controller=>"collaborators",:action=>"view_share",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio.id,:folder_id=>folder_collection.id,:folder_revoke=>"true",:is_property_folder => 'true',:is_lease_agent => 'true'},{:id=>"share_filebox_tip_#{folder_collection.id}", :title=>"#{(folder_members_collection && folder_members_collection.empty?) ? 'Add' : 'Add / Edit'}  Leasing Agents",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+								<script>new Control.Modal($('share_filebox_tip_<%=folder_collection.id %>'),{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+									<%end%>
+								</div>
+                  <div class="timermonthview_rt"><img src="<%=@pdf_convn_path%>/images/asset_folder_timert.png" width="3" height="21" style="margin-top:-1px;"/></div>
+                </div>
+                <div class="commentrow_label" style="margin-top:3px">
+								 <%if lease_agents && !lease_agents.empty?%>
+		             <% unless lease_agents.empty? %>
+              <%display_collaborators_new(lease_agents,'folder',folder_collection.id,3000,'true') %>
+              <span class='tooltip' id='tooltip_<%=@object%>_<%=@object_id%>' style='margin-left:-58px;margin-top:20px;display: none;z-index:<%=@zz_index%>;'><%=raw(@display_tooltip)%></span>
+		<%= link_to display_collaborators_new(lease_agents,'folder',folder_collection.id,3000,'true'),{:controller=>"collaborators",:action=>"view_share",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio.id,:folder_id=>folder_collection.id,:folder_revoke=>"true",:is_property_folder => 'true',:is_lease_agent => 'true'},{:id=>"share_tip_#{folder_collection.id}", :title=>"#{(folder_members_collection && folder_members_collection.empty?) ? 'Add' : 'Add / Edit'} Leasing Agents",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+<script>new Control.Modal($('share_tip_<%=folder_collection.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+ <%end %>
+<%end%>
+	     </div>
+              </div>
+            </div>

@@ -1,0 +1,7 @@
+<style>
+body div.content {
+    min-height: 210px;
+}
+</style>
+ <%=render :partial => "/properties/wres/property_weekly",:locals=>{:property_week_vacant_total=>@property_week_vacant_total, :note_collection => @note}%>
+ <%=render :partial => "properties/summary_comments_and_files"%>

@@ -1,0 +1,150 @@
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+
+  partial_page="rent_roll_highlight"
+  active_call="performance_review"
+</script>
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<% #params[:tl_month].nil? ? params[:tl_month] = @month : params[:tl_month] =  params[:tl_month]%>
+<% params[:tl_year].nil? ? params[:tl_year] = @year : params[:year] = params[:tl_year] %>
+<% !params[:tl_period].nil? ? params[:tl_period] = params[:tl_period] : params[:tl_period] = params[:period] %>
+
+<%if params[:from_lease].present?  && !params[:per_page].present?%>
+<div style="z-index: 18900; margin-bottom: 0px; padding-bottom: 0px; border-bottom: medium none;" class="executiveheadcol">
+  <span class="executiveheadcol_for_title"><div class="executivecol_subrow"><span class="executiveiconcol"><img width="14" height="16" src="/images/executivehead_icon.png"></span>Rent Roll <%=timeline_msg%>: <%=@note.property_name%></div></span>
+    <div style="z-index: 1600;" class="executiveinputrow">
+      <div class="notesalelf"></div>
+      <div id="id_for_variance_threshold" class="executiveinputmid">
+      </div>
+      <div style="z-index: -1;" class="notesalelf"></div>
+    </div>
+</div>
+<%end%>
+
+<div id ="portfolio_overview_property_graph">
+
+  <% if !(rent_roll_wres.nil? || rent_roll_wres.blank?) %>
+    <div class="tableheaderow assetview">
+      <% rent_name , rent_plan = ["Unit","Floor Plan","Name","SqFt",raw(" Lease  <br/> Rent $"),"Actual Amt/SqFt $",raw("Lease <br/> End"),"Term Remaining","Deposit $","Made Ready"],["ps.suite_number","ps.floor_plan","pl.tenant","ps.rented_area","pl.effective_rate","pl.actual_amt_per_sqft","pl.end_date","pl.term_remaining","pl.other_deposits","pl.made_ready"] %>
+      <% for index_name in 0..rent_name.count-1 %>
+        <div class="rentroll_tablecol<%= (index_name.eql?(0) || index_name.eql?(1)) ? "1" : ((index_name.eql?(2)) ? "2" : ((index_name.eql?(9)) ? "14" : ((index_name.eql?(5)) ? "15" : ((index_name.eql?(7)) ? "16" : "3")))) %>"><%= swig_sort_link_helper_for_rent_roll(rent_name[index_name], rent_plan[index_name],{:controller=>"performance_review_property",:action =>"rent_roll",:id=>note_collection.id,:portfolio_id =>portfolio_collection.id, :tl_month=>params[:tl_month], :tl_year=>params[:tl_year], :tl_period=>params[:tl_period],:quarter_end_month=>params[:quarter_end_month],:page=>params[:page],:per_page=>5,:partial_page => "/properties/wres/rent_roll"})%>
+          <%=find_sorting_image(params,rent_plan[index_name].split(".").last.strip, pdf_conv_path)%></div>
+      <% end %>
+    </div>
+    <div class="rentroltablerow">
+      <% rent_roll_wres.each do |i| %>
+        <div class="tablecontentrow">
+          <div class="rentroll_tablecol1"><%= i.suite_number %>&nbsp;</div>
+          <div class="rentroll_tablecol1"><%= i.floor_plan %>&nbsp;</div>
+          <div class="rentroll_tablecol2"><%= i.tenant %>&nbsp;</div>
+          <div class="rentroll_tablecol3" style="text-align:right;"><%= number_with_delimiter(i.rented_area)%>&nbsp;</div>
+          <div class="rentroll_tablecol3" style="text-align:right;"><%= display_currency_overview(i.effective_rate ? i.effective_rate : 0) %>&nbsp;</div>
+          <div class="rentroll_tablecol3" style="text-align:right;"><%= display_currency_overview(i.actual_amt_per_sqft) %>&nbsp;</div>
+          <div class="rentroll_tablecol3"><%= i.end_date.strftime("%m/%d/%Y") if !(i.end_date.nil? || i.end_date.blank?) %>&nbsp;</div>
+          <div class="rentroll_tablecol3" style="text-align:right;"><%= get_term_remaining(i.end_date) if !(i.end_date.nil? || i.end_date.blank?) %>&nbsp;</div>
+          <div class="rentroll_tablecol3" style="text-align:right;"><%= display_currency_overview(i.other_deposits) %>&nbsp;</div>
+          <div class="rentroll_tablecol4">&nbsp;<%= i.made_ready == true ? "Y" : "N" %>&nbsp;</div>
+        </div>
+      <% end %>
+    </div>
+    <style>
+      .paginationcol{margin-left:400px;};
+    </style>
+    <div class="paginationcol" style="margin-left:600px;">
+      <%#=will_paginate  rent_roll_wres,:inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'performance_review_property', :action => 'rent_roll',:page=>params[:page],:per_page=>30, :id=>note_collection.id, :portfolio_id=>portfolio_collection.id, :partial_page=>"rent_roll", :tl_month=>params[:tl_month], :tl_year=>params[:tl_year], :start_date=>params[:start_date], :tl_period => params[:tl_period]},:class => "ie7_paginateion_issue" %>
+      <% unless pdf_collection %>
+      <%=will_paginate  rent_roll_wres,:inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'performance_review_property', :action => 'rent_roll',:page=>params[:page],:per_page=>30, :id=>note_collection.id,:note_id => note_collection.id, :portfolio_id=>portfolio_collection.id, :partial_page=>"rent_roll", :tl_month=>params[:tl_month], :tl_year=>params[:tl_year], :start_date=>params[:start_date], :tl_period => params[:tl_period],:period => params[:period], :occupancy_type => params[:occupancy_type],:cur_month => params[:cur_month], :cur_year => params[:cur_year], :sort=>params[:sort],:quarter_end_month=>params[:quarter_end_month],:from_pag=>true} %>
+      <% end %>
+    </div>
+  <% else %>
+    <% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+        <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+          <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+          <% if note_collection.class == RealEstateProperty %>
+            <% note_name = note_collection.property_name %>
+          <% else %>
+            <% note_name = note_collection.note_id %>
+          <% end %>
+          <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+            <script type="text/javascript">
+              var month_det = ["","Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+              val_det =""
+              if (active_sub_month == ""){
+                if(active_period == 4)
+                  val_det = "Year to date - "+ new Date().getFullYear()
+                else if(active_period == 5)
+                  val_det = month_det[month_arr[new Date().getMonth()]] +" - "+ (month_arr[new Date().getMonth()] == 12 ? (new Date().getFullYear() -1) : new Date().getFullYear())
+                else if(active_period == 6)
+                  val_det = "Last year"+ active_sub_month+" - "+ (new Date().getFullYear()-1)
+              }
+              else
+                val_det = month_det[parseInt(active_sub_month, 10)]+" - "+ active_sub_year
+            </script>
+            <span style="font-size:13px;"><%if remote_property(note_collection.accounting_system_type_id) == true%><span style="color: black; padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Lease information at
+
+						<!-- <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+						<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+						<%end%>.</span>
+          <% else %>
+            <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+          <% end %>
+        </div>
+  <% end %>
+</div>
+
+<script>
+    <% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').hide();
+  jQuery('#yrForecast').hide();
+  jQuery('#quarterly').show();
+	jQuery('#weekly_display').hide();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+<% end %>
+  }
+
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+
+</script>
+
+<!--[if IE 7]>
+<style type="text/css">
+.ie7_paginateion_issue a div.nextcol{width:49px;}
+.ie7_paginateion_issue a div.nextcol span{margin-top:-14px;}
+</style>
+<![endif]-->

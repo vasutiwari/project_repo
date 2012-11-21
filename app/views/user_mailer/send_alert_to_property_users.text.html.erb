@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>AMP</title>
+</head>
+
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="10"  bgcolor="#dddddd">
+  <tr>
+    <td height="100%" scope="col"><table width="800" border="0" cellspacing="0" cellpadding="10" align="center" style="background:#fff; font-family:Arial, Helvetica, sans-serif; font-size:11px; box-shadow:2px 2px 4px #666; border-radius:6px;">
+        <tr>
+          <td width="604" align="center" valign="top"><table width="100%" border="0" cellpadding="4" cellspacing="0">
+              <tr>
+                <td width="27%" align="left" style="border-bottom:1px solid #eee"><img src="<%= "#{APP_CONFIG[:site_url]}/images/amp_logo_email.png" %>" width="172" height="83" /></td>
+                <td width="73%" align="right" style="font-size:14px; font-family:'Century Gothic'; color:#FF9900;border-bottom:1px solid #eee"><strong></strong></td>
+              </tr>
+              <tr >
+                <td colspan="2" align="left" valign="top" style="color:#444; font-size:11px">
+
+
+
+
+								<div style="margin-top: 20px;	font-family: Arial, Helvetica, sans-serif;">
+				<%find_month_for_alert_view%>
+
+				                    <h1 style="color: #FF6600 !important;display: block;font-size: 14px !important;margin: 8px 0 12px;padding: 0;">Alerts: <span style="color: #FF6600 !important;
+"><%=RealEstateProperty.find_real_estate_property(@note.id).property_name %></span></h1>
+                    <div style="	clear: both;float: none;font-size: 0;line-height: 0;margin: 0;padding: 0;"></div>
+                    <div style=" padding-bottom: 10px;padding-top: 20px;width: 782px;"><span style=" font-weight: bold !important;float:right;"><%= Date.today.strftime("%B %d , %Y")%></span>
+                      <div style="	clear: both;float: none;font-size: 0;line-height: 0;margin: 0;padding: 0;"></div>
+                    </div>
+
+
+
+
+
+
+
+
+  <div style="	clear: both;float: none;font-size: 0;line-height: 0;margin: 0;padding: 0;"></div>
+  <%@months.present? && @months.each_with_index do |i,k|%>
+    <%find_alerts_for_month(i, @note)%>
+
+<%if (@find_lease.present? && (@lease_com)) || (@find_option.present? && @opt_suite_ids) || (@find_tmp.present? && @tmp_suite_ids) || (@find_insurance.present? && @ins_suite_ids)%>
+      <div style="border: 1px solid #e3dfdf;text-shadow: 0 0 0 #FFFFFF;font-size:11px;color:#000;width: 780px;background:#fff;float: left;position: relative;font-weight:normal !important;width: 780px;	margin-bottom:10px;	background:#fff url('<%= "#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png"%>') repeat-y scroll -1px top;">
+        <div style="	float: left;position: relative;width: 780px;border-bottom:1px solid #fff;font-weight:bold !important;line-height:20px; background:#4bacc6;padding:5px 0;text-indent:5px;font-size:12px;color:#fff !important;text-shadow: 0 0 1px #444444;
+"><%@month_name.present? && @month_name.uniq.each do |name|%><a name="<%= name%>" id="<%= name%>"></a><%end%><%@month_list.present? && @month_list.uniq.each do |month|%><%if month.include?(i.split('-')[0])%><%= month%> <%end%><%end%></div>
+        <div style="	float: left;position: relative;width: 780px;border-bottom:1px solid #fff;font-weight:bold !important;line-height:20px;	color:#fff !important;text-shadow: 0 0 1px #444444;
+ 	background:#4bacc6 url('<%= "#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png"%>') repeat-y scroll -1px top;">
+          <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px;">Suite</div>
+          <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px;">Tenant</div>
+          <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px;">Date</div>
+          <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Alert Type</div>
+          <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">Description</div>
+        </div>
+        <%@find_lease.present? && @find_lease.uniq.each do |lease|%>
+          <%if lease.suite_ids?  && YAML::load(lease.suite_ids).present? && lease.commencement? && lease.commencement.to_date.strftime("%Y-%m") == YAML::load(i)  %>
+            <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px;"><%suite_val= YAML::load(lease.suite_ids)
+                suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+              %><% suite.each_with_index do |suite_detail,j|%>
+                  <%comma = (j+1 != suite.count) ? ',' : ''%>
+                  <%= suite_detail.suite_no? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                <%end%></div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px;"><%= lease.tenant_legal_name %></div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px;"><%=lease.commencement? ? lease.commencement.to_date.strftime("%d/%m/%Y") : "" %></div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Lease Start<br />
+              </div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">
+                <%if lease.expiration?%>
+                                                                                                                                                          Lease : <%=lease.commencement.to_date.strftime("%m/%Y") %> to
+                  <%if lease.try(:mtm)%>
+                                                                                                        MTM
+                  <%else%>
+                    <%=lease.expiration.to_date.strftime("%m/%Y") %>
+                  <%end%>
+                <%else%>
+                                                                                                                                                          Lease : <%=lease.commencement.to_date.strftime("%m/%Y") %>
+                <%end%>
+              </div>
+            </div>
+          <%end%>
+          <%if lease.suite_ids?  && YAML::load(lease.suite_ids) && lease.expiration.to_date.strftime("%Y-%m") == YAML::load(i)%>
+            <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(lease.suite_ids)
+                suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+              %><% suite.each_with_index do |suite_detail,j|%>
+                  <%comma = (j+1 != suite.count) ? ',' : ''%>
+                  <%= suite_detail.suite_no? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                <%end%></div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= lease.tenant_legal_name%></div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; ">
+                <%if lease.try(:mtm)%>
+                                                                                                      MTM
+                <%else%>
+                  <%=lease.expiration? ? lease.expiration.to_date.strftime("%d/%m/%Y") : "" %>
+                <%end%>
+              </div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Lease End<br />
+              </div>
+              <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">Lease : <%if lease.commencement?%><%=lease.commencement.to_date.strftime("%m/%Y") %> to  <%if lease.try(:mtm)%>MTM<%else%><%=lease.expiration.to_date.strftime("%m/%Y") %><%end%>
+                <%end%>
+              </div>
+            </div>
+          <%end%>
+        <%end%>
+
+        <%if @find_option.present?%>
+          <%@find_option.uniq.each do |opt|%>
+
+            <%if opt.option_start.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.option_start.to_date.strftime("%Y-%m") == YAML::load(i) %>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= opt.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= opt.option_start.to_date.strftime("%d/%m/%Y")%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Option Start<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">Type : <%= opt.option_type%><br/>
+                  <%if opt.option_end.present?%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%else%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %><%end%><br/>
+                  <%if opt.notice_start.present? && opt.notice_end.present?%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%elsif opt.notice_start.present? %>Notice Start:<%= opt.notice_start.to_date.strftime("%m/%Y") %><%elsif opt.notice_end.present?%>Notice End:<%= opt.notice_end.to_date.strftime("%m/%Y")%> <%end%><br/>
+                  <%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+                </div>
+              </div>
+            <%end%>
+
+            <%if opt.option_end.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.option_end.to_date.strftime("%Y-%m") == YAML::load(i) %>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= opt.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= opt.option_end.to_date.strftime("%d/%m/%Y")%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Option End<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">Type : <%= opt.option_type%><br/>
+                  <%if opt.option_start.present?%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%else%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %><%end%> <br/>
+                 <%if opt.notice_start.present? && opt.notice_end.present?%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%elsif opt.notice_start.present? %>Notice Start:<%= opt.notice_start.to_date.strftime("%m/%Y") %><%elsif opt.notice_end.present?%>Notice End: <%= opt.notice_end.to_date.strftime("%m/%Y")%> <%end%><br/>
+                  <%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+                </div>
+              </div>
+            <%end%>
+
+            <%if opt.notice_start.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.notice_start.to_date.strftime("%Y-%m") == YAML::load(i) %>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;" style="width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= opt.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= opt.notice_start.to_date.strftime("%d/%m/%Y")%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Notice Start<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px; ">Type : <%= opt.option_type%><br/>
+                  <%if opt.option_start.present? && opt.option_end.present? %>Option:<%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%elsif opt.option_start.present? %>Option Start: <%= opt.option_start.to_date.strftime("%m/%Y") %><%elsif opt.option_end.present?%> Option End:<%= opt.option_end.to_date.strftime("%m/%Y")%><%end%><br/>
+                  <%if opt.notice_end.present? %>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%else%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %><%end%><br/>
+                  <%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+                </div>
+              </div>
+            <%end%>
+
+            <%if opt.notice_end.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present?  && opt.notice_end.to_date.strftime("%Y-%m") == YAML::load(i) %>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= opt.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= opt.notice_end.to_date.strftime("%d/%m/%Y")%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px; ">Notice End<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px;">Type : <%= opt.option_type%><br/>
+                  <%if opt.option_start.present? &&  opt.option_end.present? %>Option:<%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%elsif opt.option_start.present? %>Option Start: <%= opt.option_start.to_date.strftime("%m/%Y") %><%elsif opt.option_end.present?%> Option End:<%= opt.option_end.to_date.strftime("%m/%Y")%><%end%><br/>
+                  <%if opt.notice_start.present? %>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%else%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %><%end%><br/>
+                  <%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+                </div>
+              </div>
+            <%end%>
+          <%end%>
+        <%end%>
+
+        <%if @find_insurance.present?%>
+          <%@find_insurance.compact.each do |ins|%>
+            <%if ins.expiration_date.present? && ins.suite_ids.present? && YAML::load(ins.suite_ids).present? && ins.expiration_date.to_date.strftime("%Y-%m") == YAML::load(i)%>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(ins.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= ins.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%d/%m/%Y") : ""%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px; ">Insurance<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px; " title="Insur : <%= ins.filename.present? ? ins.filename : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%d/%m/%Y") : ""%>">Insur : <%= ins.filename.present? ? truncate(ins.filename,:length=>18) : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%d/%m/%Y") : ""%></div>
+              </div>
+            <%end%>
+          <%end%>
+        <%end%>
+
+        <%if @find_tmp.present? %>
+          <%@find_tmp.uniq.each do |tmp|%>
+            <%if tmp.work_start_date.present? && tmp.suite_ids.present? && YAML::load(tmp.suite_ids).present? && tmp.work_start_date.to_date.strftime("%Y-%m") == YAML::load(i)%>
+              <div style="	float: left;position: relative;font-weight:normal !important;width: 780px;padding:4px 0;line-height:18px; <%= cycle('background:#d2eaf1 url("#{APP_CONFIG[:site_url]}/images/alert-view-tbl-bg.png") repeat-y scroll -1px top;', "") %>">
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%suite_val= YAML::load(tmp.suite_ids)
+                  suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+                %><% suite.each_with_index do |suite_detail,j|%>
+                    <%comma = (j+1 != suite.count) ? ',' : ''%>
+                    <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                  <%end%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:170px; "><%= tmp.tenant_legal_name%></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:80px; "><%= tmp.work_start_date.present? ? tmp.work_start_date.to_date.strftime("%d/%m/%Y") : "" %></div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:180px;">Tenant Improvements<br />
+                </div>
+                <div style="border: medium none; float: left; padding: 0 4px;position: relative; text-align: center;width:230px; ">TI : <%= tmp.work_start_date.present? ? tmp.work_start_date.to_date.strftime("%d/%m/%Y") : "" %><br/><%if  !tmp.note.nil? %>Notes :<%= tmp.note.content %><%end%></div>
+              </div>
+            <%end%>
+          <%end%>
+        <%end%>
+
+        <div style="	clear: both;float: none;font-size: 0;line-height: 0;margin: 0;padding: 0;"></div>
+      </div>
+    <%end%>
+ <%end%>
+				</div>
+
+								</td>
+              </tr>
+              <tr>
+                <td height="40" colspan="2" align="left"><a href="<%= "#{APP_CONFIG[:site_url]}/login" %>" target="_blank"><strong>Login</strong></a><strong> to AMP for more details.</strong></td>
+              </tr>
+              <tr style="background:#F2F2F2">
+                <td height="35" align="left" valign="middle" style="border-top:1px solid #eee;">&copy; AMP Technologies, 2010</td>
+                <td height="35" align="right" valign="middle" style="border-top:1px solid #eee;"> <a href="<%="#{APP_CONFIG[:site_url]}/index.html "%>" target="_blank">Home</a></td>
+              </tr>
+            </table></td>
+        </tr>
+      </table>
+  </tr>
+</table>
+</body>
+</html>

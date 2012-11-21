@@ -1,0 +1,12 @@
+<span id="job_title_profile" style="display:none;"><%if !user_collection.designation.blank? %><%= user_collection.designation %><% else %><% end %></span>
+<div class="job_title" id="disp_job_title"><strong>Job Title</strong> :
+  <div id="job_title" style="white-space:normal;min-height:10px;max-height:50px;overflow:auto;padding:4px;"><h><%if !user_collection.designation.nil? && !user_collection.designation.blank?%><%= user_collection.designation %><%else%><%end%></h>
+  </div>
+  <div><a href="javascript:;" onclick="jQuery('div#disp_job_title').hide();jQuery('div#change_job_title').show();jQuery('div#change_job_title span input[name]').focus();return false;" class="bluecolor" id="job_tite_edit">Edit
+  </a></div>
+</div>
+<div class="job_title" id="change_job_title" style="display:none;"><strong>Job Title</strong> :
+  <span><input id="edit_job_title"type="text" value="<%= user_collection.designation %>" name="job_title"/><a href="javascript:;" onclick="var title_job = jQuery('#edit_job_title').val(); var job_title = title_job.replace(/&/g, escape('&'));ajax_call_user_profile_update(job_title, 'designation');return false;" class="bluecolor"  id="ok_save_job_title">Save</a></span>&nbsp;<a href="javascript:;" onclick="jQuery('div#change_job_title').hide();jQuery('div#disp_job_title').show();
+jQuery('div#change_job_title span input[name]').val(jQuery('div#job_title').text().strip());jQuery('#emsg_designation').hide();return false;" class="bluecolor" id="cancel_save_job_title">Cancel</a>
+<div id="emsg_designation" style="width: 445px;" class="errormessage" style="display:none"></div>
+</div>

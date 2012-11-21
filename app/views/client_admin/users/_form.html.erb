@@ -1,0 +1,359 @@
+<%property_count=@properties.present? ? @properties.count : 0%>
+<%portfolios_count=@portfolios.present? ? @portfolios.count : 0%>
+<%action_name=params[:action]%>
+			<table cellspacing="0" cellpadding="4" border="0" style="width:100%;">
+        	<tbody>
+            	<tr>
+            	<td valign="top" style="width:245px;">Name:<span class="txtRed">*</span> <br /><%=f.text_field :name,:class=>"inpt200"%>
+							 <span class="errormessage1"> <%= error_message_on :user, :name %> </span>
+							</td>
+
+                <td valign="top" style="width:245px;">Email Id:<span class="txtRed">*</span> <br /><%=f.text_field :email,:class=>"inpt200"%>
+								<span class="errormessage1">
+											<%= error_message_on :user, :email %>
+										</span>
+								</td>
+
+																<%=hidden_field_tag 'selected_user',"Asset Manager"%>
+								<%if params[:action]=="new" || params[:action]=="create"%>
+								<%=fields_for :roles do |role|%>
+
+                <td valign="top">Role: <br /><%= f.select :roles,User.client_admin_roles %></td></tr>
+								<%end%>
+								<%else%>
+								    <!--<td>Role: <br /><%#if @user.roles.present?%><%#@user.roles.map(&:name).each do |name|%><%#=name%> <%#end%><%#=@user.selected_role%><%#end%></td></tr>-->
+										<td valign="top">Role: <br /><%= f.select :roles,User.client_admin_roles ,:selected => @user.roles.map(&:id).first%></td></tr>
+								<%end%>
+
+            </tbody>
+            <tbody>
+            	<tr>
+                <td colspan="3"><hr width="100%" size="1" class="hrBdr" /> </tr>
+            </tbody>
+            <tbody>
+            	<tr>
+
+							<td valign="top">Company:<span class="txtRed">*</span><br />
+              <!-- 	Belongs to your company? &nbsp; <label><input type="radio" id="company_name1" class="valign" name="pagenum"/>Yes</label> &nbsp; <label><input type="radio" id="company_name2" class="valign" name="pagenum"/>No</label>-->
+                <%#=f.text_field :company_name,:class=>"inpt200", :readonly=>true%>
+								<input type="text" name="user[company_name]" value="<%=current_user.try(:company_name).try(:titleize)%>" class="inpt200" readonly="true">
+								<span class="errormessage1">
+											<%= error_message_on :user, :company_name %>
+								</span>
+								</td>
+
+                <td valign="top">Department: <br /><%=f.text_field :department,:class=>"inpt200"%></td>
+								<%=fields_for :user_profile_detail do |pr|%>
+								<% if @user.user_profile_detail.present?%>
+								<%title= @user.user_profile_detail.title.present? ? @user.user_profile_detail.title : ""%>
+								<%end%>
+                <td valign="top">Job Title: <br /><%=pr.text_field :title,:class=>"inpt200",:value=>title%></td></tr>
+								<%end%>
+            </tbody>
+          	 <tbody>
+            	<tr>
+                <td colspan="3"><hr width="100%" size="1" class="hrBdr" /> </tr>
+            </tbody>
+            <tbody>
+            	<tr>
+            	<td>Address:<br /><%=f.text_area :address,:class=>"inptTxt200"%></td>
+                <td valign="top">Phone<span class="txtRed">*</span> <br /><%=f.text_field :phone_number,:class=>"inpt200"%>
+								<span class="errormessage1">
+											<%= error_message_on :user, :phone_number %>
+										</span>
+								</td>
+                <td>&nbsp;</td></tr>
+            </tbody>
+            <tbody>
+            	<tr>
+                <td colspan="3"><hr width="100%" size="1" class="hrBdr" /> </tr>
+            </tbody>
+        </table>
+    <div class="col1P bdrNone">
+      	<p><span>Property Access</span></p>
+        <div class="fltLeft marginZero">You have Selected <span id="property_count" class="TxtBold"></span> of <span  class="TxtBold"><%=property_count%></span> Properties</div>
+        <div class="fltrt maginR20"><label> <input type="checkbox" id="select_all_property" class="valign" style="vertical-align:inherit;"> Select All</label></div>
+        <div class="clear"></div>
+        <div class="whtBox overflow130">
+        	<table class="filter_role" width="100%" cellspacing="0" cellpadding="0" border="0">
+					<%if @properties.present?%>
+						<%@properties && @properties.each_with_index do |property,i|%>
+						<%if i%5==0%>
+								<tbody>
+								<tr>
+							<%end%>
+										<td><label><%=check_box_tag "property[#{i}]", "#{property.id}",false,:class=>"property_select valign", :style=>"vertical-align:inherit;"%><%=property.property_name%></label></td>
+						 <%if i%5==4%>
+							</tr>
+						</tbody>
+							<%end%>
+						<%end%>
+						<%if property_count%>
+						<%end%>
+					<%else%>
+					<tbody><tr><td colspan="3"  style="text-align:center;">No Property Avilable</td></tr></tbody>
+					<%end%>
+            </table>
+        </div>
+      </div>
+      <div class="col1P">
+      	<p><span>Portfolio Access</span></p>
+        <div class="fltLeft marginZero">You have Selected <span id="portfolio_count" class="TxtBold"></span> of <span class="TxtBold"><%=portfolios_count%></span> Portfolios</div>
+        <div class="fltrt maginR20"><label> <input type="checkbox" id="select_all_portfolio" class="valign" style="vertical-align:inherit;"> Select All</label></div>
+        <div class="clear"></div>
+        <div class="whtBox overflow130">
+        	<table class="filter_role" width="100%" cellspacing="0" cellpadding="0" border="0">
+					<%if @portfolios.present?%>
+						<%@portfolios && @portfolios.each_with_index do |portfolio,i|%>
+								<%if i%5==0%>
+										<tbody>
+										<tr>
+								<%end%>
+										<td><label><%=check_box_tag "portfolio[#{i}]", "#{portfolio.id}",false,:class=>"portfolio_select valign", :style=>"vertical-align:inherit;"%><%=portfolio.name%></label></td>
+							 <%if i%5==4%>
+								</tr>
+							</tbody>
+								<%end%>
+					<%end%>
+				<%else%>
+				<tbody><tr><td colspan="3"  style="text-align:center;">No Portfolio Available</td></tr></tbody>
+				<%end%>
+            </table>
+        </div>
+      </div>
+      <div class="clearfloat"></div>
+
+      <div class="col1P"> Comments <br /> <%=f.text_area :comment,:class=>"inptfile500"%></div>
+      <div class="clearfloat"></div>
+      <div  align="center"><a href="javascript:void(0)" onclick="jQuery('#<%=form_name%>').submit();" class="button blue">Save<%#=f.submit "Save"%></a> <a href="/client_admin/<%=current_user.id%>/users" class="button grey">CANCEL</a></div>
+      <div class="clearfloat"></div>
+
+
+
+<script>
+<%@users_properties && @users_properties.each do |property|%>
+jQuery(".property_select").each( function() {
+if (jQuery(this).val()=="<%=property%>")
+{
+jQuery(this).attr("checked","checked");
+}
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+});
+
+if (jQuery('.property_select:checked').size()=="<%=@properties.count%>")
+{
+jQuery("#select_all_property").attr("checked",true);
+}
+
+<%end%>
+
+
+<%@users_portfolios.present? && @users_portfolios.each do |portfolio| %>
+jQuery(".portfolio_select").each( function() {
+if (jQuery(this).val()=="<%=portfolio%>")
+{
+jQuery(this).attr("checked","checked");
+}
+jQuery("#portfolio_count").text(jQuery('.property_select:checked').size());
+});
+
+if (jQuery('.portfolio_select:checked').size()=="<%=@portfolios.count%>")
+{
+jQuery("#select_all_portfolio").attr("checked",true);
+}
+<%end%>
+
+
+
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+jQuery("#portfolio_count").text(jQuery('.portfolio_select:checked').size());
+jQuery("#company_name1").attr("checked","checked");
+jQuery("#user_company_name").val("<%=@user.company_name%>")
+jQuery("#company_name1").click(function(){
+if (jQuery("#company_name").is(':checked')==true)
+{
+jQuery("#user_company_name").val("<%=@user.company_name%>")
+}
+	else
+{
+jQuery("#user_company_name").val("")
+}
+});
+
+jQuery("#company_name2").click(function(){
+if (jQuery("#company_name2").is(':checked')==false)
+{
+jQuery("#user_company_name").val("<%=@user.company_name%>")
+}
+else
+{
+jQuery("#user_company_name").val("")
+}
+});
+
+
+jQuery("#select_all_property").click(function(){
+jQuery(".property_select").each( function() {
+if (jQuery("#select_all_property").is(':checked')==true)
+{
+jQuery(this).attr("checked","checked");
+}
+	else
+{
+jQuery(this).attr("checked",false);
+}
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+});
+});
+
+jQuery("#select_all_portfolio").click(function(){
+jQuery(".portfolio_select").each( function() {
+if (jQuery("#select_all_portfolio").is(':checked')==true)
+{
+jQuery(this).attr("checked","checked");
+}
+	else
+{
+jQuery(this).attr("checked",false);
+}
+jQuery("#portfolio_count").text(jQuery('.portfolio_select:checked').size());
+});
+});
+
+jQuery(".property_select").click( function() {
+jQuery("#property_count").text(jQuery('.property_select:checked').size());
+if (jQuery(this).is(':checked')==false)
+{
+jQuery("#select_all_property").attr("checked",false);
+}
+else if(jQuery('.property_select:checked').size()=="<%=@properties.count%>")
+{
+jQuery("#select_all_property").attr("checked","checked");
+}
+});
+
+jQuery(".portfolio_select").click( function() {
+jQuery("#portfolio_count").text(jQuery('.portfolio_select:checked').size());
+if (jQuery(this).is(':checked')==false)
+{
+jQuery("#select_all_portfolio").attr("checked",false);
+}
+else if(jQuery('.portfolio_select:checked').size()=="<%=@portfolios.count%>")
+{
+jQuery("#select_all_portfolio").attr("checked","checked");
+}
+});
+if ("<%=action_name%>"=="edit")
+{
+<%check_status=@user.roles.map(&:name).include?("Asset Manager")%>
+if (!(<%=check_status%>))
+{
+//~ jQuery(".fltLeft").hide();
+//~ jQuery(".filter_role").hide
+jQuery(".col1P").hide();
+}
+}
+jQuery("#user_roles").change( function() {
+var selected_user=jQuery('#user_roles :selected').text()
+if ("<%=action_name%>"=="new" || "<%=action_name%>"=="create" || "<%=action_name%>"=="update")
+{
+jQuery("#selected_user").val(selected_user);
+
+if(selected_user=="Leasing Agent" || selected_user=="Investor" || selected_user=="Accounting Team" || selected_user=="Storage and Chat only" || selected_user=="Other")
+{
+//~ jQuery(".fltLeft").hide();
+//~ jQuery(".filter_role").hide();
+jQuery(".col1P").hide();
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".property_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+}
+else
+{
+//~ jQuery(".fltLeft").show();
+//~ jQuery(".filter_role").show();
+jQuery(".col1P").show();
+}
+}
+else if("<%=action_name%>"=="edit")
+{
+var user_role_client="<%=@user.roles.map(&:name).first%>"
+if(user_role_client=="Asset Manager" || user_role_client=="Property Manager" || user_role_client=="Portfolio Manager")
+{
+if(selected_user=="Leasing Agent" || selected_user=="Investor" || selected_user=="Accounting Team" || selected_user=="Storage and Chat only" || selected_user=="Other")
+{
+alert("Remove the portfolio and property");
+}
+else
+{
+jQuery("#selected_user").val(selected_user);
+}
+}
+else
+{
+jQuery("#selected_user").val(selected_user);
+if(selected_user=="Leasing Agent" || selected_user=="Investor" || selected_user=="Accounting Team" || selected_user=="Storage and Chat only" || selected_user=="Other")
+{
+//~ jQuery(".fltLeft").hide();
+//~ jQuery(".filter_role").hide();
+jQuery(".col1P").hide();
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".property_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+}
+else
+{
+//~ jQuery(".fltLeft").show();
+//~ jQuery(".filter_role").show();
+jQuery(".col1P").show();
+}
+}
+}
+});
+
+jQuery(document).ready(function()
+{
+var map = {"Asset Manager":"0","Property Manager":"1","Portfolio Manager":"2","Leasing Agent":"3","Investor": "4","Accounting Team":"5", "Storage and Chat only":"6","Other": "7"}
+function get(k){
+  return map[k];
+}
+jQuery('#user_roles option').eq(get('<%=@user.selected_role%>')).attr('selected', 'selected')
+
+
+
+<%if params[:action]=="create" || params[:action]=="update"%>
+var selected_user=jQuery('#user_roles :selected').text()
+jQuery("#selected_user").val(selected_user);
+
+if(selected_user=="Leasing Agent" || selected_user=="Investor" || selected_user=="Accounting Team" || selected_user=="Storage and Chat only" || selected_user=="Other")
+{
+//~ jQuery(".fltLeft").hide();
+//~ jQuery(".filter_role").hide();
+jQuery(".col1P").hide();
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".portfolio_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+jQuery(".property_select").each( function() {
+jQuery(this).attr("checked",false);
+});
+}
+
+
+<%end%>
+});
+</script>

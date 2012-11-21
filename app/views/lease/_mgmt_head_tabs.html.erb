@@ -1,0 +1,31 @@
+<div class="lebredcoms">
+ <%unless @pdf%>
+ <div class="lebredcomsleft" style="color:#000 !important; font-size:12px !important" id="tenant_abstract_view">
+ <%#Removed as Abstract top Bar display is also there#%>
+ <%#if params[:click_more] == "undefined"%><%#else%><%#end%>
+ <%#if params[:lease_id].present? && params[:lease_id] != 'undefined' && !params[:lease_id].blank?%>  <%#=find_tenant_legal_name%><%#end%></div>
+ <%end%>
+  <div class="lebredcomsright" style="margin-top:-8px;margin-right:-6px;">
+<%unless @pdf%>	
+
+
+
+<div id = 'lease_pdf' style='display:none;'>
+<a href ="/lease/lease_export_pdf?portfolio_id=<%=@portfolio_collection.id%>&property_id=<%=params[:property_id] ? params[:property_id] : @note.id %>&lease_id=<%=params[:lease_id]%>&suite_no1=<%=params[:suite_no1]%>&suite_no2=<%=params[:suite_no2]%>&suite_no3=<%=params[:suite_no3]%>&suite_no4=<%=params[:suite_no4]%>&suite_no5=<%=params[:suite_no5]%>&move_in1=<%=params[:move_in1]%>&move_in2=<%=params[:move_in2]%>&move_in3=<%=params[:move_in3]%>&move_in4=<%=params[:move_in4]%>&move_in5=<%=params[:move_in5]%>&usable_sqft1=<%=params[:usable_sqft1]%>&usable_sqft2=<%=params[:usable_sqft2]%>&usable_sqft3=<%=params[:usable_sqft3]%>&usable_sqft4=<%=params[:usable_sqft4]%>&usable_sqft5=<%=params[:usable_sqft5]%>&rentable_sqft1=<%=params[:rentable_sqft1]%>&rentable_sqft2=<%=params[:rentable_sqft2]%>&rentable_sqft3=<%=params[:rentable_sqft3]%>&rentable_sqft4=<%=params[:rentable_sqft4]%>&rentable_sqft5=<%=params[:rentable_sqft5]%>&floor1=<%=params[:floor1]%>&floor2=<%=params[:floor2]%>&floor3=<%=params[:floor3]%>&floor4=<%=params[:floor4]%>&floor5=<%=params[:floor5]%>&move_out1=<%=params[:move_out1]%>&move_out2=<%=params[:move_out2]%>&move_out3=<%=params[:move_out3]%>&move_out4=<%=params[:move_out4]%>&move_out5=<%=params[:move_out5]%>&param_pipeline=<%=params[:param_pipeline]%>"  id='management_link_pdf' >
+         <div class="folderlabelcol">Print PDF</div>
+				</a>
+	     <script>new Control.Modal($('management_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+</div>
+
+
+ <div class="folderlabel" id = 'lease_pdf'>
+ 	<a onclick="pdf_click='true';close_control_modal='false';mgmt_tabs_form_submit(form_name);">         <div class="folderlabelcol">Print PDF</div></a>
+			<span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span>	</div>
+			
+	<%end%>		
+  </div>
+</div>
+
+<div  id="mgmt_tabs">
+   <%=render :partial => "lease/mgmt_abstract_view",:locals => {:lease_col=>@lease_collection ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+</div>

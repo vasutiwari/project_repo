@@ -1,0 +1,51 @@
+<div class="lite_lhs">
+    <div class="lhs_navwrapper" style="margin-top:-18px;">
+        <div class="lhs_navactive"><img src="images/white_arrow.png" /> Request Demo</div>
+        <div class="contactinfowrapper">
+		  <div class="contactinforow"><img src="images/email_icon.png" /><a href="mailto:praveeny@theamp.com">praveeny@theamp.com</a></div>
+		  <div class="contactinforow"><img src="images/telephone_icon.png" />+1 (415) 562-4585</div>
+        </div>
+      </div>
+  </div>
+<div class="lite_rhs"  style="margin-top:-18px;">
+<h1>You can add additional details here. </h1>
+       <%= form_tag(additional_info_home_index_path, :method=>:put,:html=>{:id=>"form2"}, :remote=>true ) do %>
+	    <div class="rowrapper" style="margin-top:-3px;">
+		  <div class="fieldlabel">Name:</div>
+		  <div class="fieldinputcol">
+		    <input name="name" type="text_box" class="inputfield" id="name" />
+				 <input type="hidden" name="field" class="inputfield" id="field" />
+				 <input type="hidden" name="id" class="inputfield" value="<%=@contact.id%>" />
+				 <br/><span id="name_error_msg" style="font-size: 11px; color: red; display: block; margin-top: 12px; width: 300px; white-space: nowrap;"></span>
+		  </div>
+	    </div>
+		    <div class="rowrapper">
+          <div class="fieldlabel">Phone:</div>
+	        <div class="fieldinputcol">
+            <input name="phone" type="text_box" class="inputfield" id="phone" />
+						<br/><span id="phone_error_msg" style="font-size: 11px; color: red; display: block; margin-top: 12px; width: 300px; white-space: nowrap;"></span>
+          </div>
+        </div>
+	    <div class="rowrapper">
+          <div class="fieldlabel">Comments:</div>
+          <div class="fieldinputcol">
+            <textarea name="comments" class="textfield" id="comments" style="height:52px; display: block; margin-top: 12px;"></textarea>
+          </div>
+        </div>
+					    <div class="rowrapper" >
+             <div class="fieldinputcol" style="padding-left:131px;">
+               <%= show_simple_captcha :label => "Enter the captcha..."%>
+							 <span style="font-size:11px;color:red;" id="error_msg"></span>
+							 </div>
+            </div>
+        <div class="btnrow">
+          <div class="linkwrapper">
+					</div>
+		  <div class="bntwrapper">
+         <%= image_submit_tag("/images/donebtn.png",:style=>"border:none;", :onClick=>"load_writter();document.getElementById('field').value ='done' ") %>
+ </div>
+        </div>
+      </div>
+			<%end%>
+</div>
+<iframe id="start" name="start" style="display: none"></iframe>

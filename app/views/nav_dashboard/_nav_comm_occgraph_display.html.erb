@@ -1,0 +1,13 @@
+<div class="graph floatR">
+<span class="fontgry22 floatL">Expirations</span>
+<div id="occupancyTabContent4"></div>
+<%if suite_vacant.present? || lease_expirations.present?%>
+      <script>
+        myChart = new FusionCharts("/FusionCharts/Pie2D.swf",'Factorycommocc', 451, 160, 0, 0);
+        myChart.setDataXML("<chart showBorder='0' bgColor='EEFAFF' bgAlpha='100' bgSWFAlpha='100' showPercentInToolTip='1' pieRadius='50' animation='1' labelSepChar= '\n' formatNumberScale='0' numberSuffix=' SF' pieSliceDepth='7' startingAngle='305'><set label='Vacant'  <%if params[:property_id].present? && params[:portfolio_id].present?%> link='/lease/rent_roll?rent_roll_filter=vacant&property_id=<%=params[:property_id]%>&portfolio_id=<%=params[:portfolio_id]%>'<%end%>  value='<%= suite_vacant[1]%>'  color='<%= suite_vacant[0]%>' /><% lease_expirations.each_with_index do |i,j| %><set label='<%= i[1] %>'  value='<%= i[3].to_i %>' <%if params[:property_id].present? && params[:portfolio_id].present?%>link='/lease/rent_roll?rent_roll_filter=<%= j.eql?(3) ? i[1].to_s.gsub('& above','and above') : "#{i[1]}_expiration"%>&property_id=<%=params[:property_id]%>&portfolio_id=<%=params[:portfolio_id]%>' <%end%> color='<%= i[2] %>'/><% end %><styles><definition><style type='font' name='CaptionFont' size='10' color='666666' /><style type='font' name='SubaptionFont' bold='0' /></definition><application><apply toObject='caption' styles='CaptionFont' /><apply toObject='SubCaption' styles='SubCaptionFont' /></application></styles></chart>");
+        myChart.render("occupancyTabContent4");
+      </script>
+    <%else%>
+			<h2 class="lineH194 textgry textAC">No data available</h2>
+    <%end%>
+		</div>

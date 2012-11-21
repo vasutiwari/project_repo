@@ -1,0 +1,200 @@
+<table align="left" cellpadding="2" cellspacing="4" border="0" width="400px">
+  <tbody>
+    <tr>
+      <td align="right" width="11%">Property Name :<span class="txtRed"> *</span></td>
+      <td width="5%"></td>
+      <td width="10%"><%=p.text_field :property_name,:class=>"inpt150"%></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td align="right">Property Type:<span class="txtRed"> *</span></td>
+      <td ></td>
+      <td><%=p.select  :property_type_id, property_types,{},:class=>"inpt150" %></td>
+    </tr>
+  </tbody>
+  <%= p.fields_for 'address',property_collection.address do |a| -%>
+    <tbody>
+      <tr>
+        <td align="right" valign="top" width="30%">Address : &nbsp;</td>
+        <td ></td>
+        <td><%=a.text_area :txt,:class=>"inptFilebasic"%></td>
+      </tr>
+    </tbody>
+    <tbody>
+      <tr>
+        <td align="right">State : <span class="txtRed"> *</span> </td>
+        <td ></td>
+        <td><%=a.text_field  :province,:class=>"inpt155" %>
+        </td>
+      </tr>
+      <tr>
+        <td align="right">City : &nbsp;&nbsp;</td>
+        <td></td>
+        <td><%=a.text_field  :city,:class=>"inpt150"%></td>
+      </tr>
+      <tr>
+        <td align="right"> Zip : &nbsp;&nbsp;</td>
+        <td></td>
+        <td><%=a.text_field  :zip,:class=>"inpt155"%></td>
+      </tr>
+    </tbody>
+  <%end%>
+  <%
+  property  = RealEstateProperty.find_by_id(params[:property_id])
+  pf_id=params[:portfolio_id]  ?  params[:portfolio_id] : ((controller.action_name=="add_property" || controller.action_name=="new_property")  ? params[:id] : property.present? ? property.portfolio_id : params[:pid])
+  real_prop = RealEstateProperty.find_properties_by_portfolio_id(pf_id)
+  acc_sys_typ = real_prop.map(&:accounting_system_type_id).compact.uniq if real_prop.present?
+  acc_typ = acc_sys_typ.present? ? real_prop.map(&:accounting_type).compact.uniq : []
+%>
+  <tbody>
+    <tr>
+      <td align="right"></td>
+      <td ></td>
+      <td></td>
+      <td align="right"></td>
+      <td ></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td align="right"></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<table align="left" cellpadding="2" cellspacing="4" border="0" width="400px">
+  <tr>
+    <td align="right" height="30px;">Accounting System Type :<span class="txtRed"> *</span></td>
+    <td width="5%" ></td>
+
+    <%if property_collection.accounting_system_type_id.nil? || property_collection.accounting_system_type_id.blank?%>
+      <%
+       client_ext=Client.find_by_email(User.current.email.split('@').last.strip)
+      #client_ext=ClientSetting.find_by_extension(User.current.email.split('@').last.strip)
+      acc_sys_types=if client_ext && client_ext.accounting_system_type_ids && !client_ext.accounting_system_type_ids.empty?
+        AccountingSystemType.find(client_ext.accounting_system_type_ids).collect{|x| [x.type_name,x.id]}
+      else
+        AccountingSystemType.all.collect{|x| [x.type_name,x.id]}
+      end
+      multifamily_collection=["AMP Excel","Real Page", "YARDI V1"]
+      commercial_collection=["AMP Excel","MRI, SWIG","MRI"]
+      if  params[:sort].eql?("Commercial")
+        acc_sys_types.reject!{|x| !commercial_collection.include?(x[0])}
+      else
+        acc_sys_types.reject!{|x| !multifamily_collection.include?(x[0])}
+      end
+      settings = Client.find(:first,:conditions=>["email = '#{current_user.email}'"])
+      #settings = ClientSetting.find(:first,:conditions=>["separate_email = '#{current_user.email}' or  extension = \'#{current_user.email.split('@')[1]}\'"])
+      if settings && !settings.nil? && !settings.accounting_system_type_ids.empty?
+        acc_syst_types = AccountingSystemType.find(:all,:conditions=>["id in (?)",settings.accounting_system_type_ids])
+        acc_syst_types_collection = []
+        if acc_syst_types && !acc_syst_types.empty?
+          acc_syst_types.each do |acc_syst_type|
+            acc_syst_types_collection <<  acc_syst_type.type_name
+          end
+        end
+      end
+      acc_type = []
+      acc = AccountingSystemType.find(:all)
+      acc.each do |ac|
+        acc_type << ac.type_name
+      end
+      if acc_syst_types_collection && acc_syst_types_collection == acc_type
+        com_mri=["MRI, SWIG"]
+        acc_syst_types_collection = acc_syst_types_collection - com_mri
+      end
+      if  params[:sort].eql?("Multifamily")  && acc_syst_types_collection
+        if acc_syst_types_collection.include?("AMP Excel")
+          multy_ex = ["AMP Excel"]
+          acc_sys_types_commercial =  acc_syst_types_collection - commercial_collection + multy_ex
+          acc_sys_types1 = acc_sys_types_commercial
+        else
+          acc_sys_types_commercial =  acc_syst_types_collection - commercial_collection
+          acc_sys_types1 = acc_sys_types_commercial
+        end
+      elsif acc_syst_types_collection
+        if acc_syst_types_collection.include?("AMP Excel")
+          multy_ex = ["AMP Excel"]
+          acc_sys_types_multifamily =  acc_syst_types_collection - multifamily_collection + multy_ex
+          acc_sys_types1 = acc_sys_types_multifamily
+        else
+          acc_sys_types_multifamily =  acc_syst_types_collection - multifamily_collection
+          acc_sys_types1 = acc_sys_types_multifamily
+        end
+      end
+      if acc_sys_types1 && !acc_sys_types1.empty?
+        acc_sys_types=  AccountingSystemType.find(:all,:conditions=>['type_name in (?)',acc_sys_types1]).collect{|x| [x.type_name,x.id]}
+      end
+      acc_sys_types = acc_sys_types.uniq
+    %>
+      <td align="left" colspan="2"><%=p.select  :accounting_system_type_id, acc_sys_types,{},:style=>"width: 150px;", :onchange=>"" %><span class="txtRed"></span></td>
+    <%else%>
+      <td align="left" colspan="2"><%= AccountingSystemType.find_by_id(property_collection.accounting_system_type_id).type_name %><span class="txtRed"></span></td>
+    <%end%>
+  </tr>
+  <tr>
+    <td align="right" height="30px;">Accounting Type :<span class="txtRed"> *</span></td>
+    <td ></td>
+    <td align="left" colspan="2">
+      <%if property_collection.accounting_type.nil? || property_collection.accounting_type.blank?%>
+        <%=p.select  :accounting_type, ["Accrual","Cash"],{},:style=>"width: 150px;" %>
+      <%else%>
+        <span ><%= property_collection.accounting_type %></span>
+      <%end%>
+    </td>
+  </tr>
+  <tr>
+    <td align="right" height="30px;">Leasing Type :<span class="txtRed"> *</span></td>
+    <td ></td>
+    <td colspan="2"><span ><%=  params[:sort] %></span>
+      <%=p.hidden_field  :leasing_type, :value=> "#{params[:sort]}" %></td>
+  </tr>
+  <tr>
+    <td align="right" height="30px;">Chart of Account :<span class="txtRed"> *</span></td>
+    <td ></td>
+    <td colspan="2">
+      <span class="inpt185">
+        <%if p.object.try(:chart_of_account_id).present?%>
+        <%= p.label :chart_of_account_id, find_chart_of_account_name(p.object.chart_of_account_id) %>
+        <%else%>
+         <%= p.select :chart_of_account_id, options_for_select( current_user.client.try(:chart_of_accounts).collect{|u|[u.name,u.id]},p.object.try(:chart_of_account_id)),{},html_options = {} %>
+        <%end%>
+      </span>
+      <%unless  params[:sort]%>
+        <%=p.hidden_field  :leasing_type, :value=> params[:sort] %>
+      <%end%>
+    </td>
+  </tr>
+  <!--for upload picture start-->
+  <tr>
+    <td align="right">Upload Picture :&nbsp;&nbsp;</td>
+    <td ></td>
+    <td height="30px;" colspan="2"><%=file_field "attachment", "uploaded_data", :class => "inpt155"%></td>
+  </tr>
+  <%if property_collection && property_collection.id !=nil%>
+    <%if property_collection.portfolio_image%><%image = PortfolioImage.find_by_id(property_collection.portfolio_image.id)%><%else%><%image =nil%><%end%>
+    <%if image !=nil%>
+      <tr>
+        <td height="30px;"></td>
+        <td>&nbsp;</td>
+        <td width="108px"><img src="<%=image.public_filename%>" alt="" title="" height="67" width="108px"/>
+        <td align="left">
+    <%#= link_to image_tag("/images/del_icon.png", :alt=>"Delete",:border=>"0", :title=>'Delete'),client_admin_property_path(current_user.id,property_collection.id,:sort => params[:sort] || 'Commercial',:delete_image=>"true"),:method=>:delete,:confirm => 'Are you sure want to delete?' %>
+          <a rel="nofollow" data-method="delete" data-confirm="Are you sure want to delete?" href="/client_admin/<%=current_user.id%>/properties/<%=property_collection.id%>?delete_image=true&amp;sort=<%= params[:sort] || 'Commercial'%>"><span style="font-size:11px;">Remove</span> <img border="0" title="Delete" src="/images/del_icon.png" alt="Delete"></a>
+        </td>
+      </tr>
+    <%end%>
+  <%end%>
+  <!--for upload picture end-->
+</table>
+<div class="clearfloat"></div>
+<%if params[:sort] &&  params[:sort].eql?("Multifamily")%>
+<%url = "/client_admin/#{current_user.id}/properties?sort=Multifamily"%>
+<%else%>
+<%url = "/client_admin/#{current_user.id}/properties"%>
+<%end%>
+<div class="" align="center"><a href="javascript:void(0)" class="button blue" onclick="validation_property_submit('<%=form_name%>');">Save</a>
+  <span>&nbsp;</span><a href="<%=url%>" class="button grey">CANCEL</a></div>
+<input type="hidden" id="sort" name="sort" value = "<%=params[:sort] %>" />

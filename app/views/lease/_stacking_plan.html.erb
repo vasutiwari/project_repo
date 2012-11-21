@@ -1,0 +1,131 @@
+<script language="javascript" type="text/javascript" src="/javascripts/stacking_plan.js"></script>
+<link rel="stylesheet" type="text/css" href="/stylesheets/stacking_plan.css" />
+<style>
+body{padding:0;margin:0;font-family:Arial, Helvetica, sans-serif;font-size:11px;}
+a{color:#025b8d;text-decoration:none;}
+textarea {
+	clear: both;
+	display: block;
+	font-family: arial;
+	font-size: 1em;
+	width:40em;
+	padding: 2px 4px;
+}
+</style>
+<script>
+function colExp(objid){
+	var obj = document.getElementById(objid);
+	obj.style.display=obj.style.display=="block"?"none":"block";
+}
+function addDivRow(objid){
+	var obj = document.getElementById(objid);
+	obj.style.display="block";
+}
+function focusDivOver(objid){
+	var obj = document.getElementById(objid);
+	obj.style.backgroundColor=obj.style.backgroundColor=="#f6f6f6"?"#ffffff":"#f6f6f6";
+}
+function focusDivOut(objid){
+	var obj = document.getElementById(objid);
+	obj.style.backgroundColor=obj.style.backgroundColor=="#ffffff"?"#f6f6f6":"#ffffff";
+}
+
+</script>
+   <div class="rhs leaseModule">
+          <div class="subheadwrapper">
+           <div class="clear"></div>
+			 		<%if  (@floors && !@floors.empty?) || (@suites_without_floor && !@suites_without_floor.empty?) %>
+           <div class="lebredcoms" style="padding-top:26px;">
+              <div class="lebredcomsright printbtn" style="margin-top:-8px">
+
+<div class="folderlabel" style="margin-right:5px"><a href="<%= lease_stacking_plan_expanded_path(params[:portfolio_id], params[:property_id]) %>" target="_blank">
+                  <div class="folderlabelcol">Expand View</div>
+                  </a><span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span></div>
+
+		  <div class="folderlabel" style="margin-right:5px"><a href="javascript:void(0);" onclick="prinFloorPlan();">
+                  <div class="folderlabelcol">Print PDF</div>
+                  </a><span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span></div>
+
+
+                  <!--
+                  <div class="folderlabel"><a href="index.php">
+                  <div class="folderlabelcol">Test PDF</div>
+                  </a><span><img src="/images/upllodright.png" width="2" height="27" border="0" /></span></div>-->
+
+
+               </div>
+            </div>
+            <style>
+          input[type="radio"] {
+    border: 0 solid #CCCCCC !important;
+    margin: 0 5px 0 10px !important;
+    padding: 0 !important;
+    vertical-align: middle;
+}
+          </style>
+
+            <div class="suitemid nomargin">
+              <div id="widgetQuad">
+							</div>
+            </div>
+						<%else%>
+						           <div class="lebredcoms" style="padding-top:26px;">
+
+  <div class="alertbody" style="border-top:1px solid #e3dfdf;">
+  <div style="padding:5px 0 10px; font-size:12px;" class="lsrowwrapper">
+    Stacking Plans
+  </div>
+	  <div class='no-data'> No Data To Display </div>
+ </div>
+<div style="padding: 0pt 0pt 5px;" class="suitesavebuttbor">&nbsp;</div>
+          </div>
+
+	<%end%>
+          </div>
+        </div>
+<script>
+  suitesArr = new Array();
+  floorsArr = new Array();
+  totalArea = 0;
+  totalVacant = 0;
+  widgetStr = "";
+  tooltipStr = "";
+  selectedSuiteId = "";
+  selectedSuiteCaption = "";
+  tempX = 0;
+  tempY = 0;
+  today = new Date();
+  currentYear = today.getFullYear();
+  year1_totalArea = 0;
+  year2_totalArea = 0;
+  year3_totalArea = 0;
+  year4_totalArea = 0;
+  year5_totalArea = 0;
+  year6_totalArea = 0;
+  year7_totalArea = 0;
+  year8_totalArea = 0;
+  year9_totalArea = 0;
+  year10_totalArea = 0;
+  vacant_totalArea = 0;
+  m2m_totalArea = 0;
+  totalFilterArea = 0;
+  totalFilterLease = 0;
+  isEmptyFloorNum = false;
+  tblMaxWidth = 0;
+  isEmptyFloorNum = false;
+  filterCaller = "general";
+  printQuadStr = "";
+  printRegExp = new RegExp(/name="showOptions"/gi);
+
+// "refer http://jystewart.net/2006/08/22/namespaces-attributes-and-content-in-rxml"
+<%if  (@floors && !@floors.empty?) || (@suites_without_floor && !@suites_without_floor.empty?) %>
+  stacking_plan_display('<%=params[:portfolio_id]%>','<%=params[:property_id]%>','<%=is_leasing_agent ? true : false %>');
+  msg_display('<%=params[:portfolio_id]%>','<%=params[:property_id]%>');
+  stack_drawWidget('<%=is_leasing_agent ? true : false %>');
+<%end	%>
+
+ IE = document.all?true:false;
+if (!IE) document.captureEvents(Event.MOUSEMOVE);
+document.onmousemove = getMouseXY;
+
+</script>

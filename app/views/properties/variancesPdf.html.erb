@@ -1,0 +1,7 @@
+<%= render :partial => "/properties/variances",:locals=>{:partial_page=>"variances"}%>
+
+<%if @note && remote_property(@note.accounting_system_type_id)%>
+<%= render :partial=>'/properties/variance_for_remote_property',:locals => {:expln_req_props_ytd_cash =>  @expln_req_props_ytd_cash,:expln_req_props_cash => @expln_req_props_cash,:note_collection=> @note,:month_options=>@month_option}%>
+<%else%>
+<%= render :partial=>'/performance_review_property/exp_comment_display',:locals => {:document_collection =>@document,:item_collection =>@item,:expln_req_props_ytd_collection => @expln_req_props_ytd_cash,:expln_req_props_collection => @expln_req_props_cash,:expln_req_props_cap_collection=> @expln_req_props_cap_exp,:expln_req_props_cap_ytd=>@expln_req_props_ytd_cap_exp,:month_option => @month_option,:note_collection=>@note }%>
+<%end%>

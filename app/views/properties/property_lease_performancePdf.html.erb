@@ -1,0 +1,5 @@
+<%if @note.leasing_type == 'Commercial' %>
+  <%= render :partial => "/properties/property_lease_performance",:locals => {:leases_collection => @leases,:note_collection => @note,:month_collection => @month,:start_date => @start_date } %>
+<%  else %>
+  <%= render :partial => "/properties/wres/lease_performance",:locals =>{:wres_leases=>@wres_leases,:note_collection=>@note,:month_collection=>@month,:year_collection=>@year,:explanation=>@explanation,:start_date=>@start_date,:navigation_start_position=>@navigation_start_position} %>
+<%  end %>

@@ -1,0 +1,46 @@
+if params[:from_performance_review] == "true"
+  common_insert_js_to_page(page,["jQuery('#time_line_selector').show();","jQuery('.subheaderwarpper').show();"])
+end
+if params[:partial_page] == "capital_expenditure"
+  wres_other_income_and_expense_month(@dates[1].to_i,@dates[0].to_i)
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/wres/other_income_and_expense/",:locals=>{:operating_statement=> @operating_statement,:explanation => @explanation,:current_time_period=>@current_time_period,:note_collection=>@note,:notes_collection=>@notes,:navigation_start_position=>@navigation_start_position,:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:o_actuals=>@o_actuals,:o_budget=>@o_budget,:start_date=>@start_date,:portfolio_collection=>@portfolio,
+:doc_collection=>@doc}
+elsif  params[:partial_page] == "financial"
+  @financial = false
+  wres_store_income_and_cash_flow_statement_for_month(@dates[1].to_i,@dates[0].to_i)
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/property_financial_performance/",:locals=>{:operating_statement=>@operating_statement,:explanation=>@explanation,:notes_collection=>@notes,:note_collection=>@note,:start_date=>@start_date,:time_line_actual=>@time_line_actual,:actual=>@actual,
+    :navigation_start_position=>@navigation_start_position,:time_line_rent_roll => @time_line_rent_roll,:portfolio_collection =>@portfolio}
+elsif params[:partial_page] == "financial_subpage"
+  wres_calculate_the_financial_sub_graph_for_month(@dates[1].to_i,@dates[0].to_i)
+  page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/property_financial_sub_page",:locals=>{:color_display=>@color_display,
+:time_line_actual=>@time_line_actual,:explanation=>@explanation,:totals=>@totals,:current_time_period=>@current_time_period,:note_collection=>@note,:revenue_act=>@revenue_act,
+:revenue_bud=>@revenue_bud,:revenue_var=>@revenue_var,:total_var_ope_expense_act=>@total_var_ope_expense_act,:total_var_ope_expense_bud=>@total_var_ope_expense_bud,:total_var_ope_expense_var=>@total_var_ope_expense_var,:total_var_ope_expense_per=>@total_var_ope_expense_per,:asset_details=>@asset_details,:start_date=>@start_date,
+:year_collection=>@year,:revenue_percentage=>@revenue_percentage,:portfolio_collection => @portfolio,:v_collection=>@v,:doc_collection=>@doc,:month_collection=>@month,:asset_details_collection=>@asset_details}
+elsif params[:partial_page] == "leases_and_occupancy"
+  @time_line = RentRoll.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+  @time_line_actual = Actual.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+  @time_line_rent_roll = @time_line if !@time_line.nil?
+  common_update_page(page,["head_for_titles","overview"],["/properties/head_for_titles/","/properties/leases_and_occupancy/"],{"head_for_titles"=>{:portfolio_collection => @portfolio,:note_collection => @note},"overview"=>{:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:timeline_selector =>@timeline_selector,:period=>@period,:note_collection=>@note,:time_line_start_date=>@time_line_start_date,:time_line_end_date=>@time_line_end_date,:rent_roll=>@rent_roll,:end_date=>@end_date,:portfolio_collection=>@portfolio,:user_id_graph=>@user_id_graph,:navigation_start_position=>@navigation_start_position,:rent_area=>@rent_area,:prop_collection=>@prop,:rent_sum=>@rent_sum,
+    :aged_recievables=>@aged_recievables,:start_date =>@start_date}})
+  page[:current_note].innerHTML = @note.property_name
+elsif params[:partial_page] == "rent_roll"
+  @tl_month = params[:start_date].to_date.month
+  @tl_year = params[:start_date].to_date.year
+  params[:note_id] = params[:id]
+  @rent_roll = true
+  wres_rent_roll_details(@tl_month,@tl_year) #if params[:period]=="4"
+  page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/wres/rent_roll",:locals=>{:rent_roll_wres => @rent_roll_wres,:portfolio_collection => @portfolio,:note_collection => @note,:navigation_start_position => @navigation_start_position,:start_date => @start_date}
+  if @note && @note.property_name.present?
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Rent Roll : #{@note.property_name}</div>');"
+  else
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Rent Roll </div>');"
+  end
+elsif params[:partial_page] == "leases"
+  @lease = true
+  wres_lease_details(@dates[1], @dates[0])
+  page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Leases</div>');"
+  page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/wres/lease_performance",:locals =>{:wres_leases=>@wres_leases,:note_collection=>@note,
+  :month_collection=>@month,:year_collection=>@year,:explanation=>@explanation,:start_date=>@start_date,:navigation_start_position=>@navigation_start_position}
+else
+  page.replace_html "portfolio_overview_property_graph", :partial =>"/properties/wres/portfolio_overview_property_graph/"
+end

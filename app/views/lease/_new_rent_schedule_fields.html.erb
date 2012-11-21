@@ -1,0 +1,81 @@
+<script type="text/javascript">
+  yield_calender('true');
+  current_real_id = '<%=params[:property_id]%>';
+  jQuery(".rent_schedule_amount_per_sqft_fixing_digits").each(function(e){
+    value = jQuery(this).val();
+    value = parseFloat(value);
+    if(!isNaN(value)) jQuery(this).val(value.toFixed(2));
+    var is_all_suites_selected = <%= @lease.rent.try(:is_all_suites_selected) %>;
+  })
+</script>
+<%lease = @lease%>
+<% lease_period = RentSchedule.get_rent_schedule_period(lease.try(:commencement), lease.try(:expiration)) %>
+<%is_all_sel =  lease.try(:rent).try(:is_all_suites_selected)%>
+<div class="fields rent_schedule_fields">
+  <%if @rent_sch_cnt != 1 %>
+    <div class="rentnamerow close" onmouseover="jQuery(this).css('background-color','#f6f6f6');this.style.width='765px'" onmouseout="jQuery(this).css('background-color','#ffffff');this.style.width='750px'">
+    <%else %>
+      <div class="rentnamerow">
+      <%end %>
+      <div class="rentform namefirst sch_suites">
+        <%if @pdf %>
+          <span style="width:70px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.try(:suite_id) == 0 ? 'All' : Suite.find_suite_num(f.object.try(:suite_id)) %></span>
+        <%else%>
+          <div class="new_rent_sch" style="width: 70px;">
+            <%= Suite.find_by_id(f.object.try(:suite_id)).try(:suite_no)%>
+            <%= f.hidden_field :suite_id ,:value => f.object.try(:suite_id) %>
+          </div>
+        <%end %>
+      </div>
+      <div class="rentform">
+        <%if @pdf %>
+          <span style="width:57px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.rent_schedule_type %></span>
+        <%else %>
+          <%= f.select :rent_schedule_type, options_for_select( RentSchedule::RENT_SCH_TYPE,f.object.rent_schedule_type),{},html_options = {:onchange => "hide_or_show_rent_sch(jQuery(this).attr('id'),jQuery(this).val()); check_selected_rent_schedule_type(jQuery(this).attr('id'))", :class => "rentselect sch_type rent_schedule_type", :style=>"width:57px;"} %>
+        <%end %>
+      </div>
+      <div style="width: 70px;" class="rentform">
+        <%#= f.text_field :from_date ,:type=>"text", :value => display_from_date_for_rent_schedule(f.object.try(:from_date), lease, @rent_sch_cnt) , :style=>"width:48px", :class => "rent_schedule_from_date lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}; displaying_rent_schedule_dates_by_block(jQuery(this).attr('id'), this)", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+        <%= f.text_field :from_date ,:type=>"text", :value => if(f.object.present? && f.object.from_date.present?); f.object.from_date.strftime("%m/%d/%Y") ;end , :readonly => true, :style=>"width:58px;border:none !important;" , :class => "rent_schedule_from_date" %>
+        <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+      </div>
+      <div class="rentform">
+        <% if lease.rent.try(:is_all_suites_selected) %>
+          <%= f.text_field :no_of_months ,:type=>"text", :onblur => "if (#{lease.rent.try(:is_all_suites_selected)}){if(check_number_of_months(#{lease_period},jQuery(this).attr('id'))) {displaying_rent_schedule_dates(jQuery(this).attr('id'), #{lease.try(:id)}, jQuery(this).val())}} else { display_to_date_basing_on_no_of_months(jQuery(this).attr('id'), jQuery(this).val()); }" , :class=>"lstextfield rent_schedule_number_of_months", :style=>"width:78px" %>
+        <%else%>
+          <%= f.text_field :no_of_months ,:type=>"text", :onblur => "if(check_number_of_months(#{lease_period},jQuery(this).attr('id'))) {displaying_rent_schedule_dates_by_block(jQuery(this).attr('id'),this); }" , :class=>"lstextfield rent_schedule_number_of_months", :style=>"width:78px" %>
+        <%end%>
+      </div>
+      <div style="width: 70px;" class="rentform">
+        <%= f.text_field :to_date ,:type=>"text", :value => if(f.object.present? && f.object.to_date.present?); f.object.to_date.strftime("%m/%d/%Y") ;end , :readonly => true, :style=>"width:58px;border:none !important;" , :class => "rent_schedule_to_date" %>
+      </div>
+      <div id="rent_sch_psf" class="psf_calc_block">
+        <div class="rentform">
+          <%= f.text_field :rent_schedule_amount_per_sqft ,:type=>"text", :class=>"lstextfield rent_schedule_amount_per_sqft_fixing_digits", :style=>"width:71px;#{f.object.rent_schedule_type.eql?('Free') ? 'display : none': 'display : block'}",:onblur=>"rent_sch_tot_calc(jQuery(this).val(),jQuery(this).attr('id'),current_real_id,'rent_sch_tot_amt_calc');",:value => number_with_delimiter(number_with_precision(f.object.try(:amount_per_month_per_sqft), :precission => 2))%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :amount_per_month ,:type=>"text", :class=>"lstextfield", :precision => 2,:style=>"width:71px;#{f.object.rent_schedule_type.eql?('Free') ? 'display : none': 'display : block'}",:onblur=>"rent_sch_tot_calc(jQuery(this).val(),jQuery(this).attr('id'),current_real_id,'rent_sch_psf_calc');" %>
+        </div>
+        <div class="rentform">
+          <%if @pdf %>
+            <span style="width:66px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.billing_freq.present? ? f.object.billing_freq : "Monthly" %></span>
+          <%else %>
+            <%= f.select :billing_freq, options_for_select( RentSchedule::RENT_BILLING,f.object.billing_freq),{},html_options = {:class => "rentselect", :style=>"width:66px;#{f.object.rent_schedule_type.eql?('Free') ? 'display : none': 'display : block'}"} %>
+          <%end %>
+        </div>
+        <div class="rentform">
+          <%if @pdf %>
+            <span style="width:60px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.base_year %></span>
+          <%else %>
+            <%= f.text_field :base_year ,:type=>"text", :class=>"lstextfield", :value => (f.object && f.object.base_year.present?) ? f.object.base_year.to_s.gsub(',','') : '' ,:style=>"width:68px;#{f.object.rent_schedule_type.eql?('Free') ? 'display : none': 'display : block'}" %>
+          <%end %>
+        </div>
+        <%= f.hidden_field :id, :value => f.object.id.present? ? f.object.try(:id) : "", :size => 6, :class => "rent_schedule_id" %>
+        <%= f.hidden_field :amount_per_month_per_sqft ,:value => f.object.try(:amount_per_month_per_sqft) %>
+      </div>
+      <%if @rent_sch_cnt != 1 %>
+        <span style="margin-top:-25px" class="closeme"><%= link_to_remove_sch_fields "X", f %></span>
+      <%end %>
+    </div>
+  </div>
+  <%@rent_sch_cnt +=1 %>

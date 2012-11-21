@@ -1,0 +1,53 @@
+<div class="lightbox_container2">
+  <div class="lightbox_threshold">
+    <div class="lightbox_headerow">
+      <div class="headerow_coll1"><img width="16" height="16" src="/images/tab_selection_pdf_icon.jpg"/> Select Tab to Export to a PDF Report									     </div>
+    </div>
+    <div class="lightbox_contentrow">		
+      <div class="add_contentwrapper">
+        <div class="propertylistrow">
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf1" type="checkbox" value="1"/>
+            Terms</div>
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf2" type="checkbox" <%unless ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>disabled="disabled" <%end%> value="2"/>
+            Rent</div>
+        </div>
+        <div class="propertylistrow">
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf3" type="checkbox" <%unless ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>disabled="disabled" <%end%> value="3"/>
+            CapEx & Dep</div>
+          <div class="propertylistcoll2" style="width: 275px;">
+              <input id="gen_pdf6" type="checkbox" <%unless ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>disabled="disabled" <%end%> value="6"/>Clauses
+          </div>
+        </div>
+        <div class="propertylistrow">
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf5" type="checkbox" <%unless ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>disabled="disabled" <%end%> value="5"/>
+            Insurance</div>
+          <div class="propertylistcoll2" style="width: 275px;">
+            <input id="gen_pdf4" type="checkbox" <%#if ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>checked<%#else%> <%#end%> value="4"/>Income Projection</div>
+        </div>
+				
+					<div class="propertylistrow">
+          <div class="propertylistcoll2"  style="width: 315px;">
+            <input id="gen_pdf7" type="checkbox" <%unless ( params[:lease_id] && params[:lease_id] !='undefined' && !params[:lease_id].nil? && params[:lease_id].present?)%>disabled="disabled" <%end%> value="7"/>
+            Docs</div>
+						</div>
+        <div class="propertylistrow"></div>
+      </div>
+    </div>
+  </div>
+	  <div class="butwrapper" style="width:715px;">
+		<%property_id = params[:property_id]? params[:property_id] : params[:id]%>
+    <div style="margin-left:250px" class="greenbutton"><a onclick="pdfConv(true,'<%=params[:start_date]%>','true','<%=params[:lease_id]%>','<%=params[:move_out1]%>','<%=params[:move_out2]%>','<%=params[:move_out3]%>','<%=params[:move_out4]%>','<%=params[:move_out5]%>','<%=params[:suite_no1]%>','<%=params[:suite_no2]%>','<%=params[:suite_no3]%>','<%=params[:suite_no4]%>','<%=params[:suite_no5]%>','<%=params[:move_in1]%>','<%=params[:move_in2]%>','<%=params[:move_in3]%>','<%=params[:move_in4]%>','<%=params[:move_in5]%>','<%=params[:usable_sqft1]%>','<%=params[:usable_sqft2]%>','<%=params[:usable_sqft3]%>','<%=params[:usable_sqft4]%>','<%=params[:usable_sqft5]%>','<%=params[:rentable_sqft1]%>','<%=params[:rentable_sqft2]%>','<%=params[:rentable_sqft3]%>','<%=params[:rentable_sqft4]%>','<%=params[:rentable_sqft5]%>','<%=params[:floor1]%>','<%=params[:floor2]%>','<%=params[:floor3]%>','<%=params[:floor4]%>','<%=params[:floor5]%>','<%=params[:param_pipeline]%>','<%=property_id%>','<%=params[:portfolio_id]%>');return false;" href="javascript:;">Print PDF</a><span>&nbsp;</span></div>
+    <div class="graybutton"><a onclick="Control.Modal.close();return false;" href="javascript:;">Cancel</a><span>&nbsp;</span></div>
+  </div>
+		<%if request.env["HTTP_USER_AGENT"].downcase.match(/safari/) && !request.env["HTTP_USER_AGENT"].downcase.match(/chrome/)%>
+		 <span style="float:left;font-size:11px;padding:10px;"><img width="16" height="16" src="/images/1332349563_warning_16.png"/>  We recommend using Chrome, Internet Explorer or Firefox for a better print report.</span>
+    <%end%>
+		
+  <div class="bot"></div>
+</div>
+<a style="cursor: pointer;" onclick="Control.Modal.close();return false;" id="sbox-btn-close"></a>
+

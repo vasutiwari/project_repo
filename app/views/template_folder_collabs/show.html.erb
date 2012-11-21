@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Shared by:</b>
+  <%= @template_folder_collab.shared_by %>
+</p>
+
+<p>
+  <b>Shared to:</b>
+  <%= @template_folder_collab.shared_to %>
+</p>
+
+<p>
+  <b>Folder:</b>
+  <%= @template_folder_collab.folder_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_template_folder_collab_path(@template_folder_collab) %> |
+<%= link_to 'Back', template_folder_collabs_path %>

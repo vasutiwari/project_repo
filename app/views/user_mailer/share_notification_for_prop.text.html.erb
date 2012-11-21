@@ -1,0 +1,64 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#dddddd">
+  <tr>
+    <td height="100%" scope="col"><table width="604" border="0" cellspacing="0" cellpadding="0" align="center">
+        <tr>
+          <td scope="col">
+            <table width="604" border="0" cellspacing="0" cellpadding="0">
+              <tr><td scope="col" align="left"><a href='<%= "#{APP_CONFIG[:main_url]}" %>'><img style="border: 0" src='<%= "#{APP_CONFIG[:site_url]}/images/amp_logo_email.png" %>' width="172" height="83" /></a></td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td background='<%= "#{APP_CONFIG[:site_url]}/images/email_template_top.png" %>' width="604" height="7" align="center"></td></tr>
+        <tr>
+          <td background='<%= "#{APP_CONFIG[:site_url]}/images/email_template_mid.png" %>'>
+            <table width="600" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" align="left">
+              <tr>
+                <td>
+                  <table width="560" border="0" cellpadding="0" cellspacing="0" align="center">
+                    <tr><td height="10">&nbsp; </td></tr>
+                    <tr><td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2px"> Hi <%= @user.name? ? @user.name.capitalize: @user.email%>,</font></font></font></td></tr>
+                    <tr><td height="20">&nbsp; </td></tr>
+                    <tr>
+                      <td align="left">
+                        <font face="Arial, Helvetica, sans-serif">
+                          <font color="#454545">
+                            <font size="2">
+														<%access_level =  @user.has_role?('Leasing Agent') ? 'Leasing Agent' : 'Property User'%>
+                              <b><%= @sharer_name_email%></b> has given you '<%=access_level%>' level access for the property '<%= @property_name%>'.<%unless access_level == 'Leasing Agent'%><br/>
+                              You can access files of this property and its report features.<%end%>
+                            </font>
+                          </font>
+                        </font>
+                        </font>
+                      </td>
+                    </tr>
+                    <tr><td height="20">&nbsp; </td></tr>
+                    <tr>
+                      <td align="left">
+                        <font face="Arial, Helvetica, sans-serif">
+                          <font color="#454545">
+                            <font size="2">
+                              You can click on the link <a href="<%if @user.has_role?('Leasing Agent') && @property_id.present? && !@user.password_code?%><%="#{APP_CONFIG[:site_url]}"%>/lease/show_pipeline/<%=@property_id%><%else%><%= @url%><%end%>"><%= @property_name %></a>  to proceed.
+                            </font>
+                          </font>
+                        </font>
+                        </font>
+                      </td>
+                    </tr>
+                    <tr><td height="50">&nbsp;</td></tr>
+                    <tr><td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2">- AMP Team</font></font></font></td></tr>
+										<tr><td height="10">&nbsp;</td></tr>
+										<tr><td align="left"><font face="Arial, Helvetica, sans-serif"><font color="#454545"><font size="2"><a href='<%= "#{APP_CONFIG[:main_url]}" %>'><%= "#{APP_CONFIG[:main_url]}" %></a></font></font></font></td></tr>
+                    <tr><td height="20">&nbsp;</td></tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr><td><img src='<%= "#{APP_CONFIG[:site_url]}/images/email_template_bot.png" %>' /></td></tr>
+        <tr><td height="25">&nbsp; </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>

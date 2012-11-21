@@ -1,0 +1,289 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+
+  partial_page="leases";
+  active_call="performance_review";
+</script>
+<div id ="portfolio_overview_property_graph">
+  <% unless pdf_collection %>
+    <div class="pdf_link_financial_end" style="right: 47px;top:111px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+     <script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+		 </div>
+  <% end %>
+  <% if !leases_collection.nil? && !note_collection.nil? %>
+    <div class="<% if leases_collection[:new_leases][:budget] != 0.0 ||  leases_collection[:expirations][:budget] != 0.0 ||  leases_collection[:change_in_occupancy][:budget] != 0.0 || leases_collection[:prev_year_occupancy][:budget] != 0.0 || leases_collection[:renewals][:budget] != 0.0 || leases_collection[:current_occupancy_percent][:budget] != 0.0 || leases_collection[:current_vacant][:budget] != 0.0 || leases_collection[:total_rentable_space][:budget] != 0.0 %>rhscontentrow<%else%>rhscontentrow-leasing<%end%>">
+      <div class="tableheaderow assetview">
+        <div class="cashtablecol1" style="text-align:left;left:11px;">&nbsp;</div>
+        <div class="cashtablecol3">Actuals</div>
+				<% if leases_collection[:new_leases][:budget] != 0.0 ||  leases_collection[:expirations][:budget] != 0.0 ||  leases_collection[:change_in_occupancy][:budget] != 0.0 || leases_collection[:prev_year_occupancy][:budget] != 0.0 || leases_collection[:renewals][:budget] != 0.0 || leases_collection[:current_occupancy_percent][:budget] != 0.0 || leases_collection[:current_vacant][:budget] != 0.0 || leases_collection[:total_rentable_space][:budget] != 0.0 %>
+        <div class="cashtablecol3">Budget</div>
+        <div class="cashtablecol4">Variance?</div>
+        <div class="tablecol5"></div>
+				<%end%>
+      </div>
+
+
+      <% if params[:start_date] %>
+        <% exp_month_ytd = month_collection %>
+        <% exp_ytd_check = false %>
+      <% elsif !params[:tl_month].nil? and !params[:tl_month].blank? %>
+        <% exp_month_ytd = month_collection %>
+        <% exp_ytd_check = false %>
+      <% else %>
+        <% if (params[:period] && params[:period] == "4") ||  (params[:tl_period] && params[:tl_period] == "4") %>
+          <% exp_month_ytd = Time.new.ago(1.month).strftime("%m").to_i %>
+          <% exp_ytd_check = true %>
+        <% elsif (params[:period] && params[:period] == "5") ||  (params[:tl_period] && params[:tl_period] == "5") %>
+          <% exp_month_ytd = month_collection %>
+          <% exp_ytd_check = false %>
+        <% elsif (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") %>
+          <% exp_month_ytd = 12 %>
+          <% exp_ytd_check = true %>
+        <% end %>
+      <% end %>
+
+      <div class="<% if leases_collection[:new_leases][:budget] != 0.0 ||  leases_collection[:expirations][:budget] != 0.0 ||  leases_collection[:change_in_occupancy][:budget] != 0.0 || leases_collection[:prev_year_occupancy][:budget] != 0.0 || leases_collection[:renewals][:budget] != 0.0 || leases_collection[:current_occupancy_percent][:budget] != 0.0 || leases_collection[:current_vacant][:budget] != 0.0 || leases_collection[:total_rentable_space][:budget] != 0.0 %>cashtablerow<%else%>cashtablerow-leasing<%end%>">
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:new_leases][:actual].to_f, leases_collection[:new_leases][:budget].to_f)%>
+        <div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="performanceReviewCalls('lease_sub_tab',{occupancy_type : 'new' });return false;">New Leases</a></div>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview(leases_collection[:new_leases][:actual])%> </div>
+					<% if leases_collection[:new_leases][:budget] != 0.0%>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview(leases_collection[:new_leases][:budget])%> </div>
+          <% icon_direction = up_or_down(leases_collection[:new_leases][:actual].to_f, leases_collection[:new_leases][:budget].to_f) %>
+          <% use_color = income_color(leases_collection[:new_leases][:actual].to_f, leases_collection[:new_leases][:budget].to_f) %>
+          <% color_flag = (use_color == 'green') ? '' : 'red' %>
+          <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+          <div class="cashtablecol4">
+            <div class="tablecol4_sub<%= color_flag %>col1  captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%=display_sqrt_real_estate_overview((vari[:variant]))%>  </div>
+          </div>
+<%end%>
+        </div>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:expirations][:actual].to_f, leases_collection[:expirations][:budget].to_f)%>
+        <div class="tablecontentrow2">
+          <div class="cashtablecol1"> - &nbsp;<a href="javascript:;" onclick="performanceReviewCalls('lease_sub_tab',{occupancy_type : 'expirations' });return false;">Expirations</a></div>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview( leases_collection[:expirations][:actual])%> </div>
+					<%if leases_collection[:expirations][:budget] != 0.0 %>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview( leases_collection[:expirations][:budget])%> </div>
+          <% icon_direction = up_or_down(leases_collection[:expirations][:actual].to_f, leases_collection[:expirations][:budget].to_f) %>
+          <% use_color = expense_color(leases_collection[:expirations][:actual].to_f, leases_collection[:expirations][:budget].to_f) %>
+          <% color_flag = (use_color == 'green') ? '' : 'red' %>
+          <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+          <div class="cashtablecol4">
+            <div class="tablecol4_sub<%= color_flag %>col1 captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%=display_sqrt_real_estate_overview( (vari[:variant]))%>  </div>
+          </div>
+					<%end%>
+        </div>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:change_in_occupancy][:actual].to_f, leases_collection[:change_in_occupancy][:budget].to_f)%>
+        <div class="cashtablegreyrow">
+          <div class="cashtablecol1">=&nbsp;Change in Occupancy</div>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview( leases_collection[:change_in_occupancy][:actual])%> </div>
+					<%if leases_collection[:change_in_occupancy][:budget] != 0.0 %>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:change_in_occupancy][:budget])%> </div>
+
+          <div class="cashtablecol4">
+            <% icon_direction = up_or_down(leases_collection[:change_in_occupancy][:actual], leases_collection[:change_in_occupancy][:budget]) %>
+            <% use_color = income_color(leases_collection[:change_in_occupancy][:actual], leases_collection[:change_in_occupancy][:budget]) %>
+            <% color_flag = (use_color == 'green') ? '' : 'red' %>
+            <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+            <div class="tablecol4_sub<%= color_flag %>col1  captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%= display_sqrt_real_estate_overview((vari[:variant]))%></div>
+          </div>
+					<%end%>
+        </div>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:prev_year_occupancy][:actual].to_f, leases_collection[:prev_year_occupancy][:budget].to_f)%>
+				<%unless check_accounting_sys_type_MRI%>
+        <div class="tablecontentrow2">
+          <div class="cashtablecol1">+&nbsp;Occupancy as on <%= "12/31/#{Date.today.prev_year.year}" %></div>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:prev_year_occupancy][:actual])%>  </div>
+					<%if leases_collection[:prev_year_occupancy][:budget] != 0.0 %>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview( leases_collection[:prev_year_occupancy][:budget])%> </div>
+          <div class="cashtablecol4">
+            <% icon_direction = up_or_down(leases_collection[:prev_year_occupancy][:actual], leases_collection[:prev_year_occupancy][:budget]) %>
+            <% use_color = income_color(leases_collection[:prev_year_occupancy][:actual], leases_collection[:prev_year_occupancy][:budget]) %>
+            <% color_flag = (use_color == 'green') ? '' : 'red' %>
+            <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+            <div class="tablecol4_sub<%= color_flag %>col1  captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%= display_sqrt_real_estate_overview((vari[:variant]))%> </div>
+          </div>
+					<%end%>
+        </div>
+      <%end%>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:current_occupancy][:actual].to_f, leases_collection[:current_occupancy][:budget].to_f)%>
+        <div class="cashtablegreyrow" style="<%if check_accounting_sys_type_MRI%>border-top:none;<%end%>">
+          <div class="cashtablecol1"><%if check_accounting_sys_type_MRI%>&nbsp;&nbsp;<%else%>=<%end%>&nbsp;Current Occupancy</div>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:current_occupancy][:actual] )%> </div>
+					<%if leases_collection[:current_occupancy][:budget] != 0.0 %>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:current_occupancy][:budget])%> </div>
+          <div class="cashtablecol4">
+            <% icon_direction = up_or_down(leases_collection[:current_occupancy][:actual], leases_collection[:current_occupancy][:budget]) %>
+            <% use_color = income_color(leases_collection[:current_occupancy][:actual], leases_collection[:current_occupancy][:budget]) %>
+            <% color_flag = (use_color == 'green') ? '' : 'red' %>
+            <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+            <div class="tablecol4_sub<%= color_flag %>col1  captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%= display_sqrt_real_estate_overview((vari[:variant]))%></div>
+          </div>
+					<%end%>
+        </div>
+
+				<%vari = form_hash_of_data_for_occupancy(leases_collection[:renewals][:actual].to_f,leases_collection[:renewals][:budget].to_f)%>
+						<%unless remote_property(@note.accounting_system_type_id)%>
+        <div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="performanceReviewCalls('lease_sub_tab',{occupancy_type : 'renewal' });return false;">Renewals</a></div>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview(leases_collection[:renewals][:actual])%> </div>
+					<%if leases_collection[:renewals][:budget] != 0.0%>
+          <div class="cashtablecol3"><%=display_sqrt_real_estate_overview(leases_collection[:renewals][:budget])%> </div>
+          <div class="cashtablecol4">
+            <% icon_direction = up_or_down(leases_collection[:renewals][:actual].to_f, leases_collection[:renewals][:budget].to_f) %>
+            <% use_color = income_color(leases_collection[:renewals][:actual].to_f, leases_collection[:renewals][:budget].to_f) %>
+            <% color_flag = (use_color == 'green') ? '' : 'red' %>
+            <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+            <div class="tablecol4_sub<%= color_flag %>col1 captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%>
+            </div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%= display_sqrt_real_estate_overview((vari[:variant]))%> </div>
+          </div>
+					<%end%>
+        </div>
+      <%end%>
+
+        <div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Occupancy (%)</div>
+          <div class="cashtablecol3"><%= leases_collection[:current_occupancy_percent][:actual]%><%= '%' %></div>
+					<%if leases_collection[:current_occupancy_percent][:budget] != 0.0 %>
+          <div class="cashtablecol3"><%= leases_collection[:current_occupancy_percent][:budget]%><%= '%' %></div>
+          <div class="cashtablecol4">
+            <div class="tablecol4_subcol1  captablecol4"> </div>
+            <div class="tablecol4_subcol2">  </div>
+          </div>
+					<%end%>
+        </div>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:current_vacant][:actual].to_f, leases_collection[:current_vacant][:budget].to_f)%>
+        <div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Current Vacancy</div>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:current_vacant][:actual])%> </div>
+					<%if leases_collection[:current_vacant][:budget] != 0.0%>
+          <div class="cashtablecol3"><%= display_sqrt_real_estate_overview(leases_collection[:current_vacant][:budget])%> </div>
+          <% icon_direction = up_or_down(leases_collection[:current_vacant][:actual], leases_collection[:current_vacant][:budget]) %>
+          <% use_color = expense_color(leases_collection[:current_vacant][:actual], leases_collection[:current_vacant][:budget]) %>
+          <% color_flag = (use_color == 'green') ? '' : 'red' %>
+          <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+          <div class="cashtablecol4">
+            <div class="tablecol4_sub<%= color_flag %>col1  captablecol4">
+              <span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(vari[:percent])%></div>
+            <div class="tablecol4_sub<%= color_flag %>col2"><%=display_sqrt_real_estate_overview( (vari[:variant]))%></div>
+          </div>
+					<%end%>
+        </div>
+
+        <%vari = form_hash_of_data_for_occupancy(leases_collection[:change_in_occupancy][:actual].to_f, leases_collection[:change_in_occupancy][:budget].to_f)%>
+        <div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Vacancy (%)</div>
+          <div class="cashtablecol3"><%= leases_collection[:current_vacant_percent][:actual]%><%= '%' %></div>
+					<%if leases_collection[:current_vacant_percent][:budget] != 0.0%>
+          <div class="cashtablecol3"><%= leases_collection[:current_vacant_percent][:budget]%><%= '%' %></div>
+          <div class="cashtablecol4">
+            <div class="tablecol4_subcol1  captablecol4"> </div>
+            <div class="tablecol4_subcol2">  </div>
+          </div>
+					<%end%>
+        </div>
+									<!-- start -->
+<div class="tablecontentrow">
+          <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Total Rentable Space</div>
+          <div class="cashtablecol3"><%= number_with_delimiter(leases_collection[:total_rentable_space][:actual])%><%= raw('&nbsp;SF') %></div>
+					<%if leases_collection[:total_rentable_space][:budget] != 0.0%>
+          <div class="cashtablecol3"><%= number_with_delimiter(leases_collection[:total_rentable_space][:budget])%><%= raw('&nbsp;SF') %></div>
+          <div class="cashtablecol4">
+            <div class="tablecol4_subcol1  captablecol4"> </div>
+            <div class="tablecol4_subcol2">  </div>
+          </div>
+					<%end%>
+        </div>
+		<!-- end -->
+      </div>
+	    </div>
+
+  <% else %><% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+    <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+      <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+      <% if note_collection.class == RealEstateProperty %>
+        <% note_name = note_collection.property_name %>
+      <% else %>
+        <% note_name = note_collection.note_id %>
+      <% end %>
+      <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+        <span style="font-size:13px;"><%if remote_property(note_collection.accounting_system_type_id) == true%><span style="color: black; padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Lease information at
+
+				<!--<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>-->
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+				<%end%>.</span>
+      <% else %>
+        <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').hide();
+   jQuery('#yrForecast').hide();
+		 jQuery('#quarterly').show();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+     <% end %>
+  }
+
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+</script>

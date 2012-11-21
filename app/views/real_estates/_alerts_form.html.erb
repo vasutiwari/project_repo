@@ -1,0 +1,64 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<script type="text/javascript">
+  form_name ="#alerts_form"
+  tab = "8"
+  yield_calender('true');
+</script>
+       <div class="suitemid" style="padding: 10px;">
+          <div class="alertsettingbox" >
+  <%= form_for property_collection,:url=>{:controller=>"properties",:action=>"show_asset_docs",:property_id=>property_collection.id,:data_hub=>"asset_data_and_documents",:pid=>property_collection.portfolio.id,:note_add_edit => "true",:parent_delete=>params[:parent_delete],:edit_inside_asset=>params[:edit_inside_asset]}, :html=>{:target => "upload_alert",:multipart=>true,:id=>"alerts_form"} do |p| -%>
+							<input type="hidden" name="portfolio_id" value = <%=property_collection.portfolio_id%> />
+							<input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+							<input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+							<input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+							<input type="hidden" name="alert_form_submit" value = "true"  id ="alert_form_submit"> </input>
+							<input type="hidden" id = "tab_id" name="tab_id" value ="8" > </input>
+							<input type="hidden" id = "form_txt" name="form_txt" value ="alerts" > </input>
+							<input type="hidden" name="alert_form_close" value = "false"  id ="alert_form_close"> </input>
+							<input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+							<input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+							<input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+							<input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+							<input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+							<input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+							<input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+							<input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+							<input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+
+							<!-- <input type="checkbox" name="sendMangrEmail['<%#= params[:property_id]%>']" id="sendMangrEmail" checked disabled="disabled" /> -->
+							<label for="checkbox1"><strong>Send Manager Weekly Email Alerts </strong>for Options, Tenant Improvements, Lease Expiration & Insurance. </label>
+							<div class="clear" style="margin-bottom:10px;"></div>
+							<div class="clear" style="margin-bottom:10px;"></div>
+							<%find_users_to_send_weekly_report(property_collection)%>
+							<%if !@data.blank?%>
+							<div style="padding-left:6px;">Property Users :</div>
+							 <div style='padding:1px;background:#eee;width: 750px; margin:10px 0;'><div id="file_collaborators_list" class="add_files_scroll" style="background:#fff;padding: 5px;  <% if (@members && @members.length == 3 || @members.length == 4 ) %>height:86px;<%elsif (@members.length == 5 || @members.length == 6) %>height:137px;<%elsif (@members.length >=7 )%>height:180px;overflow-y: auto; <%else%>height:35px;<%end %>">
+           <%= raw(@data)%>
+						</div><div class='clear'></div></div>
+					<%else%>
+					<div id="file_collaborators_list" style="width: 764px; margin-top: 5px; margin-bottom: 38px;">No  Property Users added.</div>
+
+						<%end%>
+
+						<!--	<input type="checkbox" name="sendInsAlert['<%#= params[:property_id]%>']" id="sendInsAlert" checked  disabled="disabled" /> -->
+							<label for="checkbox2"><strong>Send Insurance Alert Emails</strong> to Tenant, Insurance Broker, along with Manager</label>
+							<div class="clear" style="margin-bottom:10px;"></div>
+						 <!--  <div style="line-height:22px; margin-left:24px;">
+								<input name="input2" type="text" style="width:45px;" class="lstextfield" />
+								<div style="float:left; margin-left:10px;">Days before the date</div>
+							</div> -->
+							<div class="clear" style="margin-bottom:10px;"></div>
+							<small>Note: Alerts will be sent for Insurance Expiration date.</small>
+							</div>
+							<div class="butwrapper" style ="float:right">
+								<div class="greenbutton" style="margin-left:230px;margin-top:5px;">
+									<a href="javascript:;" onclick="jQuery('#alerts_form').submit();load_writter();return false;">Save</a>
+									<span>&nbsp;</span>
+							</div>
+							<%end%>
+							<div class="lsrowwrapper" style="z-index:-100; width:780px"></div>
+            </div>
+						<iframe id="upload_alert" name="upload_alert" style="display: none"></iframe>

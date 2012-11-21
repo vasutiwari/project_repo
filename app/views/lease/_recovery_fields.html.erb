@@ -1,0 +1,112 @@
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<%rent_recovery_option = @rent_recovery_option
+pdf = @pdf
+pdf_convn_path = @pdf_convn_path%>
+<div class="fields">
+  <%if rent_recovery_option != 1%>
+    <div class="close" style="margin-top:10px;" onmouseover="jQuery(this).css('background-color','#f6f6f6')" onmouseout="jQuery(this).css('background-color','#ffffff')">
+      <div class="option_recovery lsrowwrapper" style="padding-top:0;"><span class="closeme"><%= link_to_remove_recovery_fields "X", f%></span>Recovery <%=rent_recovery_option%></div>
+    <%else%>
+      <div class="option_recovery lsrowwrapper">Recovery <%=rent_recovery_option%></div>
+    <%end%>
+    <div class="rent-col-1">
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:87px">Suite</div>
+        <div class="rentname" style="width:87px;">Charge Type</div>
+        <div class="rentname" style="width:88px;">From</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%if pdf%>
+            <span style="width:85px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.suite_id == 0 ? 'All' : f.object.suite_id%></span>
+          <%else%>
+            <%= f.select :suite_id, "<option value=nil>All</option>\n"+options_from_collection_for_select(rent_page_all_suites(@lease), 'id', 'suite_no',f.object.suite_id),{},html_options = {:class => "rentselect recovery_suite", :style=>"width:87px;"}%>
+          <%end%>
+        </div>
+        <div class="rentform">
+          <%if pdf%>
+            <span style="width:85px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.recv_charge_type != '' ? f.object.suite_id : '' %></span>
+          <%else%>
+            <%= f.select :recv_charge_type, options_for_select( Recovery::RECOVERY_TYPE ,f.object.recv_charge_type),{},html_options = {:class => "rentselect", :style=>"width:87px;"}%>
+          <%end%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :from_date ,:type=>"text", :value => (f.object && f.object.from_date.present?) ? lease_date_format(f.object.try(:from_date)) : "mm/dd/yyyy",  :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:66px",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+          <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+        </div>
+      </div>
+      <div class="rent-hr"></div>
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:87px;">Billable SF</div>
+        <div class="rentname" style="width:87px;">Billing Freq</div>
+        <div class="rentname" style="width:88px;">To</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%= f.text_field :billable_sqft ,:type=>"text", :class=>"lstextfield", :style=>"width:85px",:precision => 2%>
+        </div>
+        <div class="rentform">
+          <%if pdf%>
+            <span style="width:85px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.billed_freq.present? ? f.object.billed_freq : 'Monthly' %></span>
+          <%else%>
+            <%= f.select :billed_freq, options_for_select( Recovery::RECOVERY_BILLING,f.object.billed_freq ),{},html_options = {:class => "rentselect", :style=>"width:87px;"}%>
+          <%end%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :to_date ,:type=>"text", :value => (f.object && f.object.to_date.present?) ? lease_date_format(f.object.try(:to_date)) : "mm/dd/yyyy",  :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:66px",:size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}" , :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+          <%if pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+        </div>
+      </div>
+    </div>
+    <div class="rent-col-2">
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:119px">Recovery Method</div>
+        <div class="rentname" id= "base_yr_label<%=rent_recovery_option%>" style="width:119px;margin-left:40px;<%=f.object.recovery_method.eql?('Base Year') ? 'display : block': 'display : none'%>">Base Yr</div>
+        <div class="rentname" id= "base_amt_label<%=rent_recovery_option%>" style="width:100px;margin-left:40px;<%=(f.object.recovery_method != 'Base Year') ? 'display : block': 'display : none'%>">Base Amt $</div>
+        <div class="rentname" id= "annual_label<%=rent_recovery_option%>" style="width:119px;margin-left:1px;<%=f.object.recovery_method.eql?('Expense Stop Annual %') ? 'display : block': 'display : none'%>">Annual %</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%if pdf%>
+            <span style="width:117px;line-height:20px; border: 1px solid #CCCCCC;  text-align: left; float:left;display:block; height:20px; text-indent:5px;"><%=f.object.recovery_method != '' ? f.object.recovery_method : 'Select' %></span>
+          <%else%>
+            <%= f.select :recovery_method, options_for_select( Recovery::RECOVERY_METHOD,f.object.recovery_method ), html_options = {:class => "rentselect", :style=>"width:119px;"}, :onchange => "onchange_handler_for_recovery( this.id, this.value );"%>
+					<%end%>
+        </div>
+				<div class="rentform">
+          <%= f.text_field :value ,:type=>"text", :class=>"rentselect", :style=>"width:85px;#{(f.object.recovery_method != 'Base Year') ? 'display : block': 'display : none'}",:precision => 2%>
+					</div>
+				<div class="rentform">
+          <%= f.text_field :base_yr ,:type=>"text", :class=>"rentselect", :style=>"width:85px;#{f.object.recovery_method.eql?('Base Year') ? 'display : block': 'display : none'}",:precision => 2%>
+        </div>
+				<div class="rentform">
+          <%= f.text_field :annual ,:type=>"text", :class=>"rentselect", :style=>"width:85px;#{f.object.recovery_method.eql?('Expense Stop Annual %') ? 'display : block': 'display : none'}",:precision => 2%>
+        </div>
+      </div>
+      <div class="rent-hr"></div>
+      <div class="rentnamerow boldtxt">
+        <div class="rentname namefirst" style="width:117px;">Fixed Pro-rata %</div>
+        <div class="rentname" style="width:117px;">Gross Up %</div>
+        <div class="rentname" style="width:117px;">Expense Cap Amt($)</div>
+      </div>
+      <div class="rentnamerow">
+        <div class="rentform namefirst">
+          <%= f.text_field :fixed_prorata ,:type=>"text", :class=>"lstextfield", :style=>"width:115px",:precision => 2%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :gross_up ,:type=>"text", :class=>"lstextfield", :style=>"width:115px",:precision => 2%>
+        </div>
+        <div class="rentform">
+          <%= f.text_field :expense_cap ,:type=>"text", :class=>"lstextfield", :style=>"width:115px;",:precision => 2%>
+        </div>
+      </div>
+    </div>
+    <div class="clear"></div>
+    <%if rent_recovery_option != 1%>
+    </div>
+  <%end%>
+  <%@rent_recovery_option +=1 %>
+</div>
+

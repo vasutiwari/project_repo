@@ -1,0 +1,162 @@
+<%p @value %>
+<%suite_ids = @lease.try(:property_lease_suite).try(:suite_ids)
+rent_sqft = 0
+rent_sqft = Suite.find_all_by_id_and_real_estate_property_id(suite_ids, params[:property_id]).map(&:rentable_sqft).compact.sum if suite_ids.present? %>
+<%test=@value.eql?(1) ? "Listing" : (@value.eql?(2) ? "Procurement" : "Bonus") %>
+<div class="capexnamerow">
+    <div class="capexname namefirst" style="width:95px; text-align:left">
+        <%=test %>
+    </div>
+    <div class="capexform">
+        <%= f.text_field :broker_or_agent ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:88px;margin-right:15px" %>
+    </div>
+    <%if @value.eql?(1) %><%= f.hidden_field :leasing_commission_type, :value => "Listing" %><%elsif @value.eql?(2) %><%= f.hidden_field :leasing_commission_type, :value => "Procurement" %><%elsif @value.eql?(3) %><%= f.hidden_field :leasing_commission_type, :value => "Bonus" %><%end %>
+
+		<div class="for_use_percentage">
+		    <% unless @value.eql?(3) %>
+				<%if @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true%>
+				<div class="numberform" style="padding-left:15px" >
+						<%= f.text_field :percentage_for_first_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_second_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_third_year,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_fourth_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_fifth_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_sixth_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_seventh_year,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_eighth_year,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_ninth_year,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_tenth_year ,:type=>"text", :class=>"lstextfield lease_com check_percentage", :style=>"width:24px;",:precision => 2 %>
+				</div>
+			<%elsif !@pdf%>
+							<div class="numberform" style="padding-left:15px" >
+						<%= f.text_field :percentage_for_first_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_second_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_third_year,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_fourth_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_fifth_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_sixth_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_seventh_year,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_eighth_year,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_ninth_year,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+				<div class="numberform">
+						<%= f.text_field :percentage_for_tenth_year ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:24px;",:precision => 2 %>
+				</div>
+			<%end %>
+    <!--<div class="numbername">
+        or
+    </div>-->
+    <%end %>
+	</div>
+	<!--for use_total_amount start-->
+<%if @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage == true && @value.eql?(3)%>
+			<div class="capexform"><span style="float:left;">Total Amt&nbsp;&nbsp;</span><%= f.text_field :total_amount ,:type=>"text", :class=>"lstextfield lease_tot_amt lease_com", :style=>"width:82px;",:precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_psf_calc')" %>
+			</div>
+			<div class="capexform"><span style="float:left;">$/SF&nbsp;&nbsp;</span>
+					<%= f.text_field :dollar_per_sf ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:82px;",:precision => 2, :onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_tot_calc')" %>
+			</div>
+<%elsif @pdf && @lease && @lease.cap_ex && @lease.cap_ex.is_percentage != true %>
+			<div class="capexform"><%= f.text_field :total_amount ,:type=>"text", :class=>"lstextfield lease_tot_amt lease_com", :style=>"width:82px;",:precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_psf_calc')" %>
+			</div>
+			<div class="capexform">
+					<%= f.text_field :dollar_per_sf ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:82px;",:precision => 2, :onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_tot_calc')" %>
+			</div>
+<%elsif !@pdf%>
+			<div class="capexform"><span style="float:left;" id="<%if @value.eql?(1)%>for_use_total_amount_1<%elsif @value.eql?(2)%>for_use_total_amount_2<%else%>for_use_total_amount_3<%end%>">Total Amt&nbsp;&nbsp;</span><%= f.text_field :total_amount ,:type=>"text", :class=>"lstextfield lease_tot_amt lease_com", :style=>"width:82px;",:precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_psf_calc')" %>
+			</div>
+			<div class="capexform"><span style="float:left;" id="<%if @value.eql?(1)%>for_use_per_sf_1<%elsif @value.eql?(2)%>for_use_per_sf_2<%else%>for_use_per_sf_3<%end%>">$/SF&nbsp;&nbsp;</span>
+					<%= f.text_field :dollar_per_sf ,:type=>"text", :class=>"lstextfield lease_com", :style=>"width:82px;",:precision => 2, :onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'lease_tot_calc')" %>
+			</div>
+<%end%>
+	<!--for use_total_amount end-->
+	
+	
+    <!--for leasing commissions notes start--><%if @value.eql?(3) %>
+    <div class="rentnamerow" style="padding:5px 0;">
+      <div id="lease_comm_id" style="<%if @lease.cap_ex && @lease.cap_ex.leasing_commissions[2] && @lease.cap_ex.leasing_commissions[2].note &&@lease.cap_ex.leasing_commissions[2].note.content.present?%>display:none;<%else%>display:block;<%end%>">
+        <span class="version rentnamelinkrt"><%unless @pdf %>+ <a onclick="jQuery('#lease_comm_id').hide();colExp('NotesLeasingCom')" onmouseover="focusDivOver('NotesLeasingCom')" onmouseout="focusDivOut('NotesLeasingCom')">Notes</a><%end %>
+        </span>
+      </div>
+        <div class="notesnamerow" id="NotesLeasingCom" onmouseover="focusDivOver('NotesLeasingCom')" onmouseout="focusDivOut('NotesLeasingCom')" style="<%if @lease.cap_ex && @lease.cap_ex.leasing_commissions[2] && @lease.cap_ex.leasing_commissions[2].note &&@lease.cap_ex.leasing_commissions[2].note.content.present?%>display:block;<%else%>display:none;<%end%>">
+            <div class="lsrowwrapper" style="padding-top:0;">
+                <span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesLeasingCom').hide();jQuery('#lease_comm_id').show();jQuery('#lease_cap_ex_attributes_leasing_commissions_attributes_2_note_attributes_content').val('');return false;}">X</span>Notes
+            </div>
+            <div class="termsform" style="padding-left:0px;">
+                <%= f.fields_for :note do |lease_com_note| %>
+                <%if @lease.cap_ex && @lease.cap_ex.leasing_commissions[2] && @lease.cap_ex.leasing_commissions[2].note && @lease.cap_ex.leasing_commissions[2].note.content.present? %>
+                <%= lease_com_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px",:value=>@lease.cap_ex.leasing_commissions[2].note.content%>
+                <%else %>
+                <%= lease_com_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px",:value=>""%>
+                <%end %>
+                <%end %>
+            </div>
+        </div>
+    </div>
+    <!--for leasing commissions notes end-->
+    <%end %>
+</div>
+<%@value+=1 %>
+
+<script>
+    jQuery(document).ready(function(){
+		    jQuery("textarea[class*=expand]").TextAreaExpander();
+        jQuery("leasing_commision_note[class*=expand]").TextAreaExpander();
+        jQuery("cap_ex_note[class*=expand]").TextAreaExpander();
+        jQuery('.lease_tot_amt').each(function(){
+            capx_calc(jQuery(this).attr('id'), jQuery(this).val(), '<%=rent_sqft%>', 'lease_psf_calc');
+        });
+    });// JavaScript Document
+    function colExp(objid){
+        var obj = document.getElementById(objid);
+        obj.style.display = obj.style.display == "" ? "none" : "";
+    }
+
+    function addDivRow(objid){
+        var obj = document.getElementById(objid);
+        obj.style.display = "block";
+    }
+
+    function focusDivOver(objid){
+        var obj = document.getElementById(objid);
+        obj.style.backgroundColor = obj.style.backgroundColor == "#f6f6f6" ? "#ffffff" : "#f6f6f6";
+    }
+
+    function focusDivOut(objid){
+        var obj = document.getElementById(objid);
+        obj.style.backgroundColor = obj.style.backgroundColor == "#ffffff" ? "#f6f6f6" : "#ffffff";
+    }
+</script>

@@ -1,0 +1,60 @@
+<%
+property_collection = @property
+portfolio_collection = @portfolio
+%>
+<script>
+active_call="note_terms";
+enable_disable_tab('note_terms',active_sub_call);
+active_sub_call = 'note_terms';
+partial_page = "debt"
+</script>
+<%validation = show_or_hide_loan_details%>
+<div id="show_assets_list">
+<div id="time_line_selector"></div>
+<div id="portfolio_overview_property_graph" >
+
+<%v = validation.delete_if{|l| l.empty?}%>
+<div class="rhscontentrow">
+<div class="descriptionheadcol" style="width:529px;"><span> Debt Summary</span></div>
+
+<% if @val_emp.include?(false) && !v.empty?%>
+		<div class="breadcrumbrow" style="padding-left:602px;*padding-left:589px;margin-top:-17px;*margin-top:-16px;width:180px;font-weight:normal;font-size:12px;font-family:Verdana,Arial,sans-serif">
+          <%=render :partial=>"properties/edit_property",:locals=>{:edit_inside_asset=>"false",:from_debt_summary=>'true',:from_property_details=>'false'}%>
+		</div>
+		
+<%end%>
+</div>
+
+<%i=1%>
+<br/><br/><br/><br/>
+
+	<%loan_terms = ["Loan Amount","Date of Promissory Note","Maturity","Interest Rate","Lender","Loan Balance","Term","Payments","Tax Escrow Payments","Prepayment","Replacement Reserve","Tenant Improvement and Leasing Commission Reserve","Guarantors"]%>
+<% if @val_emp.include?(false) && !v.empty?%>
+	<%@loan_hash.compact.each do |loan_detail|%>
+	<div class="rhscontntcol<%=i%>">
+	<div class="propertydetails">
+	<h3 style="color:#5F5F5F"><%="Loan #{i}"%></h3>
+	<%loan_terms.uniq.each do |loan|%>
+	<div class="propertydetails">
+	<div class="bulletcol1"><img src="/images/bulletarrow.png"  width="8" height="7"/></div>
+	<div class="label1"><%=loan %></div>
+	<%if loan == "Date of Promissory Note" || loan == "Maturity"%>
+	<div class="label2">: <%if !(loan_detail[loan].blank?) %><%= loan_detail[loan].to_date.strftime("%d %b %Y")%><%end%></div>
+	<%else%>
+	<div class="label2">: <%=loan_detail[loan] %> </div>
+	<%end%>
+	</div>
+	<%end%>
+	<%i+=1%>
+		</div>
+		</div>
+	<% end %>
+<%else%>	
+  <br/><br/><br/>
+	<h3 class="label1" style="width:600px;">	No debt summary details available. Please
+				<a id="shared_file_add" href="/real_estates/add_property/<%= portfolio_collection.id%>?property_id=<%=property_collection.id%>&partial_disp=property_settings&from_debt_summary=true" method="put" style='text-decoration:none;'>Add loan details</a>
+				<script>//new Control.Modal($('shared_file_add'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+ </h3>
+<%end%>	
+</div>
+</div>

@@ -1,0 +1,78 @@
+<%= form_tag({:action =>"send_mail_to_prop_users" ,:controller => "performance_review_property",:id=>note_collection.id,},:remote=>true, :target => "upload_frame_add_prop_user", :id => "prop_user_mail_form")  do %>
+<%if !@data.blank?%>
+<div class="basicbodycontainer" style="height:auto;width:775px;">
+<div class="lightbox_container2" style="width:730px;">
+  <div class="lightbox_threshold">
+    <div class="lightbox_headerow">
+      <div class="headerow_coll1">
+  	   		<img width="18" height="17" src="/images/add_collabaraters_icon.png"/> Send Message to Property Users <span  id='add_contact_step_property' style='font-size:12px;'></span>
+			</div>
+    </div>
+
+    <div class="collab_lightbox_contentrow" style="width:722px;">
+      <div class="add_users_contentrow">
+        <div class="add_users_headercol">Select  users to send message</div>
+        <div class="add_users_fieldrow">
+        <div id="addpropertyrow_to" style="clear:left;padding:8px 0 0;">To</div>
+        <div class="add_users_collaboraterow">
+				 <div id="file_collaborators_list" class="add_files_scroll" style="width: 680px; margin-top: 5px; overflow-y: auto;height:<%=(@members && @members.length >=8 ? 87 : 63)%>px;">
+           <%= raw(@data)%>
+						</div>					
+        </div>
+      </div>
+    </div>
+		<div>&nbsp;</div>
+    <div class="collab_lightbox_contentrow" style="width:722px;">
+      <div class="add_users_contentrow bottompadding">
+        <div class="add_users_headercol">Send a message<span class="graycolur">  A link to the current page will be added to your message</span></div>
+        <div class="add_users_fieldrow">
+          <textarea style="height: 50px;" rows="3" cols="83" name="textarea"></textarea>
+        </div>
+        </div>
+  </div>
+  </div>
+  <div class="buttonwrapper2" id="save_cancel_button">
+    <div id="save_button" class="greenbutton">
+		<a href="javascript:;" onclick="document.getElementById('prop_user_mail_form').value = 'true';document.forms.prop_user_mail_form.submit();">Send</a><span>&nbsp;</span></div>
+    <div id="cancel_button" class="graybutton"><a href="javascript:;" onclick='Control.Modal.close();return false;' style="cursor: pointer;" >Cancel</a><span>&nbsp;</span></div>
+  </div>
+	</div>
+	</div>
+	</div>
+	<%end%>
+	<%if @data.blank?%>
+	<div class="basicbodycontainer" style="height:auto;width:527px;">
+		<div class="dialog_light_center">
+				<div class="dialog_second_center">
+  					<div class="uploadheaderow">
+							<div class="uploadheadercoll">Send Message to Property Users</div>
+						</div>
+					<div class="uploadwrapper">
+						<div class="uploadrow" style="width:457px;">
+							<div class="uploadlabelrow">
+									<div class="newfolder_fieldlabel" style="font-weight:normal;">
+									
+									Please <a href="/real_estates/add_property/<%= note_collection.portfolio_id%>/?property_id=<%=note_collection.id%>&highlight_users_form=true" method="put" style="width:16,height:16,border:0;">Add Property Users</a> to Send Message
+									
+ 									 Please <%#= link_to 'Add Property Users',{:action =>'add_property',:controller => "real_estates",:id =>note_collection.portfolio_id,:property_id=>note_collection.id,:edit_inside_asset=>params[:edit_inside_asset],:from_debt_summary=>params[:from_debt_summary],:from_property_details=>params[:from_property_details],:tl_month=>params[:tl_month],:document_id=>params[:document_id],:month=>params[:month],:highlight_users_form=>true,:call_from_variances=>true},{:id => "edit_note_box_2#{note_collection.id}"}%> to Send Message
+									 					<script>//new Control.Modal($("edit_note_box_2<%#=note_collection.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+														
+														<span></span><br/>
+              </div>
+							</div>
+						</div>
+						<div class="newfolder_fieldlabel" style="font-weight:normal;margin-top:6px;margin-left:5px;font-size:11px;">Note: After adding Property Users please come back here.</div>
+					</div>
+			</div>
+		</div>
+<div class="bot"></div>
+<%end%>
+	<h4> &nbsp;</h4>
+	<iframe id="upload_frame_add_prop_user" name="upload_frame_add_prop_user" style="display: none"></iframe>
+	<a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer; right: -12px;"></a>
+</div>
+<%end%>
+
+
+
+

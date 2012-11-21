@@ -1,0 +1,56 @@
+if request.env['HTTP_REFERER'] &&  request.env['HTTP_REFERER'].include?("acquisitions")
+  common_update_page(page,["head_for_titles","overview"],["/property_acquisitions/titles/","/properties/portfolio_overview/"],{"head_for_titles"=>{:portfolio_collection => @portfolio,:note_collection => @note},"overview"=>{}})
+else
+  if params[:partial_page] == "leases_and_occupancy"
+    @time_line = RentRoll.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+    @time_line_actual = Actual.find(:all,:conditions=>["resource_id =? and resource_type=?",@note.id, 'RealEstateProperty'])
+    @time_line_rent_roll = @time_line if !@time_line.nil?
+    common_update_page(page,["head_for_titles","overview"],["/properties/head_for_titles/","/properties/leases_and_occupancy/"],{"head_for_titles"=>{:portfolio_collection => @portfolio,:note_collection => @note},"overview"=>{:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:timeline_selector =>@timeline_selector,:period=>@period,:note_collection=>@note,
+    :time_line_start_date=>@time_line_start_date,:time_line_end_date=>@time_line_end_date,:rent_roll=>@rent_roll,:end_date=>@end_date,:portfolio_collection=>@portfolio,
+    :user_id_graph=>@user_id_graph,:navigation_start_position=>@navigation_start_position,:rent_area=>@rent_area,:prop_collection=>@prop,:rent_sum=>@rent_sum,
+    :aged_recievables=>@aged_recievables,:start_date =>@start_date}})
+    page[:current_note].innerHTML = @note.property_name
+  elsif params[:partial_page] == "cash_and_receivables"
+    property_suite_ids = PropertySuite.find(:all,:conditions=>["real_estate_property_id = ?",@note.id]).collect{|s| s.id}
+    month =  @dates[1]
+    year =	@dates[0]
+    @financial = true
+    store_income_and_cash_flow_statement_for_month(@dates[1].to_i,@dates[0].to_i)
+    @account_receivables_aging = PropertyAgedReceivable.find(:all,:conditions=>["property_suite_id in (?) and month = ? and year = ? AND !(round(over_30days) = 0 AND   round(over_60days) = 0 AND round(over_90days) = 0 AND round(over_120days) = 0)", property_suite_ids,month,year]).paginate(:page=>params[:page],:per_page=>30,:order=>params[:sort],:include=>["property_suite"])
+    page.replace_html "portfolio_overview_property_graph", :partial => "/properties/cash_and_receivables/",:locals =>{:time_line_actual => @time_line_actual,
+      :time_line_rent_roll => @time_line_rent_roll,:notes_collection => @notes,:cash_flow_statement => @cash_flow_statement,:operating_statement => @operating_statement,:account_receivables_aging => @account_receivables_aging,:start_date => @start_date,:note_collection => @note}
+  elsif params[:partial_page] == "financial"
+    page.replace_html "portfolio_overview_property_graph", :partial => "/properties/property_financial_performance/",:locals=>{:operating_statement=>@operating_statement,:explanation=>@explanation,:notes_collection=>@notes,:note_collection=>@note,:start_date=>@start_date,:time_line_actual=>@time_line_actual,:actual=>@actual,
+    :navigation_start_position=>@navigation_start_position,:time_line_rent_roll => @time_line_rent_roll,:portfolio_collection =>@portfolio}
+  elsif params[:partial_page] == "capital_expenditure"
+    page.replace_html "portfolio_overview_property_graph", :partial => "/properties/capital_expenditures/",:locals=>{:cap_exp_collection => @cap_exp,:note_collection => @note,
+:start_date => @start_date,:portfolio_collection=>@portfolio}
+  elsif params[:partial_page] == "rent_roll"
+    page.replace_html "portfolio_overview_property_graph", :partial => "/properties/wres/rent_roll",:locals=>{:rent_roll_wres => @rent_roll_wres,:portfolio_collection => @portfolio,:note_collection => @note,:navigation_start_position => @navigation_start_position,:start_date => @start_date}
+  elsif params[:partial_page] == "leases"
+    @lease = true
+    wres_lease_details(@dates[1], @dates[0])
+    page << "jQuery('.executiveheadcol_for_title').html('<span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Leases');"
+    page.replace_html "portfolio_overview_property_graph" , :partial => "/wres_properties/wres_lease_performance"
+  elsif params[:partial_page] == "financial_subpage"
+    wres_calculate_the_financial_sub_graph_for_month(@dates[1].to_i,@dates[0].to_i)
+    page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/wres/property_financial_sub_page",:locals=>{:color_display=>@color_display,
+:time_line_actual=>@time_line_actual,:explanation=>@explanation,:totals=>@totals,:current_time_period=>@current_time_period,:note_collection=>@note,:revenue_act=>@revenue_act,
+:revenue_bud=>@revenue_bud,:revenue_var=>@revenue_var,:total_var_ope_expense_act=>@total_var_ope_expense_act,:total_var_ope_expense_bud=>@total_var_ope_expense_bud,:total_var_ope_expense_var=>@total_var_ope_expense_var,:total_var_ope_expense_per=>@total_var_ope_expense_per,:asset_details=>@asset_details,:start_date=>@start_date,
+:year_collection=>@year,:revenue_percentage=>@revenue_percentage,:portfolio_collection => @portfolio,:v_collection=>@v,:doc_collection=>@doc}
+  elsif params[:partial_page] =="lease_sub_tab"
+    @lease = true
+    sub_tab = {"renewal" => "Renewals", "new" => "New Leases", "expirations" => "Expirations"}
+    occupancy_type = params[:occupancy_type] if params[:occupancy_type]
+    if params[:occupancy_type] == "renewal" || params[:occupancy_type] == "new" || params[:occupancy_type] == "expirations"
+      lease_sub_details(@dates[1], @dates[0], occupancy_type)
+      val_str = "jQuery(\'.executiveheadcol_for_title\').html(\'<div class=\"executivesubheadcol\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span><a href=\"#\" onclick=\"performanceReviewCalls(\\'lease\\',{});return false;\">Leases</a><img width=\"10\" height=\"9\" src=\"/images/eventsicon2.png\">&nbsp;</div><div class=\"executivesubheadcol\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>#{sub_tab[params[:occupancy_type]]}</div>\');"
+      @sub_leases.empty? ? page << "jQuery('.executiveheadcol_for_title').html('<span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>Leases');"	 : page << val_str
+      page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/property_lease_sub_performance",:locals => {:sub_leases => @sub_leases,
+    :start_date => @start_date,:note_collection => @note}
+    end
+  else
+    page.replace_html "portfolio_overview_property_graph", :partial =>"/properties/portfolio_overview_property_graph/"
+    page[:current_note].innerHTML = @note.property_name
+  end
+end

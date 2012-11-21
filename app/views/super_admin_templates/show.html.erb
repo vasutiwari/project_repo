@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Folder name:</b>
+  <%= @super_admin_template.folder_name %>
+</p>
+
+<p>
+  <b>Template:</b>
+  <%= @super_admin_template.template_id %>
+</p>
+
+<p>
+  <b>Parent:</b>
+  <%= @super_admin_template.parent_id %>
+</p>
+
+<p>
+  <b>Is editable:</b>
+  <%= @super_admin_template.is_editable %>
+</p>
+
+
+<%= link_to 'Edit', edit_super_admin_template_path(@super_admin_template) %> |
+<%= link_to 'Back', super_admin_templates_path %>

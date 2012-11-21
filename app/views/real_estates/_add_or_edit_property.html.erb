@@ -1,0 +1,24 @@
+<% if params[:edit_from_room] %>
+  <input type="hidden" name="edit_from_room" value="true"/>
+<% end %>
+<div style="display:block;">
+<%if (params[:call_from_prop_files] == 'true' && params[:add_property] != 'true' && params[:highlight_basic_form] != 'true') || params[:is_property_folder] == "true" || params[:highlight_users_form] == "true"%>
+    <%=render :partial=>"users_form"%>
+<%elsif params[:from_debt_summary] == 'true'%>
+    <%form_hash_for_loan_details%>
+    <%=render :partial=>"loan_form"%>
+  <%elsif params[:from_property_details] == 'true'%>
+    <%=render :partial=>"property_form"%>
+  <%elsif params[:call_from_variances] == 'true'%>
+    <%=render :partial=>"variances_form"%>
+	<%elsif params[:call_from_suites] == 'true' || params[:suite_id]%>
+    <%=render :partial=>"suites_form"%>
+	<%#elsif params[:call_from_alerts] == 'true'%>
+    <%#=render :partial=>"alerts_form"%>
+	<%elsif(params[:highlight_basic_form] == 'true' || params[:add_property] == 'true')%>
+    <%=render :partial=>"basic_form"%>
+  <%else%>
+    <%=render :partial=>"basic_form"%>
+  <%end%>
+</div>
+

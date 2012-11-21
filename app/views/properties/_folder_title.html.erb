@@ -1,0 +1,12 @@
+<!-- breadcrumb display start -->
+<div class="breadcrumbbar"  id = "folder_title">
+<%if params[:parent_delete] != "true"%>
+	<div class="breadcrumblabel" style="padding-left:0px;">
+	<div class="setupiconrow" style="margin-left:0px;">
+		<img src="/images/asset_breedcrumb_icon.png" width="16" height="16" border="0" />
+	</div>
+	<%=raw(breadcrump_display_asset_manager_real_estate(@folder,'true')) %>&nbsp;<span id="loader_info" style="display:none;"><img src="/images/upload_spinner.gif" /></span>
+	</div>
+<%end%>
+</div>
+<!-- breadcrumb display end -->

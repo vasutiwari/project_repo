@@ -1,0 +1,19 @@
+<div class="contentwrapper">
+	<div class="new_portfolio"><a href=<%=new_admin_property_management_system_path%>>Create New Property Management System</a></div>
+</div>
+<!-- Steps Navigation ends -->
+<div class="fieldrow" id="disp_msg">
+	<% unless flash.now[:notice].blank? -%>
+		<center><%=flash.now[:notice]%></center>
+	<% end -%>
+</div>
+<div class="adpmiddlewrapper" id ="buyer_portfolio_list">
+	<%= render :partial => "user_list",:locals=>{:property_management_systems =>@property_management_systems}%>
+	<br class="spacer" />
+</div>
+
+<script>
+	<% if !flash[:notice].blank? %>
+		write_flash('disp_msg');
+	<% end %>
+</script>

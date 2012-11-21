@@ -1,0 +1,107 @@
+<div class="executivecontentrow property_exec">
+  <div class="prop_tablewrapper">
+    <div class="topbig">
+      <div class="executiveheadercol" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Net Units Avail </div>
+      <div class="executiveheadercol3" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Rent </div>
+    </div>
+    <div class="midbig">
+      <div class="executivetablebarrow">
+        <div class="prop_tablewrapper2">
+          <div class="prop_table3_headerow">
+            <div class="prop_tablecoll1">&nbsp;</div>
+            <div class="prop_table3_head1_coll2">Net Units Avail</div>
+            <div class="prop_table3_head1_coll3">Net Units Avail %</div>
+          </div>
+          <div class="prop_tablerow">
+            <div class="prop_tablecoll1">&nbsp;</div>
+            <div class="prop_tablecoll3">Crnt</div>
+            <div class="prop_tablecoll6">1Wk</div>
+            <div class="prop_tablecoll6">4Wk</div>
+            <div class="prop_table3_coll6">Crnt</div>
+            <div class="prop_table3_coll7">1Wk</div>
+            <div class="prop_table3_coll7">4Wk</div>
+            <div class="prop_tablecoll5">&nbsp;</div>
+            <div class="prop_table4_coll3">RTR</div>
+            <div class="prop_table4_coll3">Min Rent</div>
+            <div class="prop_table4_coll3">Max Rent</div>
+          </div>
+          <%for i in 0...count%>
+            <div class="prop_tablerow">
+              <div class="prop_tablecoll1"><%=@property_week_floor[i]%></div>
+              <div class="prop_tablecoll3"><%=@current[i]%></div>
+              <div class="prop_tablecoll6"><%=acc_type == 'YARDI V1' ? raw("&nbsp;") : @wk1[i]%></div>
+              <div class="prop_tablecoll6"><%=acc_type == 'YARDI V1' ? raw("&nbsp;") : @wk4[i]%></div>
+              <%prop_week_net_units = property_weekly_display_net_units(i,'crnt')%>
+              <div class="prop_table3_coll6"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'property_week_net_units',prop_week_net_units)%>;"><%=prop_week_net_units%></span></div>
+              <div class="prop_table3_coll7"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") : property_weekly_display_net_units(i,'wk1')%></div> <!-- property_weekly_display_net_units(i,'wk1') -->
+              <div class="prop_table3_coll7"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") : property_weekly_display_net_units(i,'wk4')%></div><!-- property_weekly_display_net_units(i,'wk4') -->
+              <div class="prop_tablecoll5">&nbsp;</div>
+              <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@rtr[i]%></div>
+              <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@min_rent[i]%></div>
+              <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@max_rent[i]%></div>
+            </div>
+          <%end%>
+          <div class="prop_table_headerow">
+            <div class="prop_tablecoll1">Total</div>
+            <div class="prop_tablecoll3"><%=@netunits_avail_crnt_total%></div>
+            <div class="prop_tablecoll6"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk1_total%></div><!-- @netunits_avail_wk1_total -->
+            <div class="prop_tablecoll6"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk4_total%></div><!-- @netunits_avail_wk4_total -->
+            <div class="prop_table3_coll6"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'property_week_total_net_units')%>;"><%=@netunits_avail_crnt_per%></span></div>
+            <div class="prop_table3_coll7"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk1_per%></div><!-- @netunits_avail_wk1_per -->
+            <div class="prop_table3_coll7"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@netunits_avail_wk4_per%></div><!-- @netunits_avail_wk4_per -->
+            <div class="prop_tablecoll5">&nbsp;</div>
+            <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_rtr%></div><!-- @total_rtr -->
+            <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_min_rent%></div><!-- @total_min_rent -->
+            <div class="prop_table4_coll3"><%= acc_type == 'YARDI V1' ? raw("&nbsp;") :@total_max_rent%></div><!-- @total_max_rent -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombig">&nbsp;</div>
+  </div>
+</div>
+<div class="executivecontentrow property_exec">
+  <div class="prop_tablewrapper">
+    <div class="topbig">
+      <div class="executiveheadercol3" style="margin-left:192px;font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Traffic </div>
+    </div>
+    <div class="midbig">
+      <div class="executivetablebarrow">
+        <div class="prop_tablewrapper5">
+          <div class="prop_table5_headerow">
+            <div class="prop_tablecoll1">&nbsp;</div>
+            <div class="prop_table5_head1_coll2">Traffic</div>
+            <div class="prop_table5_head1_coll3">Dep</div>
+          </div>
+          <div class="prop_tablerow5">
+            <div class="prop_tablecoll1">&nbsp;</div>
+            <div class="prop_table2_coll4">PI</div>
+            <div class="prop_table5_coll3">WI</div>
+            <div class="prop_table5_coll4">Total</div>
+            <div class="prop_table5_coll3">Rej</div>
+            <div class="prop_table2_coll2">Canc</div>
+          </div>
+          <%for i in 0...count%>
+            <div class="prop_tablerow5">
+              <div class="prop_tablecoll1"><%=@property_week_floor[i]%></div>
+              <div class="prop_table2_coll4"><%=@pi_total[i]%></div>
+              <div class="prop_table5_coll3"><%=@wi_total[i]%></div>
+              <div class="prop_table5_coll4"><%=@dep_total[i]%></div>
+              <div class="prop_table5_coll3"><%=@dep_rej[i]%></div>
+              <div class="prop_table2_coll2"><%=@dep_canc[i]%></div>
+            </div>
+          <%end%>
+          <div class="prop_table5_headerow2">
+            <div class="prop_tablecoll1">Total</div>
+            <div class="prop_table2_coll4"><%=@trafic_pi_total%></div>
+            <div class="prop_table5_coll3"><%=@trafic_wi_total%></div>
+            <div class="prop_table5_coll4"><%=@trafic_dep_total%></div>
+            <div class="prop_table5_coll3"><%=@trafic_rej_total%></div>
+            <div class="prop_table2_coll2"><%=@trafic_canc_total%></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombig">&nbsp;</div>
+  </div>
+</div>

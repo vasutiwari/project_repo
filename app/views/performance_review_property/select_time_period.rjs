@@ -1,0 +1,173 @@
+if params[:from_performance_review] == "true"
+  page << "jQuery('#time_line_selector').show();"
+  page << "jQuery('.subheaderwarpper').show();"
+end
+if params[:partial_page]
+	  set_quarterly_msg(page) if(params[:period] =="2" || params[:tl_period] =="2") 
+    for_notes_year_to_date  
+	if params[:partial_page] == "balance_sheet"			
+		balance_sheet
+  elsif params[:partial_page] == "balance_sheet_sub_page"		
+		balance_sheet_sub_page		
+ 	elsif params[:partial_page] == "cash_and_receivables"
+    cash_and_receivables 
+	  page.replace_html "acc_receivable_aging" , :partial => "/properties/acc_receivable_aging",:locals => {:account_receivables_aging => @account_receivables_aging,:id =>(params[:note_id] ? params[:note_id] : params[:id])} 	if (params[:partial_page] == "cash_and_receivables"  && params[:sort])
+    page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "cash_and_receivables", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date } unless params[:sort]
+	elsif params[:partial_page] == "cash_and_receivables_for_receivables"
+    cash_and_receivables_for_receivables
+     find_redmonth_start_for_recv(find_selected_year(Date.today.year))
+        timeline_msg = find_timeline_message        
+    page.replace_html "portfolio_overview_property_graph", :partial => "/properties/cash_and_receivables_for_receivables/",:locals =>{:time_line_actual => @time_line_actual,
+        :time_line_rent_roll => @time_line_rent_roll,:notes_collection => @notes,:cash_flow_statement => @cash_flow_statement,:operating_statement => @operating_statement,:account_receivables_aging_for_receivables => @account_receivables_aging_for_receivables,:start_date => @start_date,:note_collection => @note}
+    #~ page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "cash_and_receivables_for_receivables", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date } unless params[:sort]
+    if @note && @note.property_name.present?
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Account Receivables Aging #{timeline_msg}</div>');"
+    else
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Account Receivables Aging #{timeline_msg}</div>');"
+    end 
+	elsif params[:partial_page] == "portfolio_partial"
+    page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "portfolio_partial", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+		if @note && (find_accounting_system_type(1,@note) || find_accounting_system_type(2,@note) || (( find_accounting_system_type(0,@note) || remote_property(@note.accounting_system_type_id)) && is_commercial(@note)) || check_yardi_commercial(@note))
+       page.replace_html "portfolio_overview_property_graph", :partial => "/properties/prop_summary"
+		 elsif @note && ((find_accounting_system_type(3,@note) || find_accounting_system_type(4,@note) ) || ((find_accounting_system_type(0,@note) || remote_property(@note.accounting_system_type_id)) && is_multifamily(@note)) || check_yardi_multifamily(@note))
+       page.replace_html "portfolio_overview_property_graph", :partial => "/properties/wres/prop_summary"
+	 end		 
+  elsif params[:partial_page] == "leases"
+		today= Date.today
+    lease_details(nil,Date.today.year) if @period=="4" || @period == "8"
+    lease_details(@end_date.to_date.month,@start_date.to_date.year) if @period == "7" 
+    lease_details(today.prev_month.month,today.prev_month.year) if @period=="5"
+    if @period == "2"
+    year=find_selected_year(Date.today.year)
+    lease_details(nil,year) 
+    end
+    if @note.leasing_type == 'Commercial'
+    lease_details(nil,Date.today.prev_year.year)  if @period=="6" || @period=="3"
+    else
+    lease_details(Date.today.end_of_year.month,Date.today.prev_year.year)  if @period=="6" || @period=="3"
+  end
+ 
+    #~ page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "leases", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+    @lease = true  
+    find_redmonth_start_for_leases((find_selected_year(Date.today.year)))
+    timeline_msg= find_timeline_msg_for_leases    
+    if @note.leasing_type == 'Commercial'
+    page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/property_lease_performance",:locals => {:leases_collection => @leases,
+				:note_collection => @note,:month_collection => @month,:start_date => @start_date }
+        if @note && @note.property_name.present?
+          val_str = "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>Leasing #{timeline_msg}: #{@note.property_name}</div>');"
+        else
+          val_str = "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>Leasing #{timeline_msg}</div>');"
+        end
+    !@leases.nil? ? page << val_str : page << val_str
+    else   
+     page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/wres/lease_performance",:locals =>{:wres_leases=>@wres_leases,:note_collection=>@note,
+  :month_collection=>@month,:year_collection=>@year,:explanation=>@explanation,:start_date=>@start_date,:navigation_start_position=>@navigation_start_position}
+        if @note && @note.property_name.present?
+          val_str = "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>Leasing #{timeline_msg}: #{@note.property_name}</div>');"
+        else
+          val_str = "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>Leasing #{timeline_msg}</div>');"
+        end
+    page << val_str
+    end
+  elsif params[:partial_page] == "rent_roll" || params[:partial_page] == 'rent_roll_highlight'
+    @rent_roll = true
+    today= Date.today
+    @tl_month= params[:period] == "7" ? @end_date.to_date.month : today.prev_month.month
+    @tl_year= params[:period] == "7" ? @start_date.to_date.year : today.prev_month.year
+    swig_rent_roll_details(Date.today.prev_month.month,Date.today.year) if @period=="4" || @period == "8" || @period=="2"
+    swig_rent_roll_details(@end_date.to_date.month,@start_date.to_date.year) if @period=="7"
+    swig_rent_roll_details(today.prev_month.month,today.prev_month.year) if @period=="5"
+    swig_rent_roll_details(Date.today.end_of_year.month, Date.today.prev_year.year) if @period=="6" || @period=="3" 
+    #~ page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "rent_roll", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+    if @note.leasing_type == 'Commercial'
+    #~ page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/rent_roll"
+    else
+    page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/wres/rent_roll",:locals=>{:rent_roll_wres => @rent_roll_wres,:portfolio_collection => @portfolio,:note_collection => @note,:navigation_start_position => @navigation_start_position,:start_date => @start_date}
+  end
+    page << "jQuery('#per_tot_rent_roll option[value=#{params[:rent_roll_filter]}]').attr('selected', 'selected');"
+		 find_redmonth_start_for_rent_roll(find_selected_year(Date.today.year))
+     timeline_msg = find_timeline_message
+    if @note && @note.property_name.present?
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Rent Roll #{timeline_msg}: #{@note.property_name}</div>');"
+    else
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Rent Roll #{timeline_msg}</div>');"
+    end
+  elsif params[:partial_page] == "financial" || params[:partial_page] == "balance_sheet"
+    performance_financials(page)
+  elsif params[:partial_page] == 'capital_expenditure'
+    params[:id] =  @note.id
+    calc_for_financial_data_display
+    if @period=="5"
+      params[:tl_month] = @financial_month
+      params[:tl_year] = @financial_year
+      capital_expenditure_month(@financial_month,@financial_year)
+    end
+    capital_expenditure_year if @period=="4"
+    capital_expenditure_month_year if @period=="7" || @period == "2"
+    capital_expenditure_for_year_forecast if @period == "8"
+    capital_expenditure_prev_year if @period == "6" || @period == "3"
+ 	 
+    page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "capital_expenditure", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+    page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/capital_expenditures",:locals=>{:cap_exp_collection => @cap_exp,:note_collection => @note,
+:start_date => @start_date,:portfolio_collection=>@portfolio}
+   property_name = @note.try(:class).eql?(Portfolio) ? @note.try(:name) : @note.try(:property_name)
+if find_accounting_system_type(3,@note)
+    if @note && property_name.present?
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Maintenance Projects</div>');"
+    else
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Maintenance Projects</div>');"
+    end
+      page << "jQuery('#id_for_modify_threshold').hide();"
+  else
+      if @note && property_name.present?
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Capital Expenditures</div>');"
+      else
+      page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Capital Expenditures</div>');"
+      end
+     page << "jQuery('#id_for_modify_threshold').hide();"
+  end
+    #~ page << "jQuery('#id_for_variance_threshold').html('<ul class=inputcoll2 id=cssdropdown><li class=headlink3 id=id_for_modify_threshold><div class=morebutton_label><a id=modify_threshold_#{@note.id} href=#{new_threshold_explanation_path(@note.id)}>Variance Thresholds</a></div><span></span></li></ul>');"
+    #~ page << "new Control.Modal($('modify_threshold_#{@note.id}'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'post'});"
+  elsif params[:partial_page] == "financial_subpage" || params[:partial_page] == "balance_sheet_sub_page"
+	  find_financial_sub_id
+    #~ @show_variance_thresholds = true
+    financial_sub_function_calls
+    page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "financial_subpage", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+    page << "jQuery('.executiveheadcol_for_title').html('#{breadcrumb_in_financial(params[:financial_sub],params[:financial_subid])	}')"
+    @asset_details = @asset_details.collect{|asset| asset if asset.Actuals.to_f.round !=0 || asset.Budget.to_f.round !=0}.compact if @asset_details && !@asset_details.empty?
+    page.replace_html 'portfolio_overview_property_graph', :partial=>"/properties/property_financial_sub_page",:locals=>{:month_collection => @month,
+    :time_line_actual => @time_line_actual,:asset_details_collection => @asset_details,:note_collection => @note,:start_date => @start_date,:color_display => @color_display,
+    :portfolio_collection => @portfolio}
+     page << "jQuery('#id_for_modify_threshold').hide();"
+    #~ page << "jQuery('#id_for_variance_threshold').html('<ul class=inputcoll2 id=cssdropdown><li class=headlink3 id=id_for_modify_threshold><div class=morebutton_label><a id=modify_threshold_#{@note.id} href=#{new_threshold_explanation_path(@note.id)}>Variance Thresholds</a></div><span></span></li></ul>');"
+    #~ page << "new Control.Modal($('modify_threshold_#{@note.id}'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'post'});"
+  elsif  params[:partial_page] == "lease_sub_tab"
+    today = Date.today
+    sub_tab = {"renewal" => "Renewals", "new" => "New Leases", "expirations" => "Expirations"}
+    lease_sub_details(nil,Date.today.year,params[:occupancy_type]) if @period=="4" || @period=="8" 
+    if @period=="2"
+    year = find_selected_year(Date.today.year)
+    lease_sub_details(nil,year,params[:occupancy_type]) 
+    end
+    lease_sub_details(@end_date.to_date.month,@start_date.to_date.year,params[:occupancy_type]) if @period=="7"
+    lease_sub_details(today.prev_month.month,today.prev_month.year,params[:occupancy_type]) if @period=="5"
+		if @period=="6" || @period=="3"
+    lease_sub_details(nil,Date.today.prev_year.year,params[:occupancy_type]) 
+  end
+    find_redmonth_start_for_leases(find_selected_year(Date.today.year)) 
+    @timeline_msg= find_timeline_msg_for_leases
+    #~ page.replace_html "time_line_selector", :partial => "/properties/time_line_selector", :locals => {:period => @period, :note_id => @note.id, :partial_page => "lease_sub_tab", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }
+    val_str = "jQuery(\'.executiveheadcol_for_title\').html(\'<div class=\"executivesubheadcol\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span><a href=\"#\" onclick=\"performanceReviewCalls(\\'lease\\',{});return false;\">Leasing</a><img width=\"10\" height=\"9\" src=\"/images/eventsicon2.png\">&nbsp;</div><div class=\"executivesubheadcol\"><span class=\"executiveiconcol\"><img src=\"/images/executivehead_icon.png\" width=\"14\" height=\"16\" /></span>#{sub_tab[params[:occupancy_type]]} #{@timeline_msg}</div>\');"
+    page << val_str
+    page.replace_html "portfolio_overview_property_graph" , :partial => "/properties/property_lease_sub_performance",:locals => {:sub_leases => @sub_leases,
+    :start_date => @start_date,:note_collection => @note}
+  end
+else
+  page.replace_html "overview", :partial => "/properties/leases_and_occupancy/",:locals=>{:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:timeline_selector =>@timeline_selector,:period=>@period,:note_collection=>@note,:time_line_start_date=>@time_line_start_date,:time_line_end_date=>@time_line_end_date,:rent_roll=>@rent_roll,:end_date=>@end_date,:portfolio_collection=>@portfolio,:user_id_graph=>@user_id_graph,:navigation_start_position=>@navigation_start_position,:rent_area=>@rent_area,:prop_collection=>@prop,:rent_sum=>@rent_sum,:aged_recievables=>@aged_recievables,:start_date =>@start_date}
+  if !(@rent_roll.nil? or @rent_roll.blank?)
+    page.call "call_individual_graph_leases_property", "#{params[:note_id]}", "graph_leases_chart_property","#{@start_date}","#{@end_date}","#{@user_id_graph}"
+    page.call "call_individual_graph_rent_distribution_property", "#{params[:note_id]}", "graph_rent_distribution_chart_property","#{@start_date}","#{@end_date}","#{@user_id_graph}"
+    page.call "call_individual_graph_leases_expiration_property", "#{params[:note_id]}", "graph_lease_expiration_chart_property","#{@start_date}","#{@end_date}","#{@user_id_graph}"
+  end
+end

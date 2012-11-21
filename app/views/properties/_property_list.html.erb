@@ -1,0 +1,16 @@
+				<div class="textlabelcol"><span id="portfolio_name_<%=p.id%>"><%= display_truncated_chars(p.property_name, 16, true) %></span></div>
+				<div class="imagecol" style="z-index:1" onmouseover="jQuery('#'+'change_real_picture'+<%= p.id%>).removeClass('hide_element').addClass('pic_change_link'); addSelectedItemToUrl('change_real_picture<%= p.id %>');" onmouseout="jQuery('#'+'change_real_picture'+<%= p.id%>).addClass('hide_element'); addSelectedItemToUrl('change_real_picture<%= p.id%>');">
+					<img src="<%= property_image(p.id) %>" width="108" height="67" title="<%=p.property_name %>" id=<%= "pic_#{p.id}"%> />
+					<a id="change_real_picture<%= p.id%>" class="hide_element" title="Change Picture" href="/real/edit_picture?portfolio_id=<%= portfolio_collection.id%>&property_id=<%= p.id%>&controller_id=2&note_id=<%= p.id%>&last_selected_item="><img src="/images/imgedit_icon.png" alt="Change Picture" width="26" height="24" border="0" /></a>
+					<script>
+						new Control.Modal($("change_real_picture<%= p.id%>"),{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className: 'modal_container', method: 'get'});
+					</script>
+				</div>
+				<div class="textlabelcol2"><span id="portfolio_location_<%=p.id%>"><%= get_location_slider(p)%></span></div>
+				
+<script>
+jQuery(document).ready(function()
+{
+Control.Modal.close();
+})
+</script>

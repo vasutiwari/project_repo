@@ -1,0 +1,32 @@
+<div class="chart_fields">
+  <div class="fieldrow">
+    <div class="fieldlabel">
+      Chart of Account Name :
+      <font color=red>
+        *
+      </font>
+    </div>
+    <div class="fieldinput">
+      <%= f.text_field :name %>
+      <span class="errorprompt" style="color:red;font-size:12px;"><%= "Chart of Account Cant be blank" if (( params[:client] && params[:client][:chart_of_accounts_attributes].present? && params[:client][:chart_of_accounts_attributes]["0"][:name].blank? && @chart_count.eql?(1)) ||(f.object && f.object.name.blank?) ) && !action_name.eql?("new")%></span>
+    </div>
+  </div>
+  <div class="fieldrow">
+    <div class="fieldlabel">
+      Mapping Type :
+    </div>
+    <div class="fieldinput">
+      <%if action_name.eql?("new")%>
+        <%= f.select :accounting_system_type_id, options_for_select( AccountingSystemType.all.map{|x| [x.type_name,x.id]}),{},html_options = {:class => "chart_type",:style=>"width:100px;"} %>
+      <%else%>
+        <%= f.select :accounting_system_type_id, options_for_select( AccountingSystemType.where(:id => @accounting_system_type_ids).map{|x| [x.type_name,x.id]}, f.object.try(:accounting_system_type_id).present? ? f.object.accounting_system_type_id : AccountingSystemType.all.map(&:id)),{},html_options = {:class => "chart_type",:style=>"width:100px;"} %>
+      <%end%>
+    </div>
+  </div>
+  <%if @chart_count != 1%>
+    <div class="closeme fieldlabel myclass" >
+      <%= link_to_remove_chart_fields "Remove", f %>
+    </div>
+  <%end%>
+</div>
+<%@chart_count += 1%>

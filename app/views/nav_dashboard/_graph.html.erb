@@ -1,0 +1,37 @@
+			<%if params[:portfolio_id].present? && params[:property_id].blank?%>
+			<%portfolio = Portfolio.find_by_id(params[:portfolio_id])%>
+			<%@note = portfolio%>
+			<% find_redmonth_start_for_rent_roll(find_selected_year(Date.today.year))												
+														@timeline_msg = find_timeline_message%>														
+			<%property_collection = RealEstateProperty.joins(:portfolios).where("portfolios.id" => params[:portfolio_id])
+			@base_rent = []
+			@lease_expirations = []
+			prop_ids = property_collection.collect { |prop| prop.id}
+			%>
+			
+			<%if portfolio.leasing_type.eql?("Commercial")%>
+				<%portfolio_lease_expirations_calculation(prop_ids)%>
+				<%= render :partial=> "nav_comm_occgraph_display" ,:locals=>{:suite_vacant=>@suite_vacant,:lease_expirations=>@lease_expirations}%>	
+				<%else%>
+				<%portfolio_multifamily_occupancy(prop_ids)%>
+				<%= render :partial=>"nav_multi_occgraph_display",:locals=>{:occ_floor_plan=>@occ_floor_plan,:occ_floor=>@occ_floor,:suite_plan=>@suite_plan,:occ_total_floor=>@occ_total_floor,:total_suite=>@total_suite,:timeline_msg=>@timeline_msg}%>		
+			<%end%>
+			
+		<%else%>
+				<% property = RealEstateProperty.find_by_id(params[:property_id])%>
+				<%@note = property%>
+				<% find_redmonth_start_for_rent_roll(find_selected_year(Date.today.year))												
+														@timeline_msg = find_timeline_message%>
+													
+				
+				<%if property.leasing_type.eql?('Commercial')%>
+					<% lease_expirations_calculation(nil,nil)%>
+					<%= render :partial=> "nav_comm_occgraph_display" ,:locals=>{:suite_vacant=>@suite_vacant,:lease_expirations=>@lease_expirations}%>	
+					
+				<%else%>	
+						
+						<%wres_rent_analysis_cal(nil,nil)%>	
+						<%= render :partial=>"nav_multi_occgraph_display",:locals=>{:occ_floor_plan=>@occ_floor_plan,:occ_floor=>@occ_floor,:suite_plan=>@suite_plan,:occ_total_floor=>@occ_total_floor,:total_suite=>@total_suite,:timeline_msg=>@timeline_msg}%>		
+						
+			<%end%>
+<%end%>

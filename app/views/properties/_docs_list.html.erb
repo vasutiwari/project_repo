@@ -1,0 +1,270 @@
+<%
+folders_collection=@folders;
+documents_collection=@documents;
+portfolio_collection=@portfolio;
+%>
+<script>
+  orig_filename ='';
+  folder_content = ''; // this is to reset the contents for file and folder edit (key values)
+  all_selected = false;
+  function dragndrop(){
+    jQuery(".filename, .folder, .file ").draggable({
+      helper: "clone",
+      opacity: .75,
+      revert: "invalid",
+      revertDuration: 300,
+      scroll: true,
+      stop: function(e, ui) {
+        jQuery(prev_id).css('border','');
+      }
+    });
+    jQuery(" .folder").each(function() {
+      jQuery(jQuery(this)[0]).droppable({
+        accept: ".filename, .folder, .file",
+        drop: function(e, ui) {
+          if (jQuery(ui.draggable)[0].id != this.id )
+          {
+            moved_elements_to_folder(jQuery(ui.draggable)[0].id,this.id,"folder");
+          }
+          jQuery(prev_id).css('border','');
+        },
+        hoverClass: "accept",
+        over: function(e, ui) {
+          high_lighter(this.id);
+        },
+        out: function(e, ui){
+          jQuery('#'+this.id).css('border','');
+        }
+      });
+    });
+    jQuery(".parent_drop").each(function() {
+      jQuery(jQuery(this)[0]).droppable({
+        accept: ".filename, .folder, .file",
+        drop: function(e, ui) {
+          if (jQuery(ui.draggable)[0].id != this.id )
+          {
+            moved_elements_to_folder(jQuery(ui.draggable)[0].id,this.id,jQuery(".parent_drop :first")[0].id);
+          }
+          jQuery(prev_id).css('border','');
+        },
+        hoverClass: "accept",
+        over: function(e, ui) {
+          high_lighter(this.id);
+        },
+        out: function(e, ui){
+          jQuery('#'+this.id).css('border','');
+        }
+      });
+    });
+  }
+  prev_id = "";
+
+  //jQuery(document).ready(function(){
+  //  if (call_drag_and_drop == true)
+  //  dragndrop();
+  //});
+
+  function high_lighter(curr_id){
+    jQuery(prev_id).css('border','');
+    curr_id = '#'+curr_id;
+    prev_id = curr_id
+    jQuery(curr_id).css('border','2px solid #66EE00');
+  }
+
+  function moved_elements_to_folder(drag_ele,drop_ele,folder_iden)
+  {
+    if (confirm('Are u sure want to move the item?')){
+      new Ajax.Request("/properties/drag_and_drop?drag_ele="+drag_ele+"&drop_ele="+drop_ele+"&fdr_de="+folder_iden,{
+        asynchronous:true,
+        evalScripts:true,
+	onComplete: function(request){
+
+			load_completer();
+	},
+	onLoading: function(request){
+
+			load_writter();
+	},
+        insertion:Insertion.Top
+      });
+      return false;
+    }
+  }
+</script>
+<% random = Array.new(6){rand(6)}.join %>
+<% show_missing_file =  params[:show_missing_file] == "true" ?  "true" : "false" %>
+<% @folder = find_by_parent_id_and_portfolio_id(params[:pid]) if !@folder%>
+<% folder_collection=@folder; %>
+<%unless params[:user] == 'false'%>
+  <%if params[:show_past_shared] != "true"%>
+    <% if (!folder_collection.nil? && params[:show_past_shared] != "true" && params[:parent_delete] != "true") ||  (request.env['HTTP_REFERER'] && (request.env['HTTP_REFERER']).include?('collaboration_hub'))%>
+      <% if params[:list] != 'shared_list' &&  request.env['HTTP_REFERER'] && !(((request.env['HTTP_REFERER']).include?('real_estate/')) || (request.env['HTTP_REFERER']).include?('dispositions') || (request.env['HTTP_REFERER']).include?('show_pipeline')) %>
+        <%f=(folder_collection.parent_id.to_i  != -1 && folder_collection.parent_id != 0 && folder_collection.parent_id != -2) ?  find_folder(folder_collection.parent_id) : ""%>
+        <%if folder_collection.parent_id==-1 %>
+          <div class="breadparentbar" style=<%=params[:nid].present? ? 'display:block;' : 'display:none;'%>>
+            <div class="parentimg"><a href="javascript:;" onClick="show_collaboration_overview();change_color('overview_tab');return false;"><img src="/images/collaboration_hub_new_parentimg.png" width="34" height="27" border="0"/></a></div>
+            <div class="parenttext">
+              <a id="overview_tab" href="javascript:;" onClick="show_collaboration_overview();change_color('overview_tab');return false;" style="border:none;">Parent folder</a>
+            </div>
+            <%if @folder.is_portfolio? && folders_collection.blank? %>
+              <br/><div style="padding-left: 270px;margin-top:20px;"><font size="3" color="gray">Yet to Add a Property</font></div>
+            <% end %>
+          </div>
+        <%elsif (folder_collection.parent_id==0 || folder_collection.parent_id.nil?) && params[:add_file_deal] != 'true'%>
+          <div class="breadparentbar" style=<%=(params[:nid].present? || params[:attachment].present? || params[:folder_name].present?  || params[:show_missing_file].present? || params[:folder_id].present?) ? 'display:block;' : 'display:none;'%>>
+            <div class="parentimg"><%= link_to((image_tag "/images/collaboration_hub_new_parentimg.png", :width=>"34", :height=>"27", :style=>"border:none;"),{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:data_hub=>"asset_data_and_documents",:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true'},:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true ) %></div>
+            <div class="parenttext">
+              <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:data_hub=>"asset_data_and_documents",:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true'},:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true ) %>
+            </div>
+          </div>
+        <% else %>
+          <%unless params[:add_file_deal] == 'true' %>
+            <div id="asset_row_parent_<%= folder_collection.parent_id %>" class="breadparentbar" style=<%=((params[:nid].present? || params[:show_missing_file].present? || params[:folder_id].present?) && !params[:bulk_upload].eql?("true")) ? 'display:block;' : 'display:none;'%>>
+              <%folders  = find_manage_real_estates_shared_folders%>
+              <%if folders.include?(folder_collection) && current_user.has_role?("Shared User")  && session[:role] == 'Shared User'%>
+                <div id="par_<%= folder_collection.id %>" class="parentimg">
+                  <%= link_to((image_tag "/images/collaboration_hub_new_parentimg.png", :width=>"34", :height=>"27", :style=>"border:none;"),:controller=>"shared_users",:action=>"index",:pid=>portfolio_collection.id,:data_hub=>"asset_data_and_documents",:from_parent_folder=>'true',:deal_room=>params[:deal_room]) %>
+                </div>
+                <div class="parenttext">
+                  <%if params[:deal_room] == 'true'%>
+                    <%= link_to("Parent folder",:controller=>"shared_users",:action=>"index",:pid=>portfolio_collection.id,:data_hub=>"asset_data_and_documents",:from_parent_folder=>'true',:deal_room=>'true') %>
+                  <%else%>
+                    <%= link_to("Parent folder",:controller=>"shared_users",:action=>"index",:pid=>portfolio_collection.id,:data_hub=>"asset_data_and_documents",:from_parent_folder=>'true') %>
+                  <%end%>
+                </div>
+              <%else%>
+                <% if folder_collection.parent_id == -2 %>
+                  <%p_folder = bulk_find_by_id(folder_collection.id) %>
+                <% else %>
+                  <%p_folder = bulk_find_by_id(folder_collection.parent_id) %>
+                <% end %>
+                <%shared_folders_real_estate = find_manage_real_estate_shared_folders('false')%>
+                <%if (folder_collection && folder_collection.name == "my_files" && folder_collection.parent_id == 0) || (folder_collection && folder_collection.name == "my_deal_room" && folder_collection.parent_id == 0) || (p_folder.name == "my_files" && p_folder.parent_id == 0) || (p_folder.name == "my_deal_room" && p_folder.parent_id == 0) || shared_folders_real_estate.flatten.index(folder_collection) %>
+                  <div id="par_<%= folder_collection.id %>" class="parentimg"><a id="overview_tab" href="" onClick="show_collaboration_overview();change_color('overview_tab');return false;"><img src="/images/collaboration_hub_new_parentimg.png" width="34" height="27" border="0" /></a></div>
+                  <div class="parenttext">
+                    <%if params[:deal_room] == 'true'%>
+                      <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true',:deal_room=>'true' },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+                    <%else%>
+                      <a id="overview_tab" href="" onClick="show_collaboration_overview();change_color('overview_tab');return false;">Parent folder</a>
+                    <%end%>
+                  </div>
+                <%else%>
+                <%# bulk upload options added here  %>
+                  <% if params[:bulk_upload] == 'true'%>
+                  <%# unless folder_collection.parent_id == -2 %>
+                    <div id="par_<%= folder_collection.id %>" class="parentimg"><%= link_to((image_tag "/images/collaboration_hub_new_parentimg.png", :width=>"34", :height=>"27", :style=>"border:none;"),{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true',:bulk_upload=>true },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %></div>
+                    <div class="parenttext">
+                      <%if folder_collection && folder_collection.parent_id == -2 && folder_collection.name == "Bulk Uploads"%>
+                        <a id="overview_tab" href="" onClick="show_collaboration_overview();change_color('overview_tab');return false;">Parent folder</a>
+                      <%else%>
+                        <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true',:bulk_upload=>true },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+                      <%end%>
+                    </div>
+                    <% #end %>
+                  <% else %>
+                    <div id="par_<%= folder_collection.id %>" class="parentimg"><%= link_to((image_tag "/images/collaboration_hub_new_parentimg.png", :width=>"34", :height=>"27", :style=>"border:none;"),{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true' },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %></div>
+                    <div class="parenttext">
+                      <%if params[:deal_room] == 'true'%>
+                        <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true',:deal_room=>'true' },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+                      <%else%>
+                        <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id,:from_parent_folder=>'true' },:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+                      <%end%>
+                    </div>
+                  <% end %>
+                <%end%>
+              <%end%>
+            </div>
+          <%end%>
+        <%end%>
+      <% else %>
+        <% if folder_collection.parent_id==0 || folder_collection.parent_id.nil? %>	&nbsp;
+        <% elsif params[:list] != 'shared_list' %>
+          <div id="asset_row_parent_<%= folder_collection.parent_id %>" class="breadparentbar" style=<%=params[:nid].present? ? 'display:block;' : 'display:none;'%>>
+            <div id="par_<%= folder_collection.id %>" class="parentimg">
+              <%= link_to((image_tag "/images/collaboration_hub_new_parentimg.png", :width=>"34", :height=>"27", :style=>"border:none;"),{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id ,:from_parent_folder=>'true'},:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+            </div>
+            <div class="parenttext">
+              <%= link_to("Parent folder",{:controller=>"properties",:action=>"show_asset_files",:pid=>portfolio_collection.id,:folder_id=>folder_collection.parent_id ,:from_parent_folder=>'true'},:loading=>'load_writter();',:complete=>'load_completer();', :remote=>true) %>
+            </div>
+          </div>
+        <%end%>
+      <% end %>
+    <%end%>
+  <%end%>
+<%end%>
+<%x=1%>
+<!-- folders_collection each starts here -->
+<%folder_index= 2500%>
+<%if folders_collection && !folders_collection.empty?%>
+  <%j=1%>
+  <% folders_collection = folders_collection.compact.sort_by(&:created_at).reverse %>
+  <%folders_collection.each do |a| %>
+	<% if params[:deal_room] != "true" || !( a.present? && ( a.name.eql?('Lease Files') || a.name.eql?('Floor Plans') ) && a.try(:real_estate_property).try(:property_name).eql?('property_created_by_system_for_deal_room') )%>
+		<%j+=1%>
+    <%=render :partial=>"/properties/folders_row",:locals=>{:a=>a,:j => j,:x=>folder_index,:folder_index=>folder_index}%>
+    <%folder_index=folder_index - 20%>
+    <%x+=1%>
+				<%end%>
+  <%end%>
+<%end%>
+<!-- folders_collection each ends here -->
+
+<!-- documents_collection each starts here -->
+<%doc_index= folder_index%>
+<%if documents_collection && !documents_collection.empty?%>
+  <%documents_collection = find_document_collection(documents_collection)%>
+  <%i=1%>
+  <% documents_collection.each do |t| %>
+    <%display = find_current_user(t)%>
+    <%if display == "yes" && check_is_doc_shared(t) == "true"%>
+      <%=render :partial=>"/properties/document_row",:locals=>{:t=>t,:i => i,:x=>doc_index,:doc_index=>doc_index}%>
+      <%i+=1%><%x+=1%>
+      <%doc_index=doc_index - 20%>
+    <% end %>
+  <%end%>
+<%end%>
+<!-- documents_collection.each ends here -->
+
+
+<%if folders_collection.empty? && documents_collection && documents_collection.empty? && params[:show_past_shared] == 'true'%>
+  <div  style="margin-top:50px;" class="<%if params[:show_past_shared] == 'true'%>for_ie7 for_ie7_padding<%end%>">
+    <font color='gray' size="3px;">  No files / folders  shared</font>
+  </div>
+<%end%>
+<%if folders_collection.empty? && documents_collection && documents_collection.empty? && params[:show_past_shared] != 'true'%>
+  <div  style="margin-top:50px;*margin-top:160px;" class="<%if params[:show_past_shared] != 'true'%>for_ie7 for_ie7_padding<%end%>">
+    <font color='gray' size="3px;"><%if params[:user] && params[:user]=='false'%>  No files / folders found <%else%> Click on 'Upload' to add a file or 'New Folder' to create a new folder<%end%></font>
+  </div>
+<%end%>
+<script>
+  yield_calender('false');
+  jQuery(document).ready(function() {
+    if (jQuery('img#reload_parsing_file_status').length>0) {
+      folderId=<%=folder_collection.id%>;
+      new Ajax.Request('/documents/status_check?folder_id='+folderId, {evalScripts: true, asynchronous: true, method: 'GET'});
+      setTimeout("statusCheck("+folderId+")",9000);
+    }		
+		bread_parent_enable_disable();		
+    jQuery('ul.subindex li a[title]').qtip({
+      position: {
+        corner: {
+          target: 'topRight',
+          tooltip: 'bottomMiddle'
+        }
+      },
+      style: {
+        name: 'cream',
+        padding: '3px',
+        width: {
+          max: 210,
+          min: 0
+        },
+        tip: true
+      }
+    });
+  });
+
+
+
+</script>
+

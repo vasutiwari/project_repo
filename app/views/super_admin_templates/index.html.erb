@@ -1,0 +1,29 @@
+<h1>Listing super_admin_templates</h1>
+
+<table>
+  <tr>
+    <th>Folder name</th>
+    <th>Template</th>
+    <th>Parent</th>
+    <th>Is editable</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @super_admin_templates.each do |super_admin_template| %>
+  <tr>
+    <td><%= super_admin_template.folder_name %></td>
+    <td><%= super_admin_template.template_id %></td>
+    <td><%= super_admin_template.parent_id %></td>
+    <td><%= super_admin_template.is_editable %></td>
+    <td><%= link_to 'Show', super_admin_template %></td>
+    <td><%= link_to 'Edit', edit_super_admin_template_path(super_admin_template) %></td>
+    <td><%= link_to 'Destroy', super_admin_template, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Super admin template', new_super_admin_template_path %>

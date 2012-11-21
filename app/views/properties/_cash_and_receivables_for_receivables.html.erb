@@ -1,0 +1,102 @@
+<% pdf_conv_path = @pdf.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="cash_and_receivables_for_receivables"
+  active_call="performance_review"
+</script>
+<%account_receivables_aging_for_receivables = @account_receivables_aging_for_receivables%>
+<div id ="portfolio_overview_property_graph">
+  <% unless @pdf %>
+    <div class="pdf_link_financial_end" style="right: 47px;top:12px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %> </div>
+     <script>new Control.Modal($('summary_link_pdf'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+  <% end %>
+<%# if account_receivables_aging_for_receivables.length > 0 %>
+  <%if !account_receivables_aging_for_receivables.nil? and account_receivables_aging_for_receivables.length>0%>
+    <div class="rhscontentrow">
+      <div class="fieldinputcol">
+      </div>
+    </div>
+    <div class="tableheaderow portfolio_overview">&nbsp;</div>
+    <div id="acc_receivable_aging">
+      <%= render :partial => "properties/acc_receivable_aging" , :locals => {:account_receivables_aging_for_receivables => account_receivables_aging_for_receivables} %>
+    </div>
+    <div class="paginationcol">
+      <%id = params[:note_id] ? params[:note_id] : params[:id]%>
+      <% unless @pdf %>
+      <%=will_paginate account_receivables_aging_for_receivables,:renderer => 'RemoteLinkRenderer',:params =>{:id =>id,:start_date =>params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:note_id => params[:note_id],:period=>params[:period],:start_date => params[:start_date],:tl_period => params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year] } %>
+      <% end %>
+    </div>
+
+<% else %>
+  <% req_actual_folder = fetch_excels_folder(note_collection.id) %>
+  <% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+  <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+    <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+    <% if note_collection.class == RealEstateProperty %>
+      <% note_name = note_collection.property_name %>
+    <% elsif note_collection.class == Portfolio  %>
+      <% note_name =  note_collection.name %>
+			<%else%>
+		<% note_name =  note_collection.note_id %>
+    <% end %>
+    <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+      <span style="color: black;font-size:13px;"><%if remote_property(note_collection.accounting_system_type_id) == true%><span style="padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Asset Financial data at
+
+
+			<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+				<!--
+			<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>
+			-->
+			<% end %>.</span>
+    <% end %>
+  </div>
+<% end %>
+<%# end %>
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+    jQuery('#message').fadeOut(8000);
+    jQuery('#yearforecast').hide();
+		jQuery('#yrForecast').hide();
+		jQuery('#quarterly').show();
+	 	jQuery('#weekly_display').hide();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+  //changeExplanantionText(last_renderer,active_sub_month);
+</script>

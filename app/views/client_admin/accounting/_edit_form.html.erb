@@ -1,0 +1,66 @@
+<%line_items_collection=@chart_of_account.line_items.map(&:item_name)%>
+<div class="col1P">
+        	<p><span>Main Line Items Mapping to AMP </span></p>
+            <p><span>Capital Expenditure </span></p>
+            <div id="capital">
+            <div class="tblDiv">
+                <div class="titleRow">Item:</div>
+                <div class="contentRow"><select><option>List of Actual Accounts</option></select></div>
+                <div class="clear"></div>
+            </div>
+            </div>
+            <div class="addMore"><a href="javascript:void(0);" onclick="addSelectMenu('capital')">Add More</a></div>
+            <div class="clear"></div>
+        </div>
+         <div class="col1P">
+       	   <p><span>Main Headers</span></p>
+   		   <table cellpadding="2" cellspacing="4" border="0" width="50%">
+                	<tr>
+                    	<td align="right" width="30%">Operating Revenue:</td>
+											  <%= f.fields_for :line_items do |line_form| %>
+												<%if (line_form.object.item_name == "Operating Revenue")%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+										<%=line_form.hidden_field :item_name,:value=>"Operating Revenue"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Operating  Expenditure:</td>
+												<%= f.fields_for :line_items do |line_form| %>
+												<%if (line_form.object.item_name == "Operating Expenditure")%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+											<%=line_form.hidden_field :item_name,:value=>"Operating Expenditure"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Net Income:</td>
+												<%= f.fields_for :line_items do |line_form| %>
+												<%if (line_form.object.item_name == "Net Income")%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+											<%=line_form.hidden_field :item_name,:value=>"Net Income"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Net Cash Flow: </td>
+                      <td><%#=f.select :cash_flow,@income_cash_statement.collect {|p| [ p.name, p.id ] }%></td>
+                    </tr>
+                </table>
+
+         </div>
+				 <%@count=1%>
+          <div class="col1P">
+        	<p><span>Net Operating Expense Items</span></p>
+					  <%= f.fields_for :line_items do |line_form| %>
+						<%if (line_form.object.item_name.include?("Item"))%>
+					    <%= render 'line_item_fields', :f => line_form %>
+							<%@count+=1%>
+						 <%end%>
+						 <%end%>
+						   <div id="net_op" class="addMore1">    <%= link_to_line_items "Add More", f, :line_items %></div>
+            <div class="clear"></div>
+             </div>

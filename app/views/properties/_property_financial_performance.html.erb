@@ -1,0 +1,357 @@
+<% pdf_collection = @pdf %>
+<% pdf_conv_path = pdf_collection.blank? ? '' : Rails.root.to_s+'/public' %>
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="financial"
+  active_call="performance_review"
+</script>
+
+<%find_total_non_operating_expense(operating_statement)%>
+<div style="z-index: 1500;" class="rhscontentrow"></div>
+<% unless pdf_collection %>
+  <%if (note_collection.try(:class).eql?(Portfolio) ? note_collection.leasing_type  : note_collection.try(:portfolio).try(:leasing_type) ) == "Multifamily"%>
+      <div id="tot_per_val" class="sqrft_per_unit sqft_for_breadcrumb" style="top:117px;margin-right: 10px;*top:194px;"> Values :
+        <select id="per_tot_sqft" onchange="performanceReviewCalls('financial',{},undefined,this.value)">
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><%end%>
+          <%if no_of_units_available%><option value="unit_calc"  <%='selected' if params[:unit_calc]%> >Per Unit</option><%end%>
+        </select>
+      </div>
+    <%else%>
+      <div  id="tot_per_val" style="top:117px;margin-right: 10px;*top:194px;" class="sqrft_per_unit sqft_for_breadcrumb">Values :
+        <select id="per_tot_sqft" onchange="performanceReviewCalls('financial',{},undefined,this.value)">
+          <option value="total_sqft">Total SqFT</option>
+          <%if per_sqft_available%><option value="per_sqft" <%='selected' if params[:sqft_calc]%>>Per SqFT</option><%end%>
+        </select>
+      </div>
+    <%end%>
+<%end%>
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'SqFT PopUp', {:controller=>'performance_review_property',:action=>"gross_rental_area_popup", :id=>note_collection.id , :from=>"financial"} ,:id=>"per_tot_sqft_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+
+<div class="newbuttons" style="float:right;font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;">
+  <%= link_to 'PerUnit PopUp', {:controller=>'performance_review_property',:action=>"no_of_units_popup", :id=>note_collection.id, :from=>"financial"} ,:id=>"per_tot_unit_popup",:style=>"display:none;" %>
+  <script>new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+</div>
+<div id ="portfolio_overview_property_graph">
+  <% unless pdf_collection %>
+  <div class="pdf_link_financial" style=""> <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %>
+			 <span style=" border-right: 1px solid #000000;">&nbsp;</span>
+	</div>
+     <script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+  <% end %>
+  <% if notes_collection.present? && notes_collection.length > 0 %>
+    <% if !(time_line_actual.nil? || time_line_actual.blank?) || !(time_line_rent_roll.nil? || time_line_rent_roll.blank?) %>
+    <% end %>
+    <%if !actual.nil? and !operating_statement.nil? and operating_statement.length > 1 %>
+      <%exp_month_ytd,exp_ytd_check,variance_task_document_id=initial_variance_calculations(@current_time_period,"financials")%>
+      <div class="financials_tablewrapper" style="background-image: url(/images/asset_financials_tablebg_opstmt.png);">
+        <div style="z-index: 1450;" class="renttableheaderow headerBlueBg">
+          <div class="financials_tablelabel">&nbsp;</div>
+          <div class="financials_tablelabel2">Actuals $</div>
+          <div class="financials_tablelabel3">Budget $</div>
+          <div class="financials_tablelabel4"><span>Variance?</span><span style="padding-left:80px;">$ </span></div>
+          <div class="financials_tablelabel5" id ="financexp1"><%if params[:period] != "2" && params[:tl_period] !="2"%><%=month_ytd_explanation%> Explanation<%end%></div>
+        </div>
+        <div style="z-index: 1300;" class="tablecontentrow">
+          <div class="financials_subheadlabel">Operating Summary</div>
+        </div>
+        <div style="z-index: 1300;" class="tablecontentrow">
+          <div class="financials_subhead2">Operating Revenues</div>
+        </div>
+        <%find_financial_sub_items("Operating Revenue")%>
+        <%=render :partial=>"performance_review_property/financial_main_sub_items",:locals=>{:color_display=>"income",:portfolio_collection=>portfolio_collection,:first_level=>'false',:operating_statement=>operating_statement,:pdf_conv_path =>pdf_conv_path,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection,:second_level=>'false',:third_level=>'false'}%>
+        <%title=map_title("Operating Revenue")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_grayrow">
+            <div class="financials_subhead3"><span  style="padding-left:7px;">Total Operating Revenue</span></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>title,:heading=>"Total Operating Revenue",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>1,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+        <%find_financial_sub_items("Operating Expenses")%>
+        <%title=@expense_title%>
+				<%if operating_statement[title] && (operating_statement[title][:actuals] !=0 || operating_statement[title][:budget] !=0)%>
+        <div style="z-index: 1300;" class="financials_top_bot_borrow">
+          <div class="financials_subhead2">Operating Expenses</div>
+        </div>
+        <%=render :partial=>"performance_review_property/financial_main_sub_items",:locals=>{:color_display=>"expense",:portfolio_collection=>portfolio_collection,:first_level=>'true',:operating_statement=>operating_statement,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection,:second_level=>'false',:third_level=>'false'}%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_grayrow">
+            <div class="financials_subhead3"><span style="float:left;padding-left:7px;width:3px;"> - </span>&nbsp;Total Operating Expenses</div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>title,:heading=>"Total Operating Expenses",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>2,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+				<%end%>
+
+
+        <%title= map_title("net operating income")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_darkgrayrow financials_total">
+            <div class="financials_subhead3"> = NOI </div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>title,:heading=>"NOI",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>3,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+			<%if remote_property(@note.accounting_system_type_id)%>
+	        <%title= map_title("NET INCOME BEFORE DEPR & AMORT")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_darkgrayrow financials_total">
+            <div class="financials_subhead3">Net Income </div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>title,:heading=>"Net Income",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>12,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+			<%end%>
+
+			<%if !remote_property(@note.accounting_system_type_id)%>
+        <div style="z-index: 1300;" class="tablecontentrow">
+          <div class="financials_tablelabel hovehide">&nbsp;</div>
+        </div>
+
+				<div style="z-index: 1300;" class="tablecontentrow">
+          <div class="financials_subheadlabel">Non Operating Summary</div>
+        </div>
+			<%end%>
+        <%title=map_title("Non Operating Revenues")%>
+        <%find_financial_sub_items("Non Operating Revenues")%>
+        <%if operating_statement[title] && !operating_statement[title].empty? && (operating_statement[title][:actuals].to_i != 0 || operating_statement[title][:budget].to_i != 0 ) %>
+          <div style="z-index: 1300; border-bottom: 0px;" class="tablecontentrow">
+            <div class="financials_subhead2"> Non Operating Revenue</div>
+          </div>
+          <%=render :partial=>"performance_review_property/financial_main_sub_items",:locals=>{:color_display=>"income",:portfolio_collection=>portfolio_collection,:first_level=>'false',:operating_statement=>operating_statement,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection,:second_level=>'false',:third_level=>'false'}%>
+          <%title=map_title("Non Operating Revenues")%>
+          <div style="z-index: 1300;" class="financials_grayrow">
+            <div class="financials_subhead3"><span  style="padding-left:7px;">Total Non Operating Revenues</span></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>'Non Operating Revenues',:heading=>"Total Non Operating Revenues",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>4,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%else%>
+          <style>
+            .financials_top_bot_borrow{
+              border-top: 0px;
+            }
+          </style>
+        <%end%>
+ <%if !remote_property(@note.accounting_system_type_id)%>
+        <div style="z-index: 1300;" class="financials_top_bot_borrow" >
+          <div class="financials_subhead2">Non Operating Expense</div>
+        </div>
+        <%find_financial_sub_items("Non Operating Expense")%>
+        <%=render :partial=>"performance_review_property/financial_main_sub_items",:locals=>{:color_display=>"expense",:portfolio_collection=>portfolio_collection,:first_level=>'false',:operating_statement=>operating_statement,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection,:second_level=>'false',:third_level=>'false'}%>
+        <%title="Non Operating Expense"%>
+				<%end%>
+
+        <!-- --------------------------------------------------------------------------------------------------------------depreciation & amortization detail start --------------------------------------------------- -->
+        <%title="depreciation & amortization detail"%>
+        <%if operating_statement[title]%>
+          <div style="z-index: 1300;" class="tablecontentrow">
+            <div class="financials_tablelabel hovehide"><span title="non_expense" id="color_display"></span><%=raw subpages_in_financial_review('depreciation & amortization detail')%></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>title,:heading=>"Depreciation & Amortization Detail",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>5,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+        <%title="debt service detail"%>
+        <%if operating_statement[title]%>
+          <div style="z-index: 1300;" class="tablecontentrow">
+            <div class="financials_tablelabel hovehide"><span title="non_expense" id="color_display"></span><%=raw subpages_in_financial_review('debt service detail')%></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>title,:heading=>"debt service",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>6,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+        <%title=map_title("capital expenditures").downcase%>
+        <%cash_flow_statement = cash_flow_statement ? cash_flow_statement : nil%>
+        <%statement =(cash_flow_statement && cash_flow_statement[title]) ? cash_flow_statement : ((operating_statement &&  operating_statement[title]) ? operating_statement : nil)  %>
+        <% if statement%>
+          <div style="z-index: 1300;" class="tablecontentrow">
+            <div class="financials_tablelabel hovehide"><span title="non_expense" id="color_display"></span><img border="0" src="<%= pdf_conv_path %>/images/asset_listicon.png" /><%=raw subpages_in_financial_review(title)%></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>title,:heading=>"#{title.titleize}",:operating_statement=>statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>7,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+        <%title=map_title("other").downcase%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="tablecontentrow">
+            <div class="financials_tablelabel hovehide"><img border="0" src="<%= pdf_conv_path %>/images/asset_listicon.png" /><span title="non_expense" id="color_display"></span><%=raw subpages_in_financial_review(title)%></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>title,:heading=>"#{title.titleize}",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>8,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+
+				<%if !remote_property(note_collection.accounting_system_type_id)%>
+        <%title=map_title("Non Operating Expense")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_grayrow">
+            <div class="financials_subhead3" ><span style="float:left;padding-left:7px;width:3px;"> - </span>&nbsp;Total Non Operating Expense</div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"expense",:title=>'Non Operating Expense',:heading=>"Total Non Operating Expense",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>9,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+        <%end%>
+
+
+        <%title=map_title("Net Non Operating Income")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;" class="financials_darkgrayrow financials_total">
+            <div class="financials_subhead3"> = Net Non Operating Income</div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>title,:heading=>"#{title.titleize}",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>8,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+				<%if !remote_property(note_collection.accounting_system_type_id)%>
+        <%title=map_title("Net Income")%>
+        <% if operating_statement[title]%>
+          <div style="z-index: 1300;color:#000000;font-weight:bold" class="tablecontentrow financials_total" >
+            <div class="financials_subhead3">Net Income = <span style='font-weight:normal'>NOI + Net Non Op. Inc</span></div>
+            <%=render :partial=>"performance_review_property/financials_total_row",:locals=>{:color_display=>"income",:title=>title,:heading=>"Net Income",:operating_statement=>operating_statement,:explanation=>explanation,:exp_month_ytd=>exp_month_ytd,:exp_ytd_check=>exp_ytd_check,:variance_task_document_id=>variance_task_document_id,:i=>10,:portfolio_collection=>portfolio_collection,:pdf_conv_path =>pdf_conv_path,:note_collection=>note_collection}%>
+          </div>
+        <%end%>
+		<%end%>
+
+        <%if operating_statement['scheduled gross rents'] && operating_statement['rental value - vacant units'] && operating_statement['discount losses']%>
+
+          <div style="z-index: 1300;" class="tablecontentrow">
+            <div class="financials_subheadlabel">Key Numbers & Ratios</div>
+          </div>
+
+          <div class="tablecontentrow" style="z-index: 1300;">
+            <div class="financials_tablelabel" title = "Scheduled gross rents - Rental value - Discount losses">Financial Occupancy</div>
+				    <% act_fin_occ = financial_occupancy_claculation(operating_statement['scheduled gross rents'][:actuals],operating_statement['rental value - vacant units'][:actuals],operating_statement['discount losses'][:actuals]) %>
+            <% bud_fin_occ = financial_occupancy_claculation(operating_statement['scheduled gross rents'][:budget],operating_statement['rental value - vacant units'][:budget],operating_statement['discount losses'][:budget]) %>
+            <% per_fin_occ = ((act_fin_occ - bud_fin_occ)/bud_fin_occ) * 100 %>
+            <% var_fin_occ = act_fin_occ - bud_fin_occ %>
+            <div class="financials_tablelabel2"><%= display_currency_overview(act_fin_occ) %></div>
+            <div class="financials_tablelabel3"><%= display_currency_overview(bud_fin_occ) %></div>
+            <div class="financials_tablelabel4">
+              <% icon_direction, use_color, color_flag, color_icon = find_color_direction_and_icon_income(act_fin_occ, bud_fin_occ) %>
+              <div class="tablelabel4_sub<%= color_flag %>coll variance_spacer"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%>above<%elsif icon_direction.eql?('down')%>belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%>aboveRed<%elsif icon_direction.eql?('down')%>below<%end%><%end%>"><!--<img src="<%#= pdf_conv_path %>/images/<%#= color_icon %>.png" width="8" />-->&nbsp;</span><%=display_currency_real_estate_overview_for_percent(per_fin_occ)%> </div>
+              <div class="tablelabel4_sub<%= color_flag %>coll2"><%=display_currency_variance(var_fin_occ)%></div>
+            </div>
+            <div class="financials_tablelabel5">&nbsp;</div>
+          </div>
+          <div class="tablecontentrow" style="z-index: 1300;">
+            <div class="financials_tablelabel" title="Rental value + Discount Losses">Financial Vacancy</div>
+            <% act_fin_vac = financial_vacancy_calculation(operating_statement['rental value - vacant units'][:actuals],operating_statement['discount losses'][:actuals]) %>
+            <% bud_fin_vac = financial_vacancy_calculation(operating_statement['rental value - vacant units'][:budget],operating_statement['discount losses'][:budget]) %>
+            <% per_fin_vac = ((act_fin_vac - bud_fin_vac)/bud_fin_vac) * 100 %>
+            <% var_fin_vac = act_fin_vac - bud_fin_vac %>
+            <div class="financials_tablelabel2"><%= display_currency_overview(act_fin_vac) %></div>
+            <div class="financials_tablelabel3"><%= display_currency_overview(bud_fin_vac) %></div>
+            <div class="financials_tablelabel4">
+              <% icon_direction, use_color, color_flag, color_icon = find_color_direction_and_icon_income(act_fin_vac, bud_fin_vac) %>
+              <div class="tablelabel4_sub<%= color_flag %>coll variance_spacer"><span class="cashiconcol <%if color_flag.eql?('green') || color_flag.eql?('')%><%if icon_direction.eql?('up')%>above<%elsif icon_direction.eql?('down')%>belowgreen<%end%><%elsif color_flag.eql?('red')%><%if icon_direction.eql?('up')%>aboveRed<%elsif icon_direction.eql?('down')%>below<%end%><%end%>"><!--<img src="<%#= pdf_conv_path %>/images/<%#= color_icon %>.png" width="8" />-->&nbsp;</span><%=display_currency_real_estate_overview_for_percent(per_fin_vac)%> </div>
+              <div class="tablelabel4_sub<%= color_flag %>coll2"><%=display_currency_variance(var_fin_vac)%></div>
+            </div>
+            <div class="financials_tablelabel5">&nbsp;</div>
+          </div>
+          <div class="tablecontentrow" style="z-index: 1300;">
+            <div class="financials_tablelabel">Financial Occupancy %</div>
+            <% act_fin_occ_percent = (act_fin_occ/operating_statement['scheduled gross rents'][:actuals]) * 100 %>
+            <% bud_fin_occ_percent = (bud_fin_occ/operating_statement['scheduled gross rents'][:budget]) * 100 %>
+            <% per_fin_occ_percent = ((act_fin_occ_percent - bud_fin_occ_percent)/act_fin_occ_percent) * 100 %>
+            <% var_fin_occ_percent = act_fin_occ_percent - bud_fin_occ_percent %>
+            <div class="financials_tablelabel2"><%= display_currency_real_estate_overview_for_percent(act_fin_occ_percent) %></div>
+            <div class="financials_tablelabel3"><%= display_currency_real_estate_overview_for_percent(bud_fin_occ_percent) %></div>
+            <div class="financials_tablelabel4">
+              <% icon_direction = up_or_down(act_fin_occ_percent,bud_fin_occ_percent) %>
+              <% use_color = income_color((act_fin_occ_percent.nan? ? 0 : act_fin_occ_percent),(bud_fin_occ_percent.nan? ? 0 : bud_fin_occ_percent)) %>
+              <% color_flag = (use_color == 'green') ? '' : 'red' %>
+              <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+              <div class="tablecol4_sub<%= color_flag %>col1 variance_spacer"><span class="cashiconcol"><!--<img src="/images/<%= color_icon %>.png" width="8" />--></span><%#=display_currency_real_estate_overview_for_percent(per_fin_occ_percent)%> </div>
+              <div class="tablecol4_sub<%= color_flag %>col2"><%#=display_currency_real_estate_variance(var_fin_occ_percent)%></div>
+            </div>
+            <div class="financials_tablelabel5">&nbsp;</div>
+          </div>
+          <div class="tablecontentrow" style="z-index: 1300;">
+            <div class="financials_tablelabel">Financial Vacancy %</div>
+            <% act_fin_vac_percent = 100 - act_fin_occ_percent %>
+            <% bud_fin_vac_percent = 100 - bud_fin_occ_percent %>
+            <% per_fin_vac_percent = ((act_fin_vac_percent - bud_fin_vac_percent)/bud_fin_vac_percent) * 100 %>
+            <% var_fin_vac_percent = act_fin_vac_percent - bud_fin_vac_percent %>
+            <div class="financials_tablelabel2"><%= display_currency_real_estate_overview_for_percent(act_fin_vac_percent) %></div>
+            <div class="financials_tablelabel3"><%= display_currency_real_estate_overview_for_percent(bud_fin_vac_percent) %></div>
+            <div class="financials_tablelabel4">
+              <% icon_direction = up_or_down(act_fin_vac_percent,bud_fin_vac_percent) %>
+              <% use_color = income_color((act_fin_vac_percent.nan? ? 0 : act_fin_vac_percent),(bud_fin_vac_percent.nan? ? 0 : bud_fin_vac_percent)) %>
+              <% color_flag = (use_color == 'green') ? '' : 'red' %>
+              <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+              <div class="tablecol4_sub<%= color_flag %>col1 variance_spacer"><span class="cashiconcol"><!--<img src="/images/<%= color_icon %>.png" width="8" />--></span><%#=display_currency_real_estate_overview_for_percent(per_fin_vac_percent)%> </div>
+              <div class="tablecol4_sub<%= color_flag %>col2"><%#=display_currency_real_estate_variance(var_fin_vac_percent)%></div>
+            </div>
+            <div class="financials_tablelabel5">&nbsp;</div>
+          </div>
+        <%end%>
+      </div>
+    <% else %>
+      <% req_excel_uploads_folder =  fetch_excels_folder(note_collection.id) %>
+      <div style="padding-left: 108px;" class="rhscontentrow rhscontentrowtime">
+        <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+        <% if note_collection.class == RealEstateProperty %>
+         <% note_name = note_collection.property_name %>
+        <% elsif note_collection.class == Portfolio  %>
+				<% note_name =  note_collection.name %>
+				<%else%>
+				<% note_name =  note_collection.note_id %>
+				<% end %>
+        <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+          <span style="font-size:13px;"><%if remote_property(@note.accounting_system_type_id) == true%><span style="color: black; padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Asset Financial data at
+
+					<!--
+					<a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#= note_collection.try(:class).eql?(Portfolio) ? note_collection.id : note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a>
+					-->
+				<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+					<%end%>.</span>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : @navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').show();
+	jQuery('#weekly_display').hide();
+<% if (params[:tl_period] =="8" || params[:period] =="8" || ((params[:period] =="3" || params[:tl_period] =="3") && params[:tl_year].to_i >= Date.today.year ) ) %>
+    jQuery('#yrForecast').show();
+<%end%>
+    jQuery('#quarterly').show();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+<% end %>
+  }
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+</script>
+
+   

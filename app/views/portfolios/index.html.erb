@@ -1,0 +1,543 @@
+<!-- this line is added since Asset navigation is loaded with little padding onto its left -->
+<style>
+  ul {list-style-type :none;padding: 0px;margin:0px}
+  li {list-style-type :none;padding: 0px;margin:0px}
+</style>
+<%= stylesheet_link_tag 'advance_due_v2' %>
+<script type="text/javascript" >
+<%period = (params[:period].nil? || params[:period] == "") ? "4" : params[:period]%>
+  var period = '<%=period%>'
+  jQuery('.headerwrapper').css('height','95px');
+  var current_selection = 1;
+</script>
+<script type="text/javascript">
+  var swfu = true;
+  reject_ajax = false;
+  weekly_cur_date = '';
+
+  function load_swf(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadComplete,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function load_swf_task(get_path,folder,user_id) {
+    var document_id = document.getElementById('document_id').value;
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"document_id":document_id},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTask,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function load_swf_task_form_folder(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"folder_id":folder},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTaskFolder,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+
+  function pop_advanced(){
+    if (reject_ajax != true){
+      jQuery('.basic_close').hide();
+      jQuery('.advanced_close').show();
+      reject_ajax = true;
+    }
+  }
+
+  var items = 1;
+  function add_new_dates(pos){
+    arr_name = pos.split('_').shift();
+    jQuery('#'+pos).append('<div id="js_date_'+ arr_name +'" style="padding:5px 0 ;border-bottom:1px dashed black;"><span style="float: left;color:#73899E;"> Start date&nbsp;:&nbsp;&nbsp;&nbsp;</span><div class="inputcal adv_date_label"><input class="inputtext_for_datepicker date-pick dp-applied" style="border:none;width:94px;font-size:12px;color:black;"  id="start-date'+ items +'" name="set_dates[][start]" readonly  value="--not set--" /></div><span style="float: left;color:#73899E;"> End date&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;</span><div class="inputcal adv_date_label"><input class="inputtext_for_datepicker date-pick dp-applied" style="border:none;width:94px;font-size:12px;color:black;"  id="end-date'+ items + '" name="set_dates[][end]" readonly  value="--not set--" /></div><input type="hidden" name="set_dates[][state]" value="'+ arr_name +'"/><input type="hidden" name="set_dates[][id]" value=""/><span onclick="jQuery(this).parent().remove();" style="float: right;background-color:#73899e;color: #FFFFFF;cursor: pointer ;">- Remove&nbsp;</span></div></div>');
+    roll_calender(items);
+    items++;
+  }
+
+  var current_id=""
+  var active_call="overview"
+<% val = (@portfolios.index(@portfolio)).to_i + 1 %>
+  jcarousel_start = <%= val%>
+  jQuery(document).ready(function() {
+    jQuery('#mycarousel').jcarousel({
+      vertical: true,
+      scroll: 4,
+      visible: 4,
+      animation: "medium",
+      start: jcarousel_start
+    });
+    current_id=jQuery('#portfolio_id').val()
+  });
+
+  var selected_item = <%= !@portfolio.nil?  ? @portfolio.id : (@portfolios.empty? ? 0 : @portfolios.first.id) %>;
+  if(<%=!@portfolio.nil?%>)
+  //show_overview(<%=  !@portfolio.nil?  ? @portfolio.id : (@portfolios.empty? ? 0 : @portfolios.first.id) %>); this line is commented by Arun Rex since this call doesnt needed when page load.
+
+
+  function show_selected_item(p){
+<% @portfolios.each do |portfolio| %>
+      jQuery('#'+<%= portfolio.id %>+'_li').removeClass('activeimagecol').addClass('deactiveimagecol');
+      current_id=p;
+      if(p==<%= portfolio.id%>) {
+      }
+<% end %>
+    selected_item = p;
+    jQuery('#'+p+'_li').removeClass('deactiveimagecol').addClass('activeimagecol');
+  }
+
+
+
+  function change_color(p){
+    return false;
+  }
+
+  function set_call(p,period,property_id){
+    if (p=="overview"){
+      show_real_overview(current_id,period,property_id);
+    }
+    else{
+      //show_datahub(current_id)
+      show_datahub_image_real_estate(current_id,'asset_data_and_documents','asset_docs');
+    }
+  }
+
+  function edit_place(curr){
+    hide_edit();
+    current_edit = curr
+    jQuery('#'+curr.id).attr('onClick','')
+    editables = jQuery('#'+curr.id).children()
+    editables.each(function(){ value = jQuery(this).html();
+      jQuery(this).css('backgroundColor','#BBBBBB');
+      str_html = "<input size=\"10px\" onblur=\"submit_now(this);\" style=\"border:1px solid;background-color:#EEEEEE;\" class=\"inputdStyle\" type='text' value='"+value+"'></input>"
+      jQuery(this).html(str_html);
+    });
+
+  }
+
+  function hide_edit(){
+    curr = current_edit
+    jQuery('#'+curr.id).attr('onClick','edit_place(this)')
+    jQuery('#'+curr.id).css('border-top','none');
+    editables = jQuery('#'+curr.id).children()
+    editables.each(function(){ value = jQuery(this).children().val();
+      jQuery(this).css('backgroundColor','white');
+      str_value = value
+      jQuery(this).html(str_value);
+    });
+  }
+
+  function change_tabs(curr)
+  {
+    jQuery('#tab_1,#tab_2,#tab_3,#tab_4,#tab_5').each( function(){
+      temp_val = this.id.split('_').pop();
+      show_tab = '#Sheet'+ temp_val;
+      if (this.id == curr.id){
+        jQuery(current_tab).hide();
+        current_tab = show_tab;
+        curr_table = temp_val;
+        jQuery(show_tab).show();
+        jQuery(this).css('background-color','#BBBBBB')
+      } else{
+        jQuery(this).css('background-color','')
+
+      }
+    });
+  }
+  function submit_now(curr) {
+    param_tab =  current_tab.split('#').pop();
+    keys = to_params[param_tab]
+    params = {property:{}};
+    property = {};
+    par = jQuery(curr).parents('div div').get(1);
+    fields = jQuery(par).children('div');
+    fields.each(function(index){
+      property[keys[index]] = jQuery(this).children().val();
+    });
+    params.id = par.id.split('_').pop();
+    params.updates_for = curr_table;
+    //params.asset_id = tmp_asset_class_id;
+    params.property = property;
+    params.portfolio_id = <%=!@portfolio.nil? ? @portfolio.id : 0 %>;
+    new Ajax.Request('/portfolios/edit_assets', {asynchronous: true, evalScripts: true, parameters: "to_param="+Object.toJSON(params), method: 'post'});
+  }
+
+  function make_editable(curr){
+    var find_sheet = current_tab.split('t').pop();
+    var editable_div = 'enable_edit'+find_sheet+'_'+curr;
+    // obj = jQuery('#'+editable_div);
+    obj = document.getElementById(editable_div)
+    edit_place(obj);
+  }
+
+  function add_new_property(){
+    if (allow_new == true){
+      allow_new = false ;
+      str_html  = '';
+      hide_edit();
+      jQuery('#indexed').append('<div class="tabular_col8">Enter the property id:</div><div class="tabular_col8"><input id="new_property_id" type="text"  class="inputdStyle" style="border: 1px solid ;" size="10px"/>\n\
+     </div><br/><span style="color:green;line-height:0;">Fill the all three sheets , Then click save to add u r property.<a href="">Cancel</a> &nbsp;|&nbsp;<a style="cursor:pointer;color:blue;" onclick="submit_new();">save</a></span>\n\
+     ');
+      jQuery('#Sheet1 tr:last td div').children().each(function(){
+        str_html = str_html + "<div class=\"tabular_col8\"> <input size=\"10px\" style=\"border:1px solid;\" class=\"inputdStyle\" type='text'></input></div>"
+      });
+      jQuery('#Sheet1 tr:last').after('<tr><td><div id="enable_edit1_new">'+ str_html +'</div></td></tr>');
+      str_html  = ''
+      jQuery('#Sheet2 tr:last td div').children().each(function(){
+        str_html = str_html + "<div class=\"tabular_col8\"> <input size=\"10px\" style=\"border:1px solid;\" class=\"inputdStyle\" type='text'></input></div>"
+      });
+      jQuery('#Sheet2 tr:last').after('<tr><td><div id="enable_edit2_new">'+ str_html +'</div></td></tr>');
+
+      str_html  = ''
+      jQuery('#Sheet3 tr:last td div').children().each(function(){
+        str_html = str_html + "<div class=\"tabular_col8\"> <input size=\"10px\" style=\"border:1px solid;\" class=\"inputdStyle\" type='text'></input></div>"
+      });
+      jQuery('#Sheet3 tr:last').after('<tr><td><div id="enable_edit3_new">'+ str_html +'</div></td></tr>');
+
+      str_html  = ''
+      jQuery('#Sheet4 tr:last td div').children().each(function(){
+        str_html = str_html + "<div class=\"tabular_col8\"> <input size=\"10px\" style=\"border:1px solid;\" class=\"inputdStyle\" type='text'></input></div>"
+      });
+      jQuery('#Sheet4 tr:last').after('<tr><td><div id="enable_edit4_new">'+ str_html +'</div></td></tr>');
+
+      str_html  = ''
+      jQuery('#Sheet5 tr:last td div').children().each(function(){
+        str_html = str_html + "<div class=\"tabular_col8\"> <input size=\"10px\" style=\"border:1px solid;\" class=\"inputdStyle\" type='text'></input></div>"
+      });
+      jQuery('#Sheet5 tr:last').after('<tr><td><div id="enable_edit5_new">'+ str_html +'</div></td></tr>');
+    }
+  }
+  function submit_new() {
+    params = {property:{}};
+    property = {};
+    for( i=1;i<=5;i++){
+      sheet = 'Sheet'+i;
+      div_place = '#enable_edit'+i+'_new'
+      keys = to_params[sheet];
+      temp_value = {};
+      jQuery(div_place).children().each(function(index){
+        temp_value[keys[index]] = jQuery(this).children().val();
+      });
+      property[table_name[sheet]] = {};
+      property[table_name[sheet]] = temp_value;
+    }
+    params.id = jQuery('#new_property_id').val();
+    params.property = property;
+    params.portfolio_id = <%=!@portfolio.nil? ? @portfolio.id : 0 %>;
+    params.property = property;
+    new Ajax.Request('/portfolios/new_asset_create', {asynchronous: true, evalScripts: true, parameters: "to_param="+Object.toJSON(params), method: 'put'});
+  }
+
+  function check_response(res){
+    if (res == 'true'){
+      alert('Data have been saved!');
+      //window.location.href = window.location.href;
+    } else { alert('Please enter the property id.(property id cant\'be null)'); }
+  }
+
+  function delect_selected_file(upload_type,upload_file_id,document_id,fname)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+    jQuery("#fileUpAddFiles").val(null);
+    new Ajax.Request("/tasks/delect_task_file?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&document_id="+document_id,{
+      onLoading : load_writter(),
+      asynchronous:true,
+      evalScripts:true,
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      insertion:Insertion.Top
+    });
+  }
+
+  function delect_selected_file_for_folder(upload_type,upload_file_id,task_id,fname)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+    jQuery("#fileUpAddFiles").val(null);
+    var already_upload_file = document.getElementById('already_upload_file').value;
+    new Ajax.Request("/tasks/delect_task_file_for_folder?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&task_id="+task_id+"&already_upload_file="+already_upload_file,{
+      onLoading : load_writter(),
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+  }
+  function addSelectedItemToPortfolioUrl(element) {
+    var url = new Array();
+    url = jQuery("#"+element).attr('href').split("&");
+    url[2]="last_selected_item="+selected_item;
+    jQuery("#"+element).attr('href', url.join("&"));
+    new Control.Modal($(element),{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();}, className: 'modal_container', method: 'get'});
+  }
+</script>
+<script type="text/javascript">jQuery.noConflict();</script>
+<script>
+<%if params[:show] == "data_hub"%>
+    new Ajax.Request("/properties/show_asset_docs?data_hub=asset_data_and_documents"+"&pid=<%=params[:pid]%>",{
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+<%end%>
+</script>
+<br/>
+<div class="bodywrapperrow">
+  <div class="contentwrapper">
+    <div class="">
+      <% ptype=find_portfolio_type_for_realestate() %>
+      <div class="portfolioslider">
+          <div class="portfoliotext"><%= @portfolios.count%> PORTFOLIO(S)</div>
+          <!--<a href="#" onclick="show_new_real_portfolio(<%= ptype%>);change_color('datahub_tab');return false;" id="new_portfolio" name="new_portfolio"><img border="0" width="52" height="22" src="/images/portfolios_addbutton.png" alt="add new portfolio data" title="add new portfolio data"/></a>-->
+			<div class="portfolioadd">
+			<a href="#" onclick="show_new_real_portfolio(<%= ptype%>);change_color('datahub_tab');document.getElementById('show_assets_list').scrollIntoView();return false;" id="new_portfolio" name="new_portfolio"><img border="0" src="/images/btn_addportfolio.png" alt="add new portfolio data" title="Add a New Portfolio"/></a>
+				</div>
+			</div>
+
+    <% portfolio_first_id = !@portfolio.nil?  ? @portfolio.id : (@portfolios.empty? ? 0 : @portfolios.first.id) %>
+    <input type="hidden" id="portfolio_id" name="portfolio_id" value="<%= portfolio_first_id %>" />
+    <div class="rhs">
+      <div class="subheadwrapper">
+        <div class="subheadrow2">
+          <% default_overtab = !(controller.controller_name == 'real_estates' && (controller.action_name == 'create')) ? 'executivesubtab' : 'deactivesubtab' %>
+          <% default_settab = (controller.controller_name == 'real_estates' && (controller.action_name == 'create')) ? 'executivesubtab' : 'deactivesubtab' %>
+          <div class="<%= default_overtab %>"  id="over_tab">
+            <div class="left"></div>
+            <div class="tabwrapper">
+              <div style="width: 75px;" class="tabicon"><a href="#" onclick="show_real_overview(current_id);change_color('overview_tab');return false;"><img border="0" width="33" height="23" src="/images/icon1.png"/></a></div>
+              <div class="tablabel" style="padding-left:15px;padding-right:15px;" ><a href="#" onclick="show_real_overview(current_id);change_color('overview_tab');return false;">Overview</a></div>
+            </div>
+            <div class="right"></div>
+          </div>
+          <div class="<%= default_settab %>" id="set_tab">
+            <div class="left"></div>
+            <div class="tabwrapper">
+              <div style="width: 110px;" class="tabicon" id="real_estates_properties_set_up"><a href="#" onclick="show_datahub_image_real_estate(current_id,'asset_data_and_documents','asset_docs');return false;"><img border="0" width="27" height="28" src="/images/setup_icon.png"/></a>&nbsp;</div>
+              <div class="tablabel" style="padding-left:15px;padding-right:15px;"><a href="#" onclick="show_datahub_image_real_estate(current_id,'asset_data_and_documents','asset_docs');return false;">Properties &amp; Setup</a><a href="#"></a></div>
+            </div>
+            <div class="right"></div>
+          </div>
+        </div>
+        <div id = "overview">
+          <%#= render :partial => '/portfolios/portfolio_real_overview',:locals=>{:periods=>@period,:real_properties=>@real_properties,:portfolio_collection=>@portfolio,:graph_period=>@graph_period,:hash_portfolio_occupancy=>@hash_portfolio_occupancy,:operating_statement=>@operating_statement,:net_income_de=>@net_income_de,:year_to_date=>@year_to_date,:divide=>@divide} %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+ <% if params[:task_id] and @doc%>
+     function link_to_edit_task_function()
+     {
+       show_datahub_image_real_estate(current_id,'asset_data_and_documents','asset_docs');
+       new Ajax.Request("<%=edit_task_tasks_path(:id=>@doc.id,:portfolio_id=>@doc.real_estate_property.portfolio.id,:folder_id=>@doc.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file])%>",{
+         asynchronous:true,
+         evalScripts:true,
+         insertion:Insertion.Top
+       });
+     }
+     window.onload = link_to_edit_task_function;
+ <%end%>
+  </script>
+  <script type="taxt/javascript" >
+    if(<%=!@portfolio.nil? || !@portfolios.empty? %>) {
+     jQuery('#'+selected_item+'_li').removeClass('deactiveimagecol').addClass('activeimagecol');
+    }
+  </script>
+
+  <script>
+    if(<%=!@portfolio.nil? || !@portfolios.empty? %>) {
+      jQuery('#'+selected_item+'_li').removeClass('deactiveimagecol').addClass('activeimagecol');
+    }
+    function roll_calender(sufix){
+      jQuery(function()
+      {
+        jQuery('.date-pick').datePicker({startDate:'01/01/2000'})
+        strt = '#start-date'+ sufix
+        etrt = '#end-date'+ sufix
+        jQuery(strt).bind(
+        'dpClosed',
+        function(e, selectedDates)
+        {
+          var d = selectedDates[0];
+          if (d) {
+            d = new Date(d);
+            jQuery(etrt).dpSetStartDate(d.addDays(1).asString());
+          }
+        }
+      );
+        jQuery(etrt).bind(
+        'dpClosed',
+        function(e, selectedDates)
+        {
+          var d = selectedDates[0];
+          if (d) {
+            d = new Date(d);
+            jQuery(strt).dpSetEndDate(d.addDays(-1).asString());
+          }
+        }
+      );
+      });
+    }
+
+    function submit_adv_dates() // this is for advanced due date setting
+    {
+      var ret = true;
+      jQuery('#err_info_date').html('');
+      jQuery('#frmAdvanced :input:text').each( function(){
+        if(this.value == '--not set--'){
+          jQuery('#err_info_date').html('Plese select the date before you submit.');
+          ret = false;
+          return false;
+        }
+      });
+      return ret;
+  }
+  portfolios_name = '<%= @portfolios.collect{ |itr| itr.name }.join(',') %>';
+  port_names = portfolios_name.split(',');
+  function portfolio_check(){
+    chk =  jQuery('#portfolio_name').val();
+    chk=chk.replace(/^\s+|\s+$/g, '');
+    val_chk = port_names.indexOf(chk);
+    if (chk != '' && val_chk == -1 )
+      return true;
+    else
+    {
+      (chk != '') ? jQuery('#portfolio_error').html('Portfolio name already exists') : jQuery('#portfolio_error').html('Enter the portfolio name')
+      return false;
+    }
+  }
+<% if !@excel_template.nil? && !@portfolio.nil? %>
+    show_datahub(<%= @portfolio.id if !@portfolio.nil? %>);
+    change_color('datahub_tab')
+<% end %>
+<% if controller.controller_name == 'real_estates' && (controller.action_name == 'create' || controller.action_name == 'destroy') %>
+    //  show_data_hub_docs_real_estate(<%= @portfolio.id if !@portfolio.nil? %>);
+  <% if controller.action_name == 'create' %>
+      open_data_docs_real_estate("<%= @portfolio.id if !@portfolio.nil? %>");
+  <% end %>
+<% end %>
+<% if !flash[:notice].nil? && !flash[:notice].blank? %>
+    flash_writter("<%= flash.now[:notice] %>");
+<% end %>
+  function store_task_related_data()
+  {
+    alert(document.getElementById("task_task_type_id").value)
+    alert(document.getElementsByName("task[due_by]")[0].value)
+    alert(document.getElementById("task_instruction").value)
+    alert(document.getElementById("collborators_list").value)
+  }
+  if(<%= params[:from_view] == 'true' %>) {
+    flash_writter("Add a property to go to Property");
+  }
+<% if controller.controller_name == 'portfolios' && (controller.action_name == 'show' || controller.action_name == 'index') && @note %>
+    jQuery('#asset_view_path').attr('href','/real_estate/<%= @portfolio.id%>/properties/<%= @note.id %>')
+<% else %>
+    jQuery('#asset_view_path').attr('href','/portfolios/<%= @portfolio.id%>?show_notice=true')
+<% end %>
+  </script>

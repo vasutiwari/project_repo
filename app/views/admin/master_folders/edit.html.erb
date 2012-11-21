@@ -1,0 +1,48 @@
+<div class="contentwrapper" style="background-image:none;">
+  <div class="semiactivestepcontainer" style="background-image: none; margin-left: 200px; height: 5px;">
+    <div class="stepswrapper">
+      <div class="steptitle">
+        <a href="javascript:;">&nbsp;</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="middlewrapper">
+  <div class="sectiontitle">Folder Template:
+    <span style="float: right; margin-right: 60px;"><%= link_to 'Back',  admin_portfolio_types_path %></span></div>
+  <div class="rowfull">For each asset type ( retail, office, etc), and each asset, we want to give a list of files and folder structure that the user should upload for each asset created.</div>
+  <div class="finmiddlewrapper2">
+    <div class="fieldrow">
+      <% unless flash.now[:notice].blank? -%>
+        <center><font size="4" color="green"><%=flash.now[:notice]%></font></center>
+      <% end -%>
+    </div>
+    <div class="filewrap">
+      <div class="filecontainer" id="stored_assets_ids_display">
+        <table class="example" id="dnd-example">
+        </table>
+        <div class="fileright">
+          <div class="filergtwrap">
+            <div class="filergtgraytop">
+              <div class="fileheadtitlefilename" style="width:585px;" id="folder_head">
+                <img src="/images/property.png" style="margin:3px 3px -3px;"/><font color='#1F75CC'><%=@portfolio_type.name %></font>
+                &nbsp;<span id="loader_info" style="display:none;"><img src="/images/upload_spinner.gif" /></span>
+              </div>
+            </div>
+            <div class="filedatacontainer" id ="new_file_and_folder">
+              <div class="newbuttons" style="font-family:'lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;font-size:8pt;background-color:#FAFCFF;color:#1F75CC;padding:3px 5px;"><img class="icon_no_hover sprite s_folder_add icon_no_hover" src="/images/icon_spacer.gif" />
+                <%= link_to 'New Folder', {:controller=>'master_folders',:action=>"new_folder_creation",:id=>@portfolio_type.id, :folder_id => 0} ,:id=>"upload_folder_#{@portfolio_type.id}" ,:title=>"Create new folder"%>
+                <script>new Control.Modal($('upload_folder_<%= @portfolio_type.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+              </div>
+              <span id="select_one"></span>
+            </div><!-- filedatacontainer ends here -->
+            <div class="filergtwrap" id="stored_assets_docs_display">
+              <%= render :partial => 'folders_view' ,:locals=>{:portfolio_files => @portfolio_files,:portfolio_filename => @portfolio_filename,
+  :portfolio_folder => @portfolio_folder,:portfolio_type => @portfolio_type}%>
+            </div>
+          </div><!-- filergtwrap ends here -->
+        </div><!-- fileright ends here -->
+      </div><!-- filecontainer ends here -->
+    </div><!-- filewrap ends here -->
+  </div><!-- finmiddlewrapper2 ends here -->
+</div><!-- middlewrapper ends here --

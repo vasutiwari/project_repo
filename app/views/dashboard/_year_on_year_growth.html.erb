@@ -1,0 +1,162 @@
+<script>
+  var partial_page = "year_on_year"
+</script>
+<style>
+  .more {width 98%;}
+  .financials_tablelabel5{ width: 98%;}
+  .tablecol5, .more {width: 98%;}
+</style>
+<%year,cur_year_actuals,cur_year_budget,prev_year_actuals,cur_year_variance,prev_year_variance,financial_sub_id,months,month_hash_cur_year,month_hash_prev_year,display_actuals = trend_year_on_year_growth_calc%>
+<div id="perAnalysisTabContent2">
+  <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb padL5 padR5 hovertr">
+    <thead>
+      <tr class="fb-tr-head">
+        <th class="bdr-lt-gry bdr-rt-wht td90">Month</th>
+        <th class="bdr-rt-wht td80"><%= params[:tl_period] == "11" ? "#{Date.today.prev_year.prev_year.year}-#{Date.today.prev_year.year}" : year-1 %> Actuals $</th>
+        <th class="bdr-rt-wht td80"><%= params[:tl_period] == "11" ? "#{Date.today.prev_year.year}-#{Date.today.year}" : year %> Actuals $</th>
+        <th align="center" colspan="2" class="bdr-rt-wht padzero td230"> <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+              <tr>
+                <th class="bdrBnone bdrTnone bdrRnone" colspan="2" >Year on Year Growth</th>
+              </tr>
+              <tr>
+                <th class="bdr-rt-wht td63Hack bgNone bdrBnone" >($)</th>
+                <th class="td60 bgNone bdrBnone  bdrRnone">Area (%)</th>
+              </tr>
+            </tbody>
+          </table>
+        </th>
+        <th class="bdr-rt-wht td250">Explanation</th>
+      </tr>
+    </thead>
+    <%exp_month_ytd,exp_ytd_check,variance_task_document_id=initial_variance_calculations(@current_time_period,"financials")%>
+    <tbody>
+      <%if params[:tl_period] == "4"%>
+        <%exp_month_ytd = "4year"%>
+        <%exp_ytd_check = true%>
+      <%elsif params[:tl_period] == "11"%>
+        <%exp_month_ytd = "12year"%>
+        <%exp_ytd_check = true%>
+      <%elsif params[:tl_period] == "3"%>
+        <%exp_month_ytd = "3year"%>
+        <%exp_ytd_check = true%>
+      <%end%>
+      <tr>
+        <% color_display = @parent_title%>
+        <% icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(cur_year_actuals.to_f,prev_year_actuals.to_f) :  find_color_direction_and_icon(cur_year_actuals.to_f,prev_year_actuals.to_f)%>
+        <td align="left" class="tabYTDbg bdr-lt-gry bdr-rt-gry"><%if  !params[:tl_period].present? || params[:tl_period] == "4"%>YTD <%elsif params[:tl_period] == "3"%> Last Year<%elsif params[:tl_period] == "11"%> Trailing 12 Months<%end%></td>
+        <td align="right" class="tabYTDbg bdr-rt-gry"><%=display_currency_real_estate_overview(prev_year_actuals)%></td>
+        <td align="right" class="tabYTDbg bdr-rt-gry"><%=display_currency_real_estate_overview(cur_year_actuals)%></td>
+        <td align="right" class="tabYTDbg bdr-rt-gry td80 <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%=display_currency_real_estate_overview(prev_year_variance.abs)%></td>
+        <td align="right" class="tabYTDbg bdr-rt-gry td75 <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%= display_currency_real_estate_overview_for_percent(((prev_year_variance.to_f/cur_year_actuals.to_f) * 100 rescue 0) ) %></td>
+        <%percent = ((prev_year_variance.to_f/cur_year_actuals.to_f) * 100 rescue 0)%>
+        <td align="left" class="tabYTDbg bdr-rt-gry padL5" id="comment14">
+          <% if  (financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).nil? || financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).blank?) %>
+            <%i = 0%>
+            <div onclick="show_explanation('explain_income_<%=i%>');" onmouseover="document.getElementById('non_explain_income_<%=i%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_explain_income_<%=i%>').style.backgroundColor='';" class="tablecol5" >
+              <span id="non_explain_income_<%=i%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:90%;border:0px solid red;display:block;">
+                <%=truncate_extra_chars_for_expl(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+              </span>
+              <div class="more ie_7_empty_div" id="explain_income_<%=i%>_more" style="width: 203px;"></div>
+              <div id="explain_income_<%=i%>_text"  style="display:none" >
+                <textarea id="explain_income_<%=i%>_box" name="explain_income_box" class="expand25-300 inline_editing_tablecol5"  style="width: 98%" size="5" onblur="text_msg_display('explain_income');save_financial_exp(this.value,'<%= financial_sub_id %>','<%= exp_month_ytd %>','<%= exp_ytd_check %>','<%= variance_task_document_id %>','<%= request.request_uri %>')"><%= financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check) %></textarea>
+              </div>
+            </div>
+          <% else %>
+
+            <%explanation_doc_id = 0%>
+            <div class="financials_tablelabel5">
+              <span id="non_explain_income_<%=i%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:90%;border:0px solid red;display:block;">
+                <%= truncate_extra_chars_for_expl(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+              </span>
+              <div class="more" id="explain_income_<%=i%>_more">
+                <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+"#{@financial_sub}"+'&actual_explanation='+"#{prev_year_actuals}"+'&budget_explanation='+"#{cur_year_actuals}"+'&text_explanation='+URI.encode(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+"#{(percent)}"+'&var_amt_explanation='+"#{(prev_year_variance)}"+'&id_explanation='+financial_sub_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(financial_sub_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'+'&type='+'trends'+'&year=' +"#{year}"%>"  id="explain_income_<%=i%>_task" >Edit</a>
+                <script> new Control.Modal($('explain_income_<%=i%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+              </div>
+            </div>
+          <% end%>
+        </td>
+      </tr>
+    </tbody>
+    <%if params[:tl_period] == "4"%>
+      <%tmp_month = ["","January","February", "March","April","May","June","July","August","September","October", "November","December"]
+      months = []
+      for i in 1..@financial_month.to_i do
+        months << tmp_month[i]
+      end%>
+    <%end%>
+    <%(@performance_array_string.present? ? @performance_array_string : months).each_with_index do |month,i|%>
+      <%month = month.split('-')[0]%>
+      <%exp_month_ytd = (i + 1).to_s + year.to_s %>
+      <%exp_ytd_check = false%>
+      <%i = i + 1%>
+      <tbody>
+        <tr class="">
+          <td align="left" class="bdr-lt-gry bdr-rt-gry bdr-TBD-gry"><%= month%></td>
+          <%if params[:tl_period] == "11"%>
+            <%
+            actual = display_actuals["#{month}"]
+            actual1 = display_actuals["#{month}_prev"]
+          %>
+            <% icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(actual.to_f,actual1.to_f) :  find_color_direction_and_icon(actual.to_f,actual1.to_f)%>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry"><%=display_currency_real_estate_overview(actual1)%></td>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry"><%=display_currency_real_estate_overview(actual)%></td>
+            <%prev_year_variance = actual - actual1%>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%=display_currency_real_estate_overview(prev_year_variance.abs)%></td>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%= display_currency_real_estate_overview_for_percent(((prev_year_variance.to_f/actual.to_f) * 100 rescue 0) ) %></td>
+            <%percent = ((prev_year_variance.to_f/actual.to_f) * 100 rescue 0)%>
+          <%else%>
+            <% icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(month_hash_cur_year[month]["#{month}_actuals"].to_f,month_hash_prev_year[month]["#{month}_actuals"].to_f) :  find_color_direction_and_icon(month_hash_cur_year[month]["#{month}_actuals"].to_f,month_hash_prev_year[month]["#{month}_actuals"].to_f)%>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry"><%=display_currency_real_estate_overview(month_hash_prev_year[month]["#{month}_actuals"].to_f)%></td>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry"><%=display_currency_real_estate_overview(month_hash_cur_year[month]["#{month}_actuals"].to_f)%></td>
+            <%prev_year_variance = month_hash_cur_year[month]["#{month}_actuals"].to_f - month_hash_prev_year[month]["#{month}_actuals"].to_f%>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%=display_currency_real_estate_overview(prev_year_variance.abs)%></td>
+            <td align="right" class="bdr-rt-gry bdr-TBD-gry <%= ((color_flag.eql?('green') || color_flag.eql?('')) ?  "txtGreen" : "txtRed" )%>"><%= display_currency_real_estate_overview_for_percent(((prev_year_variance.to_f/month_hash_cur_year[month]["#{month}_actuals"].to_f) * 100 rescue 0) ) %></td>
+            <%percent = ((prev_year_variance.to_f/month_hash_cur_year[month]["#{month}_actuals"].to_f) * 100 rescue 0)%>
+          <%end%>
+          <td align="left" class="bdr-rt-gry bdr-TBD-gry padL5" id="comment15">
+            <% if  (financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).nil? || financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).blank?) %>
+              <div onclick="show_explanation('explain_income_<%=i%>');" onmouseover="document.getElementById('non_explain_income_<%=i%>').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_explain_income_<%=i%>').style.backgroundColor='';" class="tablecol5" >
+                <span id="non_explain_income_<%=i%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:90%;border:0px solid red;display:block;">
+                  <%=truncate_extra_chars_for_expl(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                </span>
+                <div class="more ie_7_empty_div" id="explain_income_<%=i%>_more" style="width: 203px;"></div>
+                <div id="explain_income_<%=i%>_text"  style="display:none" >
+                  <textarea id="explain_income_<%=i%>_box" name="explain_income_box" class="expand25-300 inline_editing_tablecol5"  style="width: 98%" size="5" onblur="text_msg_display('explain_income');save_financial_exp(this.value,'<%= financial_sub_id %>','<%= exp_month_ytd %>','<%= exp_ytd_check %>','<%= variance_task_document_id %>','<%= request.request_uri %>')"><%= financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check) %></textarea>
+                </div>
+              </div>
+            <% else %>
+              <%explanation_doc_id = 0%>
+              <%if params[:tl_period] == "11"%>
+                <%actual_val = actual1
+                budget_val = actual
+                variance_val = prev_year_variance
+                percent_val = percent
+                color_display = @parent_title
+                icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(actual.to_f,actual1.to_f) :  find_color_direction_and_icon(actual.to_f,actual1.to_f)
+              %>
+              <%elsif params[:tl_period] == "4" || params[:tl_period] == "3"%>
+                <%actual_val = month_hash_prev_year[month]["#{month}_actuals"]
+                budget_val = month_hash_cur_year[month]["#{month}_actuals"]
+                variance_val = prev_year_variance
+                percent_val =  percent
+                color_display = @parent_title
+                icon_direction,use_color,color_flag,color_icon = (color_display && color_display == 'income') ?  find_color_direction_and_icon_income(month_hash_cur_year[month]["#{month}_actuals"].to_f,month_hash_prev_year[month]["#{month}_actuals"].to_f) :  find_color_direction_and_icon(month_hash_cur_year[month]["#{month}_actuals"].to_f,month_hash_prev_year[month]["#{month}_actuals"].to_f)
+              %>
+              <%end%>
+              <div class="financials_tablelabel5">
+                <span id="non_explain_income_<%=i%>" style="padding-top:1px;margin-left:5px;padding-left:5px;width:90%;border:0px solid red;display:block;">
+                  <%= truncate_extra_chars_for_expl(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check),75) %>&nbsp;
+                </span>
+                <div class="more" id="explain_income_<%=i%>_more">
+                  <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+"#{@financial_sub}"+'&actual_explanation='+"#{actual_val}"+'&budget_explanation='+"#{budget_val}"+'&text_explanation='+URI.encode(financial_explanation(financial_sub_id,exp_month_ytd,exp_ytd_check).to_s)+'&var_per_explanation='+"#{(percent_val)}"+'&var_amt_explanation='+"#{(variance_val)}"+'&id_explanation='+financial_sub_id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&user_id_explanation='+financial_explanation_user_id(financial_sub_id,exp_month_ytd,exp_ytd_check).to_s+'&use_color='+"#{use_color}"+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'+'&type='+'trends'+'&year=' + "#{year}"%>"  id="explain_income_<%=i%>_task" >Edit</a>
+                  <script> new Control.Modal($('explain_income_<%=i%>_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                </div>
+              </div>
+            <% end%>
+          </td>
+        </tr>
+      </tbody>
+    <%end%>
+  </table>
+</div>

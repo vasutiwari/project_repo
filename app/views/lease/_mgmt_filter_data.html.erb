@@ -1,0 +1,83 @@
+           <div class="tbl-row <%= cycle("mgmt-odd", "mgmt-even") %>">
+              <div class="suite2" style="width:55px;word-wrap:break-word;">
+							<%if suite_details.present?%>
+                <% suite_details.each_with_index do |suite_detail,j|%>
+                  <%comma = (j+1 != suite_details.count) ? ',' : ''%>
+        <%# total_rentable_sqft = total_rentable_sqft + (!suite_detail.rentable_sqft.nil? ? suite_detail.rentable_sqft.to_i : total_rentable_sqft.to_i)%>
+                  <% total_rentable_sqft = total_rentable_sqft + suite_detail.rentable_sqft.to_i unless suite_detail.rentable_sqft.nil?%>
+                  <%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+                <%end%>
+                <%sum = sum + total_rentable_sqft%>
+								<%else%><%=  raw("&nbsp;")%><%end%>
+              </div>
+              <div class="tenant2 version letextbox" style="width:122px; padding:0 4px;word-wrap:break-word;" title = "<%=tenant ? tenant.tenant_legal_name : raw("&nbsp;") %>">
+                <a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>','<%=note_collection.id%>','','<%=property_lease_suite.lease_id%>','management');load_completer();return false;"><%= tenant ? truncate(tenant.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+              </div>
+              <div class="sqft2" style="width:80px;"><%= total_rentable_sqft ? number_with_delimiter(total_rentable_sqft) : raw("&nbsp;") %></div>
+              <div class="lease" style="width:50px;"><%= (lease && lease.commencement)  ? lease.commencement.strftime('%m/%d/%y') : raw("&nbsp;")%></div>
+              <div class="lease" style="width:50px;">
+                <%if lease.try(:mtm)%>
+                                                                                MTM
+                <%else%>
+                  <%= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%d/%y') : raw("&nbsp;")%>
+                <%end%>
+              </div>
+      <!--<div class="lease2" style="width:70px;"><%#= (lease && lease.expiration)  ? lease.expiration.strftime('%m/%Y') : raw("&nbsp;")%></div>-->
+              <div class="options2" style="width:130px;"><%=options_and_ti(tenant).present? ? options_and_ti(tenant) : raw("&nbsp;")%></div>
+              <div class="options2" style="width:110px;"><%=tenant_improvement(lease).present? ? tenant_improvement(lease) : raw("&nbsp;")%><br />
+                <%insurance(lease)%> <div title="<%=@string1%>"><%=insurance(lease)%></div>
+              </div>
+              <div class="note" style="width:97px; text-align:left; padding:4px; line-height:14px;height:19px;">
+                <%if lease.documents.present?%>
+								<%lease_management_var = 0%>
+                  <%lease.documents.each do |document|%>
+									<%lease_management_var =lease_management_var + 1%>
+									<%if lease_management_var == 1 || lease_management_var == 2 || lease_management_var == 3 || lease_management_var == 4%>
+                    <a href="<%=download_doc_path(document.id)%>" title= "<%=document.filename%>"><%=truncate(document.filename,:length=>13) %></a>
+									<%end%>
+                  <%end%>
+                <%else%>
+                  <%= form_for note_collection,:url=> attach_file_for_management_path(params[:portfolio_id],params[:property_id]), :html=>{:target => "mgmt_attach_frame", :multipart => true,:id=>"mgmt_attach_form_#{lease.id}"} do |f| -%>
+								<div class="attach-outer">
+                  <%unless @pdf%><input type="submit" name="Browse3" class="btn-browse" value="Attach File" id="suite_file_up<%=i%>"  /><%end%>
+									<input type='file' name='mgmt_file_upload'  class="hidden-input-file" id='suitefilefield_<%=lease.id%>' size="1" onchange='attachment_mgmt(<%=i%>,<%=lease.id%>);document.forms.mgmt_attach_form_<%=lease.id%>.submit();'/>
+									<input type="hidden" id = "lease_id" name="lease_id" value ="<%=lease.id%>" />
+									<%if params[:page].present?%><input type="hidden" id = "page" name="page" value ="<%=params[:page]%>" /><%end%><input type="hidden" id = "per_page" name="per_page" value ="25" /><input type="hidden" id = "sort" name="sort" value ="<%=params[:sort]%>" /><input type="hidden" id = "from_pag" name="from_pag" value ="true" />
+									<input type="hidden" id = "selected_value" name="selected_value" value ="<%=params[:selected_value] ? params[:selected_value] : 'Active Leases'%>" />
+                </div>
+                  <%end%>
+                <%end%>
+              </div>
+
+              <%if  !is_leasing_agent && !@pdf%>
+                <div class="actions" style="width:67px; margin-left:3px;">
+                  <div class="folderlabel">
+                    <a href="" onclick="show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'','management');load_completer();return false;" style="padding:0">
+                      <div class="folderlabelcol" style="padding:4px; width:54px;">Abstract</div>
+                    </a><img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                  <div class="clear"></div>
+                  <div id="morebtn" onmouseover="document.getElementById('moreddmenu<%=i%>').style.visibility='visible'" onmouseout="document.getElementById('moreddmenu<%=i%>').style.visibility='hidden'">
+                    <div class="folderlabel" style="margin-top:1px;"><a href="#" style="padding:0">
+                        <div class="folderlabelcol" style="padding:4px 4px 4px 6px; width:52px;">More &#9660;</div>
+                      </a><img src="/images/upllodright.png" width="2" height="27" border="0" /></div>
+                    <span class="moreddmenu" id="moreddmenu<%=i%>" style="visibility:hidden;" onmouseover="this.style.visibility='visible'" onmouseout="this.style.visibility='hidden'">
+                      <%#unless params[:selected_value] && params[:selected_value] == "Inactive Leases"%>
+                        <!--<div class="labeldd1">
+                          <a href="javascript:;" onclick="if(confirm(' Are you sure you want to mark the lease as inactive and archive it?')){mark_as_executed(<%= lease.id %>,<%=portfolio_collection.id%>,<%=note_collection.id%>,'lease_suite','archieve');} return false;" >Mark as Inactive</a>
+                        </div> -->
+                      <%#end%>
+											<!-- Edit attachment link added start-->
+                        <div class="labeldd1">
+                          <a href="javascript:;" onclick="management_more='true';  show_tabs_for_edit(<%=portfolio_collection.id%>,<%=note_collection.id%>,'terms','mgmt_terms',<%=lease.id%>,'','management');"> Edit Attachments </a>
+                        </div>
+											<!-- Edit attachment link added end-->
+                      <div class="labeldd1 noborder">
+                        <a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this lease permanently ?')){delete_lease(<%= lease.id %>,<%= note_collection.id %>,<%= portfolio_collection.id %>,'lease_suite', '<%=selected_value= params[:selected_value] ? params[:selected_value] : 'Active Leases'%>');} return false;" >Delete Permanently</a>
+                      </div>
+                    </span>
+                    <div class="clear"></div>
+                  </div>
+                </div>
+
+              <%end%>
+            </div>

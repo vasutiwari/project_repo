@@ -1,0 +1,13 @@
+if params[:from_performance_review] == "true"
+  common_insert_js_to_page(page,["jQuery('#time_line_selector').show();","jQuery('.subheaderwarpper').show();"])
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/wres/other_income_and_expense",:locals=>{:operating_statement=> @operating_statement,:explanation => @explanation,:current_time_period=>@current_time_period,:note_collection=>@note,:notes_collection=>@notes,:navigation_start_position=>@navigation_start_position,:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:o_actuals=>@o_actuals,:o_budget=>@o_budget,:start_date=>@start_date,:portfolio_collection=>@portfolio,
+:doc_collection=>@doc}
+else
+  common_insert_js_to_page(page,["jQuery('#time_line_selector').show();","jQuery('.subheaderwarpper').show();"])
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/wres/other_income_and_expense",:locals=>{:operating_statement=> @operating_statement,:explanation => @explanation,:current_time_period=>@current_time_period,:note_collection=>@note,:notes_collection=>@notes,:navigation_start_position=>@navigation_start_position,:time_line_actual=>@time_line_actual,:time_line_rent_roll=>@time_line_rent_roll,:o_actuals=>@o_actuals,:o_budget=>@o_budget,:start_date=>@start_date,:portfolio_collection=>@portfolio,
+:doc_collection=>@doc}
+  common_insert_js_to_page(page,["jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Other Income & Expense</div>');","jQuery('#id_for_variance_threshold').html('<ul class=inputcoll2 id=cssdropdown><li class=headlink3 id=id_for_modify_threshold><div class=morebutton_label><a id=modify_threshold_#{@note.id} href=#{new_threshold_explanation_path(@note.id)}>Variance Thresholds</a></div><span></span></li></ul>');","new Control.Modal($('modify_threshold_#{@note.id}'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'post'});"])
+end
+if params[:focus_id]
+  page.call 'set_focus_function_for_other',"#{params[:focus_id]}"
+end				

@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>AMP Technologies - Realestate Managment</title>
+<link href="/stylesheets/login_style.css" type="text/css" rel="stylesheet" />
+<link href="/stylesheets/amp_rf.css" type="text/css" rel="stylesheet" />
+<link href="/stylesheets/SqueezeBox.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/javascripts/application.js"></script>
+<script src="https://www.google.com/jsapi"></script><script>google.load("mootools", "1.2.1");</script>
+<script type="text/javascript" src="/javascripts/SqueezeBox.js"></script>
+<script type="text/javascript">
+//window.onunload = load_completer();
+window.addEvent('domready', function() {
+	SqueezeBox.assign($$('a.boxed'), {
+		parse: 'rel',
+    url:'/contactus'
+	});
+
+});
+</script>
+<style type="text/css">
+.loginnavwrapper{margin-top:54px;}
+</style>
+<style type="text/css">
+  @media screen and (-webkit-min-device-pixel-ratio:0) {
+   .loginnavwrapper{margin-top:55px;}
+  }
+
+
+</style>
+</head>
+
+
+<body>
+<% if current_user.nil? %>
+        <% path = login_path %>
+    <% else %>
+		 <%if is_leasing_agent %>
+	    <% path = goto_asset_view_path(current_user.id) %>
+     <%elsif current_user.has_role?('Asset Manager') %>
+            <% path = welcome_path %>
+        <% else %>
+            <% path = shared_users_path %>
+        <% end %>
+    <% end %>
+	<div class="topwrapper">
+    	<div class="logo"><a href='<%=APP_CONFIG[:main_url]%>' title="AMP Technologies"><img src="/images/bluelogoS6.png" title="" alt="" border="0"></a></div>
+        <div class="clearfix"></div>
+        <div class="pagewrapper">
+	<%=yield%>
+	 </div>
+
+    </div>
+<div class="footerwrapper" style="margin-top:-58px;">
+    	<div class="footerLink"><a href='<%=APP_CONFIG[:main_url]%>'>Home</a> &nbsp;|&nbsp; <a href="<%=APP_CONFIG[:main_url]%>/team/">Team</a> &nbsp;|&nbsp; <a href="<%=APP_CONFIG[:main_url]%>/privacy">Privacy & Security</a> &nbsp;|&nbsp; <a href="<%=APP_CONFIG[:main_url]%>/request_demo/">Contact Us</a> &nbsp;|&nbsp; <a href="<%=APP_CONFIG[:main_url]%>/terms-of-use/"> Terms Of Use</a></div>
+        <div class="copyright">© 2011 AMP Technologies</div>
+        <div class="clearfix"></div>
+</div>
+</body>
+</html>

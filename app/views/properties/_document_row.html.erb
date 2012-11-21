@@ -1,0 +1,350 @@
+<style>
+  .explanation_required_row {
+    left:260px;
+  }
+  .completebutton{margin-top:-6px;}
+  .enterbutton{margin-top:-6px;}
+</style>
+<%portfolio_collection = @portfolio%>
+<%@note=t.try(:real_estate_property)%>
+<%
+if is_show_deleted(t)
+  display = find_current_user(t)
+  show_missing_file =  params[:show_missing_file] == "true" ?  "true" : "false"
+  if display == "yes" && check_is_doc_shared(t) == "true"
+    doc_members = find_document_members(t)
+    file_structure_show =  check_document_functionality(t)
+  %>
+    <div class="rowinactive" style="z-index:<%=doc_index%>;<%if params[:show_past_shared] == 'true'%> margin-left:14px;<%end%>" id="document<%= t.id %>" shared="<%= (t.user_id != current_user.id || t.user_id == current_user.id && @past_shared_docs && @past_shared_docs.index(t) || params[:shared] == "yes") ? "yes" : "no" %>" onmouseover="this.className='activerow'" onmouseout="this.className='rowinactive'">
+
+      <!--document image start -->
+      <div class="dataicon">
+        <%= document_row_image_link(t) %>
+      </div>
+      <!--document image end -->
+
+      <div class="databox">
+        <!-- file name start -->
+        <div class="dataname">
+          <% if !t.is_deleted %>
+            <%col = t.is_deselected == true ? "#996633" : "#025B8D" %>
+            <%if params[:user] == 'false'%>
+              <span  id="<%= 't_filename_'+t.id.to_s %>" onmouseout="jQuery(this).css('textDecoration','none');" onclick="make_downloads_for_public('<%= t.id %>')" onmouseover="jQuery(this).css('textDecoration','underline');"  style="cursor: pointer;color:<%= col %>;"><%= lengthy_word_simplification(t.filename,25,10) %></span>
+            <%else%>
+              <span  id="<%= 't_filename_'+t.id.to_s %>" onmouseout="jQuery(this).css('textDecoration','none');" onclick="make_downloads('<%= t.id %>')" onmouseover="jQuery(this).css('textDecoration','underline');"  style="cursor: pointer;color:<%= col %>;"><%= lengthy_word_simplification(t.filename,25,10) %></span>
+            <%end%>
+          <%else%>
+            <span style="color:#999999;" title="<%= t.filename %>"><%= lengthy_word_simplification(t.filename,25,10) %></span>
+          <%end%>
+    <%#=display_owner_or_co_owner(t)%> <!-- Hidden the display temporarily -->
+        </div>
+        <!-- filename end -->
+        <% color = t.is_deleted ? '#999999' : (t.is_deselected ? '#996633' : "" )  %>
+        <!-- modified date start-->
+        <div class="datadet">
+          <div class="datadetails" style="color:<%= color%>;" id="<%=  't_documentdate'+t.id.to_s %>">
+            <%if params[:user] == 'false'%>
+              Modified &nbsp;
+              <span title = "<%= t.updated_at.strftime(" %b %d %Y") %>"><%= t.updated_at.strftime("%b %d") %></span>
+            <%else%>
+                Modified &nbsp;
+                <span title = "<%= t.updated_at.strftime(" %b %d %Y") %>"><%= t.updated_at.strftime("%b %d") %></span>
+              <% if t.parsing_done==false %><span style="color: #f63e3e;font-weight: bold;", id="reload_<%=t.id%>">&nbsp;&nbsp;&nbsp;&nbsp;Upload failed. Try again</span>
+              <% elsif t.parsing_done==nil%><span style="color: #0000ff;font-weight: bold;", id="reload_<%=t.id%>">&nbsp;&nbsp;&nbsp;&nbsp;In Progress</span>&nbsp;&nbsp;<%=image_tag "/images/parsing-progress.gif", :style=>"vertical-align:middle;cursor:pointer;",:title=>"Refresh Status", :id=>"reload_parsing_file_status", :onclick=>"reload_parsing_status('#{t.id}')"%>
+              <% end %>
+            <%end%>
+          </div>
+        </div>
+        <!-- modified date end-->
+      </div>
+      <%unless params[:user] == 'false'%>
+        <!-- Following share link functionality hided for 1.3b also image hided in ampnew.css (.datashare ans .datasharelink)-->
+        <!-- <div class="<%#=t.permalink.blank? ? 'datasharelink' : 'datashare'%>" style="<%#=t.is_deleted ? 'background:none;' : ''%>"> -->
+        <div class="datashare" style="background:none;">
+          <ul class="subindex">
+            <li style="list-style-type:none;">
+      <%#unless t.is_deleted%>
+      <%#permalink_generation(t.id)%>
+      <%#= link_to raw("&nbsp;&nbsp;&nbsp;"),{:controller=>"collaborators",:action=>"share_link_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"collaborators_#{t.id}", :title=>"Share this File" %>
+              <script>//new Control.Modal($('collaborators_<%#=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      <%#end%>
+            </li>
+          </ul>
+        </div>
+        <!-- Collaborators start-->
+        <%if (t.is_deleted ||  !(t.is_deleted == false &&  t.filename != "Cash_Flow_Template.xls" && t.filename != "Rent_Roll_Template.xls" && !t.is_master) || params[:bulk_upload] == 'true')%>
+          <div class="userbox"><div class="userwrapper"><div class="datausers" style="background:none;"></div></div></div>
+          <div class="userdrop"></div>
+        <%else%>
+          <div class="userbox">
+            <div class="dummy" onmouseover="this.className='userwrapperon'" onmouseout="this.className='dummy'">
+
+              <div class="userwrapper">
+                <div class="<%if (params[:deal_room] && params[:deal_room] == 'true') %>dealroomuser<%else%>datausers<%end%>">
+                  <ul class="subindex">
+                    <li style="list-style-type:none;">
+                      <%= link_to  raw("&nbsp;&nbsp;&nbsp;") ,{:controller=>"collaborators",:action=>"view_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"collaborators_tip_#{t.id}", :title=>"#{(doc_members && doc_members.empty?) ? 'Add' : 'Add / Edit'} Collaborators" %>
+                      <script>new Control.Modal($('collaborators_tip_<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </li>
+                  </ul>
+                </div>
+                <div class="usertext">
+                  <%=link_to (((doc_members && !doc_members.empty?) ? (doc_members.length>1 ? (display_truncated_chars((doc_members[0].name.blank? ? doc_members[0].email.split(/@/)[0] : doc_members[0].name).titleize,9,true) + ' + ' + (doc_members.length-1).to_s) : display_truncated_chars((doc_members[0].name.blank? ? doc_members[0].email.split(/@/)[0] : doc_members[0].name).titleize,12,true)) : "")),{:controller=>"collaborators",:action=>"view_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"collaborators_name_#{t.id}", :style=>"text-decoration:none;", :title=>""%>
+                  <script>new Control.Modal($('collaborators_name_<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                </div>
+              </div>
+              <div class="userdrop">
+                <div class="userheader">Collaborators</div>
+                <% doc_members && doc_members.each do |u|%>
+                  <div class="userheaderrow">><span> <%=display_truncated_chars((u.name.blank? ? u.email.split(/@/)[0] : u.name).titleize,12,true)%></span></div>
+                <%end%>
+                <div class="useradd">
+                  <%= link_to "#{(doc_members && doc_members.empty?) ? 'Add' : 'Add/Edit'}" ,{:controller=>"collaborators",:action=>"view_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"collaborators_#{t.id}_col", :title=>"" %>
+                  <script>new Control.Modal($('collaborators_<%=t.id %>_col'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                </div>
+              </div>
+            </div>
+          </div>
+        <%end%>
+      <%end%>
+      <!-- Collaborators end-->
+      <!-- variance explanations start -->
+      <%folder_det,month_details = find_folder_and_month_details
+      if (current_user.has_role?("Shared User") && !current_user.has_role?("Asset Manager")) #&& session[:role] == 'Shared User')
+        if t.is_deleted == false
+          parent_fol_name = find_name_of_the_parents_parent(t.folder.parent_id)
+          fol_name_exists = (2000..2050).to_a.any? {|i| i.to_s == parent_fol_name }
+          var_tmp = nil
+          collect_item = []
+          if (t.filename.downcase.include?('month_budget') || t.filename.downcase.include?('actual_budget_analysis') || (t.filename.downcase.include?('financial') && t.filename.downcase.include?('actual'))) && fol_name_exists
+            var_tmp = "cash_flow"
+            collect_item =[1] # explanation_required_property(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name) + explanation_required_property_ytd(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name)
+          elsif (t.filename.downcase.include?('capital_improvement') || (t.filename.downcase.include?('capexp') && t.filename.downcase.include?('actual'))) && fol_name_exists
+            var_tmp = "cap_exp"
+            collect_item = [1] # explanation_required_expenditures(t.real_estate_property, folder_det.index(t.folder.name)+1, parent_fol_name) + explanation_required_expenditures_ytd(t.real_estate_property, folder_det.index(t.folder.name)+1, parent_fol_name)
+          end
+          unless var_tmp.nil? && collect_item.empty? %>
+            <% unless collect_item.count == 0 %>
+              <% if var_tmp=="cash_flow" && find_excel_name.any?{|chk| t.filename.downcase.include? chk} && (t.filename.downcase.include?("month_budget") || (t.filename.downcase.include?("financial") && t.filename.downcase.include?("actual")) || t.filename.downcase.include?("actual_budget_analysis")) && t.folder.documents.any?{|g| (g.filename.downcase.include?("month_budget") || (g.filename.downcase.include?("financial") && g.filename.downcase.include?("budget")))} && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+                <%unless params[:user] == 'false'%>
+                  <div class="explanation_required_row">
+                  </div>
+                <%end%>
+              <% elsif var_tmp=="cash_flow" && find_excel_name.any?{|chk| t.filename.downcase.include? chk} && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+                <%unless params[:user] == 'false'%>
+                  <div class="explanation_required_row">
+                  </div>
+                <%end%>
+              <% elsif var_tmp=="cap_exp" && (t.filename.downcase.include?("capital_improvement") || (t.filename.downcase.include?('capexp') && t.filename.downcase.include?('actual'))) && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+                <%unless params[:user] == 'false'%>
+                  <div class="explanation_required_row">
+                  </div>
+                <% end %>
+              <% end %>
+            <%  end %>
+          <% end %>
+        <%end%>
+      <% else %>
+        <%
+        parent_fol_name = find_name_of_the_parents_parent(t.folder.parent_id)
+        fol_name_exists = (2000..2050).to_a.any? {|i| i.to_s == parent_fol_name }
+        if find_excel_name.any?{|chk| t.filename.downcase.include? chk} && (t.filename.downcase.include?("month_budget") || (t.filename.downcase.include?("financial") && t.filename.downcase.include?("actual")) || t.filename.downcase.include?("actual_budget_analysis")) && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+        <%# unless (explanation_required_property(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name).count + explanation_required_property_ytd(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name).count) == 0 %>
+          <%unless params[:user] == 'false'%>
+           <div class="explanation_required_row">
+            </div>
+          <%end%>
+        <%#end%>
+        <% elsif (t.filename.downcase.include?("capital_improvement") || (t.filename.downcase.include?('capexp') && t.filename.downcase.include?('actual'))) && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+        <%# unless (explanation_required_expenditures(t.real_estate_property, folder_det.index(t.folder.name)+1, parent_fol_name).count + explanation_required_expenditures_ytd(t.real_estate_property, folder_det.index(t.folder.name)+1, parent_fol_name).count) == 0  %>
+          <%unless params[:user] == 'false'%>
+            <div class="explanation_required_row">
+            </div>
+          <%end%>
+        <%#end%>
+        <% end %>
+        <%if find_excel_name.any?{|chk| t.filename.downcase.include? chk} && (t.filename.downcase.include?("month_budget") || (t.filename.downcase.include?("financial") && t.filename.downcase.include?("actual")) || t.filename.downcase.include?("actual_budget_analysis")) && t.folder.documents.any?{|i| (i.filename.downcase.include?("month_budget") || (i.filename.downcase.include?("financial") && i.filename.downcase.include?("budget")))} && folder_det.include?(t.folder.name) && t.is_deleted == false && fol_name_exists %>
+        <%# unless (explanation_required_property(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name).count + explanation_required_property_ytd(t.real_estate_property, month_details[folder_det.index(t.folder.name)], parent_fol_name).count) == 0 %>
+          <%unless params[:user] == 'false'%>
+            <div class="explanation_required_row">
+            </div>
+          <%end%>
+        <%#end%>
+        <% end
+      end %>
+      <script>threshold_reload  = "show_hide_asset_docs1_real_estate('<%=  params[:pid] %>', '<%= params[:folder_id] %>', '<%= params[:del_files] %>', '<%= params[:show_missing_file] %>');" </script>
+      <!-- variance explanations end -->
+      <!-- drop down -->
+
+      <div class="dummy" onmouseover="this.className='userwrapperon'" onmouseout="this.className='dummy'">
+        <div class="userwrapper"><span class="dataoption"><a href="javascript:;"></a>
+            <div class="userdrop2">
+
+              <div class="row2">
+                <div class="iconl3"><img src="/images/download-_icon.png"  width="14" height="14" border="0"/></div>
+                <%unless params[:user] == 'false'%>
+                  <div class="iconl3"><%= link_to 'Download', download_file_path(t.id) %></div>
+                <%else%>
+                  <div class="iconl3"><%= link_to 'Download', {:controller => "documents",:action => "download_file_for_share_link", :id=>t.id} %></div>
+                <%end%>
+              </div>
+              <%unless params[:user] == 'false'%>
+                <% if (t.is_deleted == false &&  t.filename != "Cash_Flow_Template.xls" && t.filename != "Rent_Roll_Template.xls" && !t.is_master && params[:bulk_upload] != 'true')%>
+                  <div class="row2">
+                    <div class="iconl3"><img  class="sprite hotbutton-icon s_folder_user" alt="" src="/images/icon_spacer.gif"   width="15" height="16" border="0"/></div>
+                    <div class="iconl3">
+                      <%if (params[:deal_room] && params[:deal_room] == 'true')%>
+                        <%= link_to "Add Collaborator",{:controller=>"collaborators",:action=>"view_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"shared_fileboxn_#{t.id}" %>
+                      <%else%>
+                        <%= link_to "Add Collaborator",{:controller=>"collaborators",:action=>"view_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file},:id=>"shared_fileboxn_#{t.id}" %>
+                      <%end%>
+                      <script>new Control.Modal($('shared_fileboxn_<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <%end%>
+                <% if t.is_deleted == false &&  t.filename != "Cash_Flow_Template.xls" && t.filename != "Rent_Roll_Template.xls" && !t.is_master && params[:bulk_upload] != 'true'%>
+                  <div class="row2">
+                    <div class="iconl3"><img  src="<%=t.permalink.blank? ? '/images/collaboration_hub_new_datashare.png' : '/images/collaboration_hub_new_datasharebrake.png'%>" width="15" height="16" border="0"/></div>
+                    <div class="iconl3">
+                      <%= link_to "Get Link",{:controller=>"collaborators",:action=>"share_link_file",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:show_missing_file=>show_missing_file,:deal_room => params[:deal_room]},:id=>"collaborators_#{t.id}", :title=>"" %>
+                      <script>new Control.Modal($('collaborators_<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <%end%>
+
+                <% if t.is_deleted == false &&  t.filename != "Cash_Flow_Template.xls" && t.filename != "Rent_Roll_Template.xls" && !t.is_master%>
+                  <%if t.user_id == current_user.id%>
+                    <div class="row2">
+                      <div class="iconl3"><img src="/images/moveto_icon.png"  width="15" height="16" border="0"/></div>
+                      <div class="iconl3">
+                        <% if params[:bulk_upload] == 'true' %>
+                          <%= link_to "Move To",{:controller=>"tree_view",:action=>"move_action",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file],:operation => "move",:element_type => "document",:deal_room => params[:deal_room], :bulk_upload=> true},:id=>"share_filename_#{t.id}" %>
+                        <% else %>
+                          <%= link_to "Move To",{:controller=>"tree_view",:action=>"move_action",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file],:operation => "move",:element_type => "document",:deal_room => params[:deal_room]},:id=>"share_filename_#{t.id}" %>
+                        <% end %>
+                        <script>new Control.Modal($('share_filename_<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                      </div>
+                    </div>
+                  <%end%>
+                <%end%>
+                <% if t.is_deleted == false &&  t.filename != "Cash_Flow_Template.xls" && t.filename != "Rent_Roll_Template.xls" %>
+                  <div class="row2">
+                    <div class="iconl3"><img src="/images/copyto_icon.png"  width="16" height="15" border="0"/></div>
+                    <div class="iconl3">
+                      <% if params[:bulk_upload] == 'true'%>
+                        <%= link_to "Copy To",{:controller=>"tree_view",:action=>"move_action",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file],:operation => "copy",:element_type => "document",:deal_room => params[:deal_room], :bulk_upload=> true},:id=>"copy_document#{t.id}" %>
+                      <% else %>
+                        <%= link_to "Copy To",{:controller=>"tree_view",:action=>"move_action",:id=>t.id,:portfolio_id=>portfolio_collection.id,:folder_id=>t.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file],:operation => "copy",:element_type => "document",:deal_room => params[:deal_room]},:id=>"copy_document#{t.id}" %>
+                      <% end %>
+                      <script>new Control.Modal($('copy_document<%=t.id %>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                    </div>
+                  </div>
+                <%end%>
+                <%if  !t.is_deleted? and !t.is_master?%>
+                  <div class="row2">
+                    <div class="iconl3"><img src="/images/rename_icon.png"  width="15" height="15" border="0"/></div>
+                    <div class="iconl3">
+                      <span style="cursor: pointer;" onclick="edit_asset_file_name_real_estate(document.getElementById('<%= 't_filename_'+t.id.to_s %>'),'<%=params[:deal_room]%>','<%=params[:bulk_upload]%>')" >
+                        <a>Rename</a>
+                      </span>
+                    </div>
+                  </div>
+                <%end%>
+                <%if t.due_date != nil && !t.is_deleted && t.document_name == nil and file_structure_show%>
+                  <%rd = (current_user.has_role?("Shared User") && session[:role] == 'Shared User')?  true : true%>
+                  <div class="row2">
+                    <div class="iconl3"><img src="/images/rename_icon.png"  width="15" height="15" border="0"/></div>
+                    <div class="iconl3">
+                      <a id="missing_file_d_<%=t.id %>" href="/properties/upload_asset_files?pid=<%=portfolio_collection.id %>&d=<%=t.id%>&type=<%=t.class.name%>&folder_id=<%=t.folder_id%>&missing_files_list=true&remove_due=<%=rd%>&show_past_shared=<%=params[:show_past_shared]%>&show_missing_file=<%=params[:show_missing_file]%>" style="color:<%=col%>;">New Version
+                      </a>
+                      <script> new Control.Modal($('missing_file_d_<%=t.id%>'), 	{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'}); </script>
+                    </div>
+                  </div>
+                <%end%>
+              <%end%>
+              <div class="row2">
+                <div class="iconl3"><img src="/images/view.jpg" width="16" height="16" border="0"/></div>
+                <div class="iconl3">
+                  <%is_image = find_extension(t)%>
+                  <%if t.ipaper_id.nil? &&  t.ipaper_access_key.nil? && is_image == "no"%>
+                    <%if params[:user] == 'false'%>
+                      <a href="/documents/download_file_for_share_link?id=<%= t.id %>" title="<%= t.filename %>"><%=display_truncated_chars(t.filename.to_s,15, true)%></a>
+                    <%else%>
+                      <a href="/documents/download_file/<%= t.id %>" title="<%= t.filename %>"><%=display_truncated_chars(t.filename.to_s,15, true)%></a>
+                    <%end%>
+                  <%elsif((t.ipaper_id.nil? &&  t.ipaper_access_key.nil? && is_image == "yes" ))%>
+                    <%if params[:user] == 'false'%>
+                      <a id="<%='scribdf_image'+t.id.to_s %>" href="/documents/view_scribd_image_for_public_via_folder?document=<%=t.id%>&user=false&pid=<%=t.real_estate_property.portfolio.id%>"  >View</a>
+                    <%else%>
+                      <a id="<%='scribdf_image'+t.id.to_s %>" href="/documents/view_scribd_image/<%=t.id%>?ut=sr"  >View</a>
+                    <%end%>
+                    <script>new Control.Modal($('<%='scribdf_image'+t.id.to_s %>'), {beforeOpen: function(){load_writter();jQuery('#image_pre_loader').attr('src','<%=t.public_filename %>')},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                  <%else%>
+                    <%if params[:user] == 'false'%>
+                      <a href="/documents/scribd_view/<%=t.id%>?portfolio_id=<%=t.folder.portfolio_id%>&user=false&pid=<%=t.folder.portfolio_id%>" target="_blank" >View</a>
+                    <%else%>
+                      <a href="/documents/scribd_view/<%=t.id%>?portfolio_id=<%=t.folder.portfolio_id%>" target="_blank" >View</a>
+                    <%end%>
+                  <%end%>
+                </div>
+              </div>
+              <%unless params[:user] == 'false'%>
+                <% if t.is_deleted? %>
+                  <div class="row2">
+                    <div class="iconl3"><img class="icon_no_hover sprite s_basket_remove icon_no_hover" src="/images/icon_spacer.gif" /></div>
+                    <div class="iconl3">
+                      <a href="javascript:;" onclick="if(confirm('Are you sure you want to undelete this file <%= t.filename %>?')){delete_asset_doc_or_folder_real_estate(<%= portfolio_collection.id %>,<%= t.id %>,'document','revert','Delete','sub_list','<%=params[:del_files]%>',{},{},{},{},{},'<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" class="bluecolor">Undelete</a>
+                    </div>
+                  </div>
+                <%end%>
+                <% if current_user.email == find_doc_owner_by_obj(t) and !t.is_master? and t.is_deleted?%>
+                  <div class="row2">
+                    <div class="iconl3"><img class="icon_no_hover sprite s_purge icon_no_hover" src="/images/icon_spacer.gif" /> </div>
+                    <div class="iconl3">
+                      <a href="javascript:;" onclick="if(confirm('Are you sure you want to permanently delete this file <%=t.filename%> ?')){delete_asset_doc_or_folder_real_estate(<%= portfolio_collection.id %>,<%= t.id %>,'document','del','Permanently delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','<%=params[:show_missing_file]%>',{},{},{},'<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" >Permanently Delete</a>
+                    </div>
+                  </div>
+                <%end%>
+                <% if !t.is_master? and  !t.is_deleted? %>
+                  <div class="row2">
+                    <div class="iconl3"><img src="/images/delete.png"  width="16" height="16" border="0" />  </div>
+                    <div class="iconl3">
+                      <a href="javascript:;" onclick="if(confirm('Are you sure you want to delete this file <%=t.filename%> ?')){delete_asset_doc_or_folder_real_estate(<%= portfolio_collection.id %>,<%= t.id %>,'document','del','Delete','sub_list','<%=params[:del_files]%>','<%=params[:show_past_shared]%>','<%=params[:show_missing_file]%>',{},{},{},'<%=params[:deal_room]%>','<%=params[:bulk_upload]%>');} return false;" >Delete</a>
+                    </div>
+                  </div>
+                <%end%>
+              <%end%>
+            </div>
+          </span>
+        </div>
+      </div>
+      <!-- drop down end -->
+
+      <!-- comment start -->
+      <%unless params[:user] == 'false'%>
+        <%unless t.is_deleted%>
+          <div class="trigger2" id="property_document_<%= t.id %>">
+            <ul class="subindex"><li style="list-style-type:none;"><a href="javascript:;" id="prop_document_<%= t.id %>" title="Add Comment"><%= t.comments_finder.count == 0 ? '+' :  t.comments_finder.count  %></a></li></ul>
+          </div>
+          <div class="toggle_container2" id="document_comment_<%= t.id %>"></div>
+          <script>
+            jQuery('#property_document_<%= t.id %>').bind('click',function(){
+              if(jQuery('#document_comment_<%= t.id %>').html() ==''){ all_cmts='';call_to_comment(<%= t.id %>, 'document');detect_comment_call=false;return false;}
+              else{ jQuery('#document_comment_<%= t.id %>').html('');jQuery('#document_comment_<%= t.id %>').hide();return false;}
+            });
+          </script>
+        <% end %>
+      <%end%>
+      <!-- To trigger comments when from the mail link -->
+      <%if params[:mailer] == "true" && from_mailer == "true" && document_for_mailer%>
+        <script>call_to_comment(<%= t.id %>, 'document');</script>
+      <%end%>
+      <!-- comment end -->
+    </div>
+  <%
+  end
+end
+%>
+
+<!-- Image is preloaded to make the image center for light Box-->
+<div style="display:none"><img src="" id="image_pre_loader"/></div>

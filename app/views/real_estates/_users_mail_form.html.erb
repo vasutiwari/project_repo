@@ -1,0 +1,85 @@
+<script type="text/javascript">
+  form_name ="#users_mail_form";
+  tab = "6";
+  share  = false;
+  file = false;
+  folder = false;
+</script>
+<%notify_prop_user%>
+<%= form_tag({:action =>"send_exp_mail_to_collaborators" ,:controller => "collaborators",:portfolio_id=>@property.portfolio_id,:folder_id => params[:folder_id]},:remote=>true, :target => "upload_frame_users_mail", :id => "users_mail_form", :onsubmit=>'return restrict_empty_collaborators()')  do %>
+  <input type="hidden" name="is_property_folder" value = "<%=params[:is_property_folder]%>"  id ="is_property_folder"> </input>
+  <%=hidden_field_tag :from_property_edit,"true"%>
+  <%=hidden_field_tag :folder_id,@folder.id%>
+  <%=hidden_field_tag :folder_revoke,"true"%>
+  <%=hidden_field_tag :already_added_users,!params[:collaborators_list].nil? ? params[:collaborators_list] : ""%>
+  <input type="hidden" name="from_debt_summary" value = <%=params[:from_debt_summary]%> />
+  <input type="hidden" name="from_property_details" value = <%=params[:from_property_details]%> />
+  <input type="hidden" name="highlight" value = <%=params[:highlight]%> />
+  <input type="hidden" name="pid" value = <%=params[:id]%> > </input>
+  <input type="hidden" name="note_add_edit" value = "true" > </input>
+  <input type="hidden" name="edit_inside_asset" value = <%=params[:edit_inside_asset]%> />
+  <%if @property && !@property.id.nil?%>
+    <input type="hidden" name="property_id" value = <%=@property.id%> > </input>
+  <%end%>
+  <input type="hidden" id = "tab_id" name="tab_id" value ="6" />
+  <input type="hidden" id = "form_txt" name="form_txt" value ="users_mail" />
+  <input type="hidden" name="call_from_prop_files" value = "<%=params[:call_from_prop_files]%>"  id ="call_from_prop_files"/>
+  <input type="hidden" name="users_mail_form_submit" value = "true" id="users_mail_form_submit" > </input>
+  <input type="hidden" name="users_mail_form_close" value = "false"  id ="users_mail_form_close"> </input>
+  <input type="hidden" name="step2" value = "false"  id ="step2"> </input>
+  <input type="hidden" name="step1" value = "false"  id ="step1"> </input>
+	<input type="hidden" name="call_from_variances" value = "<%=params[:call_from_variances]%>"  id ="call_from_variances"> </input>
+	<input type="hidden" name="month" value = "<%=params[:month]%>"  id ="month"> </input>
+	<input type="hidden" name="document_id" value ="<%=params[:document_id]%>"  id ="document_id"> </input>
+	<input type="hidden" name="tl_month" value ="<%=params[:tl_month]%>"  id ="tl_month"> </input>
+	<input type="hidden" name="tl_period" value ="<%=params[:tl_period]%>"  id ="tl_period"> </input>
+	<input type="hidden" name="period" value ="<%=params[:period]%>"  id ="period"> </input>
+      <div class="totalsuitesbox" style="width:765px;margin-top:0px;">
+			<div class="variance_contentrow">
+	    <div class="variances_headercol"><span class="variances_headercol_size ">Step 2 </span>Select Users to be Notified Via Email to Perform Variance Explanations
+</div>
+ <div class="add_users_headercol">Select Users to be Notified Via Email to Perform Variance Explanations When Actuals for a month are updated.</div>
+        <%if !@data.blank?%>
+          <div class="variance_collaboraterow">
+                <div id="addpropertyrow_to" class="addusers_coll" >To</div>
+                <div class="add_users_collaboraterow" id="file_collaborators_list">
+  			  			  <div class="add_files_scroll" style="width: 680px; margin-top: 5px; overflow-y: auto;height:<%=@members && @members.length >=8 ? 96 : 63%>px;">
+                     <%= raw(@data)%>
+									</div>
+                </div>
+              </div>
+        <%else%>
+          <div class="add_users_collaboraterow">
+            <div style="text-align: center; font-size: 12px;" class="addusers_coll"></div>
+          </div>
+          <div class="variance_contentrow" style="margin-left:-18px;">
+            <div class="add_users_headercol">
+              <span style="text-align: center; font-size: 12px;" class="addusers_coll">
+								<a onclick="remove_extra_space();jQuery('#tabactive5').attr('class','');jQuery('#tabactive4').attr('class','selected');deactivate_click('users_onclick');if(check_image_type()){set_tab(5,'users');add_property_form_submit(form_name); <%if @property.valid? && !@property.address.nil?%>form_name='#users_form';<%end%>} " style="cursor: pointer;">
+               No Users Added. Click to goto User Settings Page </a>
+              </span>
+            </div>
+          </div>
+          <div class="add_users_collaboraterow">
+            <div style="text-align: center; font-size: 12px;" class="addusers_coll"></div>
+          </div>
+        <%end%>
+        <h4> &nbsp;</h4>
+      </div>
+			      </div>
+		   <div class="buttonwrapper2" id="save_cancel_button" style="margin-left: 250px; padding-bottom: 25px;" >
+          <div id="save_button" class="greenbutton">
+ 						<a href="javascript:;" onclick="document.forms.users_mail_form.submit();">Save</a>
+            <span>&nbsp;</span></div>
+          <div id="save_button" class="greenbutton">
+						<a href="javascript:;" onclick="load_writter();document.getElementById('step2').value = 'false';document.getElementById('step1').value = 'true';document.getElementById('step1').value = 'true';document.forms.users_mail_form.submit();load_completer();return false;">Back to Step1</a>
+          <span>&nbsp;</span></div>
+
+          <!-- commented cancel button
+          <%link = params[:edit_inside_asset] == "true" ? "show_data_hub_docs_real_estate(#{@portfolio.id},selected_item,'hide_del','true','true');return false;" : "Control.Modal.close();refresh_page_after_close_prop(#{@portfolio.id},#{find_by_real_estate_property_id(@property.id).parent_id},'hide_del',#{params[:list] ? params[:list] : '0'},#{params[:highlight]},'#{params[:show_past_shared]}','#{params[:from_debt_summary]}','#{params[:from_property_details]}',#{@property.id},'#{params[:call_from_variances]}','#{params[:month]}','#{params[:document_id]}','#{params[:tl_month]}','#{params[:tl_period]}','#{params[:period]}')"%>
+          <div class="graybutton"><a onClick="<%=link%>" style="cursor: pointer;">Cancel</a><span>&nbsp;</span></div>
+           commented cancel button -->
+
+        </div>
+<%end%>
+<iframe id="upload_frame_users_mail" name="upload_frame_users_mail" style="display: none"></iframe>

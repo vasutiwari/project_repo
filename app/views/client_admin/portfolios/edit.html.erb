@@ -1,0 +1,4 @@
+
+<%=form_for(@portfolio, :url => client_admin_portfolio_path(current_user.id),:method=>:put,:html=>{:multipart=>true,:id=>"edit_form_submit"}) do |f| %>
+<%=render :partial=>"form",:locals=>{:f=>f, :form_name=>"edit_form_submit",:name_error => @name_error,:portfolio => @portfolio,:chart_of_accounts => @chart_of_accounts,:chart_type =>@chart_type,:property_type => @property_type,:users => @users,:name =>@name,:portfolio_properties => @portfolio_properties,:properties => @properties,:portfolio_users => @portfolio_users,:commercial_count => @commercial_count,:multifamily_count => @multifamily_count,:properties => @properties}%>
+	<%end%>

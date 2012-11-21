@@ -1,0 +1,67 @@
+<link href="/stylesheets/advance_due_v2.css" rel="stylesheet" type="text/css" />
+<div id="sbox-window" style="" class="">
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="basic_style" style="width: 530px;">
+    <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+      <div class="dialog_light_center">
+        <div class="dialog_second_center">
+          <div class="status_light_error" id="error_display"></div>
+          <div class="status_light">
+            <fieldset class="legend">
+              <span class="simple_light_text">
+                <legend>
+	     Asset Manager Details</legend>
+                <style>
+                  table tr td.label1 {color:grey;font-size:12px}
+                  table tr td.value1 {color:black;font-size:12px}
+                </style>
+                <br/>
+                <table>
+                  <tr>
+                    <td class="label1">Name:</td>
+                    <td class="value1"><b><%=@user.name%></b></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">Email:</td>
+                    <td class="value1"><%=@user.email%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">Phone Number:</td>
+                    <td class="value1"><%=@user.phone_number%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">City:</td>
+                    <td class="value1"><%=@user.user_profile_detail.city%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">State:</td>
+                    <td class="value1"><%=@user.user_profile_detail.state%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">Zipcode:</td>
+                    <td class="value1"><%=@user.user_profile_detail.zipcode%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1">Address:</td>
+                    <td class="value1"><%=@user.address%></td>
+                  </tr>
+                  <tr>
+                    <td class="label1"></td>
+                  </tr>
+                </table>
+                <br/>
+                <input type="button" id="asset_manager_approve" value="Approve and send Mail" onClick="window.location='<%=approve_sendmail_admin_asset_manager_path%>';load_writter();"/>
+              </span>
+            </fieldset>
+          </div>
+          <br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a id="sbox-btn-close" class="basic_close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+<iframe id="upload_frame" name="new_frame" style="display: none"></iframe>

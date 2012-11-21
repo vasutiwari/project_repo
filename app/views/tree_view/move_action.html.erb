@@ -1,0 +1,71 @@
+<link href="/javascripts/tree_view_lib/jquery.treeview.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/jquery-ui.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/ampnew.css" rel="stylesheet" type="text/css">
+<script type="text/javascript">
+jQuery(document).ready(function(){
+jQuery("#browser").treeview({
+animated: "fast",
+collapsed: true,
+unique: true,
+persist: "cookie",
+toggle: function() {
+window.console && console.log("%o was toggled", this);
+}
+});
+load_completer();
+});
+</script>
+<script>
+jQuery(document).ready(function() {
+jQuery("#tabs").tabs();
+});
+var a1 = jQuery('#browser').html();
+a1 = a1.gsub('<ul>','').gsub('</ul>','')
+if(a1 == "")
+{
+jQuery('#click_text').html('No folders to select');
+jQuery('#buttonwrapper').hide();
+}
+
+</script>
+<div class="basicbodycontainer" style="height:auto;width:755px;">
+<div id="tabs">
+<ul>
+<li><span class="lightbox_activetab_lt"></span><a href="#fragment-1"><img src="/images/moveto_icon.png"  border="0"/><%=params[:operation].capitalize%> to..</a><span class="lightbox_activetab_rt"></span></li>
+</ul>
+<%= form_tag({:action => "move_folder",:controller => "tree_view",:deal_room => params[:deal_room]}, :target => "upload_frame", :id => "upload_form1",:list =>params[:list])  do %>
+<div id="fragment-1">
+<div class="lightbox_container2" id="main">
+<div class="loan_contentwrapper">
+<div class="lightbox_headerow">
+</div>
+<div class="lightbox_contentrow"  style="overflow:auto;padding-left:50px;width:659px;height:350px;">
+   <%=@value%>
+<input type='hidden' value='<%=params[:list]%>'  name='list'/>
+<input type='hidden' value='<%=params[:show_past_shared]%>'  name='show_past_shared'/>
+<input type='hidden' value='' id='move_folder_id' name='move_folder_id'/>
+<input type='hidden' value='<%=params[:folder_id]%>'  name='folder_id'/>
+<input type='hidden' value='<%=params[:id]%>'  name='id'/>
+<input type='hidden' value='<%=params[:portfolio_id]%>'  name='pid'/>
+<input type='hidden' value='<%=params[:del_files]%>'  name='del_files'/>
+<input type='hidden' value='<%=params[:operation]%>'  name='operation'/>
+<input type='hidden' value='<%=params[:element_type]%>'  name='element_type'/>
+<%= raw('<input type=hidden value=true name=bulk_upload />') if params[:bulk_upload] == 'true'%>
+</div></div>
+<div class="butwrapper" id="buttonwrapper">
+<div class="greenbutton" style="margin-left:250px">
+<a   onclick="move_copy_to_action('<%=params[:operation].capitalize%>','<%= (params[:bulk_upload] == 'true') ? 'bulk' : '' %>'); return false"  style="cursor:pointer;" >
+   <%=params[:operation].capitalize%>
+</a>
+<span>&nbsp;</span></div>
+<div class="graybutton"><a onclick='Control.Modal.close();return false;' style="cursor:pointer;">Cancel</a><span>&nbsp;</span></div>
+</div>
+<div class="bot"></div>
+</div>
+</div>
+<%end%>
+<iframe id="upload_frame" name="upload_frame" style="display: none"></iframe>
+<a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+</div>
+</div>
+

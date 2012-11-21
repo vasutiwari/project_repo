@@ -1,0 +1,31 @@
+<script type="text/javascript">
+  orig_portfolio_name = ''; // here freeze null to enable edit after uncomplted rename
+</script>
+<div id="show_assets_list">
+  <% if @portfolio.nil? %>
+        <%= form_tag({:controller => "real_estates",:action => "create" },{:method =>:post,:multipart => true}) do%>
+            <div class="addportfoliorow">Add Portfolio</div>
+            <div class="portfolioinputrow">
+                    <div class="portfoliolabel">Portfolio Name:</div>
+                    <div class="portfoliofieldinput" style="height:50px;"><%=text_field :portfolio,:name,:size=>17, :style=>"border:1px solid #cccccc;"%>
+                        <div style="font-size: 11px; color:red;font-weight:normal;" id="portfolio_error"><%= error_message_on :portfolio,:name %></div>
+                    </div>
+                    <%= hidden_field :portfolio,:portfolio_type_id, :value=>@portfolio_id%>
+                    <div class="portfoliolabel">Portfolio Image:</div>
+                    <div class="portfoliofieldinput">
+                        <label>
+                            <%= file_field :portfolio_image,:uploaded_data,:size=>17 %>
+                        </label>
+                    </div>
+                    <div class="addbutton">
+                        <!--<a href="javascript:;" onclick='return portfolio_check();'><img src="/images/addbutton.png" width="57" height="23" border="0" /></a>-->
+                        <input type="image" src="/images/addbutton.png" alt="Create" title="Create" onclick="return image_check()"/>
+                    </div>
+            </div>
+            </div>
+
+        <% end %>
+    <% end %>
+  </div>
+<!--<iframe id="portfolio_frame" name="portfolio_frame" style="display: none"></iframe>-->
+

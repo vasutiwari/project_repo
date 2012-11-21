@@ -1,0 +1,9 @@
+page.call 'close_control_model'
+page.call "load_completer";
+page <<  "jQuery('#user_profile_image').attr('src','#{user_default_image(current_user.id)}');"
+page.replace_html "profile_details",:partial => "collaboration_hub/render_profile",:locals => {:user_collection => @user}
+page.replace_html "amp_logo",:partial => "layouts/logo",:locals => {:current_user => @user,:portfolio_obj => @last_portfolio,:property_obj => @first_property}
+page <<  "jQuery('#logo_img').attr('src','#{current_user.try(:logo_image).try(:public_filename)}?time=#{Time.now.to_i}');" if current_user.try(:logo_image).present?
+page <<  "if (jQuery('#logo_img').attr('src') != '/images/amp-logo.png'){ jQuery('#span_id').show();}"
+page.call "flash_writter" , "Picture updated successfully"
+page.call "flash_completer"

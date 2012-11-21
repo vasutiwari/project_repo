@@ -1,0 +1,46 @@
+<%if @accounts.present?%>
+	<div class="box-1col">
+    <div class="breadcrumb"><a class="loader_event" href="/client_admin/<%=current_user.id%>/accounting">Accounting</a> > <a class="loader_event" href="/client_admin/accounting/edit/<%=@chart_id%>">Setup</a> > Account Tree </div>
+    <div class="box-title"><span class="title"><%=@financial_statement%></span></div>
+    <div>&nbsp;</div>
+
+    	<table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+        	<thead >
+            	<tr class="fb-tr-head">
+            	<th class="bdr-lt-gry bdr-rt-wht" style="width: 26px;">S. No.</th>
+                <th class="bdr-rt-wht" style="width: 56px;">Account ID</th>
+                <th class="bdr-rt-wht" style="width: 129px;">Account Name</th>
+                <th class="bdr-rt-wht" style="width: 57px;">Total ID</th>
+                <th class="bdr-rt-wht" style="width: 99px;">Total Name</th>
+                <th class="bdr-rt-wht" style="width: 97px;">Normal Balance</th>
+                <th class="bdr-rt-wht" style="width: 111px;">Type</th>
+                </tr>
+						<%@accounts && @accounts.each_with_index do |account,i|%>
+            <tbody>
+							<%class_name=(i%2==0 ? "tablefbAlternate" : "")%>
+									<tr class="<%=class_name%>">
+                	<td align="center" class="bdr-lt-gry bdr-rt-gry bdr-top-gry" style="width:26px;"><%=i+1%></td>
+                    <td align="center" class="bdr-rt-gry bdr-top-gry" style="width: 56px;"><%=account.id%></td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry" style="width: 129px;"><%=account.name? ? account.name.titleize :  account.name%></td>
+                 	<td align="center" class="bdr-rt-gry bdr-top-gry" style="width:57px;"><%=account.total_id%></td>
+                 	<td align="left" class="bdr-rt-gry bdr-top-gry" style="width:99px;"><%=account.total_name? ? account.total_name.titleize : account.total_name%></td>
+                    <td align="center" class="bdr-rt-gry bdr-top-gry" style="width: 97px;"><%=account.normal_balance? ? "CR" :"DR"%></td>
+                    <td align="left" class="bdr-rt-gry bdr-top-gry" style="width:111px;"><%=account.account_type%></td>
+              </tr>
+             </tbody>
+						 <%end%>
+        </table>
+    </div>
+    <div class="clearfloat"></div>
+		</div>
+		<%else%>
+		<div class="box-1col">
+			<div class="nopropertyDiv">
+    	<p><span class="iconNotificaton">No data is available.</span> </p>
+		<p>Please contact your admin to request access.</p>
+        </div>
+    <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+		</div>
+		<%end%>

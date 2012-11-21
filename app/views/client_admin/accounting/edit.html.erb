@@ -1,0 +1,142 @@
+<%line_items_attr=@chart_of_account.line_items%>
+<%capital_items_attr=@chart_of_account.capital_expenditures%>
+<%main_headers_items_attr=@chart_of_account.main_headers%>
+<script>
+ line_count=<%=@chart_of_account.present? && line_items_attr.present? ? line_items_attr.count : 1%>
+ capital_count=<%=@chart_of_account.present? && capital_items_attr.present? ? capital_items_attr.count : 1%>
+ </script>
+ <%financial_statement = Account::FINANCIAL_STATEMENT%>
+ <%@income_statement_value=@income_statement.collect {|p| [ p.name, p.id ] }%>
+ <div class="box-1col">
+    <div class="breadcrumb"><a class="loader_event" href="/client_admin/<%=current_user.id%>/accounting">Accounting</a> > Setup </div>
+     <div class="col1P">
+     	<p class="fltLeft margin10LR"><span class="title">Chart of Account ID </span></p>
+        <p class="fltLeft padL10"><%=params[:id]%></p>
+        <div class="clearfloat"></div>
+     </div>
+      <div class="col1P">
+        <p><span>Financial Statement</span></p>
+          <table width="50%" cellpadding="2" cellspacing="4">
+           	  <tr>
+               	  <td align="right" style="width:30%;">Income Statement:</td>
+                  <td align="left" style="width:25%;">From <%=@type_name%></td>
+                  <td align="left"><%=link_to "View Tree",:controller=>"client_admin/accounting",:action=>"account_tree",:statement_type=>financial_statement["Income statement"],:chart=>params[:id]%></td>
+              </tr>
+              <tr>
+               	  <td align="right">Balance Sheet:</td>
+                  <td align="left">From <%=@type_name%></td>
+                  <td align="left"><%=link_to "View Tree",:controller=>"client_admin/accounting",:action=>"account_tree",:statement_type=>financial_statement["Balance sheet"],:chart=>params[:id]%></td>
+              </tr>
+              <tr>
+               	  <td align="right">Cash Flow Statement:</td>
+                  <td align="left"><%=@type_name%></td>
+                  <td align="left"><%=link_to "View Tree",:controller=>"client_admin/accounting",:action=>"account_tree",:statement_type=>financial_statement["Cash Flow"],:chart=>params[:id]%></td>
+              </tr>
+       	  </table>
+      </div>
+				 <%=form_for(@chart_of_account, :url => {:controller=>"client_admin/accounting",:action=>"update_line_items",:id=>@chart_of_account.id},:html=>{:id=>"accounting_submit"}) do |f| %>
+				  <%@capital_count=1%>
+        <div class="col1P">
+        	<p><span>Main Line Items Mapping to AMP </span></p>
+            <p><span>Capital Expenditure </span></p>
+						<%= f.fields_for :capital_expenditures do |capital| %>
+					    <%= render 'capital_expenditure_fields', :f => capital %>
+            				 <%@capital_count+=1%>
+						 <%end%>
+            <div id="cap_exp" class="addMore"> <%= link_to_capital_expenditures "Add More", f, :capital_expenditures %></div>
+            <div class="clear"></div>
+        </div>
+         <div class="col1P">
+       	   <p><span>Main Headers</span></p>
+   		   <table cellpadding="2" cellspacing="4" border="0" width="50%">
+                	<tr>
+                    	<td align="right" width="30%">Operating Revenue:</td>
+											<%if ((main_headers_items_attr.present? && main_headers_items_attr.map(&:item_name).include?("Operating Expenditure")) || ((main_headers_items_attr.reject{|x| x.id.nil?}).blank?))%>
+											  <%= f.fields_for :main_headers do |line_form| %>
+												<%if (line_form.object.item_name=="Operating Revenue" || (main_headers_items_attr.reject{|x| x.id.nil?}).blank?)%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+										<%=line_form.hidden_field :item_name,:value=>"Operating Revenue"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Operating  Expenditure:</td>
+											<%if ((main_headers_items_attr.present? && main_headers_items_attr.map(&:item_name).include?("Operating Expenditure")) || ((main_headers_items_attr.reject{|x| x.id.nil?}).blank?))%>
+												<%= f.fields_for :main_headers do |line_form| %>
+												<%if (line_form.object.item_name=="Operating Expenditure" || (main_headers_items_attr.reject{|x| x.id.nil?}).blank?)%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+											<%=line_form.hidden_field :item_name,:value=>"Operating Expenditure"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Net Income:</td>
+												<%if ((main_headers_items_attr.present? && main_headers_items_attr.map(&:item_name).include?("Net Income")) || ((main_headers_items_attr.reject{|x| x.id.nil?}).blank?))%>
+												<%= f.fields_for :main_headers do |line_form| %>
+												<%if (line_form.object.item_name=="Net Income" || (main_headers_items_attr.reject{|x| x.id.nil?}).blank?)%>
+                      <td><%=line_form.select :account_id,@income_statement_value%></td>
+											<%=line_form.hidden_field :item_name,:value=>"Net Income"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+											<%end%>
+                    </tr>
+                    <tr>
+                    	<td align="right">Net Cash Flow: </td>
+												<%if ((main_headers_items_attr.present? && main_headers_items_attr.map(&:item_name).include?("Net Income")) || ((main_headers_items_attr.reject{|x| x.id.nil?}).blank?))%>
+												<%= f.fields_for :main_headers do |line_form| %>
+												<%if (line_form.object.item_name=="Cash Flow" || (main_headers_items_attr.reject{|x| x.id.nil?}).blank?)%>
+                      <td><%=line_form.select :account_id,@income_cash_statement.collect {|p| [ p.name, p.id ] }%></td>
+											<%=line_form.hidden_field :item_name,:value=>"Cash Flow"%>
+										<%=line_form.hidden_field :client_id,:value=>current_user.client_id%>
+											<%end%>
+											<%end%>
+											<%end%>
+                    </tr>
+                </table>
+
+         </div>
+				 <%@count=1%>
+          <div class="col1P">
+        	<p><span>Non Operating Expense Items</span></p>
+					  <%= f.fields_for :line_items do |line_form| %>
+						<%if @chart_of_account.line_items.present? && @chart_of_account.line_items.count >=1%>
+					    <%= render 'line_item_fields', :f => line_form %>
+							<%else%>
+						 <%unless @count==1%>
+								<%= render 'line_item_fields', :f => line_form %>
+						 <%end%>
+						 <%end%>
+						 <%@count+=1%>
+						 <%end%>
+						   <div id="net_op" class="addMore1">    <%= link_to_line_items "Add More", f, :line_items %></div>
+            <div class="clear"></div>
+             </div>
+              <div class="clearfloat"></div>
+         <!-- <div class="button" align="center"><a href="javascript:void(0)" onclick="jQuery('#accounting_submit').submit();" class="button blue">Save</a><%#=f.submit "Save"%> <a href="/client_admin/<%#=current_user.id%>/accounting" class="button grey">Cancel</a></div>-->
+						<%end%>
+             <div class="clearfloat"></div>
+        </div>
+<script>
+  if(line_count >= 5)
+        jQuery('#net_op').hide();
+
+  if(capital_count >= 5)
+        jQuery('#cap_exp').hide();
+	<%if params[:page].nil? && (params[:edit_account].eql?('true'))%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['406']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['client_admin']['113']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+</script>

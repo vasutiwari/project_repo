@@ -1,0 +1,191 @@
+<script>
+function blank_portfolio_upload()
+{ //alert("Work in progress")
+    var length_of_folder = trim(document.getElementById('portfolio_name').value);
+    if (document.getElementById('portfolio_name').value == "" || length_of_folder.length == 0) {
+      //alert('Please enter folder name..');
+      document.getElementById('emp_file').style.display="block";
+      document.getElementById('emp_name').style.display="none";
+      return false;
+    }
+    else
+    {
+            <% @portfolio_name = Portfolio.find(:all, :conditions=>['user_id = ?    and portfolio_type_id = 1', current_user]) %>
+            <% @portfolio_name.each do |portfolio_name| %>
+                            if (document.getElementById('portfolio_name').value == "<%=portfolio_name.name%>") {
+                                document.getElementById('emp_name').style.display="block";
+                                document.getElementById('emp_file').style.display="none";
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+            <% end %>
+    }
+  }
+</script>
+<div class="bodywrapperrow">
+    <div class="contentwrapper">
+        <div class="homerow1">
+            <% if !@portfolio_notes.blank? && !@portfolio_notes.nil? %>
+                <div class="homeiconcol"><a href="<%= portfolios_path %>"><img src="/images/homepage_icon1.png" width="153" height="95" border="0"/></a></div>
+            <% else %>
+                <div class="homeiconcol">
+                <%=link_to image_tag("/images/homepage_icon1.png", :style=>"border:none;"),{:controller=>'users',:action=>"new_portfolio",:id=>1, :type=>"image"} ,:id=>"upload_form2"  %>
+                <script>new Control.Modal($('upload_form2'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                </div>
+            <% end %>
+            <div class="hometextlabelcol">Manage Notes</div>
+            <div class="hometextlabelcol2">Portfolios</div>
+            <% if !@portfolio_notes.blank? && !@portfolio_notes.nil? %>
+            <% @portfolio_notes.each do |p| %>
+            <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(p.name), portfolio_path(p.id), :title=> p.name %></div>
+            <% end %>
+            <% if @portfolio_notes.count>8 %>
+                <div class="addportfolio"><a href="<%= portfolios_path %>">more >></a></div>
+            <% end %>
+            <% else %>
+                <div class="addportfolio">
+                <%= link_to 'Add Portfolio', {:controller=>'users',:action=>"new_portfolio",:id=>1} ,:id=>"upload_form3" %>
+        <script>new Control.Modal($('upload_form3'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      </div>
+            <% end %>
+        </div>
+        <div class="liner"><img src="/images/line.png" width="5" height="229" /></div>
+        <div class="homerow1">
+            <% if !@portfolio_real_estates.blank? && !@portfolio_real_estates.nil? %>
+                <div class="homeiconcol"><a href="<%= portfolios_path %>" ><img src="/images/homepage_icon2.png" width="153" height="95" border="0"/></a></div>
+            <% else %>
+                <div class="homeiconcol">
+                <%=link_to image_tag("/images/homepage_icon2.png", :style=>"border:none;"),{:controller=>'users',:action=>"new_real_portfolio",:id=>2, :type=>"image"} ,:id=>"upload_form4"  %>
+                <script>new Control.Modal($('upload_form4'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                </div>
+            <% end %>
+            <div class="hometextlabelcol">Manage Real Estate</div>
+            <div class="hometextlabelcol2">Portfolios</div>
+            <% if !@portfolio_real_estates.blank? && !@portfolio_real_estates.nil? %>
+            <% @portfolio_real_estates.each do |p| %>
+            <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(p.name), portfolios_path(p.id), :title=> p.name %></div>
+            <% end %>
+            <% if @portfolio_real_estates.count>8 %>
+                <div class="addportfolio"><a href="<%= _path %>">more >></a></div>
+            <% end %>
+            <% else %>
+                <div class="addportfolio">
+                <%= link_to 'Add Portfolio', {:controller=>'users',:action=>"new_real_portfolio",:id=>2} ,:id=>"upload_form5" %>
+        <script>new Control.Modal($('upload_form5'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+      </div>
+            <% end %>
+        </div>
+        <div class="liner"><img src="/images/line.png" width="5" height="229" /></div>
+        <div class="homerow1">
+            <div class="homeiconcol"><a href="<%= property_acquisitions_path %>"><img src="/images/homepage_icon3.png" width="153" height="95" border="0"/></a></div>
+            <div class="hometextlabelcol">Acquisitions</div>
+            <div class="hometextlabelcol2">Assets Offered to You</div>
+      <% if !@acquisitions.nil? && !@acquisitions.empty? %>
+                <div class="hometextlabelcol3">Notes</div>
+        <% @acquisitions.first(8).each do |a| %>
+          <% path = @acquisition_searched_notes.collect{|x|x.id}.include?(a.id) ? acquisitions_path : (@acquisition_saved_notes.collect{|x|x.id}.include?(a.id)) ? saved_notes_acquisitions_path : welcome_confirmed_notes_path(a.id) %>
+          <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(a.note_id), path, :title=> a.note_id %></div>
+        <% end %>
+        <% if @acquisitions.length > 5 %>
+           <% paths = ['/acquisitions', '/acquisitions/saved_notes', '/acquisitions/confirmed_notes']
+              arr_path = [@acquisition_searched_notes.count, @acquisition_saved_notes.count, @acquisition_confirmed_notes.count ]
+            %>
+          <div class="addportfolio"><a href="<%= paths[arr_path.index(arr_path.detect{|i| i >0})] %>" >more >></a></div>
+        <% end %>
+      <% else %>
+            <div class="hometextlabelcol3">
+                <div class="homebottomcol2" style="font-size:11px;">No note(s) available to buy</div>
+            </div>
+            <% end %>
+            <% if !@property_acquisitions.nil? && !@property_acquisitions.empty? %>
+            <div class="hometextlabelcol3">RealEstate</div>
+        <% @property_acquisitions.first(8).each do |a| %>
+          <% path = @property_acquisition_searched_notes.collect{|x|x.id}.include?(a.id) ? property_acquisitions_path : (@property_acquisition_saved_notes.collect{|x|x.id}.include?(a.id)) ? saved_notes_property_acquisitions_path : confirmed_notes_property_acquisitions_path %>
+          <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(a.property_name), path, :title=> a.property_name %></div>
+        <% end %>
+        <% if @property_acquisitions.length > 5 %>
+           <% paths = ['/property_acquisitions', '/property_acquisitions/saved_notes', '/property_acquisitions/confirmed_notes']
+              arr_path = [@property_acquisition_searched_notes.count, @property_acquisition_saved_notes.count, @property_acquisition_confirmed_notes.count ]
+            %>
+          <div class="addportfolio"><a href="<%= paths[arr_path.index(arr_path.detect{|i| i >0})] %>" >more >></a></div>
+        <% end %>
+      <% else %>
+            <div class="hometextlabelcol3">
+                <div class="homebottomcol2" style="font-size:11px;">No property(s) available to buy</div>
+            </div>
+            <% end %>
+        </div>
+    <div class="liner"><img src="/images/line.png" width="5" height="229" /></div>
+    <div class="homerow1">
+      <div class="homeiconcol"><a href="<%= property_dispositions_path %>"><img src="/images/homepage_icon4.png" width="153" height="95" border="0"/></a></div>
+      <div class="hometextlabelcol">Dispositions</div>
+      <div class="hometextlabelcol2">Assets Offered by You</div>
+      <% if !@dispositions.blank? && !@dispositions.nil? %>
+                <div class="hometextlabelcol3">Notes</div>
+        <% @dispositions.each do |a| %>
+          <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(a.note_id), dispositions_path(:note_id => a.id), :title=> a.note_id %></div>
+        <% end %>
+        <% if @dispositions.count>8 %>
+          <div class="addportfolio"><a href="<%= dispositions_path %>" >more >></a></div>
+        <% end %>
+      <% else %>
+        <div class="hometextlabelcol3">
+          <div class="homebottomcol2" style="font-size:11px;">No note(s) available to sell</div>
+        </div>
+      <% end %>
+            <% if !@property_dispositions.blank? && !@property_dispositions.nil? %>
+                <div class="hometextlabelcol3">RealEstate</div>
+        <% @property_dispositions.each do |a| %>
+          <div class="hometextlabelcol3"><span class="bulletcol2"><img src="/images/bullet.png" width="5" height="6" /></span><%= link_to truncate_extra_chars(a.property_name), property_dispositions_path(:note_id => a.id), :title=> a.property_name %></div>
+        <% end %>
+        <% if @property_dispositions.count>8 %>
+          <div class="addportfolio"><a href="<%= property_dispositions_path %>" >more >></a></div>
+        <% end %>
+      <% else %>
+        <div class="hometextlabelcol3">
+          <div class="homebottomcol2" style="font-size:11px;">No property(s) available to sell</div>
+        </div>
+      <% end %>
+    </div>
+    <div class="liner"><img src="/images/line.png" width="5" height="229" /></div>
+    <div class="homerow1">
+      <div class="homeiconcol"><a href="/notes/services/" ><img src="/images/homepage_icon5.png" width="153" height="95" border="0"/></a></div>
+      <div class="hometextlabelcol">Services</div>
+      <div class="hometextlabelcol2">Offered</div>
+      <div class="homebottomcol2" style="padding-top:10px;font-size:11px;">Coming Soon..</div>
+    </div>
+    <div class="homebottomrow">
+      <div class="iconrow" style="width:350px;">
+        <div class="homeiconcol2"><img src="/images/homepage_icon6.png" width="97" height="98" /></div>
+        <div class="homebottomcol" style="width:250px;">Investment Opportunities</div>
+        <div class="homebottomcol2">Coming Soon..</div>
+      </div>
+    </div>
+        <% if params[:home_page] != "old" %>
+        <div class="homebottomrow">
+            <% if !(@updated_properties.nil? || @updated_properties.blank?)%>
+      <div class="iconrow" style="width:475px;">
+        <div class="homebottomcol" style="width:450px;">Latest Updated Properties</div>
+                <% @updated_properties.each do |i| %>
+                    <div class="hometextlabelcol3" style="width:400px;">
+                        <%=link_to image_tag(real_estate_property_image(i.id), :border=>0,:width=>"65",:height=>"41"), real_estate_property_path(i.portfolio.id,i.id) %>
+                        <%= link_to i.property_name,real_estate_property_path(i.portfolio.id,i.id) %>
+                <% end %>
+      </div>
+            <% end %>
+            <% if !(@updated_files.nil? || @updated_files.blank?)%>
+      <div class="iconrow" style="width:475px;">
+        <div class="homebottomcol" style="width:450px;">Latest Updated Files</div>
+                <% @updated_files.each do |i| %>
+                    <div class="hometextlabelcol3" style="width:400px;">
+                    <a href="/properties/<%= i.folder.id %>/show_folder_files?folder_id=<%= i.folder.id %>&pid=<%= i.folder.portfolio_id %>" title='<%= i.filename %>' ><%= lengthy_word_simplification(i.filename, 20, 15) %></a>
+                <% end %>
+      </div>
+            <% end %>
+        </div>
+        <% end %>
+  </div>
+</div>

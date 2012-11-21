@@ -1,0 +1,63 @@
+<%suite_ids = @lease.try(:property_lease_suite).try(:suite_ids)
+rent_sqft = 0
+rent_sqft = Suite.find_all_by_id_and_real_estate_property_id(suite_ids, params[:property_id]).map(&:rentable_sqft).compact.sum if suite_ids.present?
+%>
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<div class="capexnamerow close" onmouseover="if(<%=@tenant_add_item%> != 1){jQuery(this).css('background-color','#f6f6f6');}" onmouseout="jQuery(this).css('background-color','#ffffff');" style="display:block">
+  <div class="capexform namefirst">
+    <%= f.text_field :name ,:type=>"text", :class=>"lstextfield", :style=>"width:93px" %>
+  </div>
+  <div class="capexform">
+    <%= f.text_field :amount_psf ,:type=>"text", :class=>"lstextfield tot_amt_psf", :style=>"width:88px;", :precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'tenant_tot_calc')" %>
+  </div>
+  <div class="capexform">
+    <%= f.text_field :total_amount ,:type=>"text", :class=>"lstextfield tot_amt", :style=>"width:88px;",:precision => 2,:onblur=>"capx_calc(jQuery(this).attr('id'),jQuery(this).val(),#{rent_sqft},'tenant_psf_calc')" %>
+  </div>
+  <div class="capexform">
+    <%= f.text_field :work_start_date ,:type=>"text", :value =>(f.object && f.object.work_start_date.present?) ? lease_date_format(f.object.try(:work_start_date)) : "mm/dd/yyyy", :class=>"lstextfield hightlighted inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:88px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+    <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+  </div>
+  <%= f.fields_for :note do |tenant_improvement_note| %>
+    <div class="capexform">	
+			<%if @pdf%>
+				<%= tenant_improvement_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 lstextfield2 taskfieldinput2",:style=>"width:287px;height:25px;" %>	
+			<%else%>
+				<%= tenant_improvement_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 lstextfield2 taskfieldinput2",:style=>"width:287px;" %>	
+			<%end%>
+    </div>
+  <%end %>
+  <%if @tenant_add_item != 1 %>
+  <%#*<div class="lsrowwrapper" id="closebutton">%>
+    <%if f.object.new_record?%>
+      <span class="closeme" style="margin-top:-25px">
+        <%= link_to_remove_tenant_improvement_fields "X", f %>
+      </span>
+    <%else%>
+      <span class="closeme" style="margin-top:-25px" id="closeme_tenant" value="1">
+        <%= link_to_remove_tenant_improvement_fields "X", f %>
+      </span>
+    <%end%>
+  <%#*</div>%>
+  <%end %>
+</div>
+<%@tenant_add_item+=1 %>
+<script>
+  jQuery(document).ready(function(){
+	jQuery("textarea[class*=expand]").TextAreaExpander();
+    calculateSum();
+    calSum();
+    jQuery('.tot_amt_psf').each(function(){
+      jQuery(this).blur(function(){
+        calculateSum();
+      });
+    });
+    jQuery('.tot_amt').each(function(){
+      capx_calc(jQuery(this).attr('id'),jQuery(this).val(),'<%=rent_sqft%>','tenant_psf_calc');
+      jQuery(this).blur(function(){
+        calSum();
+      });
+    });
+  });
+</script>

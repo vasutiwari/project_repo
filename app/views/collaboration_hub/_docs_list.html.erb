@@ -1,0 +1,69 @@
+<%find_my_folders_files_tasks%>
+<%if params[:show_past_shared] != 'true'%>
+  <%collect_shared_folders_doc_tasks_in_my_files%>
+<%end%>
+<%x=1%>
+
+<!-- @folders each starts here -->
+<%folder_index= 8000%>
+<%unless @document_for_mailer%><!-- To restrict folders when click document comments link from the mail -->
+<%if @folders && !@folders.empty?%>
+  <%j=1%>
+<%if @from_mailer == "true" && @folder_for_mailer%>
+<%@folders = []%>
+<%@folders << @folder_for_mailer%>
+<%end%>
+    <% @folders = @folders.sort_by(&:created_at).reverse %>
+  <%@folders.uniq.each do |a| %>
+    <%j+=1%>
+    <%=render :partial=>"/properties/folders_row",:locals=>{:a=>a,:j => j,:x=>folder_index,:folder_index=>folder_index,:from_mailer=>@from_mailer,:folder_for_mailer=>@folder_for_mailer}%>
+    <%folder_index=folder_index - 20%>
+    <%x+=1%>
+  <%end%>
+<%end%>
+<%end%>
+<!-- @folders each ends here -->
+<!-- @documents each starts here -->
+<%doc_index= folder_index%>
+<%unless @folder_for_mailer%><!-- To restrict documents when click folder comments link from the mail -->
+<%if @documents && !@documents.empty?%>
+  <%@documents = find_document_collection(@documents)%>
+  <%i=1%>
+<%if @from_mailer == "true" && @document_for_mailer%>
+<%@documents = []%>
+<%@documents << @document_for_mailer%>
+<%end%>
+  <% @documents.uniq.each do |t| %>
+    <%display = find_current_user(t)%>
+    <%if display == "yes" && check_is_doc_shared(t) == "true"%>
+      <%=render :partial=>"/properties/document_row",:locals=>{:t=>t,:i => i,:x=>doc_index,:doc_index=>doc_index,:from_mailer=>@from_mailer,:document_for_mailer=>@document_for_mailer}%>
+      <%i+=1%><%x+=1%>
+      <%doc_index=doc_index - 20%>
+    <% end %>
+  <%end%>
+<%end%>
+<%end%>
+<!-- @documents.each ends here -->
+
+<script>
+  orig_filename=''
+  jQuery(document).ready(function() {
+     jQuery('ul.subindex li a[title]').qtip({
+        position: {
+           corner: {
+              target: 'topRight',
+              tooltip: 'bottomMiddle'
+           }
+        },
+        style: {
+           name: 'cream',
+           padding: '3px',
+           width: {
+              max: 210,
+              min: 0
+           },
+           tip: true
+        }
+    });
+  });
+</script>

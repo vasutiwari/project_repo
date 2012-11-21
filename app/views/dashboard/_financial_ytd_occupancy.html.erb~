@@ -1,0 +1,60 @@
+		<div class="box-3col-small fltlft">
+      <div class="box-title"><span class="title">YTD Occupancy</span></div>
+			<%prop_collection = RealEstateProperty.find_real_estate_property(params[:property_id])%>
+			<%if prop_collection && prop_collection.try(:leasing_type) == "Commercial"%>
+				<%path_for_rent_roll = "/lease/#{params[:portfolio_id]}/rent_roll/#{params[:property_id]}/property_rentroll"%>
+			<%else%>
+				<%path_for_rent_roll = "/performance_review_property/rent_roll?portfolio_id=#{params[:portfolio_id]}&id=#{params[:property_id]}&property_id=#{params[:property_id]}&partial_page=rent_roll_highlight&tl_year=#{Time.now.year}&from_lease=ya"%>
+			<%end%>
+      <div class="value-box">
+        <p class="value"><%if occupancy_sqft.present? %> <a href="<%=path_for_rent_roll%>"><%= occupancy_percent %>%, <%= occupancy_sqft %></a><%else%><%= raw("&nbsp;") %><%end%></p>
+				<%if sf_var_percent.present? || sf_variance.present?%>
+        <p class="value-status"><span class=" <%= (diff && diff >= 0 ?  "above" : "below" )%>"><%=sf_var_percent%>% <%= sf_variance%> SF <%= (diff && diff >= 0 ?  "above" : "below" ) %>  budget </span></p>
+				<%else%> 
+				<p class="value-status"> No data available</p>
+				<%end%>
+      </div>
+    </div>
+		
+		<%ytd_noi = find_ytd_noi(operating_statement) if operating_statement.present?%>
+    <div class="box-3col-small fltlft margin10LR">
+      <div class="box-title"><span class="title">YTD NOI</span></div>
+      <div class="value-box">
+				<%if ytd_noi.present? && (ytd_noi[:actuals].present? ||  ytd_noi[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= params[:property_id]%>">$ <%= ( ytd_noi.nil? || ytd_noi[:actuals].nil? ? 0 : dashboard_currency_display(ytd_noi[:actuals],'false')) %></a></p>
+        <p class="value-status"><span class="<%if ytd_noi[:actuals] > ytd_noi[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(ytd_noi[:percent])%>, <%= dashboard_currency_display(ytd_noi[:variant])%><%if ytd_noi[:actuals] > ytd_noi[:budget]%> above<%else%> below<%end%> budget</span></p>
+				<%else%>
+				<p class="value-status"> No data available</p>
+				<%end%>
+      </div>
+    </div>
+
+		<%if note_collection.present? && is_multifamily(note_collection)%>
+		<%net_income = find_net_income(operating_statement) if operating_statement.present?%>
+    <div class="box-3col-small fltlft">
+      <div class="box-title"><span class="title">YTD Net Income</span></div>
+      <div class="value-box">
+				<%if net_income.present? && (net_income[:actuals].present? ||  net_income[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= params[:property_id]%>">$ <%= ( net_income.nil? || net_income[:actuals].nil? ? 0 : dashboard_currency_display(net_income[:actuals],'false')) %></a></p>
+        <p class="value-status"><span class="<%if net_income[:actuals] > net_income[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(net_income[:percent])%>, <%= dashboard_currency_display(net_income[:variant])%><%if net_income[:actuals] > net_income[:budget]%> above<%else%> below<%end%> budget</span></p>
+				<%else%>
+				<p class="value-status"> No data available</p>
+				<%end%>
+      </div>
+    </div>
+		<%end%>
+		
+		<%if note_collection.present? && is_commercial(note_collection)%>
+		<%net_cash,cash_type = find_net_cash(operating_statement)  if operating_statement.present?%>
+    <div class="box-3col-small fltlft ">
+      <div class="box-title"><span class="title">YTD Net Cash Flow</span></div>
+      <div class="value-box">
+			<%if net_cash.present? && (net_cash[:actuals].present? ||  net_cash[:budget].present?) %>
+        <p class="value"><a href="/real_estate/<%= params[:portfolio_id]%>/properties/<%= params[:property_id]%>">$ <%= ( net_cash.nil? || net_cash[:actuals].nil? ? 0 : dashboard_currency_display(net_cash[:actuals],'false')) %></a></p>
+  			 <p class="value-status"><span class="<%if net_cash[:actuals] > net_cash[:budget]%>above<%else%>below<%end%>"><%= display_currency_real_estate_overview_for_percent(net_cash[:percent])%>, <%= dashboard_currency_display(net_cash[:variant])%><%if net_cash[:actuals] > net_cash[:budget]%> above<%else%> below<%end%> budget</span></p>
+				 <%else%>
+				 <p class="value-status"> No data available </p>
+				 <%end%>
+      </div>
+    </div>
+		<%end%>

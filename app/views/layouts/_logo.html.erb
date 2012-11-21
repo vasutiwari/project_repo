@@ -1,0 +1,44 @@
+<% if current_user.nil? %>
+  <% if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?('share') %>
+    <% path = login_path %>
+  <% else %>
+    <% path = root_path %>
+  <% end %>
+<% else %>
+	<%if is_leasing_agent %>
+		<% path = goto_asset_view_path(current_user.id) %>
+	<%elsif current_user.has_role?('Asset Manager')%>		
+    <% path = (!session[:property__id].present? && portfolio_obj.present?) ? "/nav_dashboard/dashboard?portfolio_id=#{portfolio_obj.id}" : (portfolio_obj.present? && property_obj.present?) ? "/nav_dashboard/dashboard?portfolio_id=#{portfolio_obj.id}&property_id=#{property_obj.id}"  :  "/dashboard/notify_admin?from_session=true"%>
+  <% else %>
+    <% path = shared_users_path %>
+  <% end %>
+<% end %>
+
+<%check_logo_from_public = "false"%>
+<%if current_user && current_user.logo_image && current_user.logo_image.full_filename%>
+			<%check_logo_from_public = FileTest.exists?("#{current_user.logo_image.full_filename}") ? "true" : "false" %>
+	<%if check_logo_from_public.eql?('true')%>
+			<% check_user_logo = current_user.logo_image.nil? %>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%>border="0" src="<%= check_user_logo ? (find_logo_extension.nil? ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+	<%else%>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" src="/images/amp-logo.png" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" /></a>
+	<%end%>
+	<%elsif current_user && current_user.client_logo_image && current_user.client_logo_image.full_filename%>
+			<%check_logo_from_public = FileTest.exists?("#{current_user.client_logo_image.full_filename}") ? "true" : "false" %>
+	<%if check_logo_from_public.eql?('true')%>
+			<% check_user_logo = current_user.client_logo_image.nil? %>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" src="<%= check_user_logo ? (find_logo_extension.nil? ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.client_logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+	<%else%>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" src="/images/amp-logo.png" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" /></a>
+	<%end%>	
+<%else%>
+<%gate = (params[:from_session].present? || params[:from_view].present? || params[:no_properties].present?)%>
+<%if (gate && current_user.logo_image.nil?) || controller.action_name.eql?("notify_admin")%>
+	<% check_user_logo = current_user.logo_image.nil? %>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" src="<%= check_user_logo ? ((find_logo_extension.nil? || !FileTest.exists?("#{find_logo_extension.public_filename}")) ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+  <%elsif gate %>
+	<a><img border="0" id="logo_img" src="/images/amp-logo.png" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" /></a>
+	<%else%>
+			<a href="<%if (controller.controller_name != 'document' && controller.action_name != 'scribd_view')%><%= path %><%else%>#<%end%>"><img border="0" id="logo_img" src="/images/amp-logo.png" <%if params[:controller].eql?("nav_dashboard")%>height = "59" width="121"<%else%>height="35" width="104"<%end%> border="0" /></a>
+			<%end%>
+<%end%>

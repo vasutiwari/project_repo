@@ -1,0 +1,24 @@
+
+<div class="box-1col fontcol">
+    <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/properties">Property List</a> > Edit Property </div>
+		<div class="mandatryDiv" align="right" style="margin:-30px 0 10px 762px;">( <span class="txtRed">*</span> )<small> Mandatory Fields is required</small> </div>
+		<%@property_types = find_property_types%>
+		<%=form_for(@property,:url => client_admin_property_path(current_user.id), :method => :put,:html=>{:multipart=>true, :id=>"edit_prop_submit"}) do |p| %>
+				<%=render "form",:p=>p, :property_collection => @property, :property_types => @property_types, :form_name=>"edit_prop_submit"%>
+		<%end%>
+		<div class="clearfloat"></div>
+</div>
+<script>
+<%if params[:delete_picture].eql?('true')%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['413']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['properties']['413']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+</script>

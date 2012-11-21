@@ -1,0 +1,7 @@
+<%@lease_collection =@lease %>
+<div class="leaseModule">
+  <%=render :partial=> "lease/pipeline_div_display",:locals => {:lease_collection=>@lease ,:note_collection => @note, :portfolio_collection => @portfolio_collection}%>
+  <div class="suitemid">
+    <%=render :partial=>"/lease/mgmt_clauses", :locals => {:note_collection => @note, :portfolio_collection => @portfolio_collection, :@lease => @lease}%>
+  </div>
+</div>

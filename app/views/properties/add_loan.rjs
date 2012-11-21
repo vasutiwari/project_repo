@@ -1,0 +1,5 @@
+table_name = "#loan_table#{@loan_form_number.to_i}"
+generate_loan_table(page,table_name)
+page.call "add_class_for_datepicker","date_of_note_#{@number}","maturity_#{@number}"
+page.call "yield_calender"
+@n = @loan_form_number.to_i + 1

@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+<link href="/stylesheets/amp_website.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/SqueezeBox.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "control.modal" %>
+    <style>
+      .background{
+        background-image:none;
+      }
+    </style>
+ </head>
+<div class="loginwrapperrow">
+    <%= form_for @contact, :url=>{:action=>"create"}, :html => {:multipart => true, :method=> 'post'}do |f| %>
+    <div class="loginlhs">
+            <div class="loginheaderow" style="width:420px;"><span class="comcol"><font color="#007934" size="5px;">Contact Us and Get Started with AMP!</font></span></div>
+            <div class="loginfieldrow">
+                    <div class="loginfieldlabel">Name <font color=red>*</font></div>
+                    <div class="loginfieldinput">
+                    <%name_class=@contact.errors[:name].nil? ? 'signinputbox' : 'signinputboxerror'%>
+                        <label>
+                        <%= f.text_field 'name', :class=>name_class%>
+                        </label><br /><span style="color:#BA2300"><%= error_message_on :contact, :name %></span>
+                    </div>
+                    <div class="loginfieldlabel">Email <font color=red>*</font></div>
+                    <div class="loginfieldinput">
+                    <%email_class=@contact.errors[:email].nil? ? 'signinputbox' : 'signinputboxerror'%>
+                        <label>
+                        <%= f.text_field 'email', :class=>email_class%>
+                        </label><br/><span style="color:#BA2300"><%= error_message_on :contact, :email %></span>
+                    </div>
+                    <div class="loginfieldlabel">Comments</div>
+                    <div class="loginfieldinput">
+                    <%comment_class=@contact.errors[:comment].nil? ? 'textbox' : 'textboxerror'%>
+                        <label>
+                        <%= f.text_area 'comment', :class=>comment_class%>
+                        </label><br/><span style="color:#BA2300"><%= error_message_on :contact, :comment %></span>
+                    </div>
+            </div>
+          </div>
+          <div class="lite_contentwrapper">
+            <p>We integrate with your existing accounting systems to seamlessly provide information on your assets.&nbsp;You will&nbsp;receive a confirmation&nbsp;email&nbsp;in&nbsp;your inbox&nbsp;as you complete this process.
+            </p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+          </div>
+          <div class="btnrow">
+            <div class="linkwrapper"><a href="#">Cancel</a></div>
+            <div class="bntwrapper">
+              <a href="" onclick="jQuery('#contact_form').submit();"><img src="/images/nextbtn.png" border="0" /></a>
+            </div>
+          </div>
+	      <%end%>
+        </div>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

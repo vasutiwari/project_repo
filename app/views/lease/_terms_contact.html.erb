@@ -1,0 +1,53 @@
+<div class="termsnamerow">
+  <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Contact Name</div>
+  <div class="termsform" style="padding-left:5px;">
+    <%= contact_form.text_field :name ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+  </div>
+  <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Email</div>
+  <div class="termsform" style="padding-left:5px;">
+    <%= contact_form.text_field :email ,:type=>"text", :class=>"lstextfield hightlighted", :style=>"width:111px"%>
+  </div>
+  <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Ph</div>
+  <div class="termsform" style="padding-left:5px;">
+     <%= contact_form.text_field :phone ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+  </div>
+</div>
+<div class="termsnamerow">
+  <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Tenant Address</div>
+  <div class="termsform" style="padding-left:5px;">
+     <%= contact_form.text_field :address ,:type=>"text", :class=>"lstextfield", :style=>"width:377px"%>
+  </div>
+  <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Fax</div>
+  <div class="termsform" style="padding-left:5px;">
+     <%= contact_form.text_field :fax ,:type=>"text", :class=>"lstextfield", :style=>"width:111px"%>
+  </div>
+</div>
+<div class="termsnamerow" id="billing_name" style="display:none;">
+  <a href="#" id="closeimg_billing"><img src="/images/del_icon.png" width="7" height="7" border="0" /></a>
+  <div class="termsname namefirst" style="width:100px; text-align:left;"> Billing Name</div>
+  <div class="termsform" style="padding-left:5px;">
+    <input id="billing_name" name="billing_name" type="text" style="width:111px" class="lstextfield" />
+  </div>
+  <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Billing Address</div>
+  <div class="termsform" style="padding-left:5px;">
+    <input id="billing_address" name="billing_addresss" type="text" style="width:377px" class="lstextfield" />
+  </div>
+</div>
+<div class="termsnamerow" id="notice_name" style="display:none;">
+  <a href="#" id="closeimg_notice"><img src="/images/del_icon.png" width="7" height="7" border="0" /></a>
+  <div class="termsname namefirst" style="width:100px; text-align:left;"> Notice Name</div>
+  <div class="termsform" style="padding-left:5px;">
+    <input id="notice_name" name="notice_name" type="text" style="width:111px" class="lstextfield" />
+  </div>
+  <div class="termsname" style="width:100px; text-align:left; margin-left:48px">Notice Address</div>
+  <div class="termsform" style="padding-left:5px;">
+    <input id="notice_address" name="notice_address" type="text" style="width:377px" class="lstextfield" />
+  </div>
+</div>
+<div class="termsnamerow" id="assignee_contact" style="display:none;">
+  <a href="#" id="closeimg_assignee"><img src="/images/del_icon.png" width="7" height="7" border="0" /></a>
+  <div class="termsname namefirst" style="margin-left:5px; width:100px; text-align:left;">Assignee Contact</div>
+  <div class="termsform" style="padding-left:5px;">
+    <input id="assignee_contact" name="assignee_contact" type="text" style="width:377px" class="lstextfield" />
+  </div>
+</div>

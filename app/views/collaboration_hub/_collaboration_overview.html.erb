@@ -1,0 +1,63 @@
+<%
+portfolios_collection = @portfolios
+%>
+<script>AddedFiles=[];</script>
+        <% if portfolios_collection %>
+            <% portfolios_collection = portfolios_collection.compact.sort_by(&:created_at).reverse %>
+        <% portfolios_collection.each do |i| %>
+          <% find_portfolio_fol_doc_task(i) %>
+          <% portfolio_folder =  find_by_parent_id_and_portfolio_id(i.id) %>
+          <%if portfolio_folder %>
+            <% folder_members = find_folder_member(portfolio_folder) if !(portfolio_folder.nil? || portfolio_folder.blank?) %>
+            <div class="rowinactive" onmouseover="this.className='activerow'" onmouseout="this.className='rowinactive'">
+              <div class="dataicon">
+                <%img_src =  i.portfolio_image ? i.portfolio_image.public_filename : "/images/property.jpg"%>
+                <img src="<%=img_src %>" width="32" height="32" onclick="show_hide_asset_docs1_real_estate(<%=i.id %>,<%=portfolio_folder.id %>,'hide_del');return false;" style="cursor:pointer;"/>
+              </div>
+                <div class="databox">
+                  <div class="dataname">
+                    <a href = "javascript:;" style="text-decoration:none;" onclick="show_hide_asset_docs1_real_estate(<%=i.id %>,<%=portfolio_folder.id %>,'hide_del');return false;") title="<%=i.name%>" ><%= lengthy_word_simplification(i.name,25,10) %></a>
+										<span style="font-size:11px;color:#666666;"><%#= i.user_id == current_user.id ? "<img src='/images/owner.png' />" : "" %><!-- Hidden temporarily --></span>
+                  </div>
+                  <div class="datadet">
+										<div class="datadetails">
+											<% if @portfolio_prop.count > 0 %>
+													<%if i.user_id == current_user.id %>
+														<%= property_count(@portfolio_prop.count) %> , <% if @portfolio_prop.count > 0 %><%= file_count(@portfolio_document_count) %><% end %>
+												 <%else%>
+														<%= property_count(@portfolio_prop.count) %> , <% if @portfolio_prop.count > 0 %><%= file_count(@portfolio_document_count) %><% end %>
+													<%end%>
+											<% else %>
+												No Property
+											<%end%>			
+									</div>									
+									<!-- Number of files end -->
+                </div>
+              </div>
+	           <!-- Following share link functionality hided for 1.3b -->
+                   <!-- <div class="<%#=portfolio_folder.permalink.blank? ? 'datasharelink' : 'datashare'%>"> -->
+                      <div class="datashare" style="background:none;">
+                      <ul class="subindex">
+                        <li style="list-style-type:none;">
+                          <%#= link_to raw("&nbsp;&nbsp;&nbsp;"),{:controller=>"collaborators",:action=>"share_link_folder",:id=>portfolio_folder.id,:portfolio_id=>portfolio_folder.id,:folder_id=>portfolio_folder.id,:deal_room => params[:deal_room]},:id=>"collaborators_#{portfolio_folder.id}", :title=>"Share this Portfolio" %>
+                          <script>//new Control.Modal($('collaborators_<%#=portfolio_folder.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+                        </li>
+                      </ul>
+                    </div>
+						
+							<!-- Comment start -->
+							<div class="trigger3" id="property_folder_<%= portfolio_folder.id %>">
+							<ul class="subindex"><li style="list-style-type:none;"><a href="javascript:;" title="Add comment" id="prop_folder_<%= portfolio_folder.id %>"><%= portfolio_folder.comments_finder.count == 0 ? '+' :  portfolio_folder.comments_finder.count  %></a></li></ul>
+								<script>
+									jQuery('#property_folder_<%= portfolio_folder.id %>').toggle(function(){all_cmts='';call_to_comment(<%=portfolio_folder.id %>, 'folder');detect_comment_call=false;return false;}, function(){ jQuery('#folder_comment_<%= portfolio_folder.id %>').html('');jQuery('#folder_comment_<%= portfolio_folder.id %>').hide();return false;});
+								</script>
+							</div>
+							<div id="folder_comment_<%= portfolio_folder.id %>" class="toggle_container2">
+							</div>
+							<!-- Comment end -->
+						
+						
+          </div>
+        <%end%>
+      <%end%>
+    <% end %>

@@ -1,0 +1,34 @@
+<% pdf_conv_path = @pdf.blank? ? '' : Rails.root.to_s+'/public' %>
+<div id="page">
+    <div id="header">
+        <div class="logoDiv" id="amp_logo">
+            <%if current_user %>
+            <% check_user_logo = current_user.logo_image.nil? %>
+            <a href=""><img border="0" id="logo_img"<% if !check_user_logo %>width="172"<% end %><% if !check_user_logo %>height="83"<% end %> src="<%= pdf_conv_path %><%= check_user_logo ? (find_logo_extension.nil? ? "/images/logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /> </a><%else %>
+            <a href=""><img border="0" id="logo_img" src="<%=  pdf_conv_path %>/images/logo.png" /></a><%end %>
+        </div>
+    </div>
+    <div class="property-name">
+        <div style="color:#444">
+            <%= @note_name %>
+        </div>
+    </div>
+    <div class="property-address">
+        <%= @property_address %>
+    </div>
+    <div class="property-image">
+        <img src="<%= pdf_conv_path %><%= @property_image.try(:public_filename) %>" alt="" width="337" height="214" />
+    </div>
+    <div class="TOC">
+        <h1>Table of Contents:</h1>
+        <ol>
+            <% @partial_pages.each do |title| %>
+            <li>
+                <%= title %>
+            </li>
+            <% end %>
+        </ol>
+        <div class="clear">
+        </div>
+    </div>
+</div>

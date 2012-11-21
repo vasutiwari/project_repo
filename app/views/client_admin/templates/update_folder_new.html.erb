@@ -1,0 +1,12 @@
+<div class="box-1col fontcol">
+    <div class="breadcrumb"><a href="/client_admin/<%=current_user.id%>/templates">Template List</a> > Add Template </div>
+		<div class="mandatryDiv" align="right" style="margin:-90px 0 10px 762px;"><small> </small> </div>
+		
+
+	<%=form_for(@folder_update, :method => :post, :url =>"/client_admin/#{current_user.id}/templates/#{params[:template_id]}/update_folder",:html=>{:multipart=>true,:id=>"folder2_submit"}) do |p| %>
+			<%=render "update_folder",:p=>p, :template_collection => @folder_update, :form_name=>"folder2_submit"%>
+
+	<%end%>
+
+			<div class="clearfloat"></div>
+	</div>

@@ -1,0 +1,45 @@
+xml.chart(
+		:caption=>'Actuals',
+		:subcaption=>'',
+		:xAxisName=>'', 
+		:yAxisName=>'',
+		:numberPrefix=>'$',
+		:showvalues=>'1', 
+		:connectorDashed=>'1',
+		:showSumAtEnd=>"0",
+		:yAxisMaxValue =>"#{@max_graph}",
+		:numDivLines=>"10",
+		:adjustDiv=>"0"
+		#:positiveColor=>"00FF00",
+		#:negativeColor=>"FF0000"
+) {
+	unless @sdr.empty?
+	@sdr.each do |i|
+		#xml.set("label".to_sym=>"Cash Flow after Debit Service and Capital Cost","value".to_sym=>"#{i.cash_flow_after_dbt_ser_bfr_cap_cost}"){}
+		#xml.set("label".to_sym=>"Leasing and Capital Cost","value".to_sym=>"#{i.leasing_and_cap_cost}"){}
+		#xml.set("label".to_sym=>"Debt Service","value".to_sym=>"#{i.debt_service}"){}
+		#xml.set("label".to_sym=>"Net Operating Income","value".to_sym=>"#{i.noi}"){}
+		#xml.set("label".to_sym=>"Operating Expense","value".to_sym=>"#{i.operating_expenses}"){}
+		#xml.set("label".to_sym=>"Vacancy and Losses","value".to_sym=>"#{i.vacancy_and_losses}"){}
+		#xml.set("label".to_sym=>"Total revenue","isSum".to_sym=>"1", :cumulative=>"0"){}
+		
+		xml.set("label".to_sym=>"Total revenue","value".to_sym=>"#{i.total_revenue}", :displayValue=>"#{display_graph_values(i.total_revenue.to_i)}", :toolText => "#{display_graph_values(i.total_revenue.to_i)}","color".to_sym => "#{@color[0]}"){}		
+		
+		xml.set("label".to_sym=>"Vacancy and Losses","value".to_sym=>"-#{i.vacancy_and_losses}", :displayValue=>"#{display_graph_values(i.vacancy_and_losses.to_i)}", :toolText => "#{display_graph_values(i.vacancy_and_losses.to_i)}","color".to_sym => "#{@color[1]}"){}
+		
+		xml.set("label".to_sym=>"Operating Expense","value".to_sym=>"-#{i.operating_expenses}", :displayValue=>"#{display_graph_values(i.operating_expenses.to_i)}", :toolText => "#{display_graph_values(i.operating_expenses.to_i)}","color".to_sym => "#{@color[2]}"){}
+		
+		xml.set("label".to_sym=>"Net Operating Income","value".to_sym=>"-#{i.noi}", :displayValue=>"#{display_graph_values(i.noi.to_i)}", :toolText => "#{display_graph_values(i.noi.to_i)}","color".to_sym => "#{@color[3]}"){}
+		
+		xml.set("label".to_sym=>"Debt Service","value".to_sym=>"-#{i.debt_service}", :displayValue=>"#{display_graph_values(i.debt_service.to_i)}", :toolText => "#{display_graph_values(i.debt_service.to_i)}","color".to_sym => "#{@color[4]}"){}
+		
+		xml.set("label".to_sym=>"Leasing and Capital Cost","value".to_sym=>"-#{i.leasing_and_cap_cost}", :displayValue=>"#{display_graph_values(i.leasing_and_cap_cost.to_i)}", :toolText => "#{display_graph_values(i.leasing_and_cap_cost.to_i)}","color".to_sym => "#{@color[5]}"){}
+		
+		xml.set("label".to_sym=>"Cash Flow after Debit Service and Capital Cost","isSum".to_sym=>"1", :cumulative=>"0"){}
+		
+		#xml.set("label".to_sym=>"Cash Flow after Debit Service and Capital Cost","value".to_sym=>"-#{i.cash_flow_after_dbt_ser_bfr_cap_cost}", :displayValue=>"#{display_graph_values(i.cash_flow_after_dbt_ser_bfr_cap_cost.to_i)}", :toolText => "#{display_graph_values(i.cash_flow_after_dbt_ser_bfr_cap_cost.to_i)}","color".to_sym => "#{@color[6]}"){}
+
+	end		
+	end
+}
+

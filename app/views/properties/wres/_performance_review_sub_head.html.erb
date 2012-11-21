@@ -1,0 +1,44 @@
+<!-- sub head-->
+<div class="subheaderwarpper">
+  <div class="detailedactbutwrapper">
+    <div class="notesalelf"><img width="9" height="30" src="/images/detailed_budget_dealf.png"></div>
+    <div id="for_notes" class="detailedactbutmid"><a href="" onclick="performanceReviewCalls('for_notes',{main_head_call:true});return false;">Summary</a></div>
+    <div class="notesalelf"><img width="7" height="30" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="financial" class="detaileddeactbutmid "><a href="javascript:;" onclick="performanceReviewCalls('financial',{});return false;">Financials</a></div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="lease" class="detaileddeactbutmid "><a href="" onclick="performanceReviewCalls('lease',{tl_month:'<%= Date.today.month%>',tl_year:'<%= Date.today.year%>',tl_period:''});return false;">Leasing</a></div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="rent_roll" class="detaileddeactbutmid ">	<a href="" onclick="performanceReviewCalls('rent_roll',{});return false;">Rent Roll</a></div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="capital_expenditure" class="detaileddeactbutmid "><a href="javascript:;" onclick="performanceReviewCalls('capital_expenditure',{}); return false;">Other Inc & Exp</a></div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+<% unless session[:wres_user] %> <%# this is hide for wres user - shortly%>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="cash_n_receivables" class="detaileddeactbutmid ">	<a href="" onclick="performanceReviewCalls('cash_n_receivables',{});return false;">Cash &amp; Receivables</a>	</div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+ <% end %>
+  <div class="detaileddeactbutwrapper">
+    <div class="notesalelf"><img width="5" height="28" src="/images/detailed_budget_dealf.png"></div>
+    <div id="variances" class="detaileddeactbutmid "><a href="javascript:;" onclick="performanceReviewCalls('variances',{}); return false;">Variances</a></div>
+    <div class="notesalelf"><img width="6" height="28" src="/images/detailed_budget_deactrt.png"></div>
+  </div>
+</div>
+<script type="text/javascript">
+  enable_disable_tab('for_notes', active_sub_call);
+</script>
+<!-- sub head end-->

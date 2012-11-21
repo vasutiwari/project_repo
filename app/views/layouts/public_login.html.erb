@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>&nbsp;AMP - Simplified Intelligence</title>
+    <%= stylesheet_link_tag 'amp_v2', :media=>'all' %>
+    <%= stylesheet_link_tag 'amp_dev', :media=>'all' %>
+    <%= stylesheet_link_tag 'nyroModal', :media=>'all' %>
+    <% if !(controller_name == 'properties' && action_name == 'show')  %>
+      <%= stylesheet_link_tag "ampnew_label.css", :media=>"all" %>
+    <% end %>
+    <link href="/stylesheets/jquery-ui.css" rel="stylesheet" type="text/css" media="all" />
+    <%= stylesheet_link_tag "ampnew", :media=>"all"  %>
+    <%= stylesheet_link_tag "amp_rf", :media=>"all"  %>
+<link href="/stylesheets/sprites.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/SqueezeBox.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/screen_v1.0.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/javascripts/application.js"></script>
+<!--
+<script src="https://www.google.com/jsapi"></script><script>google.load("mootools", "1.2.1");</script>
+<script type="text/javascript" src="/javascripts/SqueezeBox.js"></script>
+<script type="text/javascript">
+window.addEvent('domready', function() {
+	SqueezeBox.assign($$('a.boxed'), {
+		parse: 'rel',
+    url:'/contactus'
+	});
+
+});
+</script>
+-->
+<script type="text/javascript">
+window.onunload = load_completer();
+function load_completer(){jQuery('#msg_writter', parent.document.body).fadeOut(1000);}
+function flash_completer(){jQuery('#msg_writter', parent.document.body).fadeOut(5000);}
+</script>
+
+  </head>
+  	<body>
+		<!--Loading Msg Start-->
+		<div id="msg_writter" class="msgWritter">
+			<div id="success_msg" class="loadingmsg"><div class="msgTxt"><img width="83" height="15" border="0" align="absmiddle" style="padding:0; margin:0;" src="/images/loading_amp.gif"/>&nbsp;&nbsp;<strong>Loading...</strong></div></div>
+		</div>
+		<!--Loading Msg End-->
+		<!--container start-->
+			<div class="container">
+				<!--header starts here-->
+					<div class="header">
+							<!--top level header starts here-->
+								<div class="logo" id="amp_logo">
+									<a href="/"><img border="0" id="logo_img" src="/images/amp-logo.png" height="35" width="104" border="0" /></a>
+								</div>
+							<!--top level header ends here-->
+							<div class="navpostion">
+								<div class="nav">
+									<!--div for header tabs links starts here-->
+										<div>
+												<a href="<%= login_path %>">Log In</a>
+										</div>
+									<!--div for header tabs links ends here-->
+									</div>
+								</div>
+						</div>
+				<!--header ends here-->
+					<!--content starts here-->
+							<div class="mainwrapper" style="<%if controller_name == 'home'%>width: 994px;<%end%>">
+								<div class="bodywrapperrow">
+									<div class="contentwrapper">
+									<%=yield %>
+									</div>
+								</div>
+								<div class="clearfloat"></div>
+							</div>
+					<!--content ends here-->
+					<div class="clearfloat"></div>
+					<div class="footer" style="height:63px;">
+							<div class="footer-nav fltlft">© 2011 <% if Rails.env != "development" %><%= get_analytics_code %><% end %>AMP Technologies | <a href="/">Home</a> | <a href="/team.html">Team</a> | <a href="/security_privacy.html">Privacy &amp; Security</a> | <a href="http://localhost:3000/request_demo/" target="_blank" class="boxed" rel="{handler:'iframe',size:{x:760,y:300},iframePreload:true}">Contact Us | <a href="/security_privacy.html">Terms Of Use</a></a></div>
+							<div class="footer-ssl fltrt">
+								<a target="GT__SIP" href="https://smarticon.geotrust.com/smarticonprofile?Referer=https://localhost:3000" tabindex="-1">
+								<img src="/images/ssl.png" width="99" height="40" align="left" /></a>&nbsp;&nbsp;<img src="/images/powered-by-logo.png" width="83" height="44" align="right" />
+							</div>
+						</div>
+					<div class="clearfloat"></div>
+				</div>
+		<!--container end-->
+	</body>
+</html>

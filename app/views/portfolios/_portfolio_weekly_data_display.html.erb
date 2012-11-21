@@ -1,0 +1,44 @@
+<%cnt = property_week_floor.count%>
+<%property_weekly_display_total(cnt)%>
+<tbody class="">
+	<%for j in 0...cnt%>
+		<tr class="">
+				<%if j==0%><td rowspan="<%=cnt+1%>" align="center" valign="top" class="bdr-lt-Dgry bdr-rt-Dgry  bdr-bt-Dgry"><a href="/dashboard/<%=portfolio_collection.id%>/property_multifamily_leasing_info/<%=prop_id_coll[i]%>" title="<%=find_property(prop_id_coll[i])%>"><%=find_property(prop_id_coll[i])%> <%#=display_truncated_chars(find_property(prop_id_coll[i]),15,true)%></a><br /> <%=find_property_address(prop_id_coll[i])%></td><%end%>
+					<td align="center" class="bdr-rt-Dgry"><%=property_week_floor[j]%></td>
+					<td align="right" class="bdr-rt-Dgry"><%=property_week_units[j]%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=property_week_vacant_total[j]%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=is_nan_checking_gross(property_week_vacant_total[j].to_f,property_week_units[j].to_f)%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=property_week_vacant_total[j].to_i-property_week_prelsd[j].to_i%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=is_nan_checking_net(property_week_vacant_total[j].to_f,property_week_prelsd[j].to_f,property_week_units[j].to_f)%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=property_weekly_ntv[j].to_i-property_week_prelsd2[j].to_i%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=is_nan_checking_net(property_weekly_ntv[j].to_f,property_week_prelsd2[j].to_f,property_week_units[j].to_f)%></td>
+					<td align="right" class="bdr-rt-Dgry td60"><%=property_weekly_display(j,'vacant_net').to_i+property_weekly_display(j,'notice_net').to_i%></td>
+					<td align="right" class="bdr-rt-Dgrytd60"><%=is_nan_checking_gross(property_weekly_display(j,'vacant_net').to_f+property_weekly_display(j,'notice_net').to_f,property_week_units[j].to_f)%></td>
+					<td align="right" class="bdr-rt-Dgry"><%=pi_total[j]%></td>
+					<td align="right" class="bdr-rt-Dgry"><%=wi_total[j]%></td>
+					<td align="right" class="bdr-rt-Dgry"><%=dep_total[j]%></td>
+			</tr>
+			<%if j==cnt-1%>
+				<tr class="tdTotal">
+					<td align="center" class="bdr-rt-Dgry">Total</td>
+						<td align="right" class="bdr-rt-Dgry"><%=@vacant_units_total%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%=@vacant_gross_total%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%=@vacant_gross_per%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%=@vacant_net_total%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%="#{number_with_precision((@vacant_net_total.to_f/@vacant_units_total.to_f)*100, :precision => 1)}%"%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%=@notice_gross_total-@notice_rented_total%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%="#{number_with_precision(((@notice_gross_total-@notice_rented_total)/@vacant_units_total.to_f)*100, :precision => 1)}%"%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%=@vacant_net_total.to_i+(@notice_gross_total.to_i-@notice_rented_total.to_i)%></td>
+						<td align="right" class="bdr-rt-Dgry td60"><%="#{number_with_precision(((@vacant_net_total+(@notice_gross_total-@notice_rented_total))/@vacant_units_total.to_f)*100, :precision => 1)}%"%></td>
+						<td align="right" class="bdr-rt-Dgry"><%=@trafic_pi_total%></td>
+						<td align="right" class="bdr-rt-Dgry"><%=@trafic_wi_total%></td>
+						<td align="right" class="bdr-rt-Dgry"><%=@trafic_dep_total%></td>
+				</tr>
+			<%end%>
+	<%end%>
+</tbody>
+<%if i != property_count-1%>
+	<tbody>
+	<tr><td colspan="14" class="bdr-lt-Dgry bdr-rt-Dgry nospace"></td></tr>
+	</tbody>
+<%end%>

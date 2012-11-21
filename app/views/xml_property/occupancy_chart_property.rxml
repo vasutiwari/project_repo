@@ -1,0 +1,15 @@
+xml.chart(
+		:caption=>"Occupancy",
+		:palette=>"2", 
+		:animation=>"1", 
+		:formatNumberScale=>"0", 
+		:numberPrefix=>"\n", 
+		:numberSuffix=>" SqFt",
+		:pieSliceDepth=>"30",
+		:startingAngle=>"125") {		
+		unless @sdr.empty?
+			xml.set("value".to_sym=>"#{@sdr[0].occupied_area}","name".to_sym=>"Occupied Area"){}
+			xml.set("value".to_sym=>"#{@sdr[0].free_area}","name".to_sym=>"Free Area"){}
+		end
+}
+

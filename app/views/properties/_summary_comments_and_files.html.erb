@@ -1,0 +1,42 @@
+<%@folder =  find_property_folder_by_property_id(@note.id)%>
+<%folder_collection = @folder%>
+<%folder_members = find_folder_member(folder_collection) %>
+<% pdf_conv_path = @pdf.blank? ? "" : "#{Rails.root.to_s}/public" %>
+<%@item = folder_collection%>
+<%params[:type] = "summary" %>
+<%params[:id] = folder_collection.id%>
+<div class="executivecontentrow new_executive_summary">
+  <div class="variance_update_commentrow">
+    <div class="summary_comment_row">
+      <div class="col"> Comments</div>
+      <div class="summary_commentrow"> <img src="<%= pdf_conv_path %>/images/asset_manager_icon.png" width="24" height="24" alt="add collaboraters"/>
+        <div class="timerbutwrapper">
+          <div class="timermonthview">
+            <%= link_to folder_members.count ,{:controller=>"properties",:action=>"view_portfolios_path",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio_id,:folder_id=>folder_collection.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true, :call_from_prop_files =>true,:parent_delete=>"true",:is_property_folder =>true},:class=>"bluecolor",:id=>"share_filesbox_#{folder_collection.id}"%>
+            <script>new Control.Modal($('share_filesbox_<%=folder_collection.id %>'),  {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+          </div>
+          <div class="timermonthview_rt"><img src="<%= pdf_conv_path %>/images/asset_folder_timert.png" width="3" height="21" /></div>
+        </div>
+        <div class="commentrow_label">
+          <span>
+            <% unless folder_members.empty? %>
+              <%display_collaborators_new(folder_members,'folder',folder_collection.id,1,'false') %>
+              <span class='tooltip' id='tooltip_<%=@object%>_<%=@object_id%>' style='margin-left:-58px;margin-top:20px;display: none;z-index:<%=@zz_index%>;'><%=raw(@display_tooltip)%></span>
+              <%= link_to display_collaborators_new(folder_members,'folder',folder_collection.id,1,'false') ,{:controller=>"properties",:action=>"view_portfolios_path",:id=>folder_collection.id,:portfolio_id=>folder_collection.portfolio_id,:folder_id=>folder_collection.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:folder_revoke=>true, :call_from_prop_files =>true,:parent_delete=>"true",:is_property_folder =>true},:class=>"bluecolor",:id=>"doc_collaborator_display_#{folder_collection.id}" %>
+              <script>new Control.Modal($('doc_collaborator_display_<%=folder_collection.id %>'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            <% end %>
+          </span>
+        </div>
+      </div>
+      <% params[:type] = @type ? @type : params[:type]%>
+      <% params[:id] = folder_collection.id%>
+      <%@item = folder_collection%>
+      <!--<div id="<%#= "summary_comment_#{@item.id}" %>">
+        <%#=render :partial=>"properties/summary_comment_view"%>
+      </div>-->
+    </div>
+    <div id="summary_secondary_files">
+      <%=render :partial=>"properties/summary_secondary_files_display"%>
+    </div>
+  </div>
+</div>

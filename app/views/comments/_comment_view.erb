@@ -1,0 +1,62 @@
+<% item_collection = @item
+	find_comments = 'item_collection.comments_finder'
+%>
+
+<style type="text/css">
+  textarea{
+    clear: both;
+    display: block;
+    font-family: arial;
+    font-size: 1em;
+  }
+  .imgcol5{margin-top:6px;}
+
+    .fieldinput2{width:595px;}
+  </style>
+<!--  FIND THE CSS ON [ AMP_RF css file ] *   -->
+
+<% if item_collection %>
+  <%  if !(params[:show_all] || eval(find_comments).count < 9) %>
+    <h2><a id="cmt_titled" href="javascript:;" style="float: left; margin-top: 8px; color: #025B8D; font-size:12px;" onclick="all_cmts='&show_all=true';call_to_comment('<%= params[:id] %>','<%= params[:type] %>','');return false;"><b>View all comments</b></a></h2> <!-- (<%= item_collection.comments_finder.count %>)</a></h2> -->
+  <%  end %>
+  <div id="<%= item_collection.class == Document ? 'list_comments_file' : (item_collection.class.eql?(Folder) ? "list_comments_file" : (item_collection.document_id? ? 'list_comments_file' :  'list_comments_task'))%>">
+    <% if (params[:show_all] || eval(find_comments).count < 8)
+      length = eval(find_comments).count
+    else
+      length = 8
+    end
+  %>
+   <% eval(find_comments).last(length).each do |comment| %>
+      <div class="commentcontainer2" id="comment_view_<%= comment.id %>" onmouseover="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','visible');" onmouseout="jQuery('#comment_view_<%= comment.id %>_options').css('visibility','hidden');">
+        <div class="imgcol5"><img border="0" width="26" height="26" src="<%=display_image_for_user(comment.user.id)%>"/></div>
+        <div class="rowwrapper" id="edit_comment_<%= comment.id %>">
+          <div class="commentwrapper">
+            <div class="commentedrow" style="white-space:normal;width:652px;"><span style="color: #025B8D;font-weight: bold;"><% if current_user.id == comment.user_id %>You<% else %> <%= comment.user.user_name %> <% end %></span>&nbsp;
+              <span id="act_comment_<%= comment.id %>" class="commentcol2" style="float:none;"><%=h comment.comment %></span></div>
+            <div class="timercol"><%= comment.updated_at.strftime('%b %d, %Y at  %I:%M %p') %></div>
+            <div class="commenteditrow" id="comment_view_<%= comment.id %>_options" style="visibility: hidden;width:150px;" >
+              <% if current_user.id == comment.user_id %>
+                <div class="labell2"><a href="javascript:;" onclick="if(confirm('Are you sure to delete the comment?')){call_to_comment('<%= params[:id] %>','<%= params[:type] %><%= "&comment_id=#{comment.id}" %>&delete=true');} return false;"> Delete <img src="/images/del_icon_green.png" width="7" height="7" border="0" /></a></div>
+                <div class="labell2"><a href="javascript:;" onclick="edit_comment('<%= params[:id] %>','<%= params[:type] %>','<%= comment.id %>'); return false;">Edit <img src="/images/edit_icon.png"  width="8" height="8" border="0"/></a></div>
+              <%end%>
+            </div>
+          </div>
+        </div>
+      </div>
+    <%end%>
+  </div>
+  <div class="commentcontainer2" id="new_<%= "#{params[:type]}" %>">
+    <div class="imgcol5" style="margin-top:0px;"><img border="0" width="28" height="28" src="<%=display_image_for_user(current_user.id)%>"/></div>
+    <div class="commentwrapper2">
+      <textarea id="text_<%= "#{params[:type]}_#{params[:id]}" %>" class="expand25-300 fieldinput2" name="textfield"></textarea>
+      <div class="addbut">
+        <div class="addpropertyrow"><a href="javascript:;" onclick="if (/\S/.test(jQuery('#text_<%= "#{params[:type]}_#{params[:id]}" %>').val())){call_to_comment(<%= params[:id] %>,'<%= params[:type] %>&save=true')}else{alert('Please enter the comment')}return false;">Comment</a><span>&nbsp;</span></div>
+      </div>
+    </div>
+  </div>
+<% end %>
+<script>
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+</script>

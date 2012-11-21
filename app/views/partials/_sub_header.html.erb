@@ -1,0 +1,18 @@
+<%check_shared_documents = is_leasing_agent ? false : check_shared_documents%>
+<%if (all_properties.present? || check_shared_documents)%>
+  <%#if  (((controller_name == 'dashboard' && (action_name == 'financial_info' || action_name == "property_info" || (action_name == 'portfolio_commercial_leasing_info' || action_name == 'portfolio_multifamily_leasing_info' || action_name == 'property_commercial_leasing_info' || action_name == 'property_multifamily_leasing_info' || action_name == 'properties' || action_name == 'trends' ))) || (controller_name == 'users' &&  action_name == 'welcome')) && !is_leasing_agent)%>
+  		<%= render :partial=> "partials/dashboard_property_sub_header",:locals=>{:property_obj=>property_obj, :portfolio_obj=>portfolio_obj, :all_properties=>all_properties}%>
+  		<%#= render :partial=> "partials/dashboard_portfolio_sub_header"%>
+  <%#elsif (((controller_name == 'properties' ) && ( action_name == 'show' || action_name == 'show_folder_files' || action_name == 'loan_details')) || (controller_name == 'performance_review_property' && action_name == 'lease')  && !is_leasing_agent)%>
+    <%= render :partial=> "partials/financials_sub_header",:locals=>{:property_obj=>property_obj, :portfolio_obj=>portfolio_obj}%>
+
+    <%= render :partial=> "partials/lease_sub_header",:locals=>{:property_obj=>property_obj, :portfolio_obj=>portfolio_obj}%>
+
+    <%= render :partial=> "partials/files_sub_header",:locals=>{:property_obj=>property_obj, :portfolio_obj=>portfolio_obj}%>
+
+    <%= render :partial=> "partials/settings_sub_header",:locals=>{:property_obj=>property_obj, :portfolio_obj=>portfolio_obj}%>
+  <%#end%>
+<%elsif (!all_properties.present? && (is_leasing_agent || (!current_user.has_role?("Asset Manager") && !is_leasing_agent && !current_user.has_role?("Client Admin"))) && params[:from_session] != "true") || (controller_name =='collaboration_hub') || (controller_name == 'transaction') ||  (controller.action_name == "notify_admin") ||  (params[:no_properties])%>
+		<%= render :partial=> "partials/files_sub_header_for_shared_user"%>
+<%#end%>
+<%end%>

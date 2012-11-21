@@ -1,0 +1,33 @@
+if params[:from_performance_review] == "true"
+  page << "jQuery('#time_line_selector').show();"
+  page << "jQuery('.subheaderwarpper').show();"
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/capital_expenditures",:locals=>{:cap_exp_collection => @cap_exp,:note_collection => @note,
+:start_date => @start_date,:portfolio_collection=>@portfolio}
+elsif params[:from_performance_review] != "true"
+	if(params[:tl_period] == "4"  ||  params[:period] == "4") &&  ((params[:tl_month].nil? || params[:tl_month].blank?) )   
+    replace_time_line_selector(page)
+  else
+    page << "jQuery('#time_line_selector').show();"
+	end 
+  page << "jQuery('.subheaderwarpper').show();"
+  page << "jQuery('#monthyear').show();"
+  page.replace_html "portfolio_overview_property_graph", :partial => "/properties/capital_expenditures",:locals=>{:cap_exp_collection => @cap_exp,:note_collection => @note,
+:start_date => @start_date,:portfolio_collection=>@portfolio}
+if find_accounting_system_type(3,@note)
+      property_name = @note.try(:class).eql?(Portfolio) ? @note.try(:name) : @note.try(:property_name)
+    if @note && property_name.present?
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Maintenance Projects</div>');"
+    else
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Maintenance Projects</div>');"
+    end
+  page << "jQuery('#id_for_modify_threshold').hide();"
+  else
+    if @note && property_name.present?
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Capital Expenditures</div>');"
+    else
+    page << "jQuery('.executiveheadcol_for_title').html('<div class=\"executivecol_subrow\"><span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span>Capital Expenditures</div>');"
+    end
+   page << "jQuery('#id_for_modify_threshold').hide();"
+end
+  set_quarterly_msg(page) if params[:period] =="2" || params[:tl_period] =="2"  
+end

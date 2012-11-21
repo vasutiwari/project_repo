@@ -1,0 +1,35 @@
+<head>
+<style>
+body{
+	background-color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+</style>
+</head>
+<div class="lightbox_container2">
+  <div class="lightbox_threshold" style="width:727px;">
+    <div class="lightbox_headerow">
+      <div class="headerow_coll1"><img src="/images/add_collabaraters_icon.png" width="16" height="16" /> List Of Users</div>
+    </div>
+  <div class="lightbox_contentrow">
+<div class="collab_lightbox_contentrow" style="width:651px;padding-right:55px;height:164px;overflow-y:auto;overflow-x:hidden;">
+			<div class="add_users_collaboraterow">
+			<%unless @collaborators.empty?%>
+			  <%@collaborators.uniq.each do |collaborator|%>
+<div class='add_users_collaboratercol'  style="margin-left:13px;"  ><div class='add_users_imgcol'><img width='30' height='36' src='<%=display_image_for_user_add_collab(collaborator.id)%>'/></div><div class='collaboraterow'><div class='collaboratername'><span title='<%=(!collaborator.name.nil? and !collaborator.name.blank?) ?  collaborator.name : collaborator.email.split('@')[0]%>'><%=(!collaborator.name.nil? and !collaborator.name.blank?) ?  lengthy_word_simplification(collaborator.name,7,5) : lengthy_word_simplification(collaborator.email.split('@')[0],7,5)%></span>
+     </div><div class='collaborateremail'><%=collaborator.email%></div> </div></div>
+			  <%end%>
+			<%else%>
+			         <div class="headerow_coll1" style="padding-left:266px;width:440px;padding-top:62px;">  No Users</div>
+			<%end%>
+      </div>
+      </div>
+ </div>
+  <div class="butwrapper" style="padding-left:270px;height:20px;">
+	 <br/>
+    <div class="graybutton"><a href="#" onclick='Control.Modal.close();return false;'>Close</a><span>&nbsp;</span></div>
+  </div>
+  <a id="sbox-btn-close" onclick='Control.Modal.close();return false;' style="cursor: pointer;"></a>
+  <div class="bot"></div>
+</div>

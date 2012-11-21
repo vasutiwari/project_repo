@@ -1,0 +1,32 @@
+xml.graph(
+		:caption=>"Rent Distribution", 
+		:palette=>"2",
+		:showNames=>"1",
+		:showValues=>"1",
+		:limitsDecimalPrecision=>"1",
+		:PYAxisName=>"Monthly Rent",
+		:SYAxisName=>"Rent/SqFt",
+		:baseFontName=> "Calibri",
+		:divLineDecimalPrecision=>"0", 
+		:baseFontSize=> "11",
+		:decimalPrecision=>"2", 
+		:numberPrefix=>"$") {
+   @sdr.each do |i|
+				xml.categories(
+				){xml.category(:name =>"#{i.tenant_name}"){}
+				}	 
+	 end
+	 
+		xml.dataset("seriesname".to_sym=>"Monthly Rent", "color".to_sym=>"#afd8f8", :showValues=>"0"){
+		 @sdr.each do |j|
+					 xml.set(:value =>"#{j.monthly_rent}"){}
+				end
+		}
+
+		xml.dataset("seriesname".to_sym=>"Rent/SqFt", "color".to_sym=>"#01800a", :lineThickness=>"3", :parentYAxis=>"S"){
+		 @sdr.each do |l|
+					 xml.set(:value =>"#{l.rent_sf}"){}
+				end
+		}
+		
+}

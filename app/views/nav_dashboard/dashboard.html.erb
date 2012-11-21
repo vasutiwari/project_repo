@@ -1,0 +1,111 @@
+<%if params[:property_id]%>
+ <%@note=RealEstateProperty.find(params[:property_id])%>
+ <%leasing_type=@note.leasing_type%>
+ <%elsif params[:portfolio_id]%>
+ <%@note=Portfolio.find(params[:portfolio_id])%>
+ <%@real_estate_property_records=@note.real_estate_properties.uniq%>
+ <%@real_estate_property_ids=@real_estate_property_records.map(&:id)%>
+ <%leasing_type=@note.leasing_type%>
+ <%end%>
+<div class="height80">
+         	<div class="box2 floatL">
+         		<div class="marginRB10 floatL"><img src="<%= user_profile_nav_image(current_user.id)%>" height=61 width=61 alt="" title="" /></div>
+								<%if leasing_type == "Multifamily" && params[:property_id]%>
+            		<h3 style="padding-top:20px">Welcome back <%=current_user.name%>!</h3>
+								<%else%>
+								<h3>Welcome back <%=current_user.name%>!</h3>
+								<%end%>
+								<%if leasing_type == "Commercial"%>
+								<%if params[:property_id]%>
+                    <h4>You have <%=alerts_nav_dashboard%> upcoming <a href="/lease/<%=params[:portfolio_id]%>/alert/<%=params[:property_id]%>/property_alert"> alerts</a> up to <%=Date.today.next_month.strftime("%B")%></h4>
+										<%else%>
+										          <h4>You have <%=alerts_nav_dashboard%> upcoming <a id="portfolio_alert" style="cursor:pointer;"> alerts</a> up to <%=Date.today.next_month.strftime("%B")%></h4>
+										<%end%>
+								<%elsif leasing_type == "Multifamily"%>
+								<%if !params[:property_id]%>
+								<h4>You have <%=(@real_estate_property_records.present? && @real_estate_property_records.count > 1) ? "#{@real_estate_property_records.count} Properties" : (@real_estate_property_records.present? && @real_estate_property_records.count == 1) ? "1 Property" : "0 Property"%></h4>
+								<%end%>
+								<%end%>
+         	</div>
+         	<div class="box2 floatR">
+         		<h1>Recent Updates</h1>
+						<% events_count = (@events.present? && @events.count > 8) ?  @events.count  : "8"%>
+                <h4>You have <a href="#nav_updates"><%=events_count%> recent updates</a></h4>
+         	</div>
+         </div>
+         <div class="marginT10">
+				 <div class="width478" id="occupancy_id">
+				     	<div class="occupbox">
+         			
+                </div>
+                <div class="totalsfbox">
+                	<div class="width288" align="center">
+                    	<img src="/images/loading_amp.gif" class="marginT82"/>
+                    </div>
+                </div>
+            </div> 
+				 </div>
+				<div id="expiration_graph">
+				   <div class="graph floatR" align="center"> <img src="/images/loading_amp.gif" class="marginT92"/></div>
+			 <%#=render :partial =>"graph"%>
+			 </div>
+					
+         <div class="clear"></div>
+        <div class="supretar">&nbsp;</div>
+				<div class="sliderbox" id="sliderbox_loading" style="display:none;">
+	 <div class="height40">
+		<span class="fontgry22 floatL">Rank by</span>
+			
+	 </div>
+		<div class=" width472 floatL">
+<div class="clearfloat"></div>		
+					<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10"/>
+					</div>
+	 </div>
+			<div class="performbox floatR">
+			<div class="clearfloat"></div>
+			<div align="center">
+			<img src="/images/loading_amp.gif" class="marginT10 bdrnone"/>
+			</div>
+			
+			</div>
+</div>
+				<%if !params[:property_id].present?%>
+						<%portfolio = find_leasing_type_of_portfolio%>
+						<%if portfolio && portfolio.try(:leasing_type).eql?("Commercial")%>
+							<div id="commercial_comparison"><%#=render :partial =>"commercial_comparison"%></div>
+						<%elsif portfolio && portfolio.try(:leasing_type).eql?("Multifamily")%>
+							<div id="multifamily_comparison"><%#=render :partial =>"multifamily_comparison"%></div>
+						<%end%>
+						<div class="clear"></div>
+            <div class="supretar">&nbsp;</div>
+				<%end%>
+        <div class="updatbox floatL" id="nav_updates"><h1>Updates</h1>
+				<div  id="updatbox">
+				<div align="center">
+         		<img src="/images/loading_amp.gif" class="marginT155"/>
+				</div>
+        <%#=render :partial =>"updates"%>
+				</div>
+				</div>
+        <%=render :partial =>"news"%>
+        <div class="clearfloat"></div>
+			<%if params[:property_id]%>
+				<script>occupancy_find_property('<%=leasing_type%>','<%=params[:property_id]%>','<%=params[:portfolio_id]%>')</script>				
+				<%else%>
+					<script>occupancy_find_portfolio('<%=leasing_type%>','<%=params[:portfolio_id]%>')</script>
+					<%if leasing_type == "Commercial"%>
+					<script>comparison_graph_commercial('<%=params[:portfolio_id]%>')</script>
+					<%else%>
+					<script>comparison_graph_multifamily('<%=params[:portfolio_id]%>')</script>
+					<%end%>
+				<%end%>
+				<script>expiration_graph('<%=params[:property_id]%>','<%=params[:portfolio_id]%>')</script>
+				<script>call_updates_nav('<%=params[:property_id]%>','<%=params[:portfolio_id]%>')</script>
+				
+<script>
+jQuery('#portfolio_alert').click(function() {
+alert("Please select a property to see alerts");
+});
+</script>

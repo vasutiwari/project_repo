@@ -1,0 +1,344 @@
+<script>
+  function change_timeline_highlight(id)
+  {
+    document.getElementById('time_line_highlight_'+id).className = "active"
+  }
+  partial_page="leases";
+  active_call="performance_review";
+</script>
+<style>
+.cashtablecol4{
+text-align:right;
+}
+</style>
+<% exp_month_ytd , exp_ytd_check = set_local_variables_value(params , month_collection , {:option => "lease_performance"}) %>
+  <% unless @pdf %>
+<div class="pdf_link_financial_end" style="right: 47px;top:111px;">  <%= link_to "Print PDF",{:controller=>"performance_review_property",:action=>"export_pdf",:id=>note_collection.id,:start_date=>params[:start_date]},:id=>"summary_link_pdf" %></div>
+     <script>new Control.Modal($('summary_link_pdf'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container'});</script>
+  <% end %>
+<%if !note_collection.nil? && !wres_leases.nil? %>
+
+  <div class="tableheaderow assetview">
+
+    <div class="cashtablecol1" style="text-align:left;left:11px;">&nbsp;</div>
+    <div class="cashtablecol3">Units</div>
+    <div class="cashtablecol3">%</div>
+    <div class="cashtablecol4">SqFt</div>
+    <div class="tablecol5" id="financexp" >Explanation</div>
+  </div>
+
+
+  <div class="cashtablerow">
+    <div class="tablecontentrow">
+
+      <div class="cashtablecol1">&nbsp;&nbsp;&nbsp;Current Vacancy</div>
+      <div class="cashtablecol3"><%= wres_leases[:current_vacancy][:units]%></div>
+      <div class="cashtablecol3"><%= wres_leases[:current_vacancy][:percent]%>&nbsp;</div>
+      <div class="cashtablecol4" >&nbsp;&nbsp;&nbsp;<%= number_with_delimiter(wres_leases[:current_vacancy][:sqft])%>&nbsp;</div>
+      <% if explanation == true %>
+        <%  lease_currently_vacant_leases_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'currently_vacant_leases') %>
+        <% if lease_currently_vacant_leases_comment.nil?  %>
+          <div onclick="show_explanation('currently_vacant_leases');" onmouseover="document.getElementById('non_currently_vacant_leases').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_currently_vacant_leases').style.backgroundColor='';" class="tablecol5" >
+            <span id="non_currently_vacant_leases" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+      <%#= truncate_extra_chars_for_expl(lease_currently_vacant_leases_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="currently_vacant_leases_more">
+              <!--
+      <%# if !(lease_currently_vacant_leases_comment.nil? || lease_currently_vacant_leases_comment.blank?)%>
+                      <a href="javascript:;">More</a>
+      <%# end %>
+              -->
+            </div>
+            <div id="currently_vacant_leases_text"  style="display:none" >
+              <textarea id="currently_vacant_leases_box" name="currently_vacant_leases_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('currently_vacant_leases');save_lease_exp(this.value,<%= note_collection.id %>,<%= exp_month_ytd %>,<%= year_collection %>,'currently_vacant_leases','<%= request.request_uri %>')"><%= lease_currently_vacant_leases_comment %></textarea>
+            </div>
+          </div>
+        <% else %>
+          <% explanation_doc_id = "" %>
+          <div  class="tablecol5">
+            <span id="non_currently_vacant_leases" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+              <%= truncate_extra_chars_for_expl(lease_currently_vacant_leases_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="currently_vacant_leases_more">
+              <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Current Vacancy'+'&units_explanation='+"#{wres_leases[:current_vacancy][:units]}"+'&sqft_explanation='+"#{wres_leases[:current_vacancy][:sqft]}"+'&text_explanation='+URI.encode(lease_currently_vacant_leases_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:current_vacancy][:percent])}"+'&id_explanation='+lease_currently_vacant_leases_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_currently_vacant_leases_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="currently_vacant_leases_task" >More</a>
+              <script> new Control.Modal($('currently_vacant_leases_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+
+    <div class="tablecontentrow">
+      <div class="cashtablecol1">-&nbsp; Vacant Leased</div>
+      <div class="cashtablecol3"><%= wres_leases[:vacant_leased][:units]%></div>
+      <div class="cashtablecol3"><%= wres_leases[:vacant_leased][:percent]%>&nbsp;</div>
+      <div class="cashtablecol4">&nbsp;&nbsp;&nbsp;<%= number_with_delimiter(wres_leases[:vacant_leased][:sqft])%>&nbsp;</div>
+      <% if explanation == true %>
+        <%  lease_vacant_leased_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'vacant_leased') %>
+        <% if lease_vacant_leased_comment.nil?  %>
+          <div onclick="show_explanation('vacant_leased');" onmouseover="document.getElementById('non_vacant_leased').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_vacant_leased').style.backgroundColor='';" class="tablecol5" >
+            <span id="non_vacant_leased" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+      <%#= truncate_extra_chars_for_expl(lease_vacant_leased_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="vacant_leased_more">
+              <!--
+      <%# if !(lease_vacant_leased_comment.nil? || lease_vacant_leased_comment.blank?)%>
+                      <a href="javascript:;">More</a>
+      <%# end %>
+              -->
+            </div>
+            <div id="vacant_leased_text"  style="display:none" >
+              <textarea id="vacant_leased_box" name="vacant_leased_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('vacant_leased');save_lease_exp(this.value,<%= note_collection.id %>,<%= exp_month_ytd %>,<%= year_collection %>,'vacant_leased','<%= request.request_uri %>')"><%= lease_vacant_leased_comment %></textarea>
+            </div>
+          </div>
+        <% else %>
+          <% explanation_doc_id = "" %>
+          <div  class="tablecol5">
+            <span id="non_vacant_leased" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+              <%= truncate_extra_chars_for_expl(lease_vacant_leased_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="vacant_leased_more">
+              <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Vacant Leased'+'&units_explanation='+"#{wres_leases[:vacant_leased][:units]}"+'&sqft_explanation='+"#{wres_leases[:vacant_leased][:sqft]}"+'&text_explanation='+URI.encode(lease_vacant_leased_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:vacant_leased][:percent])}"+'&id_explanation='+lease_vacant_leased_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_vacant_leased_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="vacant_leased_task" >More</a>
+              <script> new Control.Modal($('vacant_leased_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+
+    <div class="tablecontentrow">
+      <div class="cashtablecol1">+&nbsp; Occupied on Notice</div>
+      <div class="cashtablecol3"><%= wres_leases[:occupied_on_notice][:units]%></div>
+      <div class="cashtablecol3"><%= wres_leases[:occupied_on_notice][:percent]%>&nbsp;</div>
+      <div class="cashtablecol4">&nbsp;&nbsp;&nbsp;<%= number_with_delimiter(wres_leases[:occupied_on_notice][:sqft])%>&nbsp;</div>
+        <% if explanation == true %>
+          <%  lease_occupied_on_notice_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'occupied_on_notice') %>
+          <% if lease_occupied_on_notice_comment.nil?  %>
+            <div onclick="show_explanation('occupied_on_notice');" onmouseover="document.getElementById('non_occupied_on_notice').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_occupied_on_notice').style.backgroundColor='';" class="tablecol5" >
+              <span id="non_occupied_on_notice" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+        <%#= truncate_extra_chars_for_expl(lease_occupied_on_notice_comment.explanation,75) %>&nbsp;
+              </span>
+              <div class="more" id="occupied_on_notice_more">
+                <!--
+        <%# if !(lease_occupied_on_notice_comment.nil? || lease_occupied_on_notice_comment.blank?)%>
+                        <a href="javascript:;">More</a>
+        <%# end %>
+                -->
+              </div>
+              <div id="occupied_on_notice_text"  style="display:none" >
+                <textarea id="occupied_on_notice_box" name="occupied_on_notice_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('occupied_on_notice');save_lease_exp(this.value,<%= note_collection.id %>,<%= exp_month_ytd %>,<%= year_collection %>,'occupied_on_notice','<%= request.request_uri %>')"><%= lease_occupied_on_notice_comment %></textarea>
+              </div>
+            </div>
+          <% else %>
+            <% explanation_doc_id = "" %>
+            <div  class="tablecol5">
+              <span id="non_occupied_on_notice" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+                <%= truncate_extra_chars_for_expl(lease_occupied_on_notice_comment.explanation,75) %>&nbsp;
+              </span>
+              <div class="more" id="occupied_on_notice_more">
+                <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Occupied on Notice'+'&units_explanation='+"#{wres_leases[:occupied_on_notice][:units]}"+'&sqft_explanation='+"#{wres_leases[:occupied_on_notice][:sqft]}"+'&text_explanation='+URI.encode(lease_occupied_on_notice_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:occupied_on_notice][:percent])}"+'&id_explanation='+lease_occupied_on_notice_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_occupied_on_notice_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="occupied_on_notice_task" >More</a>
+                <script> new Control.Modal($('occupied_on_notice_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+              </div>
+            </div>
+        <% end %>
+      <% end %>
+    </div>
+
+
+    <div class="tablecontentrow2">
+      <div class="cashtablecol1">-&nbsp; Occupied Preleased</div>
+      <div class="cashtablecol3"><%= wres_leases[:occupied_preleased][:units]%></div>
+      <div class="cashtablecol3"><%= wres_leases[:occupied_preleased][:percent]%>&nbsp;</div>
+      <div class="cashtablecol4">&nbsp;&nbsp;&nbsp;<%= number_with_delimiter(wres_leases[:occupied_preleased][:sqft])%>&nbsp;</div>
+      <% if explanation == true %>
+        <%  lease_occupied_preleased_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'occupied_preleased') %>
+        <% if lease_occupied_preleased_comment.nil?  %>
+          <div onclick="show_explanation('occupied_preleased');" onmouseover="document.getElementById('non_occupied_preleased').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_occupied_preleased').style.backgroundColor='';" class="tablecol5" >
+            <span id="non_occupied_preleased" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+      <%#= truncate_extra_chars_for_expl(lease_occupied_preleased_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="occupied_preleased_more">
+              <!--
+      <%# if !(lease_occupied_preleased_comment.nil? || lease_occupied_preleased_comment.blank?)%>
+                      <a href="javascript:;">More</a>
+      <%# end %>
+              -->
+            </div>
+            <div id="occupied_preleased_text"  style="display:none" >
+              <textarea id="occupied_preleased_box" name="occupied_preleased_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('occupied_preleased');save_lease_exp(this.value,<%= note_collection.id %>,<%= exp_month_ytd %>,<%= year_collection %>,'occupied_preleased','<%= request.request_uri %>')"><%= lease_occupied_preleased_comment %></textarea>
+            </div>
+          </div>
+        <% else %>
+          <% explanation_doc_id = "" %>
+          <div  class="tablecol5">
+            <span id="non_occupied_preleased" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+              <%= truncate_extra_chars_for_expl(lease_occupied_preleased_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="occupied_preleased_more">
+              <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Occupied PreLeased'+'&units_explanation='+"#{wres_leases[:occupied_preleased][:units]}"+'&sqft_explanation='+"#{wres_leases[:occupied_preleased][:sqft]}"+'&text_explanation='+URI.encode(lease_occupied_preleased_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:occupied_preleased][:percent])}"+'&id_explanation='+lease_occupied_preleased_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_occupied_preleased_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="occupied_preleased_task" >More</a>
+              <script> new Control.Modal($('occupied_preleased_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+
+    <div class="cashtablegreyrow">
+      <div class="cashtablecol1">=&nbsp; Net Units Avail</div>
+      <div class="cashtablecol3"><b><%= wres_leases[:net_exposure_to_vacancy][:units]%></b></div>
+      <div class="cashtablecol3"><b><%= wres_leases[:net_exposure_to_vacancy][:percent]%>&nbsp;</b></div>
+      <div class="cashtablecol4">&nbsp;&nbsp;&nbsp;<b><%= number_with_delimiter(wres_leases[:net_exposure_to_vacancy][:sqft])%>&nbsp;</b></div>
+      <% if explanation == true %>
+        <%  lease_net_exposure_to_vacancy_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'net_exposure_to_vacancy') %>
+        <% if lease_net_exposure_to_vacancy_comment.nil?  %>
+          <div onclick="show_explanation('net_exposure_to_vacancy');" onmouseover="document.getElementById('non_net_exposure_to_vacancy').style.backgroundColor='yellow';" onmouseout="document.getElementById('non_net_exposure_to_vacancy').style.backgroundColor='';" class="tablecol5" >
+            <span id="non_net_exposure_to_vacancy" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+      <%#= truncate_extra_chars_for_expl(lease_net_exposure_to_vacancy_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="net_exposure_to_vacancy_more">
+              <!--
+      <%# if !(lease_net_exposure_to_vacancy_comment.nil? || lease_net_exposure_to_vacancy_comment.blank?)%>
+                      <a href="javascript:;">More</a>
+      <%# end %>
+              -->
+            </div>
+            <div id="net_exposure_to_vacancy_text"  style="display:none" >
+              <textarea id="net_exposure_to_vacancy_box" name="net_exposure_to_vacancy_box" class="expand25-300 inline_editing_tablecol5" size="5" onblur="text_msg_display('net_exposure_to_vacancy');save_lease_exp(this.value,<%= note_collection.id %>,<%= exp_month_ytd %>,<%= year_collection %>,'net_exposure_to_vacancy','<%= request.request_uri %>')"><%= lease_net_exposure_to_vacancy_comment %></textarea>
+            </div>
+          </div>
+        <% else %>
+          <% explanation_doc_id = "" %>
+          <div  class="tablecol5">
+            <span id="non_net_exposure_to_vacancy" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+              <%= truncate_extra_chars_for_expl(lease_net_exposure_to_vacancy_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="net_exposure_to_vacancy_more">
+              <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Net Explosure to Vacancy'+'&units_explanation='+"#{wres_leases[:net_exposure_to_vacancy][:units]}"+'&sqft_explanation='+"#{wres_leases[:net_exposure_to_vacancy][:sqft]}"+'&text_explanation='+URI.encode(lease_net_exposure_to_vacancy_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:net_exposure_to_vacancy][:percent])}"+'&id_explanation='+lease_net_exposure_to_vacancy_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_net_exposure_to_vacancy_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="net_exposure_to_vacancy_task" >More</a>
+              <script> new Control.Modal($('net_exposure_to_vacancy_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="tablecontentrow">
+      <div class="cashtablecol1">&nbsp;Total Rentable Space</div>
+      <div class="cashtablecol3"><b><%= wres_leases[:total_rentable_space][:units]%> </b></div>
+      <div class="cashtablecol3"><b>&nbsp;</b></div>
+      <div class="cashtablecol4">&nbsp;&nbsp;&nbsp;<b><%= number_with_delimiter(wres_leases[:total_rentable_space][:sqft])%>&nbsp;</b></div>
+      <% if explanation == true %>
+        <%  lease_net_exposure_to_vacancy_comment = lease_exp(note_collection.id,exp_month_ytd,year_collection,'total_rentable_space') %>
+        <% if lease_net_exposure_to_vacancy_comment.nil?  %>
+          <div  class="tablecol5" >
+            <span id="non_net_exposure_to_vacancy" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+      <%#= truncate_extra_chars_for_expl(lease_net_exposure_to_vacancy_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="net_exposure_to_vacancy_more">
+              <!--
+      <%# if !(lease_net_exposure_to_vacancy_comment.nil? || lease_net_exposure_to_vacancy_comment.blank?)%>
+                      <a href="javascript:;">More</a>
+      <%# end %>
+              -->
+            </div>
+          </div>
+        <% else %>
+          <% explanation_doc_id = "" %>
+          <div  class="tablecol5">
+            <span id="non_net_exposure_to_vacancy" style="padding-top:1px;margin-left:5px;padding-left:5px;width:100%;border:0px solid red;display:block;">
+              <%= truncate_extra_chars_for_expl(lease_net_exposure_to_vacancy_comment.explanation,75) %>&nbsp;
+            </span>
+            <div class="more" id="net_exposure_to_vacancy_more">
+              <a href = "<%= '/tasks/check_variance_task?doc_id='+explanation_doc_id.to_s+'&title_explanation='+'Total Rentable Space'+'&units_explanation='+"#{wres_leases[:net_exposure_to_vacancy][:units]}"+'&sqft_explanation='+"#{wres_leases[:net_exposure_to_vacancy][:sqft]}"+'&text_explanation='+URI.encode(lease_net_exposure_to_vacancy_comment.explanation.to_s)+'&var_per_explanation='+"#{(wres_leases[:net_exposure_to_vacancy][:percent])}"+'&id_explanation='+lease_net_exposure_to_vacancy_comment.id.to_s+'&month_explanation='+exp_month_ytd.to_s+'&year_explanation='+exp_ytd_check.to_s+'&year_value='+"#{year_collection}"+'&user_id_explanation='+"#{lease_net_exposure_to_vacancy_comment.user_id}"+'&performance_review_page='+'wres_leases'+'&performance_review_path='+request.request_uri.gsub('&','and')+'&from_performance_review='+'true'  %>"  id="net_exposure_to_vacancy_task" >More</a>
+              <script> new Control.Modal($('total_rentable_space_task'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% else %><% req_actual_folder = fetch_excels_folder(note_collection.id) %><% req_excel_uploads_folder = fetch_excel_uploads_folder(note_collection.id) %>
+  <div class="rhscontentrow rhscontentrowtime">
+    <% start_date = (!start_date.nil? ? start_date : Time.now) %>
+    <% if note_collection.class == RealEstateProperty %>
+      <% note_name = note_collection.property_name %>
+    <% else %>
+      <% note_name = note_collection.note_id %>
+    <% end %>
+    <% if (note_collection.user_id == current_user.id || !(find_property_shared(note_collection).nil? || find_property_shared(note_collection).blank?)) %>
+      <script type="text/javascript">
+        var month_det = ["","Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        val_det =""
+        if (active_sub_month == ""){
+          if(active_period == 4)
+            val_det = "Year to date - "+ new Date().getFullYear()
+          else if(active_period == 5)
+            val_det = month_det[month_arr[new Date().getMonth()]] +" - "+ (month_arr[new Date().getMonth()] == 12 ? (new Date().getFullYear() -1) : new Date().getFullYear())
+          else if(active_period == 6)
+            val_det = "Last year"+ active_sub_month+" - "+ (new Date().getFullYear()-1)
+        }
+        else
+          val_det = month_det[parseInt(active_sub_month, 10)]+" - "+ active_sub_year
+      </script>
+      <span style="font-size:13px;"><%if remote_property(note_collection.accounting_system_type_id) == true%><span style="color: black; padding-left: 230px;">Data Unavailable</span><%else%>Data Unavailable. Please add Lease information at
+
+			<!-- <a href="javascript:;" onclick="show_hide_asset_docs1_real_estate(<%#=note_collection.portfolio.id %>,'<%#= req_excel_uploads_folder %>','hide_del');return false;">'Excel Uploads'</a> -->
+
+			<%if session[:portfolio_id].present? || note_collection.try(:class).eql?(Portfolio)%>
+				<a href="/files/<%=note_collection.id %>?folder_id=<%=Folder.folder_of_a_portfolio(note_collection.id).try(:id)%>&hide_var=true">'Excel Uploads'</a>
+				<%else%>
+				<a href="/files/<%=note_collection.portfolio_id %>/<%=note_collection.id %>">'Excel Uploads'</a>
+				<%end%>
+
+			<%end%>.</span>
+    <% else %>
+      <span style="color: black;">Seller has not updated CASH FLOW and/or RENT ROLL data</span>
+    <% end %>
+  </div>
+<% end %>
+<script>
+<% navigation_start_position = (params[:period] && params[:period] == "6") ||  (params[:tl_period] && params[:tl_period] == "6") ? 1 : navigation_start_position %>
+  jQuery('#mycarousel_horizontal').jcarousel({
+    vertical: false,
+    scroll: 12,
+    visible: 12,
+    animation: "medium",
+    start: <%= !navigation_start_position.nil? ? navigation_start_position : 6 %>
+  });
+  jQuery('#message').fadeOut(8000);
+  jQuery('#yearforecast').hide();
+  jQuery('#yrForecast').hide();
+  jQuery('#quarterly').show();
+	jQuery('#weekly_display').hide();
+
+  function dehighlight_month(date_array){
+    for(i = 0; i < (date_array); i ++)
+    {
+      document.getElementById('time_line_highlight_'+i).className = 'deactive';
+    }
+  }
+
+  function dehighlight(){
+<% for i in 0..12 %>
+    if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+		{
+      document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+		 }
+     <% end %>
+  }
+
+  function timeline_on_over(id){
+    document.getElementById('show_time_hover_'+id).style.display="block";
+  }
+  function timeline_on_out(id){
+    document.getElementById('show_time_hover_'+id).style.display="none";
+  }
+
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander(25,35);
+  });// JavaScript Document
+  //changeExplanantionText(last_renderer,active_sub_month)
+</script>

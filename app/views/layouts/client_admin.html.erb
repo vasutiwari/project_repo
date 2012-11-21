@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <%if params[:user] == 'false'%>
+      <title>&nbsp;AMP - Simplified Intelligence</title>
+    <%else%>
+      <title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+    <%end%>
+
+    <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+    <script type="text/javascript" src="/javascripts/client_admin.js"></script>
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "control.modal" %>
+    <link href="/stylesheets/jquery-ui.css" rel="stylesheet" type="text/css" media="all" />
+<%#= stylesheet_link_tag "screen_v1.0", :media=>"all" %>
+    <%= stylesheet_link_tag "client_admin", :media=>"all" %>
+    <%= stylesheet_link_tag "client_admin_rf", :media=>"all"  %>
+    <!-- Included for properties tab design issue occured-->
+    <%= stylesheet_link_tag 'ampnew', :media=>'all' %>
+    <%= stylesheet_link_tag 'amp_rf', :media=>'all' %>
+    <!-- Included for properties tab design issue occured-->
+    <%= javascript_include_tag :defaults %>
+    <%= csrf_meta_tag %>
+    <script type="text/javascript" src="/javascripts/common.js"></script>
+     <link type="text/css" href="/ampchat/cometchatcss.php" rel="stylesheet" charset="utf-8"/>
+      <script type="text/javascript" src="/ampchat/cometchatjs.php" charset="utf-8"></script>
+  </head>
+  <body>
+    <!--Loading Msg Start-->
+    <div id="msg_writter" class="msgWritter">
+      <div id="success_msg" class="loadingmsg"><div class="msgTxt"><img width="83" height="15" border="0" align="absmiddle" style="padding:0; margin:0;" src="/images/loading_amp.gif"/>&nbsp;&nbsp;<strong>Loading...</strong></div></div>
+    </div>
+    <div class="container">
+      <div class="header">
+        <div class="acInfo">
+				  <span id="span_id" style="display:none;"><a href="http://localhost:3000/" style="margin-left: 0px !important;"><img  src="/images/amplogo_small.png" border="0" class="amplogoM5" style="margin-bottom:-3px;"/></a> |</span>
+          <span style="margin-left: 7px !important;"><%= current_user.email %></span>|
+
+          <%
+          if current_user && current_user.last_visited_url.present?
+            user_console_url = current_user.last_visited_url
+          else
+            real_props = RealEstateProperty.find_owned_and_shared_properties_of_a_user(current_user.id,prop_folder=true)
+            if real_props.present?
+              last_portfolio, first_property = Portfolio.last_created_portfolio_of_a_user(current_user)
+              if last_portfolio.present? && first_property.present?
+                user_console_url = "/dashboard/#{last_portfolio.id}/financial_info?property_id=#{first_property.id}"
+              else
+                user_console_url = notify_admin_path(:from_session=> true)
+              end
+            else
+              user_console_url = notify_admin_path(:from_session=> true)
+            end
+          end
+        %>
+          <a href="<%=user_console_url%>" class="highlightacInfo">
+            <span id="current_user_console">Switch to User Console</span>
+          </a>
+          |
+          <a href="<%= logout_path %>">Logout</a>
+        </div>
+        <div class="logo">
+          <%check_logo_from_public = "false"%>
+          <%if current_user && current_user.logo_image && current_user.logo_image.full_filename%>
+            <%check_logo_from_public = FileTest.exists?("#{current_user.logo_image.full_filename}") ? "true" : "false" %>
+            <%if check_logo_from_public.eql?('true')%>
+              <% check_user_logo = current_user.logo_image.nil? %>
+              <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" height="35" width="104" border="0" src="<%= check_user_logo ? ((find_logo_extension.nil? || !FileTest.exists?("#{find_logo_extension.public_filename}")) ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+            <%else%>
+              <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" src="/images/amp-logo.png" height="35" width="104" border="0" /></a>
+            <%end%>						
+						<%check_logo_from_public = "false"%>
+					<%elsif current_user && current_user.client_logo_image && current_user.client_logo_image.full_filename%>
+					<%check_logo_from_public = FileTest.exists?("#{current_user.client_logo_image.full_filename}") ? "true" : "false" %>
+					<%if check_logo_from_public.eql?('true')%>
+							<% check_user_logo = current_user.client_logo_image.nil? %>
+						<a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" height="35" width="104" border="0" src="<%= check_user_logo ? (find_logo_extension.nil? ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.client_logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+				<%else%>
+						<a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" src="/images/amp-logo.png" height="35" width="104" border="0" /></a>
+				<%end%>
+						
+          <%else%>
+            <% check_user_logo = current_user.logo_image.nil? %>
+            <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" height="35" width="104" border="0" src="<%= check_user_logo ? ((find_logo_extension.nil? || !FileTest.exists?("#{find_logo_extension.public_filename}")) ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+          <%end%>
+        </div>
+        <div class="navpostion">
+          <div class="nav">
+            <%user_id=current_user.id%>
+            <div>
+              <a href="/client_admin/<%=user_id%>/properties" class='<%=params[:controller]=="client_admin/properties" ? "selected" : ""%>           loader_event'>Properties</a>
+              <a href="/client_admin/<%=user_id%>/users" class='<%=params[:controller]=="client_admin/users" ? "selected" : ""%> loader_event'>Users</a>
+              <a href="/client_admin/<%=user_id%>/portfolios" class='<%=params[:controller]=="client_admin/portfolios" ? "selected" : ""%>            loader_event'>Portfolios</a>
+              <a href="/client_admin/<%=user_id%>/templates" class='<%=params[:controller]=="client_admin/templates" ? "selected" : ""%>           loader_event'>File</a>
+											<%if current_user.try(:client).try(:is_financials_required)%>
+              <a href="/client_admin/<%=user_id%>/accounting" class='<%=params[:controller]=="client_admin/accounting" ? "selected" : ""%>            loader_event'>Accounting</a>
+							<%end%>
+              <a href="/client_admin/<%= user_id %>/company/<%= current_user.try(:client_id) %>/edit" class='<%=params[:controller]=="client_admin/company" ? "selected" : ""%> loader_event'>Company</a>
+              <a href="/client_admin/<%= user_id %>/settings/<%= current_user.try(:client_id) %>/edit" class='<%=params[:controller]=="client_admin/settings" ? "selected" : ""%> loader_event'>App Settings</a>
+            </div>
+          </div>
+          <div class="megaDdContainer">
+            <div class="headertitle">
+              <h3>Admin Console</h3>
+              </div>
+          </div>
+		 </div>
+		</div>
+     <div class="clearfloat">
+      </div>
+      <div class="content">
+        <%= yield %>
+        <div class="clearfloat">
+        </div>
+        <div class="footer">
+          <div class="footer-nav fltlft">
+            © 2011<a href="">AMP Technologies</a>
+            | <a href="/client_admin/<%=current_user.id%>/properties">Home</a>
+            | <a href="http://localhost:3000/request_demo/" target="_blank" class="boxed" rel="{handler:'iframe',size:{x:760,y:300},iframePreload:true}">Contact Us</a>
+          </div>
+          <div class="footer-ssl fltrt">
+            <img src="/images/ssl.png" width="99" height="40" align="left" />&nbsp;&nbsp;<img src="/images/powered-by-logo.png" width="83" height="44" align="right" />
+          </div>
+        </div>
+        <div class="clearfloat">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  //To hide the loader after page load
+  jQuery(window).load(function() {
+    load_completer();
+    //~ jQuery("a[href]").addClass("loader_event");
+    jQuery(".loader_event").click(function() {
+      load_writter();
+    });
+  });
+  function load_writter(){
+    jQuery('#success_msg').html("<div style='float:left; font:11px/14px Arial, Helvetica, sans-serif; '><img src='/images/loading_amp.gif' height='15' width='83' border='0' align='absmiddle' style='padding:0; margin:0;' />&nbsp;&nbsp;<strong>Loading...</strong></div>");
+    //jQuery('#msg_writter').css('background','none');
+    jQuery('#msg_writter').show();
+  }
+
+  function load_completer() {
+    jQuery('#msg_writter').fadeOut(1000);
+  }
+
+  function flash_writter(msg){
+    jQuery('#success_msg').html(msg);
+    jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+    jQuery('#msg_writter').show();
+    jQuery('#msg_writter').fadeOut(10000);
+    msg_t = setTimeout('flash_completer();', 5000);
+  }
+
+  function getAllParent(property_type_name)
+  {
+
+      new Ajax.Request("/client_admin/templates/get_template?pname="+property_type_name,{
+          //$.ajax({
+          // url:"/super_admin_templates/get_template?pname="+property_type_name,
+          method:"GET",
+
+          asynchronous:true,
+
+          // contentType: "application/json; charset=utf-8",
+          //dataType: "application/json",
+          onComplete:function(request){
+              load_completer();
+          },
+          onLoading: function(request){
+
+              load_writter();
+          },
+
+
+          onSuccess:function(data){
+
+              //$("#super_admin_template_parent_id").html(data);
+              //var element = jQuery("#super_admin_template_id option").find();
+              //alert(element)
+              //element.options[0] = null;
+              //alert(data)
+              // $("#super_admin_template_parent_id").val(data.parent_id);
+              //$.each(data.size(), function(i, data){
+              //alert("praveen")
+              //var opt = $("<option>data.parent_id</option>");
+              //opt.text(value.parent_id);
+              // $("#super_admin_template_id").append(opt);
+
+              //  })
+          },
+          error:      function() {
+              alert("Ajax Error !");
+          }
+
+      });
+  }
+  function confirmSubmit()
+  {
+    var agree=confirm("<%=FLASH_MESSAGES['client_admin']['105'] %>");
+    if (agree)
+      return true ;
+    else
+      return false ;
+  }
+
+	jQuery(document).ready(function()
+	{
+	enable_disable_amp_logo();
+	}
+	);
+
+</script>
+
+

@@ -1,0 +1,33 @@
+<%= form_for(@super_admin_template) do |f| %>
+  <% if @super_admin_template.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@super_admin_template.errors.count, "error") %> prohibited this super_admin_template from being saved:</h2>
+
+      <ul>
+      <% @super_admin_template.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :folder_name %><br />
+    <%= f.text_field :folder_name %>
+  </div>
+  <div class="field">
+    <%= f.label :template_id %><br />
+    <%= f.text_field :template_id %>
+  </div>
+  <div class="field">
+    <%= f.label :parent_id %><br />
+    <%= f.text_field :parent_id %>
+  </div>
+  <div class="field">
+    <%= f.label :is_editable %><br />
+    <%= f.check_box :is_editable %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

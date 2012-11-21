@@ -1,0 +1,23 @@
+<%
+folder_collection = @folder
+%>
+
+<%name,title,action = action_and_title(from_debt_summary,from_property_details)%>
+<%a = (from_property_details == 'true') ? 'high_prop_detail' : (from_debt_summary == 'true') ? 'high_prop_debt' : (edit_inside_asset == 'true') ? 'high_prop_basic' : ''%>
+					<a href="/real_estates/add_property/<%= folder_collection.portfolio_id%>?property_id=<%= folder_collection.real_estate_property_id%>&partial_disp=property_settings&from_debt_summary=true" >
+					 <%= image_tag('/images/portfolio_setup_icon3.png', :border=>0,:alt=>'Edit',:title=>title)%></a>
+
+					<a href="/real_estates/add_property/<%=  folder_collection.portfolio_id%>?property_id=<%= folder_collection.real_estate_property_id%>&partial_disp=property_settings&from_debt_summary=true" style="width:16,height:16,border:0;">
+					 <%=lengthy_word_simplification(name,15,5)%></a>
+
+<!-- COMMENTED LIGHTBOX STARTS HERE
+			<%#name,title,action = action_and_title(from_debt_summary,from_property_details)%>
+					<%#=link_to_remote image_tag('/images/portfolio_setup_icon3.png', :border=>0,:alt=>'Edit',:title=>title), { :action =>action,:controller => "real_estates",:id =>folder_collection.portfolio_id,:property_id=>folder_collection.real_estate_property_id,:edit_inside_asset=>edit_inside_asset,:from_debt_summary=>from_debt_summary,:from_property_details=>from_property_details,:folder_id => folder_collection.id},{:id => "edit_note_box_#{folder_collection.id}",:style=>{:width=>"16",:height=>"16",:border=>"0"}}%>
+
+					<script>//new Control.Modal($("edit_note_box_<%#=folder_collection.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+					<%#=link_to_remote lengthy_word_simplification(name,15,5), { :action =>action,:controller => "real_estates",:id =>folder_collection.portfolio_id,:property_id=>folder_collection.real_estate_property_id,:edit_inside_asset=>edit_inside_asset,:from_debt_summary=>from_debt_summary,:from_property_details=>from_property_details,:folder_id => folder_collection.id},{:id => "edit_note_box_#{folder_collection.id + 1}",:style=>{:width=>"16",:height=>"16",:border=>"0"},:title=>title}%>
+
+					<script>//new Control.Modal($("edit_note_box_<%#=folder_collection.id + 1%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+
+COMMENTED LIGHTBOX ENDS HERE -->

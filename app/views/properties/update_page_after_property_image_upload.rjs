@@ -1,0 +1,10 @@
+page.call "flash_completer"
+flash[:notice]=FLASH_MESSAGES['properties']['403']
+if is_leasing_agent
+   page.redirect_to "/lease/show_pipeline/#{params[:property_id]}"
+else	 
+	case params[:controller_id]
+	when "2"
+		page.redirect_to real_estate_property_path(params[:portfolio_id], params[:last_selected_item])
+	end
+end

@@ -1,0 +1,10 @@
+<div class="rhs leaseModule" id = "lease_container">
+	<div class="subheadwrapper">
+		<div class="clear"></div>
+		<div class="suitemid">
+			<div id="show_assets_list">
+				<%=render :partial => "/lease/mgmt_head_tabs", :locals => {:note_collection => @note, :portfolio_collection => @portfolio_collection, :@lease => @lease, :param_pipeline=> !params[:param_pipeline].blank? ? params[:param_pipeline] : nil}%>
+			</div>
+		</div>
+	</div>
+</div>

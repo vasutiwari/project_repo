@@ -1,0 +1,19 @@
+<div class="wrapper" >
+  <div class="bodywrapperrow">
+    <div class="contentwrapper" style="margin: 298px 168px 146px 30px;padding-left: 324px; width: 275px;">
+      Click here to download the file <a href="/documents/download_file_for_share_link/<%= @document.id %>" title="<%= @document.filename %>"><%=display_truncated_chars(@document.filename.to_s,15, true)%></a>
+    </div>
+  </div>
+</div>
+<!--<style>
+  #embedded_flash embed
+  {height:580px;width:925px;}
+  #embedded_flash
+  {
+    height:480px
+  }
+</style>-->
+
+<script>
+window.onunload = load_completer();
+		</script>

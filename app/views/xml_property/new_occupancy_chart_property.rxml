@@ -1,0 +1,25 @@
+ xml.chart(
+		:caption=>"",
+		:palette=>"2", 
+		:animation=>"1", 
+		:formatNumberScale=>"0", 
+		:numberPrefix=>"", 
+		:numberSuffix=>" SqFt",
+		:pieSliceDepth=>"30",
+		:bgcolor=>"ffffff",
+		:showBorder=>"0",
+		:paletteColors=>'FF0000,0372AB,FF5904',
+		:chartTopMargin=>"10",
+		:chartBottomMargin=>"10",
+		:chartLeftMargin=>"0",
+		:chartRightMargin=>"0",
+		:use3DLighting=>"1",
+		:showhovercap=>"0",
+		:pieRadius=>"50",
+		:startingAngle=>"#{@actual_noi["Occupied"][0].to_i*1.8}") {		
+			i = 0 
+			@actual_noi.each_pair do |k,v|
+				xml.set("value".to_sym=>"#{v}","name".to_sym=>"#{v}%-#{k}", :color=>"#{@color[i]}",:basefontcolor=>"#ff0000", :enableSmartlabels=>"1",:displayvalue=>"#{v[0]}%\n#{number_with_delimiter(v[1])} Sqft \n#{k}"){}
+				i = i + 1
+			end
+}

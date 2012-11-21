@@ -1,0 +1,48 @@
+<div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+  <% if params[:type]=="image" %>
+    <h4 class="light_head" style="color:red;">To proceed further, you need to add at least one portfolio</h4>
+  <% end %>
+  <h3 class="light_head"><%#= @portfolio_type.name.capitalize %>Create Portfolio</h3>
+  <div class="dialog_light_center">
+    <div class="dialog_second_center">
+      <div class="status_light_error" id="error_display"></div>
+      <div class="status_light">
+        <span class="simple_light_text">
+          Portfolio Name : &nbsp;  <%=text_field :portfolio,:name,:size=>15%>
+        </span>
+        &nbsp;&nbsp;
+        <span class="status_light_error" id="emp_file" style="display:none;">Please enter portfolio name</span>
+        <span class="status_light_error" id="emp_name" style="display:none;">Portfolio already exist</span>
+
+      </div>
+      <div class="status_light" style="margin-top:10px;">
+       <span class="simple_light_text">Leasing Type : &nbsp;&nbsp;&nbsp;&nbsp;
+        <select name="portfolio[leasing_type]">
+          <option value="Commercial">Commercial</option>
+          <option value="Multifamily">Multifamily</option>
+        </select>
+        </span>
+      </div>
+      <br />
+      <%=hidden_field :portfolio,:portfolio_type_id,:value=>params[:id]%>
+      <div class="status_light">
+        <span class="simple_light_text">
+          Portfolio Image : &nbsp;  <%= file_field :portfolio_image,:uploaded_data,:size=>15 %>
+        </span>
+				        <span class="status_light_error" id="img_name" style="display:none;margin-left:122px;">Please upload (jpg,jpeg,png,gif,bmp) format file only </span>
+      </div>
+      <br/>
+      <div class="status">
+      </div>
+
+<div class="newfieldrow">
+						<div class="newfieldlabel">&nbsp;</div>
+<div class="newfielditem"><div class="greenbutton2" style="margin-right:73px;">
+    <%= image_submit_tag("/images/addbutton1.png",:id=>"img_portfolio_upload", :onClick=>"return blank_portfolio_upload1();") %>
+    </div>
+  </div>
+		<div class="newfieldlabel2">&nbsp;</div>
+			</div>
+   </div>
+  </div>
+</div>

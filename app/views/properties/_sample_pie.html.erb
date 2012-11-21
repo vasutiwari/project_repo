@@ -1,0 +1,8 @@
+<%vaccant = @vaccant %>
+<%occupied = @occupied%>
+<chart exportEnabled='1' exportAtClient='0' exportHandler='/Fusioncharts/fc_exporter/index' exportFormats = 'JPG|PDF' exportAction='save' numberSuffix=' Units' chartLeftMargin='0' palette='2' pieSliceDepth='30' pieRadius='50' chartRightMargin='0' showBorder='0' caption='' animation='1' use3DLighting='1' bgcolor='ffffff' paletteColors='FF0000,0372AB,FF5904' formatNumberScale='0' showhovercap='0' chartTopMargin='10' numberPrefix='' chartBottomMargin='10' startingAngle='<%= @start_angle %>'>
+<set basefontcolor='#ff0000' value='<%= vaccant.to_i %>' enableSmartlabels='1'  color='#c63c26' displayvalue='<%= @vaccant_percent %>%25 &#xA;<%= number_with_delimiter(vaccant.to_i) %> <%= session[:wres_user] ? 'Units' : 'Sqft' %> &#xA;Vacant'>
+</set>
+<set basefontcolor='#ff0000' value='<%= occupied.to_i %>' enableSmartlabels='1'  color='#c7e164' displayvalue='<%= @occupied_percent %>%25 &#xA;<%= number_with_delimiter(occupied.to_i) %> <%= session[:wres_user] ? 'Units' : 'Sqft' %> &#xA;Occupied'>
+</set>
+</chart>

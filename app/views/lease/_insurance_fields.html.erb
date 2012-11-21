@@ -1,0 +1,45 @@
+<script type="text/javascript">
+  yield_calender('true');
+</script>
+<div class="lsrowwrapper" style="color:#000 !important; padding:10px 0">Compliance Status</div>
+<div class="insurancenamerow" style="padding-top:10px;">
+  <div class="insurancename" style="margin-left:46px">Insurance Required By</div>
+  <div class="insuranceform" style="padding-left:5px">
+    <%= f.text_field :insurance_received_by ,:type=>"text", :value =>(f.object && f.object.insurance_received_by.present?) ? lease_date_format(f.object.try(:insurance_received_by)) : "mm/dd/yyyy", :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:65px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}"%>
+    <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"/> </a><%end%>
+  </div>
+	<div class="insurancename" style="margin-left:39px">
+    <label>
+      <%= f.check_box :insurance_required,{:class =>"is_insurance_complete"},f.object.insurance_required%>
+				Insurance Required
+    </label>
+  </div>
+  <div class="insurancename" style="margin-left:39px">
+    <label>
+      <%= f.check_box :is_insurance_complete,{:class =>"is_insurance_complete"},f.object.is_insurance_complete%>
+				Insurance Certificate Complete & Received
+    </label>
+  </div>
+</div>
+
+<div class="insurancenamerow" style="border-bottom:1px solid #EEEEEE">
+  <div class="insurancename namefirst">Insurance Coverage Required: $</div>
+  <div class="insuranceform" style="padding-left:5px">
+    <%= f.text_field :coverage_required_amount ,:type=>"text", :class=>"lstextfield", :style=>"width:82px",:precision => 2%>
+  </div>
+  <div class="insurancename" style="margin-left:46px">Insurance Coverage Received: $</div>
+  <div class="insuranceform" style="padding-left:5px">
+    <%= f.text_field :coverage_received_amount ,:type=>"text", :class=>"lstextfield", :style=>"width:82px",:precision => 2%>
+  </div>
+</div>
+<script type="text/javascript">
+  jQuery('.is_insurance_complete').click(function () {
+    if(this.value == '0' || this.value == 'on' || this.value == 'false') {
+      jQuery(this).attr('value','1');
+    }
+    else
+    {
+      jQuery(this).attr('value','0');
+    }
+  });
+</script>

@@ -1,0 +1,52 @@
+	<h2>Log into theamp.com</h2>
+	<div class="loginForm">
+	<% req_agent = request.env['HTTP_USER_AGENT'].downcase %>
+    <% if req_agent && (req_agent.include?('msie 7.') || req_agent.include?('msie 6.') || req_agent.include?('msie 5.')) %>
+        <%= stylesheet_link_tag "core"  %>
+        <div  style="float:left;clear:both;margin-top:50px;">
+            <div style="width:100%">
+                <p>
+                    <strong>Your browser is no longer supported.</strong><br/>
+                    <span>Please upgrade to a modern browser.</span>
+                </p>
+                <p>
+                    <a href="http://www.google.com/chrome" class="browser-link"><img src="/images/pixel.gif" class="chrome-link" /></a>
+                    <a href="http://www.microsoft.com/windows/internet-explorer/default.aspx" class="browser-link"><img src="/images/pixel.gif" class="ie8-link" /></a>
+                    <a href="http://www.apple.com/safari/" class="browser-link"><img src="/images/pixel.gif" class="safari-link" /></a>
+                    <a href="http://www.mozilla.com/en-US/firefox/personal.html" class="browser-link"><img src="/images/pixel.gif" class="firefox-link" /></a>
+                </p>
+            </div>
+        </div>
+	 <% else %>
+        <%= form_tag session_path,:name=>"form" do %>
+            	<div class="label">Email ID:</div>
+		<% classname = flash[:error].nil? ? 'input' : 'inputError' %>
+                <div class="inputBox"><%= text_field_tag 'email', @email, :size=>"35",:class=>"#{classname}" %></div>
+                 <% if !flash[:error].nil? %><div class="errormessage"><%= flash[:error]%></div><% end %>
+                <div class="clearfix"></div>
+
+                <div class="label">Password:</div>
+                <div class="inputBox"><%= password_field_tag 'password', nil, :size=>"35",:class=>"#{classname}" %></div>
+               <!--<div class="errormessage">Error Message will come here</div>-->
+                <div class="clearfix"></div>
+
+
+                <div class="label">&nbsp;</div>
+                <div class="inputBox"><%= check_box_tag 'remember_me', '1', @remember_me, :id=>"rememberme", :class=>"checkbox",:style=>"vertical-align:top; margin:0px 5px 0px 0px;" %>Remember me on this computer</div>
+                <div class="clearfix"></div>
+
+                <div class="label">&nbsp;</div>
+                <div class="inputBox">
+		<div class="left"><!--<a class="button orange alignleft" href="#">Log In</a>--><%= submit_tag 'Log In',:class => "button_login orange alignleft",:style=>"cursor:pointer;" %></div>
+		                    <div class="left" style="padding:7px 10px;"></div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="label">&nbsp;</div>
+                    <div class="inputBox"><a href="/forgot_password">Forgot your password?</a></div>
+                    <div class="clearfix"></div>
+                <div class="clearfix"></div>
+            </div>
+		<% end %>
+            <%end%>

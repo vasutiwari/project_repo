@@ -1,0 +1,63 @@
+<% pdf_conv_path = @pdf.blank? ? '' : Rails.root.to_s+'/public' %>
+<%if !@account_receivables_aging_for_receivables.empty?%>
+  <%amount_pending = 0%><% tot_prepaid = 0 %>	<%late_by_30_days = 0%>	<%late_by_60_days = 0%><%late_by_90_days = 0%><%late_by_120_days = 0%>
+  <%id = params[:note_id] ? params[:note_id] : params[:id]%>
+  <div class="tableheaderow portfolio_overview">
+    <div  class="executiveheadcol head_font"><span class="executiveiconcol"></span></div>
+  </div>
+  <div class="tableheaderow portfolio_overview blueBg">
+    <%controller_name,action_name = find_controller_and_action_in_cash%>
+    <div class="cashtable2_col1"><%= sort_link_helper("Suite or Lease", "property_suites.suite_number",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"suite_number",pdf_conv_path)%></div>
+    <div class="cashtable2_col2"><%= sort_link_helper("Tenant", "tenant",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"tenant",pdf_conv_path)%></div>
+    <div class="cashtable2_col3"style="text-align:center;width:66px;"><%= sort_link_helper("Total Unpaid  $", "amount",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %>	<%=find_sorting_image(params,"amount",pdf_conv_path)%></div>
+    <div class="cashtable2_col4" style="width:400px;">
+      <div class="cashtable2_col4_row1" style="width:340px;">Aging Days</div>
+      <div class="cashtable2_col4_subcol3"><%= sort_link_helper("0 - 30  $", "paid_amount",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"paid_amount",pdf_conv_path)%></div>
+      <div class="cashtable2_col4_subcol3"><%= sort_link_helper("30 - 60   $ ", "over_30days",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"over_30days",pdf_conv_path)%></div>
+      <div class="cashtable2_col4_subcol3"><%= sort_link_helper("60 - 90   $", "over_60days",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"over_60days",pdf_conv_path)%></div>
+      <div class="cashtable2_col4_subcol3"><%#= sort_link_helper("90", "over_90days",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year]}) %><%#=find_sorting_image(params,"over_90days")%><%= sort_link_helper("Over 90 $", "over_120days",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"over_120days",pdf_conv_path)%></div>
+      <div class="cashtable2_col4_subcol3"><%= sort_link_helper("Prepays   $", "prepaid",{:controller=>"performance_review_property", :action => "cash_n_receivables_for_receivables",:page=>params[:page],:per_page=>params[:per_page],:id=>params[:id],:start_date => params[:start_date],:partial_page=>"cash_and_receivables_for_receivables",:id=>id,:period => params[:period],:tl_period=>params[:tl_period],:tl_month=>params[:tl_month],:tl_year => params[:tl_year],:quarter_end_month=>params[:quarter_end_month]}) %><%=find_sorting_image(params,"prepaid",pdf_conv_path)%></div>
+     </div>
+    <div id ="financexp" class="cashtable2_tablecol5" style="width:50px;">Explanation</div>
+  </div>
+  <% sum = 0%>
+  <% @account_receivables_aging_for_receivables.each do |aging| %>
+    <div class="cashtablerow2">
+      <div class="tablecontentrow">
+        <%= render :partial => "properties/aging_list",:locals => {:aging => aging} %>
+      </div>
+    </div>
+    <% sum = sum + aging.amount.to_f
+    aging_30_days,aging_60_days,aging_90_days,aging_120_days,prepaid,pending_amount = find_aging_details(aging)
+    #amount_pending = amount_pending + find_amount_pending(aging)
+    amount_pending = amount_pending + pending_amount
+    late_by_30_days = late_by_30_days + aging_30_days
+    late_by_60_days = late_by_60_days + aging_60_days
+    late_by_90_days = late_by_90_days + aging_90_days
+    late_by_120_days = late_by_120_days + aging_120_days
+    tot_prepaid += prepaid%>
+
+  <%end%>
+
+  <div class="cashtable2_grayrow">
+    <div class="cashtable2_col1">&nbsp;</div>
+    <div class="cashtable2_col2"><%=@account_receivables_aging_for_receivables.count%> <%= display_text_for_counts(@account_receivables_aging_for_receivables.count,'Tenant') %></div>
+    <div class="cashtable2_col3" style="text-align:right;width:66px;"><%=display_currency_overview(sum)%>   </div>
+    <div class="cashtable2_col4_subcol3"> <%=display_currency_overview(amount_pending)%></div>
+    <div class="cashtable2_col4_subcol3"><%=display_currency_overview(late_by_30_days)%></div>
+    <div class="cashtable2_col4_subcol3"><%=display_currency_overview(late_by_60_days)%></div>
+    <div class="cashtable2_col4_subcol3"><%#=display_currency_real_estate_overview(late_by_90_days)%><%=display_currency_overview(late_by_120_days)%></div>
+		<div class="cashtable2_col4_subcol3"><%=display_currency_overview(tot_prepaid)%></div>
+    <div class="cashtable2_tablecol5"></div>
+  </div>
+ <br/>
+ <% acc_sys_type=AccountingSystemType.find(@note.accounting_system_type_id).try(:type_name)%>
+ <%if acc_sys_type == 'AMP Excel'%>
+  <div class="cashtable2_grayrow">
+    <div style="text-align: right; width: 264px;" class="cashtable2_col1">Prepaid:</div>
+    <div class="cashtable2_col2"><%= tot_prepaid %></div>
+    <div style="text-align: right; width: 104px;" class="cashtable2_col1">Current Balance:</div>
+    <div class="cashtable2_col2"><%= sum - tot_prepaid %></div>
+  </div>
+ <%end%>
+<% end %>

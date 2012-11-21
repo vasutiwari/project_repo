@@ -1,0 +1,118 @@
+  <%#if @properties.present?%>
+<%  user_id = current_user.id%>
+<div class="box-1col">
+  <div class="clearfloat"></div>
+
+	<div class="wrsTab fltLeft">
+	<ul>
+    <li id="wrsTabMultifamily1" class="wrsTabSelect"><%= link_to "Commercial (#{@comm_prop_count})",  client_admin_properties_path(params[:client_admin_id],{:sort => 'Commercial'}) %></li>
+    <li id="wrsTabMultifamily2" style="border-right:none;"><%= link_to "Multifamily (#{@multi_prop_count})",  client_admin_properties_path(params[:client_admin_id],{:sort => 'Multifamily'}) %></li>
+	</ul>
+	</div>
+
+  <div class="fltrt">
+    <%= link_to new_client_admin_property_path(params[:client_admin_id], :sort => params[:sort] || 'Commercial'), :class=>"button lightBlue" do %>
+      <%#= image_tag("/images/add.png",:border => "0", :width=> "16",:height => "16") %> <span>Add Property</span>
+    <% end %>
+  </div>
+  <!-- <div><a href="#" class="iconAdd"><span>Add Portfolio</span></a></div>-->
+  <div class="clearfloat"></div>
+    <table width="100%" cellspacing="0" cellpadding="6" border="0" class="tablefb">
+      <thead >
+        <tr class="fb-tr-head">
+          <th class="bdr-lt-gry bdr-rt-wht" style="width:100px;">Name</th>
+          <th class="bdr-rt-wht"style="width:300px;">User(s)</th>
+          <th class="bdr-rt-wht" style="width:60px;">Actions</th>
+        </tr>
+      </thead>
+			<%if @properties.present?%>
+      <%@properties && @properties.each_with_index do |property,i|%>
+        <%class_name=(i%2==0) ? "tablefbAlternate" : ""%>
+        <%@all_users = find_user_names(property) %>
+
+        <tbody>
+          <tr class=<%=class_name%>>
+						<%if property.portfolio_image%><%image = PortfolioImage.find_by_id(property.portfolio_image.id)%><%else%><%image =nil%><%end%>
+						<%image_src = (image!=nil) ? image.public_filename : "/images/real_portfolio_img5.jpg"%>
+            <td align="left" class="bdr-rt-gry bdr-top-gry"><img src=<%=image_src%> class="imgPLM" title="" alt="" height="35" width="42px;"/> <%=  property.try(:property_name)%></td>
+            <td align="left" class="bdr-rt-gry bdr-top-gry">
+						<%if @all_users.present?%>
+						<%@all_users.compact.each_with_index do |user,j|%>
+						<!--
+						<a href="/client_admin/<%#=user_id%>/properties/<%#=properties_id[j]%>/edit?sort=<%#= params[:sort] || 'Commercial' %>">
+									<%#=property_name%></a><%#if j==0%>,<%#end%>
+									-->
+									<%if j <  2%>
+									<%if (user.client_id == current_user.client_id)%>
+									<a class="loader_event" href="/client_admin/<%=current_user.id%>/users/<%=user.id%>/edit"><%= user.try(:name).present? ? user.try(:name) : user.try(:email)%></a>
+									<%else%>
+									<%= user.try(:name).present? ? user.try(:name) : user.try(:email)%>
+									<%end%>
+									<%end%>
+									<%if @all_users.compact.last != user%><%if j < 1%>, <%end%><%end%>
+									<%end%>
+									<%if @all_users.compact.try(:count)!="" && @all_users.compact.try(:count)>2%>
+										and +
+											<%= link_to "#{@all_users.compact.try(:count) - 2} more",{:controller=>"client_admin/properties",:action=>"other_users",:id=>"#{property.id}"}, :id=>"#{property.id}"%>
+							<script>new Control.Modal($("<%=property.id%>"), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>
+										<%end%>
+										<%else%>
+										-
+										<%end%>
+						</td>
+    <%#*<td align="left" class="bdr-rt-gry bdr-top-gry"><a href="#"></a>and <a href="#">+ 21 more</a></td>%>
+            <td align="center" class="bdr-rt-gry bdr-top-gry">
+              <a href="/client_admin/<%=user_id%>/properties/<%=  property.id%>/edit?sort=<%= params[:sort] || 'Commercial' %>"><img src="/images/icon_editActive.png" title="Edit" alt="Edit" /></a>
+              <%= link_to image_tag("/images/iconDeleteActive.png", :alt=>"Delete",:border=>"0", :title=>'Delete'),client_admin_property_path(user_id,property.id,:sort => params[:sort] || 'Commercial'),:method=>:delete,:confirm => "#{FLASH_MESSAGES['client_admin']['104']}" %>
+            </td>
+          </tr>
+        </tbody>
+      <%end%>
+			<%else%>
+			  <tbody><tr><td colspan="3"  style="text-align:center;">No Data To Display</td></tr></tbody>
+			<%end%>
+    </table>
+		<div class="clearfloat"></div>
+		<%if @properties.present?%>
+		<div class="paginationcol" style="margin-left:800px;">
+    <%=will_paginate @properties %>
+</div>
+<%end%>
+</div>
+<%#else%>
+<!--
+<div class="box-1col">
+			<div class="nopropertyDiv">
+    	<p><span class="iconNotificaton">No property is available.</span> </p>
+		<p>Please contact your client admin <code><a href="mailto:admin@theam.com">&lt;admin email as link&gt;</a></code> to request access.</p>
+        </div>
+    <div class="clearfloat"></div>
+    </div>
+    <div class="clearfloat"></div>
+		</div>
+		-->
+<%#end%>
+<script>
+ jQuery(document).ready(function()
+ {
+ <%if params[:sort].eql?("Multifamily")%>
+ jQuery('#wrsTabMultifamily2').attr('className','wrsTabSelect');jQuery('#wrsTabMultifamily1').attr('className','');
+ <%else%>
+ jQuery('#wrsTabMultifamily1').attr('className','wrsTabSelect');jQuery('#wrsTabMultifamily2').attr('className','');
+ <%end%>
+ });
+ //For add_edit property success message display
+<%if params[:page].nil? && (params[:add_property].eql?('true') || params[:edit_property].eql?('true'))%>
+	//flash_writter("<%=FLASH_MESSAGES['properties']['406']%>");
+	flash_writter();
+	function flash_writter(){
+		jQuery('#success_msg').html("<%=FLASH_MESSAGES['properties']['406']%>");
+		jQuery('#msg_writter').css('background',"url('/images/loader_bg.png')");
+		jQuery('#msg_writter').show();
+		jQuery('#msg_writter').fadeOut(10000);
+		msg_t = setTimeout('flash_completer();', 5000);
+}
+function flash_completer() { jQuery('#msg_writter').fadeOut(5000);}
+<%end%>
+
+</script>

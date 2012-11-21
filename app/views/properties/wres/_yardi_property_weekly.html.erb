@@ -1,0 +1,55 @@
+<div class="executivecontentrow property_exec">
+  <div class="prop_tablewrapper">
+    <div class="topbig">
+      <div class="executiveheadercol" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Net Units Avail </div>
+      <div class="executiveheadercol3" style="font-weight:bold;"><span class="setupiconrow2"><img src="<%= pdf_conv_path%>/images/executivearrow.png" width="13" height="12" border="0" /></span>Traffic</div>
+    </div>
+    <div class="midbig">
+      <div class="executivetablebarrow">
+        <div class="prop_tablewrapper1 yardi_tablewrapper1">
+          <div class="prop_tablerow">
+            <div class="prop_tablecoll1">&nbsp;</div>
+            <div class="prop_tablecoll2 yardi_tablecoll2">Units</div>
+            <div class="prop_tablecoll3 yardi_tablecoll3 yardi_heading">%</div>
+            <div class="prop_tablecoll2 yardi_tablecoll4">&nbsp;</div>
+            <div class="prop_tablecoll5">&nbsp;</div>
+            <div class="prop_table2_coll2">Calls</div>
+            <div class="prop_table2_coll3">Walk-In</div>
+            <div class="prop_table2_coll4">Applied</div>
+            <div class="prop_table2_coll5">Denied</div>
+            <div class="prop_table2_coll6">Cancels</div>
+          </div>
+          <%for i in 0...count%>
+            <div class="prop_tablerow">
+              <div class="prop_tablecoll1"><%=@property_week_floor[i]%></div>
+              <div class="prop_tablecoll2 yardi_tablecoll2"><%=property_weekly_display(i,'vacant_net').to_i+property_weekly_display(i,'notice_net').to_i%></div> <!-- Use @current[i] for get the value from db -->
+              <% net_unit_per = is_nan_checking_gross(property_weekly_display(i,'vacant_net').to_f+property_weekly_display(i,'notice_net').to_f,@property_week_units[i].to_f)%>
+              <div class="prop_tablecoll3 yardi_tablecoll3"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'property_yardi_netunits_avail_per',net_unit_per)%>;"><%=net_unit_per%></span></div><!-- property_weekly_display_net_units(i,'crnt') -->
+              <div class="prop_tablecoll2 yardi_tablecoll4 ">&nbsp;</div>
+              <div class="prop_tablecoll5">&nbsp;</div>
+              <div class="prop_table2_coll2"><%=@pi_total[i]%></div>
+              <div class="prop_table2_coll3"><%=@wi_total[i]%></div>
+              <div class="prop_table2_coll4"><%=@dep_total[i]%></div>
+              <div class="prop_table2_coll5"><%=@dep_rej[i]%></div>
+              <div class="prop_table2_coll6"><%=@dep_canc[i]%></div>
+            </div>
+          <%end%>
+          <div class="prop_table_headerow">
+            <div class="prop_tablecoll1">Total</div>
+            <div class="prop_tablecoll2 yardi_tablecoll2"><%=@vacant_net_total.to_i+(@notice_gross_total.to_i-@notice_rented_total.to_i)%></div><!-- @netunits_avail_crnt_total -->
+            <%net_units_per = "#{number_with_precision(((@vacant_net_total+(@notice_gross_total-@notice_rented_total))/@vacant_units_total.to_f)*100, :precision => 1)}%"%>
+            <div class="prop_tablecoll3 yardi_tablecoll3"><span class="barcoll" style="width:<%=bar_percentage_calc(i,'property_yardi_netunits_avail_total_per',net_units_per)%>;"><%=net_units_per%></span></div><!-- total_crnt_per_calc , @netunits_avail_crnt_per -->
+            <div class="prop_tablecoll2 yardi_tablecoll4 ">&nbsp;</div>
+            <div class="prop_tablecoll5">&nbsp;</div>
+            <div class="prop_table2_coll2"><%=@trafic_pi_total%></div>
+            <div class="prop_table2_coll3"><%=@trafic_wi_total%></div>
+            <div class="prop_table2_coll4"><%=@trafic_dep_total%></div>
+            <div class="prop_table2_coll5"><%=@trafic_rej_total%></div>
+            <div class="prop_table2_coll6"><%=@trafic_canc_total%></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottombig">&nbsp;</div>
+  </div>
+</div>

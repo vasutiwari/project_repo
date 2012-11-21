@@ -1,0 +1,58 @@
+
+
+<table align="left" cellpadding="2" cellspacing="4" border="0" width="400px">
+  
+	  <tbody>
+     <tr>
+      <td align="right" width="100%">Folder Name:<span class="txtRed"> </td>
+      <td width="10%"></td>
+      <td width="200%"><%=text_field :folder_name,:class=>"inpt150"%></td>
+    </tr>
+  </tbody>
+  
+	
+   <tbody>
+     <tr>
+      <td align="right" width="11%">Description :<span class="txtRed"> </td>
+      <td width="5%"></td>
+      <td width="10%"><%=text_field :discription,:class=>"inpt150"%></td>
+    </tr>
+  </tbody>
+  
+  <tbody>
+     <tr>
+      <td align="right" width="11%">Parent Id :<span class="txtRed"> </td>
+      <td width="5%"></td>
+	 <td><%=collection_select(:post, :id, @temp4, :id, :folder_name, {} )%> </td> 
+	</tr>
+  </tbody>
+ 
+ 
+  
+ <tbody>
+    <tr>
+      <td align="right"></td>
+      <td ></td>
+      <td></td>
+      <td align="right"></td>
+      <td ></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td align="right"></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<div class="clearfloat"></div>
+
+<%url = "/client_admin/templates/add_new_folder_template"%>
+
+<div class="" align="center"><a href="javascript:void(0)" class="button blue" onclick="validate_template_submit('folder1_submit');">Save</a>
+  <span>&nbsp;</span><a href="<%=url%>" class="button grey">CANCEL</a></div>
+
+
+
+

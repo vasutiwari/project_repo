@@ -1,0 +1,10 @@
+page.call "flash_completer"
+flash[:notice]="Picture Updated Successfully"
+
+if is_leasing_agent
+  page.redirect_to "/lease/show_pipeline/#{params[:note_id]}"
+elsif params[:note_id].to_i>0
+  page.redirect_to real_estate_property_path(params[:id], params[:last_selected_item])
+else
+  page.redirect_to '/portfolios/'+params[:last_selected_item]
+end

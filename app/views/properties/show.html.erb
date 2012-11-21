@@ -1,0 +1,1197 @@
+
+
+<!-- this line is added since Asset navigation is loaded with little padding onto its left -->
+<!-- this line is added since Asset navigation is loaded with little padding onto its left -->
+<style>
+  ul {list-style-type :none;padding: 0px;margin:0px}
+  li {list-style-type :none;padding: 0px;margin:0px}
+	.trendsHover {position:absolute; z-index:10000; margin:-13px 0px 0px 185px; font-size:11px;}
+	.iconTrend {background:url(/images/Trends.png) 0px 0px no-repeat; padding:5px 0px 12px 20px;}
+	.osimg {float: left; padding-left: 15px;}
+	.ostext {float: left; padding-left: 5px; width: 154px;}
+	.marTopM70{ margin-top:-70px;}
+</style>
+<link href="/stylesheets/jcarousel.css" rel="stylesheet" type="text/css" />
+<!-- <script src="http://maps.google.com/maps?file=api&amp;v=3&amp;key=<%#= get_google_key %>" type="text/javascript"></script> -->
+<script type="text/javascript" src="/javascripts/slideshow/jquery.slideViewerPro.1.0.js"></script>
+<script type="text/javascript" src="/javascripts/slideshow/jquery.timers-1.2.js"></script>
+<link href="/stylesheets/svwp_style.css" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/default_swf.css" rel="stylesheet" type="text/css" />
+<%= javascript_include_tag "DatePicker/date" %>
+<%= javascript_include_tag "DatePicker/jquery.datePicker-2.1.2" %>
+<%= stylesheet_link_tag 'DatePicker/datePicker1' %>
+<script type="text/javascript" src="/javascripts/swfupload.js"></script>
+<script type="text/javascript" src="/javascripts/fileprogress.js"></script>
+<script type="text/javascript" src="/javascripts/handlers.js"></script>
+<script type="text/javascript" src="/javascripts/swfupload.queue.js"></script>
+<script src="/javascripts/control.modal.js" type="text/javascript"></script>
+<script type="text/javascript" src="/javascripts/jquery.jcarousel.min.js"></script>
+<script type="text/javascript" src="/javascripts/highcharts_code.js"></script>
+<script type="text/javascript" src="/javascripts/highchart_exec_summary.js"></script>
+<script language="javascript" type="text/javascript" src="/javascripts/stacking_plan.js"></script>
+<link rel="stylesheet" type="text/css" href="/stylesheets/stacking_plan.css" />
+<link rel="stylesheet" type="text/css" href="/stylesheets/stacking_print.css" media="print" />
+<%= stylesheet_link_tag "advance_due_v2"  %>
+<script>jQuery.noConflict();</script>
+<script type="text/javascript">
+  jQuery(window).bind("load", function() {
+    jQuery("div#basic").slideViewerPro();
+  });
+  var months = new Array();
+  var crMonth = ''
+  months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  var active_sub_call = 'financial'; // this is to identify the sub cal from the performance review tab.
+  var active_sub_params = {}; //
+  var financial_sub = '' ;
+  var financial_subid = '';
+  var occupancy_type='';
+  var active_port_partial = '';
+  var arrlE= [];
+  var lEelements  = [];
+  var ocWresElements = [];
+  var par_list = {'for_notes':'portfolio_partial', 'cash_n_receivables':'cash_and_receivables', 'cash_n_receivables_for_receivables':'cash_and_receivables_for_receivables', 'financial':'financial', 'lease':'leases', 'capital_expenditure':'capital_expenditure','rent_roll':'rent_roll','financial_subpage':'financial_subpage','lease_sub_tab':'lease_sub_tab','variances':'variances','balance_sheet':'balance_sheet','balance_sheet_sub_page':'balance_sheet_sub_page'}
+  var active_period = '';
+	quarter_end_month = '';
+  var start_date_rent_pdf = '';
+  var rent_roll_for_pdf= '';
+<% @ytd_cal_flag = "true" if !params[:tl_period].present?%>
+
+<%if Date.today.month == 1%>
+   active_period = "5";
+<%elsif @ytd_cal_flag == "true"%>
+    active_period = "4";
+<%elsif params[:tl_period].present?%>
+    active_period = "<%=params[:tl_period]%>";
+<%else%>
+		 active_period = "4";
+<%end%>
+  var active_sub_month = ''; //new Date().getMonth(); set null becoz loading ytd and highlight call is wrote down
+<%calc_for_financial_data_display%>
+	<%if Date.today.month == 1%>
+	  var active_sub_year = '<%=@financial_year%>';
+		active_sub_month = '<%=@financial_month%>';
+		cur_month = months[active_sub_month];
+    cur_year = active_sub_year;
+	<%elsif params[:tl_year].present? && params[:tl_period] == "10"%>
+		var active_sub_year = "<%= params[:tl_year]%>";
+	<%else%>
+   	var active_sub_year = new Date().getFullYear();
+	<%end%>
+  var month_arr = [12,1,2,3,4,5,6,7,8,9,10,11];
+  var last_renderer = 'for_notes'; // this is to identify the last called of (sub_head or sub_graph)
+  var  capital_sub_call=''; // this is for manking sub calls in cap_exp
+  var  capital_sub_params = {};
+  var  cash_sub_call = '';
+  var  cash_find_id = '';
+  var  for_time_period_setting= '';
+  sub_tab=" ";
+  var port_id = '<%= @portfolio.id %>'
+  var swfu = true;
+  reject_ajax = false;
+  var parSqftCalc=""
+  weekly_start_date=""
+  function number_with_delimiter(number, delimiter) {
+    number = number + '', delimiter = delimiter || ',';
+    var split = number.split('.');
+    split[0] = split[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + delimiter);
+    return split.join('.');
+  }
+
+
+  function change_occupancy_type(vacant_val,occupied_val,text)
+  {
+    if  ( FusionCharts( "myChartId" ) )  FusionCharts( "myChartId" ).dispose();
+    var total = parseInt(vacant_val)+parseInt(occupied_val);
+    vacant_percent = Math.round((parseInt(vacant_val) *100) /  (total)) ;
+    occupied_percent =  100 - vacant_percent;
+    var myChart = new FusionCharts("/FusionCharts/Pie2D.swf", "myChartId", "325", "125", "0", "1",{autoInstallRedirect:"1",bgColor:"white"});
+    myChart.setDataXML("<chart exportEnabled='1' exportAtClient='0' exportFileName = 'fusionchart_<%= current_user.id%>' exportHandler='/Fusioncharts/fc_exporter/index' exportFormats = 'JPG|PDF' exportAction='save' numberSuffix=' Units' chartLeftMargin='0' palette='2' pieSliceDepth='30' pieRadius='40' chartRightMargin='0' showBorder='0' caption='' animation='1' use3DLighting='1' bgcolor='ffffff' paletteColors='FF0000,0372AB,FF5904' formatNumberScale='0' showhovercap='0' chartTopMargin='10' numberPrefix='' chartBottomMargin='10'  startingAngle='0'><set basefontcolor='#ff0000' value='"+parseInt(vacant_val)+"' enableSmartlabels='1'  color='#c63c26' displayvalue='"+vacant_percent+"%\n"+number_with_delimiter(parseInt(vacant_val))+"&nbsp;"+text+"\nVacant'></set><set basefontcolor='#ff0000' value='"+parseInt(occupied_val)+"' enableSmartlabels='1'  color='#c7e164' displayvalue='"+occupied_percent+"%\n"+number_with_delimiter(parseInt(occupied_val))+"&nbsp;"+text+"\nOccupied' ></set></chart>");
+    myChart.render("gh_graph_new_occupancy_chart");
+  }
+
+  function change_lease_expirations(values,years,colors,text)
+  {
+    val = "";
+    values = values.split(',')
+    colors = colors.split(',')
+    years = years.split(',')
+    for(x=0;x<values.length;x++){
+      val += "<set label='"+years[x]+"' link='javascript:call_rent_roll("+years[x]+")' value='"+values[x]+"' color='"+colors[x]+"' tooltext='Click to see"+years[x]+"{br} Expiration details' />";
+    }
+    if  ( FusionCharts( "myChartId1" ) )  FusionCharts( "myChartId1" ).dispose();
+    var myChart1 = new FusionCharts("/FusionCharts/Column2D.swf", "myChartId1", "350", "160", "0", "1",{autoInstallRedirect:"1",bgColor:"white"});
+    myChart1.setDataXML("<chart exportEnabled='1' exportAtClient='0' exportFileName = 'fusionchart_expiration_<%= current_user.id%>' exportHandler='/Fusioncharts/fc_exporter/index' exportFormats = 'JPG|PDF' exportAction='save' numberPrefix='"+text+"' numVDivLines='0'  showBorder='0' canvasBorderThickness = '1' canvasBorderColor='cccccc' bgColor='ffffff' showValues='1' bgColor='FFFFFF' plotSpacePercent='40' plotBorderColor='cccccc'>"+val+"</chart>");
+    myChart1.render("gh_graph_new_expiration_chart");
+  }
+
+
+  function load_swf(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref:'<%= request.env['HTTP_REFERER'] %>' <% if session[:wres_user] %><%= ', wres_user:true' %><%end%>},
+      file_size_limit : "150 MB",
+      //file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx;*.tif;,*.tiff;*.zip",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadComplete,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function load_swf_task(get_path,folder,user_id) {
+    var document_id = document.getElementById('document_id').value;
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"document_id":document_id},
+      file_size_limit : "150 MB",
+     // file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx,*.tif,*.tiff",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTask,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function load_swf_task_form_folder(get_path,folder,user_id) {
+    var settings = {
+      flash_url : "/assets/swfupload.swf",
+      upload_url: get_path,
+      //post_params: {"authenticity_token" : "<%#= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"_theamp2_session":'<%#= cookies['_theamp2_session'] %>'},
+      post_params: {"authenticity_token" : "<%= form_authenticity_token %>","flash_ups":"true","folder_id":folder,"user_id":'<%= current_user.id %>',ref: window.location,"folder_id":folder},
+      file_size_limit : "150 MB",
+      //file_types : "*.jpg;*.png;*.jpeg;*.pdf;*.pot;*.pps;*.doc;*.dot;*.ppt;*.xla;*.xlc;*.xlm;*.xls;*.xlt;*.xlw;*.ai;*.ps;*.eps;*.bas;*.rtf;*.sxw;*.sxi;*.sxc;*.odt;*.ods;*.odp;*.xlsx;*.xltx;*.pptx;*.ppsx;*.potx;*.docx;*.dotx;*.bmp;*.txt;*.wav;*.mp3;*.mkv; *.avi; *.mpeg;*.mp4;*.3gp;*.vob;*.wmv;*.flv;*.swf;*.divx;*.tif;*.tiff;*.zip",
+      file_types : "*.*",
+      file_types_description : "All Files",
+      file_upload_limit : 100,
+      file_queue_limit : 0,
+      custom_settings : {
+        progressTarget : "fsUploadProgress",
+        cancelButtonId : "btnCancel"
+      },
+      debug: false,
+
+      // Button settings
+      button_image_url: "/images/TestImageNoText_65x29.png",
+      button_width: "65",
+      button_height: "29",
+      button_placeholder_id: "spanButtonPlaceHolder",
+      button_text: '<span class="theFont" style="padding: 3px 0 0 8px;">Browse</span>',
+      button_text_style: ".theFont { font-size: 13px;color:black;  }",
+      button_text_left_padding: 12,
+      button_text_top_padding: 3,
+
+      // The event handler functions are defined in handlers.js
+      file_queued_handler : fileQueued,
+      file_queue_error_handler : fileQueueError,
+      upload_start_handler : uploadStart,
+      upload_progress_handler : uploadProgress,
+      upload_error_handler : uploadError,
+      upload_success_handler : uploadSuccess,
+      upload_complete_handler : uploadCompleteTaskFolder,
+      queue_complete_handler : queueComplete        // Queue plugin event
+    };
+    swfu = new SWFUpload(settings);
+    reject_ajax = false;
+  }
+
+  function delect_selected_file(upload_type,upload_file_id,document_id,filename)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(filename),1);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+    jQuery("#fileUpAddFiles").val(null);
+    var already_upload_file = document.getElementById('already_upload_file').value;
+    new Ajax.Request("/tasks/delect_task_file?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&document_id="+document_id+"&already_upload_file="+already_upload_file,{
+      onLoading : load_writter(),
+      asynchronous:true,
+      evalScripts:true,
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      insertion:Insertion.Top
+    });
+  }
+
+  function delect_selected_file_for_folder(upload_type,upload_file_id,task_id,fname)
+  {
+    disable_control();
+    AddedFiles.splice(AddedFiles.indexOf(fname),1);
+    tempFiles = tempFiles.substr(0,tempFiles.length-17);
+    jQuery("#fileUpAddFiles").val(null);
+    var already_upload_file = document.getElementById('already_upload_file').value;
+    new Ajax.Request("/tasks/delect_task_file_for_folder?upload_type="+upload_type+"&upload_file_id="+upload_file_id+"&task_id="+task_id+"&already_upload_file="+already_upload_file,{
+      onLoading : flash_writter(),
+      asynchronous:true,
+      evalScripts:true,
+      onLoading:load_writter(),
+      onComplete:load_completer(),
+      insertion:Insertion.Top
+    });
+  }
+
+  function assign_already_added_users(users_list)
+  {
+    document.getElementById('already_added_users').value = users_list;
+    document.getElementById('collaborator_list').value = 'Enter email addresses here';
+  }
+
+  function add_collaborators_to_task()
+  {
+    var collaborator_list = document.getElementById('collaborator_list').value;
+    var already_added_users =document.getElementById('already_added_users').value;
+    var deleted_users =document.getElementById('deleted_users').value;
+    var notification_alert = document.getElementById('notification_alert').value;
+    alert(document.getElementById('notification_alert'));
+    //  alert(document.getElementById('notification_alert').checked);
+    if(document.getElementById('notification_alert').checked == true)
+      alert('yes');
+    else
+      alert('no')
+
+    new Ajax.Request("/tasks/add_collaborator_to_add_task?collaborator_list="+collaborator_list+"&already_added_users="+already_added_users+"&deleted_users="+deleted_users+"&notification_alert="+notification_alert,{
+      asynchronous:true,
+      evalScripts:true,
+      insertion:Insertion.Top
+    });
+  }
+</script>
+<script type="text/javascript">
+  partial_page = '';
+  <% if(params[:period] == "9")  %>
+    active_period = "9"
+  <%end%>
+
+
+
+  if(<%= !params[:partial_disp].nil? && params[:partial_disp] == 'data_hub' %>)
+  var active_call="data_hub"
+  else
+    var active_call="performance_review"
+
+  var status_set=<%=@status%>
+<% val = (@notes.index(@note)).to_i + 1 %>
+  jcarousel_start = <%= val%>
+  jQuery(document).ready(function() {
+    jQuery('#mycarousel').jcarousel({
+      vertical: true,
+      scroll: 4,
+      visible: 4,
+      animation: "medium",
+      start: jcarousel_start
+    });
+    jQuery('#message').fadeOut(8000);
+<%portfolio_id=@portfolio ? @portfolio.id : 0%>
+    //show_performance_review(<%#=portfolio_id%>,selected_item)
+  });
+
+  if(<%= !params[:highlight_id] && (params[:id].nil? && @reset_selected_item) %>)
+	{
+  var selected_item = <%= @notes.length > 0 ? @notes.first.id : @portfolio.real_estate_properties.first.id %>;
+	}
+  else
+	{
+	    var selected_item = <%= params[:id] %>;
+	}
+
+  function active_title(val)
+  {
+    active_call = val;
+    if (val=="rent_roll"){
+     // document.getElementById('r_roll').className = "executivesubtab"
+      document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+      //document.getElementById("d_pipe").className = "deactivesubtab"
+      //document.getElementById("d_lease").className = "deactivesubtab"
+      <%if is_commercial(@note)%>
+      document.getElementById("lease_view").className = "deactivesubtab"
+      <%end%>
+    }
+    if (val=="performance_review"){
+      //  document.getElementById("r_roll").className = "deactivesubtab"
+      document.getElementById("p_review").className = "executivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+      //document.getElementById("d_pipe").className = "deactivesubtab"
+      //document.getElementById("d_lease").className = "deactivesubtab"
+       <%if is_commercial(@note)%>
+      document.getElementById("lease_view").className = "deactivesubtab"
+      <%end%>
+    }
+
+    if(val=="note_terms"){
+      //   document.getElementById("r_roll").className = "deactivesubtab"
+     // document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "executivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+      //document.getElementById("d_pipe").className = "deactivesubtab"
+     // document.getElementById("d_lease").className = "deactivesubtab"
+      <%if is_commercial(@note)%>
+     document.getElementById("lease_view").className = "deactivesubtab"
+     <%end%>
+    }
+
+    if(val=="property_view"){
+      //document.getElementById("r_roll").className = "deactivesubtab"
+      document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("p_view").className = "executivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+      //document.getElementById("d_pipe").className = "deactivesubtab"
+      //document.getElementById("d_lease").className = "deactivesubtab"
+       <%if is_commercial(@note)%>
+      document.getElementById("lease_view").className = "deactivesubtab"
+      <%end%>
+    }
+
+    if(val=="data_hub"){
+      //document.getElementById("r_roll").className = "deactivesubtab"
+      document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "executivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+      //document.getElementById("d_pipe").className = "deactivesubtab"
+      //document.getElementById("d_lease").className = "deactivesubtab"
+       <%if is_commercial(@note)%>
+      document.getElementById("lease_view").className = "deactivesubtab"
+      <%end%>
+    }
+    if(val=="property_settings"){
+      //document.getElementById("r_roll").className = "deactivesubtab"
+      document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("n_s_review").className = "executivesubtab"
+     // document.getElementById("d_pipe").className = "deactivesubtab"
+     // document.getElementById("d_lease").className = "deactivesubtab"
+      <%if is_commercial(@note)%>
+     document.getElementById("lease_view").className = "deactivesubtab"
+     <%end%>
+    }
+
+     if(val=="lease_management"){
+      //document.getElementById("r_roll").className = "deactivesubtab"
+      document.getElementById("p_review").className = "deactivesubtab"
+      document.getElementById("n_terms").className = "deactivesubtab"
+      document.getElementById("p_view").className = "deactivesubtab"
+      document.getElementById("d_hub").className = "deactivesubtab"
+      document.getElementById("n_s_review").className = "deactivesubtab"
+    //  document.getElementById("d_pipe").className = "executivesubtab"
+     // document.getElementById("d_lease").className = "deactivesubtab"
+      <%if is_commercial(@note)%>
+      document.getElementById("lease_view").className = "executivesubtab"
+      <%end%>
+    }
+  }
+
+	//moved function active_sub_title to lease_mgmt.js
+
+   var sub_list = {"financial_subpage" : "financial", "lease_sub_tab" : "lease","balance_sheet_sub_page":"balance_sheet"}
+
+  function performanceReviewCalls(act,params,lease_type,sqftCalc,rent_filter,strt_date)
+  {
+if(active_period == "4" && partial_page == 'variances')
+ {
+  <%if Date.today.month == 1%>
+	  active_period = 5;
+	<%end%>
+	}
+
+ if(active_period == "4"  || active_period == "3" || active_period == "8" || active_period == "6" || active_period == "2")
+  {
+	 active_sub_month = '';
+	}
+
+if(partial_page == "cash_and_receivables" || partial_page =="leases" || partial_page =="lease_sub_tab" || partial_page =="rent_roll_highlight" || partial_page =="cash_and_receivables_for_receivables" || partial_page == 'variances')
+  {
+    grossRent='undefined';
+    noOfUnits='undefined';
+  }
+
+    lease_type = '<%= @note.leasing_type%>'
+    for_time_period_setting = ''
+    // Added for rent_roll filter -- starts
+      params.rent_roll_filter=rent_filter;
+      params.start_date_rent = strt_date; // For filters in month_ytd
+      start_date_rent_pdf = strt_date;
+      rent_roll_for_pdf= rent_filter;
+    // -- ends--
+    if (sqftCalc!=undefined)
+      parSqftCalc=sqftCalc;
+
+    if (sqftCalc=="per_sqft" || parSqftCalc=="per_sqft")
+    {
+      if (grossRent==true)
+      {
+        params.sqft_calc="per_sqft";
+        grossRent='undefined';
+      }
+
+      else if (grossRent==false)
+      {
+        jQuery("#per_tot_sqft option:first").attr('selected','true');
+        jQuery("#per_tot_sqft_popup").trigger('click');
+        //~ grossRent='undefined';
+        return false;
+      }
+    }
+    else if (sqftCalc=="unit_calc" || parSqftCalc=="unit_calc")
+    {
+      if (noOfUnits==true)
+      {
+        params.unit_calc="unit_calc";
+        noOfUnits='undefined';
+      }
+      else if (noOfUnits==false)
+      {
+        jQuery("#per_tot_sqft option:first").attr('selected','true');
+        jQuery("#per_tot_unit_popup").trigger('click');
+        //~ noOfUnits='undefined';
+        return false;
+      }
+    }
+    if(active_period == "9" && selected_class[0] == "sys_id_1"){
+      params.tl_period = "4";
+      params.tl_month = "";
+      params.tl_year  = "";
+    }
+    else if(active_period == "9"){
+     params.tl_period = "9";
+      params.tl_month = "";
+      params.tl_year  = "";
+      params.start_date = weekly_start_date;
+    }
+    else{
+    params.tl_period = active_period;
+    params.tl_month = active_sub_month || '<%= params[:tl_month]%>';
+    params.tl_year  = active_sub_year;
+    params.quarter_end_month = quarter_end_month;
+    }
+    var month = parseInt(params.tl_month,10) - 1
+    if(params.tl_period == "7"){
+      //cur_month = months[active_sub_month]//jQuery('div.active').children('div.label').children('div.label2').last().children().html();
+      // cur_year = active_sub_year//jQuery('div.active').children('div.label').children('div.label2').last().children()[0].title;
+      if(active_sub_month != ''){
+        params.cur_month = months[parseInt(active_sub_month,10) - 1];
+        crMonth = month;}
+      else{
+        params.cur_month = crMonth;
+      }
+      params.cur_year = active_sub_year;
+    }
+    // params.deactive_sub_call = active_sub_call; now this made by the script itself ..
+    if (act=="financial_subpage" || act == "lease_sub_tab" || act == "balance_sheet_sub_page")
+    {
+      act_page = sub_list[act];
+    }
+    else
+      act_page = act;
+    if (active_sub_call=="financial_subpage" || active_sub_call == "lease_sub_tab" || active_sub_call =="balance_sheet_sub_page")
+      deact_page = sub_list[active_sub_call];
+    else
+      deact_page = active_sub_call;
+    enable_disable_tab(act_page,deact_page);//enable_disable_tab(act,active_sub_call);
+    last_renderer = act
+    active_sub_call = act;
+    active_sub_params = params;
+    new Ajax.Request('/performance_review_property/'+for_time_period_setting+act+'?id='+selected_item+'&portfolio_id='+port_id+'&partial_page='+partial_page ,{asynchronous:true,
+      evalScripts:true,
+      method: 'GET',
+      parameters: params,
+      onComplete:function(request){
+			jQuery('#show_assets_list').show();
+			jQuery('.contentwrapper').show();
+        if(partial_page!='variances'){
+          load_completer();
+					jQuery('#show_assets_list').show();
+					jQuery('.contentwrapper').show();
+        }
+				if(new Date().getMonth() == 0 && (active_sub_month - 1) == 11)
+			  	jQuery(".timelinelabel_wrapper .executivesubtabrow #lastMonth").attr('class','subtabactiverow');
+        else if (parseInt(active_sub_month)==new Date().getMonth())
+          jQuery(".timelinelabel_wrapper .executivesubtabrow #lastMonth").attr('class','subtabactiverow');
+        else
+          jQuery(".timelinelabel_wrapper .executivesubtabrow #lastMonth").attr('class','subtabdeactiverow');
+        if (!(active_sub_month=='' && active_period==4))
+          dynamic_month_change(active_sub_month);
+         if(partial_page =='financial' && jQuery("div[class^='executivecol_subrow']:contains('Operating Statement')").length == 0)
+          jQuery(".executiveiconcol").after("Operating Statement ");
+      },
+      onLoading:function(request){
+        if(partial_page!='variances'){
+          load_writter();
+        }
+      }});
+      if((deact_page == 'balance_sheet' && act_page != 'balance_sheet') || (deact_page == 'rent_roll' && act_page != 'rent_roll') || (deact_page == 'lease' && act_page != 'lease') || (deact_page == 'lease_sub_tab' && act_page != 'lease_sub_tab') || (deact_page == 'cash_n_receivables_for_receivables' && act_page != 'cash_n_receivables_for_receivables'))
+      {
+        jQuery('.executiverhsrow').show();
+      }
+  }
+
+
+
+  function show_selected_note(n,sqftCalc,gross,unit,rent_filter,portfolio_id){
+	  sqftCalc =jQuery('#per_tot_sqft').val();
+    if(gross != 0)
+    {
+      grossRent=true;
+    }
+  else if(partial_page != "cash_and_receivables" && partial_page !="leases" && partial_page !="lease_sub_tab" && partial_page !="rent_roll_highlight" && partial_page !="cash_and_receivables_for_receivables" && partial_page != 'variances')
+	 {
+       grossRent=false;
+	 }
+    else
+		{
+      grossRent='undefined';
+		}
+   if(unit != 0)
+    {
+      noOfUnits=true;
+    }
+ else if(partial_page != "cash_and_receivables" && partial_page !="leases" && partial_page !="lease_sub_tab" && partial_page !="rent_roll_highlight" && partial_page !="cash_and_receivables_for_receivables" && partial_page != 'variances')
+ {
+   noOfUnits=false;
+  }
+  else
+  {
+  	noOfUnits='undefined';
+	}
+   selected_item = n;
+    if (sqftCalc=="per_sqft")
+    {
+      if (grossRent==true)
+      {
+        grossRent='undefined';
+      }
+
+      else if (grossRent==false)
+      {
+        jQuery("#per_tot_sqft option:first").attr('selected','true');
+				url = jQuery("#per_tot_sqft_popup").attr('href').split("/");
+				url[2] = String(n);
+				jQuery("#per_tot_sqft_popup").attr('href',url.join("/"))
+				new Control.Modal($('per_tot_sqft_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});
+				jQuery("#per_tot_sqft_popup").click();
+        return false;
+      }
+    }
+    else if (sqftCalc=="unit_calc")
+    {
+      if (noOfUnits==true)
+      {
+        noOfUnits='undefined';
+      }
+      else if (noOfUnits==false)
+      {
+        jQuery("#per_tot_sqft option:first").attr('selected','true');
+				url = jQuery("#per_tot_unit_popup").attr('href').split("/")
+				url[2] = String(n)
+				jQuery("#per_tot_unit_popup").attr('href',url.join("/"))
+				new Control.Modal($('per_tot_unit_popup'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});
+					jQuery("#per_tot_unit_popup").click();
+        return false;
+      }
+    }
+  if(call_performance_review == true)
+ {
+		set_call(active_call,portfolio_id,n,jQuery('#per_tot_rent_roll').val());
+	}
+  }
+
+  function set_call(active,portfolio_id,note_id,rent_filter,property_lease_id,from_mgmt){
+if (active=="rent_roll"){
+      show_rent_rolls_real_estate(portfolio_id,note_id,partial_page)
+    }
+    if (active=="performance_review"){
+      if (last_renderer == "cash_sub_view") // here the cash and receivable and the cap_exp sub view calls added
+        cashSubCalls(cash_sub_call,cash_sub_params);
+      else if(last_renderer == "capital")
+        capitalSubCalls(capital_sub_call,capital_sub_params);
+      else
+        performanceReviewCalls(active_sub_call,active_sub_params,{},{},rent_filter);
+      //show_performance_review_real_estate(portfolio_id,note_id,partial_page) will be removed shortly.
+    }
+    if (active=="note_terms"){
+      show_loans(portfolio_id,note_id,'debt')
+    }
+    if (active=="property_view"){
+      show_property_view_real_estate(portfolio_id,note_id,partial_page)
+    }
+    if (active=="datahub"){
+      show_data_hub_docs_real_estate(portfolio_id,note_id,'hide_del') // ?
+      //show_datahub_image(portfolio_id,partial_page,note_id);
+    }
+    if (active=="property_settings"){
+      //move_to_dispositions_real_estate(portfolio_id,note_id,partial_page)
+      property_settings(portfolio_id,note_id,partial_page)
+    }
+    if (active=="property_lease"){
+      property_lease(portfolio_id,note_id,partial_page)
+    }
+    if (active=="property_pipeline"){
+      show_tabs(portfolio_id,note_id,'pipeline','property_pipeline')
+    }
+    if (active=="lease_management"){
+      show_tabs(portfolio_id,note_id,'management','management')
+    }
+     if (active=="property_alert"){
+      show_tabs(portfolio_id,note_id,'alert','property_alert')
+    }
+     if (active=="property_encumb"){
+      show_tabs(portfolio_id,note_id,'encumbrance','property_encumb')
+    }
+     if (active=="property_rentroll"){
+      show_tabs(portfolio_id,note_id,'rent_roll','property_rentroll')
+    }
+    if (active=="suites_form"){
+      show_tabs(portfolio_id,note_id,'suites','suites_form')
+    }
+     if (active=="mgmt_terms"){
+     show_tabs(portfolio_id,note_id,'terms','mgmt_terms','',property_lease_id,from_mgmt)
+    }
+     if (active=="stacking_plan"){
+      show_tabs(portfolio_id,note_id,'stacking_plan','stacking_plan')
+    }
+
+  }
+
+  function get_status()
+  {
+    cn=document.getElementsByClassName("status")
+    cn.length
+
+    for(i=0;i<cn.length;i++)
+    {
+      status_set = (cn[i].checked == true)? cn[i].value :status_set;
+    }
+    return false;
+  }
+
+  function set_radio_call(active,portfolio_id,note_id){
+    if (active=="rent_roll"){
+      show_rent_rolls_real_estate(portfolio_id,note_id)
+    }
+    if (active=="performance_review"){
+      show_performance_review(portfolio_id,note_id)
+    }
+  }
+
+  function enable_disable_tab(cur_act, de_act){ // this stays...
+    jQuery('a#' + de_act).removeAttr('className');
+    jQuery('a#' + cur_act).attr('className', 'selected');
+  }
+
+  function addSelectedItemToPortfolioUrl(element) {
+    var url = new Array();
+    url = jQuery("#"+element).attr('href').split("&");
+    url[2]="last_selected_item="+selected_item;
+    jQuery("#"+element).attr('href', url.join("&"));
+    new Control.Modal($(element),{beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className: 'modal_container', method: 'get'});
+  }
+
+  function show_note_terms(){
+    show_terms();
+  }
+  if(<%= !@portfolio.nil? %>) {
+    //document.getElementById('portfolio_breadcrumb').innerHTML = "<a href='<%= real_estate_path(@portfolio.id) %>' id='portfolio_<%= @portfolio.id%>'><span><%= @portfolio.name %></span></a>";
+  }
+<%if !flash[:notice].nil? && !flash[:notice].blank?%>
+    flash_writter("<%= flash.now[:notice]%>");
+<% end %>
+  var current_selection = 1;
+</script>
+<script type="text/javascript">jQuery.noConflict();</script>
+<%folder_det,month_details = find_folder_and_month_details%>
+
+<div class="rhs">
+      <div id="show_assets_list">
+			<div id="time_line_selector">
+				<%= render :partial => '/properties/time_line_selector', :locals => {:period => 1, :note_id => @note.id, :partial_page => "portfolio_partial", :start_date => 0, :timeline_start => @time_line_start_date, :timeline_end => @time_line_end_date }  %>
+				</div>
+				<script>jQuery(".executiveiconcol").after("Operating Statement ") </script>
+        <%= render :partial =>"/properties/property_financial_performance",:locals =>{:operating_statement => @operating_statement,  :explanation => @explanation,:cash_flow_statement => @cash_flow_statement,:debt_services => @debt_services,:portfolio_collection => @portfolio,
+    :notes_collection => @notes,:time_line_actual => @time_line_actual,:time_line_rent_roll => @time_line_rent_roll,:note_collection => @note,:start_date => @start_date,:actual=>@actual,:current_time_period =>@current_time_period,:doc_collection=>@doc} %>
+  </div>
+<div id="current_note">	  </div>
+</div>
+
+<script type="text/javascript">
+  //jQuery('#yearToDate').attr('className', 'subtabactiverow'); // initial year to date details hightlighted
+
+  function monthHighLight(){
+    if (active_period != 3 ){
+      if (active_sub_month == month_arr[new Date().getMonth()] && active_period != "9" && active_sub_year == new Date().getFullYear()){
+        jQuery('#yearToDate').attr('className', 'subtabdeactiverow');
+        jQuery('#lastMonth').attr('className', 'subtabactiverow');
+        jQuery('#lastyear').attr('className', 'subtabdeactiverow');
+      }
+      else{
+        jQuery('#yearToDate').attr('className', 'subtabdeactiverow');
+        jQuery('#lastMonth').attr('className', 'subtabdeactiverow');
+        jQuery('#lastyear').attr('className', 'subtabdeactiverow');
+      }
+    }
+  }
+
+  function capitalSubCalls(act,params,sqftCalc){ // its for cap_exp sub calls
+    if (sqftCalc!=undefined)
+      parSqftCalc=sqftCalc;
+    if (sqftCalc=="per_sqft" || parSqftCalc=="per_sqft")
+    {
+      if (grossRent==true)
+      {
+        params.sqft_calc="per_sqft";
+        grossRent='undefined';
+      }
+      else if (grossRent==false)
+      {
+        jQuery("#per_tot_sqft option:first").attr('selected','true');
+        jQuery("#per_tot_sqft_popup").trigger('click');
+        grossRent='undefined';
+        return false;
+      }
+    }
+    capital_sub_call = act;
+    params.tl_period = active_period;
+   if (<%=params[:page_refer]=="capital"%>)
+		{
+		params.tl_month = '<%=params[:tl_month]%>'
+		}
+		else
+		{
+    params.tl_month = active_sub_month;
+		}
+    params.quarter_end_month = quarter_end_month;
+    params.tl_year  = active_sub_year;
+    if(params.tl_period == "7"){
+        if(active_sub_month != ''){
+        params.cur_month = months[parseInt(active_sub_month,10) - 1];
+        crMonth = month;}
+      else{
+        params.cur_month = crMonth;
+      }
+      params.cur_year = active_sub_year;
+    }
+    last_renderer = "capital"//we can change in case we need more for all other sub_graphs
+    //params.deactive_sub_call = active_sub_call;
+    capital_sub_params = params
+    if(typeof(call_onetime_clearer) !='undefined' || params.tl_period == 5){
+      if (params.tl_month=='')
+      //params.tl_month = month_arr[new Date().getMonth()];
+        delete call_onetime_clearer; // call one time clearer is ll be  removed shortly
+    }
+    new Ajax.Request('/performance_review_property/capital_expenditures_sub_view?id='+selected_item+'&portfolio_id='+port_id+'&cap_call_id='+act ,{asynchronous:true,
+      evalScripts:true,
+      method: 'GET',
+      parameters: params,
+      onComplete:function(request){
+      load_completer();
+			jQuery('#show_assets_list').show();
+			jQuery('.contentwrapper').show();
+      if (month_arr[new Date().getMonth()] == parseInt(active_sub_month) && period !=  "9")
+        jQuery(".timelinelabel_wrapper .executivesubtabrow #lastMonth").attr('class','subtabactiverow');
+      else
+        jQuery(".timelinelabel_wrapper .executivesubtabrow #lastMonth").attr('class','subtabdeactiverow');
+      if (!(active_sub_month=='' && active_period==4))
+        dynamic_month_change(active_sub_month);
+      },
+      onLoading:function(request){
+        load_writter();
+        jQuery('#success_msg').html("<img src='/images/loading_amp.gif'/>" + "&nbsp;&nbsp;We are calculating the values for your Cap Exp page. This operation will take about a minute.&nbsp;");
+      }});
+  }
+  function cashSubCalls(act,params,sqftCalc){ // its for cap_exp sub calls
+    cash_sub_call = act;
+    cash_find_id = params.cash_find_id;
+		params.cash_item_title = params.cash_item;
+    params.tl_period = active_period;
+		if (<%=params[:page_refer]=="cash"%>)
+		{
+		params.tl_month = '<%=params[:tl_month]%>'
+		}
+		else
+		{
+    params.tl_month = active_sub_month;
+		}
+    params.tl_year  = active_sub_year;
+    params.quarter_end_month = quarter_end_month;
+    if(params.tl_period == "7"){
+        if(active_sub_month != ''){
+        params.cur_month = months[parseInt(active_sub_month,10) - 1];
+        crMonth = month;}
+      else{
+        params.cur_month = crMonth;
+      }
+      params.cur_year = active_sub_year;
+    }
+
+    last_renderer = "cash_sub_view"//we can change in case we need more for all other sub_graphs
+    cash_sub_params = params
+    if(typeof(call_onetime_clearer) !='undefined' || params.tl_period == 5){
+      if (params.tl_month=='')
+      //params.tl_month = month_arr[new Date().getMonth()];
+        delete call_onetime_clearer; // call one time clearer is ll be  removed shortly
+    }
+			new Ajax.Request('/performance_review_property/'+ for_time_period_setting +'cash_n_receivables_sub_view?id='+selected_item+'&portfolio_id='+port_id+'&cash_call_id='+act ,{asynchronous:true,
+      evalScripts:true,
+      method: 'GET',
+      parameters: params,
+	onComplete: function(request){
+			load_completer();
+			jQuery('#show_assets_list').show();
+			jQuery('.contentwrapper').show();
+	},
+	onLoading: function(request){
+
+			load_writter();
+	}});
+  }
+  /* THIS IS CHANGED AND WANT TO BE REMOVED SHORLY.*/
+
+  function update_level_bread_crum1(lvl){
+  // var arr_lvl = ['', ' Net Cash from Operating Activities', ' Total Capital Expenditures', ' Net Cash from Financing Activities','Cash Flow From Op Activities','Non Cash Items in Net Income','Changes in assets and liabilities:','Capital Expenditures','Cash Flow From Financing Activities']
+ //   str = "<span class=\"executiveiconcol\"><img width=\"14\" height=\"16\" src=\"/images/executivehead_icon.png\"></span><a id=\"a1\" href=\"#\"       onclick=\"performanceReviewCalls('cash_n_receivables',{}); return false;\">Cash & Receisdsdvables</a><img id=\"i2\" width=\"10\" height=\"9\" src=\"/images/eventsicon2.png\"/><a id=\"a2\" href=\"\" onclick=\"cashSubCalls("+lvl+",{cash_find_id:''}); return false;\" >"+arr_lvl[lvl]+"</a>"
+//    brd_updater =   "jQuery('.executiveheadcol:first').html(str);jQuery('#a2').css('color','black'); jQuery('#a2').removeAttr('href');"
+
+  }
+
+  function update_level_bread_crum2(lvl,cont){
+    jQuery('#a2').css('color','');
+    jQuery('#a2').attr("href",'');
+    str = jQuery('.executiveheadcol').html();
+    str1 = "<img id=\"i3\" width=\"10\" height=\"9\" src=\"/images/eventsicon2.png\"/><a id=\"a3\"href=\"\" onclick=\"cashSubCalls(2,{cash_find_id:'"+lvl+"'});return false;\">"+cont+"</a>"
+    brd_updater =  "jQuery('.executiveheadcol').html(str +str1);jQuery('#a3').css('color','black');jQuery('#a3').removeAttr('href');"
+  }
+
+  function remove_level_bread_crum(place){ // bread crump level limited to 6 .u can change
+    var start = parseInt(place[1]) + 1;
+    for(var i=start; i<=6; i++){
+      jQuery('#i'+ i).remove();
+      jQuery('#a'+ i).remove();
+    }
+    jQuery('#a'+ (start - 1)).css('color','black'); // traverse back ..
+    jQuery('#a'+ (start - 1)).removeAttr("href");
+  }
+  if(<%= !params[:partial_disp].nil? && params[:partial_disp] == 'data_hub' %>) {
+    show_data_hub_docs_real_estate(port_id,selected_item,'hide_del');
+  }
+
+if(<%= !params[:partial_disp].nil? && params[:partial_disp] == 'property_settings' %>) {
+    active_title('property_settings');
+    if (<%=params[:folder_revoke] != ""%>)
+       folder_revoke = '<%=params[:folder_revoke]%>';
+    if (<%=params[:call_from_variances] != ""%>)
+       high_prop_var = '<%=params[:call_from_variances]%>';
+	  if (<%=params[:highlight_users_form] != ""%>)
+       high_prop_users = '<%=params[:highlight_users_form]%>';
+    if (<%=params[:highlight_basic_form] != ""%>)
+      high_prop_basic = '<%=params[:highlight_basic_form]%>';
+    if (<%=params[:from_property_details] != ""%>  )
+      high_prop_detail = '<%=params[:from_property_details]%>';
+    if (<%=params[:from_debt_summary] != ""%>  )
+      high_prop_debt = '<%=params[:from_debt_summary]%>';
+    if (<%=params[:folder_id] != ""%>  )
+      folder_id = '<%=params[:folder_id]%>';
+    if (<%=params[:document_id] != ""%>  )
+      document_id = '<%=params[:document_id]%>';
+    if (<%=params[:is_property_folder] != ""%>  )
+      is_property_folder = '<%=params[:is_property_folder]%>';
+    if (<%=params[:from_prop_setting] != ""%>  )
+      from_prop_setting = '<%=params[:from_prop_setting]%>';
+    property_settings(port_id,selected_item);
+     }
+
+
+
+  function show_aged_explanation(txt,val)
+  {
+    var el=document.getElementById("wrapper_div");
+    if ( prev_text != txt )
+    {
+      // Code removed from here to replace the text area value. If needed, take from github '814d70b126c8aca8377f7c7b003cb7f456d0b36d'.
+      document.getElementById("non_"+txt).innerHTML=document.getElementById(txt+"_box").value;
+      document.getElementById("non_"+txt).style.display='none';
+      document.getElementById(txt+"_text").style.display='block';
+      prev_text = txt;
+      // Code removed from here to replace the text area value. If needed, take from github '814d70b126c8aca8377f7c7b003cb7f456d0b36d'.
+      //document.getElementById(txt+"_box").value=val;
+      document.getElementById(txt+"_box").focus();
+      //		document.getElementById(txt+"_more").style.display='none';
+    }
+  }
+
+  function set_focus_function_for_other(elem_id)
+  {
+    window.location.hash = '#'+elem_id;
+  }
+</script>
+<script>
+<% if params[:open_property_folder] %>
+    show_data_hub_docs_real_estate('<%=@portfolio.id%>','<%=@note.id%>','hide_del');
+<% elsif params[:open_folder] %>
+    show_hide_asset_docs1_real_estate('<%=@portfolio.id%>','<%= params[:open_folder] %>','hide_del')
+<% end %>
+<% if params[:task_id] and @doc%>
+    function edit_func_call1(){
+      new Ajax.Request("<%=edit_task_tasks_path(:id=>@doc.id,:portfolio_id=>@doc.real_estate_property.portfolio.id,:folder_id=>@doc.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file])%>",{
+        asynchronous:true,
+        evalScripts:true,
+        insertion:Insertion.Top
+      });
+    }
+  <% if folder_det.include?(@doc.folder.name) %>
+      function edit_func_call_for_var(){
+    <% knd = (@doc.filename.downcase.include?('capital_improvement') || @doc.filename.downcase.include?('capexp')) ? "cap_exp" : "cash_flow" %>
+        new Ajax.Request("<%=edit_task_tasks_path(:id=>@doc.id,:portfolio_id=>@doc.real_estate_property.portfolio.id,:folder_id=>@doc.folder_id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file],  :from_assign_task=>knd, :month=> folder_det.index(@doc.folder.name)+1)%>",{
+          asynchronous:true,
+          evalScripts:true,
+          insertion:Insertion.Top
+        });
+      }
+  <% end %>
+    function link_to_edit_task_function()
+    {
+
+      new Ajax.Request("/properties/notes_data_hub/?pid=<%=@doc.real_estate_property.portfolio.id%>&nid=<%=@doc.real_estate_property.id%>&del_files=false",{
+        asynchronous:false,
+        evalScripts:true,
+        onComplete:function(request){
+          load_completer();
+					jQuery('.contentwrapper').show();
+        },
+        onLoading:function(request){
+          load_writter();
+        },
+      });
+    }
+    window.onload = link_to_edit_task_function;
+<% elsif params[:task_id] and @fol %>
+    function edit_func_call2()
+    {
+      new Ajax.Request("<%=edit_task_tasks_path(:id=>params[:task_id],:portfolio_id=>@fol.portfolio_id,:folder_id=>@fol.id,:del_files=>params[:del_files],:show_past_shared=>params[:show_past_shared],:revoke_fn=>"true",:show_missing_file=>params[:show_missing_file], :edit_task_for_folder => 'true')%>",{
+        asynchronous:true,
+        evalScripts:true,
+        insertion:Insertion.Top
+      });
+    }
+    function link_to_edit_task_function1()
+    {
+//show_data_hub_docs_real_estate('<%=@fol.portfolio_id%>','<%=@fol.real_estate_property_id%>','hide_del');
+
+      new Ajax.Request("/properties/notes_data_hub/?pid=<%=@fol.portfolio_id%>&nid=<%=@fol.real_estate_property_id%>&del_files=false",{
+        asynchronous:false,
+        evalScripts:true,
+        onComplete:function(request){
+          load_completer();
+					jQuery('.contentwrapper').show();
+        },
+        onLoading:function(request){
+          load_writter();
+        },
+      });
+
+      //setTimeout("edit_func_call2()",2250);
+      edit_func_call2();
+    }
+    window.onload = link_to_edit_task_function1;
+<%elsif params[:task_id]%>
+    jQuery("#d_hub .tabwrapper a").trigger('click');
+<%end%>
+
+  function highlight_explanation(id,period)
+  {
+    if (jQuery("#expln_"+id) && period == "false")
+    {
+      setTimeout(function(){
+        document.getElementById("expln_"+id).focus();
+        document.getElementById("expln_"+id).scrollIntoView();},1500);
+    }
+    else if (document.getElementById("expln_ytd_"+id))
+    {
+			setTimeout(function(){
+      document.getElementById("expln_ytd_"+id).focus();
+			document.getElementById("expln_ytd_"+id).scrollIntoView();},1500);
+    }
+  }
+
+	 function highlight_comment(id,period)
+  {
+    if (jQuery("#explanation_comment_"+id) && period == "false")
+    {
+      setTimeout(function(){
+        document.getElementById("explanation_comment_"+id).focus();
+        document.getElementById("explanation_comment_"+id).scrollIntoView();},1500);
+    }
+    else if (document.getElementById("explanation_comment_ytd_"+id))
+    {
+			setTimeout(function(){
+      document.getElementById("explanation_comment_ytd_"+id).focus();
+			document.getElementById("explanation_comment_ytd_"+id).scrollIntoView();},1500);
+    }
+  }
+
+ function restrict_pwd(){
+ if(active_period == '9' || active_period == '11'){
+   active_period = "4"
+   active_sub_month=""
+   <%params[:tl_period],params[:period]="4","4"%>
+ }
+ }
+  function change_option(){
+	if(active_period == '2'){
+   active_period = "4"
+   active_sub_month=""
+   <%params[:tl_period],params[:period]="4","4"%>
+ }
+ }
+
+<% if params[:variances] == "true"%>
+			partial_page='variances';
+			restrict_pwd();
+			change_option();
+			performanceReviewCalls('variances',{});
+<%end%>
+
+  // initialize all expanding textareas
+  jQuery(document).ready(function() {
+    jQuery("textarea[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+
+<%#if @set_prev_month %>
+  <%if !params[:partial_disp].nil? && params[:partial_disp] == "property_settings"%>
+
+  <%else%>
+    <%if !params[:tl_period].present? %>
+    document.getElementById("yearToDate").className = "subtabactiverow";
+	<%end%>
+	<%end%>
+<%#end%>
+//  enable_disable_tab('financial', active_sub_call);
+</script>
+
+<!--[if IE 7 ]>
+<style type="text/css">
+  #stop_events_top{
+    top:-890px;
+  }
+  #stop_events_bottom{
+    top:-890px;
+    height:600px;
+  }
+  #msg_writter{
+  padding-bottom:6px;
+  }
+	#success_msg{
+  padding-bottom:6px;
+  }
+</style>
+<![endif]-->
+
+<!--[if IE 8 ]>
+<style type="text/css">
+  #stop_events_top{
+    top:-890px;
+  }
+  #stop_events_bottom{
+    top:-890px;
+    height:600px;
+  }
+</style>
+<![endif]-->
+<%if params[:page_refer] == "capital"%>
+<script>
+jQuery("#financial").removeClass("selected");
+jQuery("#capital_expenditure").addClass("selected");
+jQuery(".contentwrapper").hide();
+jQuery(document).ready(function () {
+  jQuery("#capital_expenditure").click();
+});
+</script>
+<%end%>
+
+<%if params[:page_refer] == "cash"%>
+<script>
+jQuery("#financial").removeClass("selected");
+jQuery("#cash_n_receivables").addClass("selected");
+jQuery(".contentwrapper").hide();
+jQuery(document).ready(function () {
+  jQuery("#cash_n_receivables").click();
+});
+</script>
+<%end%>
+
+<%if params[:page_refer] == "variances"%>
+<script>
+jQuery("#financial").removeClass("selected");
+jQuery("#variances").addClass("selected");
+jQuery(".contentwrapper").hide();
+jQuery(document).ready(function () {
+  jQuery("#variances").click();
+
+});
+</script>
+<%end%>

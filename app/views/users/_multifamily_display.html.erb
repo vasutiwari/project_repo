@@ -1,0 +1,48 @@
+
+<%unless multi_count.eql?(0)%>
+	<div class="legendAB">Legend: &nbsp; <span class="above">Above Budget</span>&nbsp; &nbsp;<span class="below">Below Budget</span></div>
+  		<table cellspacing="0" cellpadding="6" border="0" width="100%" style="table-layout: fixed;position:relative; float:left;" class="tablefb font12">
+        	<thead>
+            	<tr class="fb-tr-head">
+                	<th style="width: 31px;" class="bdr-lt-gry bdr-rt-wht">Rank</th>
+                    <th style="width: 153px;" class="bdr-rt-wht">Property</th>
+                    <th style="width: 99px;" class="bdr-rt-wht">Vacancy %, SF</th>
+                    <th style="width: 89px;" class="bdr-rt-wht">Net Avail <br><small style="width:auto; bottom:-10px; left:0px">Vac + Net</small></th>
+                    <th style="width: 106px;" class="bdr-rt-wht">YTD Op Rev $ </th>
+                    <th style="width: 105px;" class="bdr-rt-wht">YTD NOI $</th>
+                    <th style="width: 105px;" class="bdr-rt-wht">YTD Cash $</th>
+                    <th style="width: 131px;" class="bdr-rt-wht">
+										  <div class="">Last Wk <br />
+                         <div class="multdeposits" >Traffic</div>
+                         <div class="multdeposits" >Deposits</div></div>
+                       <!--  <div class="multytdcash multent">Tenant $</div> -->
+                      </div>
+										</th>
+                </tr>
+             </thead>
+          </table>
+			
+      <div id="tbloverflow"> <%=render :partial =>"/users/multifamily_content_display",:locals=> {:multi_count=>multi_count} %> </div>
+  <%else%>
+    <%if portfolio_count.empty? || portfolio_count.eql?(0)%>
+      <div id="multi_table">
+        <div class="multbodybox"><center>No Data to Display<!--. Click this link to add portfolio--> <!-- Commented temporarily -->
+            <%#= link_to 'Add Portfolio', {:controller=>'users',:action=>"new_portfolio",:id=>2} ,:id=>"upload_form6" %>
+            <!--<script>new Control.Modal($('upload_form6'), {beforeOpen: function(){load_writter();},afterOpen: function(){load_completer();},className:'modal_container', method:'get'});</script>-->
+          </center>
+        </div>
+      </div>
+    <%elsif comm_count.eql?(0)%>
+      <div id="multi_table">
+        <div class="multbodybox"><center>No Data to Display<!--. Click this link to add properties --> <!-- Commented temporarily -->
+            <%#= link_to 'Add Properties', {:controller=>'portfolios'}  %>
+          </center>
+        </div>
+      </div>
+    <%else%>
+      <div id="multi_table">
+        <div class="multbodybox"><center>No Data to Display</center>
+        </div>
+      </div>
+    <%end%>
+  <%end%>

@@ -1,0 +1,41 @@
+<%#portfolio_collection = @portfolio%>
+<%portfolio = portfolio_obj.id %>
+<%note = property_obj.id %>
+<%if property_obj.try(:leasing_type) == "Commercial"%>
+		<div class="navSubmenu leasingSubMenu" style="<%if is_leasing_agent %> position: relative;margin-right: -95px;<%end%>visibility:hidden;" id="leasing_sub_tab">
+				<%unless is_leasing_agent%><a href="/lease/<%=portfolio%>/management/<%=note%>/management" class="lease_tab <%= (controller_name == 'lease' && action_name == 'management' || controller_name == 'lease' && action_name == 'dashboard_terms') ? 'selected' : '' %>">Management</a><%else%><span style="background: none repeat scroll 0 0 transparent;border: 0 none;color: #9C9C9C!important;float: none;font-size: 11px;letter-spacing: 0.7px;margin: 0 5px;padding: 4px 6px;">Management</span><%end%> |
+				<a href="/lease/<%=portfolio%>/pipeline/<%=note%>/property_pipeline?from_mgmt=true" class="lease_tab <%= ((controller_name == 'lease' && action_name == 'pipeline') || (controller_name == 'lease' && action_name == 'show_pipeline' && is_leasing_agent)) ? 'selected' : '' %>">Pipeline</a>|
+				<%unless is_leasing_agent%><a href="/lease/<%=portfolio%>/alert/<%=note%>/property_alert" class="lease_tab <%= (controller_name == 'lease' && action_name == 'alert') ? 'selected' : '' %>">Alerts</a><%else%><span style="background: none repeat scroll 0 0 transparent;border: 0 none;color: #9C9C9C!important;float: none;font-size: 11px;letter-spacing: 0.7px;margin: 0 5px;padding: 4px 6px;">Alerts</span><%end%> |
+					<a href="/lease/<%=portfolio%>/stacking_plan/<%=note%>/stacking_plan" class="<%= (controller_name == 'lease' && action_name == 'stacking_plan') ? 'selected' : '' %>">Stacking</a>|
+					
+				<%unless is_leasing_agent%><a href="/lease/<%=portfolio%>/budget/<%=note%>/budget" class="lease_tab <%= (controller_name == 'lease' && action_name == 'budget') ? 'selected' : '' %>">Budget</a><%else%><span style="background: none repeat scroll 0 0 transparent;border: 0 none;color: #9C9C9C!important;float: none;font-size: 11px;letter-spacing: 0.7px;margin: 0 5px;padding: 4px 6px;">Budget</span><%end%> |
+				<%unless is_leasing_agent%><a href="/lease/<%=portfolio%>/encumbrance/<%=note%>/property_encumb" class="lease_tab <%= (controller_name == 'lease' && action_name == 'encumbrance') ? 'selected' : '' %>">Encumbrance</a><%else%><span style="background: none repeat scroll 0 0 transparent;border: 0 none;color: #9C9C9C!important;float: none;font-size: 11px;letter-spacing: 0.7px;margin: 0 5px;padding: 4px 6px;">Encumbrance</span><%end%> |
+				<%unless is_leasing_agent%><a href="/lease/<%=portfolio%>/rent_roll/<%=note%>/property_rentroll" class="lease_tab <%= (controller_name == 'lease' && action_name == 'rent_roll') ? 'selected' : '' %>">Rent Roll</a><%else%><span style="background: none repeat scroll 0 0 transparent;border: 0 none;color: #9C9C9C!important;float: none;font-size: 11px;letter-spacing: 0.7px;margin: 0 5px;padding: 4px 6px;">Rent Roll</span><%end%> |
+				<a href="/lease/<%=portfolio%>/suites/<%=note%>/suites_form" class="lease_tab <%= (controller_name == 'lease' && action_name == 'suites') ? 'selected' : '' %>">Suite</a>
+		</div>
+<%else%>
+		<div class="navSubmenu leasingSubMenu leasingSubMenu2 marginL5m" style="visibility:hidden;margin-left:179px !important;"  id="leasing_sub_tab">
+				<a href="/performance_review_property/rent_roll?portfolio_id=<%=portfolio%>&id=<%=note%>&property_id=<%=note%>&partial_page=rent_roll_highlight&tl_year=<%=Time.now.year%>&from_lease=ya" class="<%= (controller_name == 'performance_review_property' && action_name == 'rent_roll') ? 'selected' : '' %>">Rent Roll</a>
+		<!--
+			<a href=""  id="rent_roll" onclick="partial_page='rent_roll_highlight';restrict_pwd();performanceReviewCalls('rent_roll',{});jQuery('.executiverhsrow').hide();jQuery('.pdf_link_financial_end').hide();jQuery('.pdf_link_financial').hide();jQuery('.temp_class').hide();jQuery('.sqrft_per_unit').hide();jQuery('#id_for_modify_threshold').hide();return false;">Rent Roll</a>
+		-->
+		</div>
+<%end%>
+<script>
+jQuery(document).ready(function()
+	{
+	 if (jQuery('#leasing_id').attr('class').indexOf('selected') !== -1)
+	  jQuery('#leasing_sub_tab').css('visibility','visible');
+	}
+	);
+	
+jQuery('#leasing_sub_tab').mouseover(function()
+	{
+    mousehover('leasing_id','leasing')
+	});
+	
+	jQuery('#leasing_sub_tab').mouseout(function(){
+    delayed_mouseout('leasing_id');
+});
+
+</script>

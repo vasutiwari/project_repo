@@ -1,0 +1,187 @@
+<script>
+  open_text_box = 'undefined';
+</script>
+<!--for floor,suite,rentable sqft count start--><%params[:suite_filter] =="Vacant" ? find_floor_suite_count(params[:property_id],params[:suite_filter]) : params[:suite_filter] =="Occupied" ? find_floor_suite_count(params[:property_id],params[:suite_filter]) : find_floor_suite_total(params[:property_id]) %>
+<%params[:suite_filter] =="Vacant" ? find_vacant_suite(params[:property_id],params[:suite_filter]) : params[:suite_filter] =="Occupied" ? find_vacant_suite(params[:property_id],params[:suite_filter]) : find_suite_all(params[:property_id]) %>
+<%if @suite_data.present? %>
+  <div class="lebredcomsleft boldtxt" style="margin-top:13px;color:#000 !important; font-size:12px !important">
+    <%=@floor_count %> Floor(s), <%=@suite_count %> Suites, <%if @rentable_sqft_total.present? %><%=number_with_delimiter(@rentable_sqft_total.round) %><%else %><%=@rentable_sqft_total %><%end %> Rentable Sqft Added
+  </div>
+  <div class="leadditem" style="padding-top:0px;">
+  </div>
+  <!--for floor,suite,rentable sqft count end-->
+  <div class="tbl_lease suite-tbl">
+    <div class="tbl-head suite-head">
+      <div class="suiteno" style="width:70px">
+        Floor
+      </div>
+      <div class="suiteno" style="width:70px">
+        Suite
+      </div>
+      <div class="sqft" style="width:95px">
+        Rentable SF
+      </div>
+      <div class="tenant" style="width:95px">
+        Usable SF
+      </div>
+      <div style="width: 70px;" class="activity">
+                                                  Status
+      </div>
+      <div style="width: 70px;" class="activity">
+                                                  Days Vac
+      </div>
+      <div style="width: 125px;" class="note">
+                                                  Notes
+      </div>
+      <div style="width:115px" class="note">
+                                                  Attach Flr Plan
+      </div>
+      <div style="width: 70px;" class="note">Action</div>
+    </div>
+    <%@suite_data.each_with_index do |suite_data,i| %>
+      <%suiteformid = suite_data.id %>
+      <!--form two start--><%= form_for note_collection,:url=> lease_suites_create_path(params[:portfolio_id],params[:property_id]), :html=>{:target => "lease_suites_frame_form", :multipart => true,:id=>"mgmt_suites_form_#{suiteformid}"} do |f| -%>
+        <div class="tbl-row <%= cycle("suite-odd", "suite-even") %>" style="padding-top:12px;">
+          <!--for suite data start-->
+          <div id="suite_text_data<%=suite_data.id%>">
+            <div class="suiteno" style="width:62px; padding:4px" title="<%=suite_data.floor%>">
+              <%=suite_data.floor.present? ? truncate(suite_data.floor,:length=>9) : raw("&nbsp;")%>
+            </div>
+            <div class="suiteno" style="width:62px; padding:4px;" title="<%=suite_data.suite_no%>">
+              <%=suite_data.suite_no.present? ? truncate(suite_data.suite_no,:length=>9) : raw("&nbsp;") %>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px" title="<%if suite_data.rentable_sqft.present? %><%=number_with_delimiter(suite_data.rentable_sqft.round) %><%end %>">
+              <%= suite_data.rentable_sqft.present? ? number_with_delimiter(suite_data.rentable_sqft.round) : raw("&nbsp;") %>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px" title="<%if suite_data.usable_sqft.present? %><%=number_with_delimiter(suite_data.usable_sqft.round) %><%end %>">
+              <%= suite_data.usable_sqft.present? ? number_with_delimiter(suite_data.usable_sqft.round) : raw("&nbsp;")%>
+            </div>
+            <!--for status start-->
+            <div class="sqft" style="width:62px; padding:4px">
+              <div id="suitHelp1<%=i%>" class="suithelpbox" style="display:none">
+                <img src="/images/helpbox_arrow.png" width="11" height="12" align="texttop" class="helparrow" /><%if suite_data.status.titlecase == "Vacant" %>Add lease for this suite to change the status to Occupied.<%else %>Change the expiration date or delete Lease to change the status to Vacant.<%end %>
+              </div><a onMouseOver="jQuery('.suithelpbox').hide();colExp('suitHelp1<%=i%>')" onMouseOut="document.getElementById('suitHelp1<%=i%>').style.display='none'"><%=suite_data.status.titlecase %></a>
+            </div>
+            <!--for status end-->
+
+            <%calculate_vac_days_for_suite(suite_data.id)%>
+            <%if @vac_days.present?%>
+              <div style="width:62px; padding:4px" class="sqft"title="<%= @vac_days.present? ? @vac_days  : raw("&nbsp;") %>">
+                <%= @vac_days.present? ? @vac_days  : raw("&nbsp;") %>
+              </div>
+            <%else%>
+              <div style="width:62px; padding:4px" class="sqft"title="<%if suite_data.days_vaccant.present? %><%=suite_data.days_vaccant %><%end %>">
+                <%= suite_data.days_vaccant.present?  ? suite_data.days_vaccant : raw("&nbsp;") %>
+              </div>
+            <%end%>
+
+            <div class="sqft" style="width:117px; padding-left:4px; text-align:left; word-wrap:break-word;height:30px;margin-bottom:23px;margin-top:-10px;" title="<%if suite_data.note.present? %><%= suite_data.note.content %><%end %>">
+              <%= suite_data.note.present? ? truncate(suite_data.note.content,:length=>45) : raw("&nbsp;")%>
+            </div>
+          </div>
+          <!--for suite data start--><!--for suite data fields start-->
+          <div id="suite_text_fields<%=suite_data.id%>" style="display:none;">
+            <div class="suiteno" style="width:62px; padding:4px">
+              <input type="hidden" id = "suite_field_id" name="suite_field_id" value ="<%=suiteformid%>" /><input name="floor1" type="text" class="lstextfield" style="width:58px" value="<%=suite_data.floor%>"/>
+            </div>
+            <div class="suiteno" style="width:62px; padding:4px">
+              <input name="suite_no1" type="text" class="lstextfield" style="width:58px" value="<%=suite_data.suite_no%>"/>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px">
+              <input name="rentable_sqft1" type="text" class="lstextfield" style="width:83px" value="<%=suite_data.rentable_sqft.present? ? (suite_data.rentable_sqft.to_i) : suite_data.rentable_sqft%>"/>
+            </div>
+            <div class="sqft" style="width:87px; padding:4px">
+              <input name="usable_sqft1" type="text" class="lstextfield" style="width:83px" value="<%=suite_data.usable_sqft.present? ? (suite_data.usable_sqft.to_i) : suite_data.usable_sqft%>"/>
+            </div>
+            <div class="sqft" style="width:62px; padding:4px">
+              <input name="status1" type="text" class="lstextfield" style="width:60px;" value="<%=suite_data.status.titlecase%>" readonly="readonly"/>
+            </div>
+
+            <%calculate_vac_days_for_suite(suite_data.id)%>
+            <%if @vac_days.present?%>
+              <div style="width:62px; padding:4px" class="sqft"title="<%= @vac_days.present? ? @vac_days  : raw("&nbsp;") %>">
+                <%= @vac_days.present? ? @vac_days  : raw("&nbsp;") %>
+              </div>
+            <%else%>
+              <div style="width:62px; padding:4px" class="sqft">
+                <input type="text" value="<%=suite_data.days_vaccant.present? ? (suite_data.days_vaccant) : suite_data.days_vaccant%>" style="width:60px;" class="lstextfield" name="days_vaccant1">
+              </div>
+            <%end%>
+
+            <div class="sqft" style="width:117px; padding:4px">
+              <textarea name="suite_note1" style="width:115px;" class="expand25-300 taskfieldinput2" value = "<%if suite_data.note.present?%><%=suite_data.note.content%><%else%><%end%>"><%if suite_data && suite_data.note.present? && suite_data.note.content.present?%><%=suite_data.note.content%><%else%><%end%></textarea>
+            </div><!--for attachfile edit start-->
+
+            <div class='suite_data_upload1' style="float: left; padding: 4px 14px 4px 4px;overflow: hidden;width: 96px;">
+              <%if suite_data.document.present? %><input type='file' name='suite_file_upload1' id='suitefilefield1' size="2" value = "<%=suite_data.document.filename%>"/><%else %><input type='file' name='suite_file_upload1' id='suitefilefield1' size="2"/><%end %>
+            </div><!--for attachfile edit end-->
+          </div><!--for save edit data start-->
+          <div id="savefield<%=suiteformid%>" style="display:none;">
+            <div style="float: left; padding: 3px 4px;">
+              <div class="graybutton" style="margin:0">
+                <a href="javascript:;" id="suite_save" style="cursor: pointer; padding: 0pt 13px;" onclick="jQuery('#mgmt_suites_form_<%=suiteformid%>').submit();">Save</a>
+                <span>&nbsp;</span>
+              </div>
+            </div>
+          </div>
+
+          <!--for save edit data start--><!--for suite data fields end--><!--For edit,delete suites start-->
+          <div class="actions" id="dataoption2<%=suiteformid%>"style="padding: 0 0 0 8px; width: 62px;margin-left: 112px;">
+            <%if !@pdf && !is_leasing_agent %>
+              <div id="morebtn" onmouseover="document.getElementById('moreddmenu<%=i%>').style.visibility='visible';zIndexDD('moreddmenu<%=i%>')" onmouseout="document.getElementById('moreddmenu<%=i%>').style.visibility='hidden';zIndexDD('moreddmenu<%=i%>')">
+                <div class="folderlabel">
+                  <a href="#" style="padding:0">
+                    <div class="folderlabelcol center"style="padding:4px; width:43px;white-space:nowrap">
+                      Select &#9660;
+                    </div>
+                  </a>
+                  <img src="/images/upllodright.png" width="2" height="27" border="0" />
+                </div><span class="moreddmenu" id="moreddmenu<%=i%>" style="visibility:hidden;left:8px; top:24px" onmouseover="this.style.visibility='visible'" onmouseout="this.style.visibility='hidden'">
+                  <div class="labeldd1">
+                    <a href="javascript:;" onclick="if(open_text_box == 'true'){alert('Please Update the Edited Suite to proceed.');}else{edit_suite_data(<%=suiteformid%>); }return false;"><img border="0" width="9" height="9" src="/images/white_edit.png"/> Edit</a>
+                  </div>
+                  <div class="labeldd1">
+                    <a href="javascript:;" onclick="msg=check_suite_status(<%= suiteformid%>);if(msg){alert(msg)} else { if(confirm('Are you sure you want to delete this suite <%=suite_data.suite_no%>?')){<%if params[:page].present?%>delete_suite_data_page(<%=suiteformid%>,<%=params[:portfolio_id]%>,<%=params[:property_id]%>,<%=params[:page]%>);<%else%>delete_suite_data(<%=suiteformid%>,<%=params[:portfolio_id]%>,<%=params[:property_id]%>);<%end%>}} return false;"><img border="0" width="9" height="9" src="/images/delete.png"/> Delete</a>
+                  </div>
+                  <%if suite_data.document.present? %>
+                    <div class="labeldd1">
+                      <a href="javascript:;" onclick ="if(confirm('Are you sure you want to delete?')){<%if params[:page].present?%>suite_file_delete_page(<%=suite_data.document.id%>,<%=params[:portfolio_id]%>,<%=params[:property_id]%>,<%=params[:page]%>);<%else%>suite_file_delete(<%=suite_data.document.id%>,<%=params[:portfolio_id]%>,<%=params[:property_id]%>);<%end%>return false;}"><img src="/images/remove-file.png" width="9" height="9" border="0" align="absmiddle"/> Remove File</a>
+                    </div>
+                  <%end %>
+                </span>
+                <div class="clear">
+                </div>
+              </div>
+            <%end %>
+          </div>
+          <!--For edit,delete suites end--><input type="hidden" id = "tab_id" name="tab_id" value ="10" /><input type="hidden" id = "form_txt" name="form_txt" value ="suites" /><input type="hidden" id = "property_id" name="property_id" value ="<%=params[:property_id]%>" /><input type="hidden" id = "suites_form" name="suites_form" value ="false" /><%if params[:page].present? %><input type="hidden" id = "page" name="page" value ="<%=params[:page]%>" /><%end %><input type="hidden" id = "per_page" name="per_page" value ="25" /><input type="hidden" id = "sort" name="sort" value ="<%=params[:sort]%>" /><input type="hidden" id = "from_pag" name="from_pag" value ="true" />
+        </div><%end %>
+      <!--form two end-->
+      <!--form three start-->
+      <div id="attach_replace_#{suiteformid}">
+        <%= render 'suite_file_display',:note_collection => note_collection,:suiteformid => suiteformid,:suite_data => suite_data,:i => i %>
+      </div>
+      <!--form three end-->
+    <%end %>
+    <!--</div>-->
+    <!--<div class="lsrowwrapper" style="z-index:-100; width:780px">
+    </div>-->
+  </div>
+  <%if @suite_data.present? %>
+    <%unless @pdf %>
+      <div class="paginationcol" style="margin-left:600px;">
+        <%= will_paginate  @suite_data, :inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'lease', :action => 'suites', :id=>note_collection.id,:per_page=>25,:page=>params[:page], :portfolio_id=>params[:portfolio_id],:property_id => params[:property_id],:sort=>params[:sort],:from_pag=>true} %>
+      </div>
+    <%end %>
+  <%end %>
+<%else %>
+  <div class='no-data'>
+    No Data To Display
+  </div>
+<%end %>
+<iframe id="lease_suites_frame" name="lease_suites_frame" style="display: none">
+</iframe>
+<iframe id="lease_suites_frame_form" name="lease_suites_frame_form" style="display: none">
+</iframe>
+<iframe id="lease_suites_frame_form_two" name="lease_suites_frame_form_two" style="display: none">
+</iframe>

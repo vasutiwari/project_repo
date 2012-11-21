@@ -1,0 +1,81 @@
+<% date_array = @date_array %>
+<% @current_selected_time_frame = @date_array.last %>
+<div class="executiverhsrow executiverhsrow3" style="z-index: 19000; float: left; margin: 0 0 0 140px; width: 600px;">
+    <div class="timelinewrapper" style ="width: 590px;">
+        <h4 align="center" style="font-size:12px; margin:0 0 5px; padding:0; color: black;">Timeframe</h4>
+        <div class="timelineselector" style ="padding-left: 1px; width: 589px;">
+            <div class="timewrapper" style="width:701px;">
+                <div class=" jcarousel-skin-tango">
+                    <div class="jcarousel-container-horizontal" style="position: relative; display: block;">
+                        <div class="jcarousel-clip jcarousel-clip-horizontal" style="overflow: hidden; position: relative;">
+                            <ul class="jcarousel jcarousel-list jcarousel-list-horizontal" id="mycarousel_horizontal_new" style="overflow: hidden; position: relative; top: 0px; left: 0px; margin: 0px; padding: 0px; height: 468px;">
+                                <% for i in 0..date_array.count-1 %>
+                                <li class="jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal " style="float: left; list-style: none outside none; cursor: pointer;" jcarouselindex="1">
+                                    <div class="<% if @selected_time_line == i %>active<%else%>deactive<%end%>  common_time_line_selector" id = "time_line_highlight_<%= i%>" onclick="display_selected_time_line_from_multifamily_property(jQuery(this).attr('id'),<%= @note.id %>, <%= params[:portfolio_id] %>, jQuery('div.jcarousel-next').attr('disabled'))">
+                                        <div class="left">
+                                            &nbsp;
+                                        </div>
+                                        <div class="label" style="padding-left: 0px; padding-right: 0px; font-weight: normal;">
+                                            <center>
+                                                <div class="label2">
+                                                    <%date_month = @date_month %>
+                                                    <a href="javascript:;" title='<%= "#{date_array[i]}"" #{date_month[i]}"%>'><%= date_array[i] %></a>
+                                                    <span title='<%= "#{date_array[i]}"" #{date_month[i]}"%>' style="display: block;"><%= date_month[i] %></span>
+                                                </div>
+                                            </center>
+                                        </div>
+                                        <div class="right">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+                                </li>
+                                <% end %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    jQuery('#mycarousel_horizontal_new').jcarousel({
+        vertical: false,
+        scroll: 12,
+        visible: 12,
+        animation: "medium",
+		start: <%= @start_date_position%>
+    });
+
+
+    jQuery('#message').fadeOut(8000);
+
+    /* function dehighlight_month(date_array){
+     for(i = 0; i < (date_array); i ++)
+     {
+     document.getElementById('time_line_highlight_'+i).className = 'deactive';
+     }
+     }
+     function dehighlight(){
+     <% for i in 0..12 %>
+     if(document.getElementById('time_line_highlight_'+<%=i%>) != null)
+     {
+     document.getElementById('time_line_highlight_'+<%=i%>).className = 'deactive';
+     }
+     <% end %>
+     }*/
+    function timeline_on_over(id){
+        document.getElementById('show_time_hover_' + id).style.display = "block";
+    }
+
+    function timeline_on_out(id){
+        document.getElementById('show_time_hover_' + id).style.display = "none";
+    }
+
+    breadData = "";
+</script>
+<style type="text/css">
+    .ie_7_position {
+        top: 27px;
+    }
+</style>

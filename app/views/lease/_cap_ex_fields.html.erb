@@ -1,0 +1,154 @@
+<!--for security deposits start-->
+<div class="capexnamerow" style="margin-bottom:10px;">
+  <div class="capexname namefirst boldtxt">Security Deposits</div><div class="clear"></div>
+  <div class="capexname" style="width:90px; text-align:right">Amount($)</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :security_deposit_amount,:type=>"text", :class=>"lstextfield", :style=>"width:100px;",:precision => 2%>
+  </div>
+  <div class="capexname">Interest Rate</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :security_deposit_interest_rate,:type=>"text", :class=>"lstextfield", :style=>"width:100px",:precision => 2%><img src="<%=@pdf_convn_path%>/images/persentageimg.png" width="15" height="18" border="0" />
+  </div>
+  <div class="capexname">L.Para</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :security_deposit_lpara,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+  <div class="capexborder"></div>
+</div>
+<!--for security deposits end-->
+<!--for rent prepaid start-->
+<div class="capexnamerow" style="margin-bottom:10px;">
+  <div class="capexname namefirst boldtxt">Rent Prepaid</div><div class="clear"></div>
+  <div class="capexname" style="width:90px; text-align:right">Amount($)</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :rent_prepaid_amount,:type=>"text", :class=>"lstextfield", :style=>"width:100px;",:precision => 2%>
+  </div>
+  <div class="capexname" style="margin-left:22px;">For Months</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :rent_prepaid_for_months,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+  <div class="capexname" style="margin-left:30px;">L.Para</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :rent_prepaid_lpara,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+  <div class="capexborder"></div>
+</div>
+<!--for rent prepaid end-->
+<!--for Late Charges: Grace start -->
+<div class="capexnamerow" style="margin-bottom:10px;">
+  <div class="capexname namefirst boldtxt">Late Charges</div><div class="clear"></div>
+  <div class="capexname" style="width:90px; text-align:right">Grace &amp; Penalties</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :late_charges_grace_and_penalities,:type=>"text", :class=>"lstextfield", :style=>"width:451px"%>
+  </div>
+  <div class="capexborder"></div>
+</div>
+<!--for Late Charges: Grace end -->
+<div id="capexnote">
+  <!--for Guarantor start-->
+  <div class="capexnamerow" style="margin-bottom:10px;">
+    <div class="capexname namefirst boldtxt">Guarantor</div><div class="clear"></div>
+    <div class="capexname" style="width:90px; text-align:right">Name</div>
+    <div class="capexform" style="padding-left:5px;">
+      <%= f.text_field :guarantor_name,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+    </div>
+    <div class="capexname" style="margin-left:33px;">Address</div>
+    <div class="capexform" style="padding-left:5px;">
+      <%= f.text_field :guarantor_address,:type=>"text", :class=>"lstextfield", :style=>"width:269px"%>
+    </div>
+    <!--for cap ex notes start-->
+    <div id="cap_ex_note" class="capexname" style="<%if @lease.try(:cap_ex).try(:note).try(:content).present?%>display:none;<%else%>display:block;<%end%>float:right">
+      <%unless @pdf%>+ <a onclick="jQuery('#cap_ex_note').hide();colExp('NotesOtherExp')" onmouseover="focusDivOver('NotesOtherExp')" onmouseout="focusDivOut('NotesOtherExp')" >Notes</a><%end%>
+    </div><div class="clear"></div><div class="notesnamerow" id="NotesOtherExp" onmouseover="focusDivOver('NotesOtherExp')" onmouseout="focusDivOut('NotesOtherExp')" style="<%if @lease.cap_ex && @lease.cap_ex.note && @lease.cap_ex.note.content.present?%>display:block;<%else%>display:none;<%end%>">
+      <div class="lsrowwrapper" style="padding-top:0;"><span class="closeme" onclick="if(confirm('<%=FLASH_MESSAGES['leases']['116']%>')){jQuery('#NotesOtherExp').hide();jQuery('#lease_cap_ex_attributes_note_attributes_content').val('');jQuery('#cap_ex_note').show();return false;}">X</span>Notes</div>
+      <div class="termsform" style="padding-left:0px;">
+        <%= f.fields_for :note do |cap_ex_note| %>
+          <%if @lease.cap_ex && @lease.cap_ex.note && @lease.cap_ex.note.content.present?%>
+            <%= cap_ex_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px",:value=>@lease.cap_ex.note.content%>
+          <%else%>
+            <%= cap_ex_note.text_area :content,:rows=>"3",:cols=>"27",:class=>"expand25-300 taskfieldinput2",:style=>"width:748px",:value=>""%>
+          <%end%>
+        <%end%>
+      </div>
+    </div>
+    <!--for cap ex notes end-->
+    <div class="capexborder"></div>
+  </div>
+  <!--for Guarantor end-->
+</div>
+<!--for Key Deposit start-->
+<div class="capexnamerow" style="margin-bottom:10px;">
+  <div class="capexname namefirst boldtxt">Key Deposit</div><div class="clear"></div>
+  <div class="hoursrow2">
+    <div class="capexname" style="width:90px; text-align:right">Amount($)</div>
+    <div class="capexform" style="padding-left:5px;">
+      <%= f.text_field :key_deposit_amount,:type=>"text", :class=>"lstextfield", :style=>"width:100px;",:precision => 2%>
+    </div>
+  </div>
+  <div class="hoursrow2">
+    <div class="capexname" style="margin-left:44px;">L.Para</div>
+    <div class="capexform" style="padding-left:5px;">
+      <%= f.text_field :key_deposit_lpara,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+    </div>
+  </div>
+  <div class="capexborder"></div>
+</div>
+<!--for Key Deposit end-->
+<!--for Letter Of Credit start-->
+<div class="capexnamerow" style="margin-bottom:10px;">
+  <div class="capexname namefirst boldtxt" style="width:240px; text-align:left">Letter Of Credit</div><div class="clear"></div>
+  <div class="capexname" style="width:90px; text-align:right">Amount($)</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :letter_of_credit_amount,:type=>"text", :class=>"lstextfield", :style=>"width:100px;",:precision => 2%>
+  </div>
+  <div class="capexname" style="margin-left:26px;">Expiry Date</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :letter_of_credit_expiration_date, :value => (f.object && f.object.letter_of_credit_expiration_date.present?) ? lease_date_format(f.object.try(:letter_of_credit_expiration_date)) : "mm/dd/yyyy",:type=>"text", :class=>"lstextfield inputtext_for_datepicker date-pick dp-applied loan_fieldinput", :style=>"width:84px;", :size=>12,:onchange => "if(jQuery.trim(jQuery('#'+jQuery(this).attr('id')).val()) != ''){custom_validation_for_date(jQuery('#'+jQuery(this).attr('id')).val(),'','undefined',jQuery(this).attr('id'))}", :onblur=>"if(this.value == ''){this.value = 'mm/dd/yyyy';this.style.color='gray';}",:onclick=>"if(this.value == 'mm/dd/yyyy'){this.value = ''}" %>
+    <%if @pdf%><a title="Choose date" class="dp-choose-date" href="#"><img style="border: medium none ;" src="<%=@pdf_convn_path%>/images/lease1_terms_calu.png"> </a><%end%>
+  </div>
+  <div class="capexname" style="margin-left:27px;">L.Para</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :letter_of_credit_expiration_lpara,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+  <div class="capexborder"></div>
+</div>
+<!--for Letter Of Credit end-->
+<!--for Tax ID start-->
+<div class="capexnamerow">
+  <div class="capexname namefirst boldtxt">Tax ID</div><div class="clear"></div>
+  <div class="capexname" style="width:90px;">Tax Authority No</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :tax_id_tax_authority_number,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+  <div class="capexname" style="margin-left:33px;">Tax Rate</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :tax_id_tax_rate,:type=>"text", :class=>"lstextfield", :style=>"width:92px",:precision => 2%>
+  </div>
+  <div class="capexname" style="margin-left:39px; width:31px;">Phone</div>
+  <div class="capexform" style="padding-left:5px;">
+    <%= f.text_field :tax_id_phone,:type=>"text", :class=>"lstextfield", :style=>"width:100px"%>
+  </div>
+</div>
+<!--for Tax ID end-->
+<script>
+  jQuery(document).ready(function() {
+    jQuery("leasing_commision_note[class*=expand]").TextAreaExpander();
+    jQuery("cap_ex_note[class*=expand]").TextAreaExpander();
+  });// JavaScript Document
+  function colExp(objid){
+    var obj = document.getElementById(objid);
+    obj.style.display=obj.style.display==""?"none":"";
+  }
+  function addDivRow(objid){
+    var obj = document.getElementById(objid);
+    obj.style.display="block";
+  }
+  function focusDivOver(objid){
+    var obj = document.getElementById(objid);
+    obj.style.backgroundColor=obj.style.backgroundColor=="#f6f6f6"?"#ffffff":"#f6f6f6";
+  }
+  function focusDivOut(objid){
+    var obj = document.getElementById(objid);
+    obj.style.backgroundColor=obj.style.backgroundColor=="#ffffff"?"#f6f6f6":"#ffffff";
+  }
+</script>

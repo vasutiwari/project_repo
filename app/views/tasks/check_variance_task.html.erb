@@ -1,0 +1,123 @@
+<script>
+<%if !params[:type].eql?("trends") && !params[:type].eql?("perf_analysis") && !params[:performance_review_path].include?('dashboard') %>
+   jQuery('#varianceexp').text(jQuery('#financexp1').text());
+	 <%end%>
+  </script>
+<div id="sbox-window" style="height:auto;width:900px;overflow:none;" class="" >
+  <div class="sbox-bg-wrap"><div class="sbox-bg sbox-bg-n"></div><div class="sbox-bg sbox-bg-ne"></div>
+    <div class="sbox-bg sbox-bg-e"></div><div class="sbox-bg sbox-bg-se"></div><div class="sbox-bg sbox-bg-s"></div>
+    <div class="sbox-bg sbox-bg-sw"></div><div class="sbox-bg sbox-bg-w"></div><div class="sbox-bg sbox-bg-nw"></div>
+  </div>
+  <div id="sbox-content" style="visibility: visible; opacity: 1;color:black" class="sbox-content-iframe">
+    <div class="lightbox_container" style="font-family: Arial,Helvetica,sans-serif">
+      <div class="lightbox_headerow">
+        <div class="headerow_coll1"><img alt="explain_var" width="15" height="13" src="/images/lightbox_icon.png"/> Enter Explanations</div>
+      </div>
+            <% if params[:performance_review_page] != "wres_leases" %>
+      <div class="lightbox_tableheaderow">
+        <div class="tablecoll1">&nbsp;</div>
+        <div class="tablecoll2"><%if params[:type].eql?("trends")%><%=params[:year].to_i - 1 %> Actuals <%else%>Actuals <%end%></div>
+        <div class="tablecoll3"><%if params[:type].eql?("trends")%><%= params[:year] %> Actuals <%else%>Target/Budget <%end%></div>
+        <div class="tablecoll4">Variance?</div>
+        <div class="lightbox_tablecoll5" id="varianceexp">Explanation</div>
+        <div class="tablecoll6">Added by</div>
+      </div>
+      <div id="lister" style="float: left; height: 300px;overflow: auto; width: 862px;">
+          <div class="lightbox_tablewrapper">
+            <div class="lightbox_tablecolrow">
+              <div class="lightbox_tablecolrow2">
+                <div class="tablecoll1"><%= @title_explanation.casecmp("noi")==0 ? "NOI" : @title_explanation.titleize %></div>
+                <div class="tablecoll2">$<%= number_with_delimiter(@actual_explanation)%></div>
+                <div class="tablecoll3">$<%= number_with_delimiter(@budget_explanation)%></div>
+
+
+                                <% icon_direction = up_or_down(@actual_explanation, @budget_explanation) %>
+                <% txt = (icon_direction == 'up') ? "above budget" : "below target" %>
+                            <% use_color = params[:use_color]%>
+                                <% color_icon = (use_color == 'green') ? "greenarrow#{icon_direction}" : "#{icon_direction}arrowred" %>
+
+                <div class="tablecoll4">
+                  <div class="collabs_<%=use_color%>coll"><span class="cashiconcol <%if use_color.eql?('green') || use_color.eql?('')%><%if icon_direction.eql?('up')%> above<%elsif icon_direction.eql?('down')%> belowgreen<%end%><%elsif use_color.eql?('red')%><%if icon_direction.eql?('up')%> aboveRed<%elsif icon_direction.eql?('down')%> below<%end%><%end%>">&nbsp;</span><%= display_currency_real_estate_overview_for_percent(@var_per_explanation) %></div>
+                  <div class="collabs_<%=use_color%>coll">$<%= number_with_delimiter(@var_amt_explanation.abs) %> <span title="<%= txt %>"><%= display_truncated_chars(txt, 8, true) %></span></div>
+                </div>
+
+                                <% if @doc and (@doc.filename.downcase.include?('month_budget') || @doc.filename.downcase.include?('actual_budget_analysis'))
+            var_tmp = "cash_flow"
+                        doc_id = @doc.id
+            elsif @doc and @doc.filename.downcase.include?('capital_improvement')
+            var_tmp = "cap_exp"
+                        doc_id = @doc.id
+                        else
+                        doc_id = ""
+                        var_tmp=nil
+          end %>
+
+                                <% if @year_explanation != true %>
+                                    <% explain_id =  "expln_#{ @id_explanation}" %>
+                                <% else %>
+                                    <% explain_id =  "expln_ytd_#{ @id_explanation}" %>
+                                <% end %>
+
+                                <% explain_id =  "expln_#{ @id_explanation}" if  params[:performance_review_page] == "leases" %>
+
+                                <div class="lightbox_tablecoll5">
+                  <textarea class="variance_inputfield" id="<%=  explain_id %>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="<%if params[:performance_review_page] == "cap_exp" %>  call_to_store_expln('<%= @id_explanation %>', <%= @month_explanation %>, '<%= doc_id %>', <%= @year_explanation %>,'<%= params[:performance_review_path]%>','cap_exp'); <% elsif params[:performance_review_page] == "leases" %> call_to_store_expln('<%= @id_explanation %>', <%= @month_explanation %>, '<%= doc_id %>', <%= @year_value %>, '<%= params[:performance_review_path]%>','leases');<% else %> call_to_store_expln('<%= @id_explanation %>', <%= @month_explanation %>, '<%= doc_id %>', <%= @year_explanation %>,'<%= params[:performance_review_path]%>'); <% end %>jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42"><%= @text_explanation  %></textarea>
+                </div>
+                <div class="tablecoll6">
+                  <div class="subcol1" id="usr_<%= @id_explanation %>"><%=  find_user_name(@user_id_explanation)  %></div>
+                  <div class="subcol2" id="upt_<%= @id_explanation %>">
+                                        <% if params[:performance_review_page] == "cap_exp" %>
+                                            <%= "on " + cap_exp_explanation_updated_at(@id_explanation,@month_explanation,@year_explanation).strftime("%b %d,%Y")  %>
+                                        <% elsif params[:performance_review_page] == "leases" %>
+                                            <%= "on " + leases_explanation_updated_at(@id_explanation,@month_explanation,@year_explanation).strftime("%b %d,%Y")  %>
+                                        <% else %>
+                                            <%= "on " + financial_explanation_updated_at(@id_explanation,@month_explanation,@year_explanation).strftime("%b %d,%Y")  %>
+                                        <% end %>
+                                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+            <% else %>
+      <div class="lightbox_tableheaderow">
+        <div class="tablecoll1">&nbsp;</div>
+        <div class="tablecoll2">Units </div>
+        <div class="tablecoll3">SqFt</div>
+        <div class="tablecoll4">%</div>
+        <div class="lightbox_tablecoll5" id="varianceexp">Explanation</div>
+        <div class="tablecoll6">Added by</div>
+      </div>
+            <div id="lister" style="float: left; height: 300px;overflow: auto; width: 862px;">
+          <div class="lightbox_tablewrapper">
+            <div class="lightbox_tablecolrow">
+              <div class="lightbox_tablecolrow2">
+                <div class="tablecoll1"><%= @title_explanation.capitalize %></div>
+                <div class="tablecoll2"><%= (@units_explanation)%></div>
+                <div class="tablecoll3"><%= number_with_delimiter(@sqft_explanation)%>&nbsp;SqFt</div>
+                                <div class="tablecoll4"><%=  (@var_per_explanation)%> %</div>
+                                <div class="lightbox_tablecoll5">
+                  <textarea class="variance_inputfield" id="<% if @year_explanation != "true" %>expln_<%= @id_explanation %><% else %>expln_ytd_<%= @id_explanation %><% end %>" onclick="jQuery(this).css('borderColor', '#92a99b')"  onblur="call_to_store_expln('<%= @id_explanation %>', <%= @month_explanation %>, '<%= doc_id %>', <%= @year_explanation %>, '<%= params[:performance_review_path]%>','leases');jQuery(this).css('borderColor', '#EEEEEE');" name="textfield42"><%= @text_explanation  %></textarea>
+                </div>
+                                <div class="tablecoll6">
+                  <div class="subcol1" id="usr_<%= @id_explanation %>"><%=  find_user_name(@user_id_explanation)  %></div>
+                  <div class="subcol2" id="upt_<%= @id_explanation %>">
+                                            <%= "on " + leases_explanation_updated_at(@id_explanation,@month_explanation,@year_explanation).strftime("%b %d,%Y")  %>
+                                    </div>
+                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <% end %>
+      <div class="buttonwrapper-w" style="clear:both;margin-left:335px;padding-top:18px;">
+        <div class="greenbutton"><a onclick="Control.Modal.close();replace_performance_review('<%= @performance_review_path %>',true);return false;" href="javascript:;">Close</a><span>&nbsp;</span></div>
+      <!--  This is removed
+      <div class="graybutton"><a onclick="Control.Modal.close();return false;" href="javascript:;">Cancel</a><span>&nbsp;</span></div> -->
+      </div>
+    </div>
+  </div>
+  <a id="sbox-btn-close" onclick="Control.Modal.close();replace_performance_review('<%= @performance_review_path %>',true);return false;" style="cursor: pointer;"></a></div>
+  <script>
+  //changeExplanantionText('variance_popup',active_sub_month);
+  </script>

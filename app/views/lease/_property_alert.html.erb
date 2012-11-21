@@ -1,0 +1,282 @@
+<%note_collection = @note%>
+<script>
+selected_item = "<%=note_collection.id%>"
+</script>
+<div class="rhs leaseModule"  id="lease_container">
+	<div class="suitemid marginTop20" id="show_assets_list">
+		<h1 class="page-title">Alerts</h1>
+		<div class="clear"></div>
+		<%portfolio_collection = Portfolio.find_by_id(params[:portfolio_id])%>
+		<%if  !@pdf && !note_collection.is_getting_started_closed%>
+			<%=render :partial=>'/lease/lease_getting_started',:locals=>{:note_collection=>note_collection,:portfolio_collection=>portfolio_collection} %>
+		<%end%>
+		<div class="lebredcoms" style="padding-bottom: 4px;padding-top: 16px;"><span class="boldtxt" style="float:right;"><%= Date.today.strftime("%B %d , %Y")%></span><div class="lebredcoms boldtxt" style="color:#000 !important; font-size:12px !important; padding-top:0px;">Building Name: <%=RealEstateProperty.find_real_estate_property(note_collection.id).property_name %></div></div>
+		<div class="clear"></div>
+		<div class="alertnamerow boldtxt monthbox" style="padding:5px 0; border:1px solid #eee;font-size:12px !important; border-top:1px solid #eee; margin-bottom:10px;">
+			<%find_month_for_alert_view%>
+			<%date_month = @date_month%>
+			<%months = @months%>
+			<%date_month.present? && date_month.each_with_index do |month,j|%>
+				<a  id= "month_array<%= j %>" href="#<%=month%>"><%= month%></a> <%if j != 11%>|<%end%>
+			<%end%></div>
+		<div class="clear"></div>
+		<%months.present? && months.each_with_index do |i,k|%>
+			<%find_alerts_for_month(i,params[:property_id])%>
+	<%
+	find_lease = @find_lease
+	find_option = @find_option
+	find_tmp = @find_tmp
+	find_insurance = @find_insurance
+	month_name = @month_name
+	month_list = @month_list
+	%>
+			<%if !month_list.present?%>
+				<script>
+					var k = <%=k%>
+					jQuery('a#month_array'+k ).each(function(){
+						jQuery(this).replaceWith("<span id=\"" + jQuery(this).attr("id") + "\">" + jQuery(this).text() + "</span>");
+						jQuery('span#month_array'+k).css({'padding' :'0 9px','font-size' :'11px'});
+					});
+				</script>
+			<%end%>
+
+
+
+			<%if (find_lease.present? && (@lease_com)) || (find_option.present? && @opt_suite_ids) || (find_tmp.present? && @tmp_suite_ids) || (find_insurance.present? && @ins_suite_ids)%>
+				<div class="tbl_lease margin-btm alertview-tbl">
+					<div class="tbl-head alertview-head-month"><%month_name.present? && month_name.uniq.each do |name|%><a name="<%= name%>" id="<%= name%>"></a><%end%><%month_list.present? && month_list.uniq.each do |month|%><%if month.include?(i.split('-')[0])%><%= month%> <%end%><%end%></div>
+					<div class="tbl-head alertview-head">
+						<div class="alertname" style="width:80px;">Suite</div>
+						<div class="alertname" style="width:170px;">Tenant</div>
+						<div class="alertname" style="width:80px;">Date</div>
+						<div class="alertname" style="width:180px;">Alert Type</div>
+						<div class="alertname" style="width:230px;">Description</div>
+					</div>
+					<%find_lease.present? && find_lease.uniq.each do |lease|%>
+						<%if lease.suite_ids?  && YAML::load(lease.suite_ids).present? && lease.commencement? && lease.commencement.to_date.strftime("%Y-%m") == YAML::load(i)  %>
+							<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+								<div class="alertname" style="width:80px;"><%suite_val= YAML::load(lease.suite_ids)
+									suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+								%><% suite.each_with_index do |suite_detail,j|%>
+										<%comma = (j+1 != suite.count) ? ',' : ''%>
+										<%= !suite_detail.suite_no.eql?(nil) ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+									<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=lease ? lease.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=lease.lease_id%>','management');load_completer();return false;"><%= lease ? truncate(lease.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+								<div class="alertname" style="width:80px;"><%=lease.commencement? ? lease.commencement.to_date.strftime("%m/%d/%Y") : "" %></div>
+								<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Lease Start<br />
+								</div>
+								<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">
+									<%if lease.expiration?%>
+																																																																														Lease : <%=lease.commencement.to_date.strftime("%m/%Y") %> to
+										<%if lease.try(:mtm)%>
+																																																					MTM
+										<%else%>
+											<%=lease.expiration.to_date.strftime("%m/%Y") %>
+										<%end%>
+									<%else%>
+																																																																														Lease : <%=lease.commencement.to_date.strftime("%m/%Y") %>
+									<%end%>
+								</div>
+							</div>
+						<%end%>
+						<%if lease.suite_ids.present?  && YAML::load(lease.suite_ids) && lease.try(:expiration).present? && lease.expiration.to_date.strftime("%Y-%m") == YAML::load(i)%>
+							<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+								<div class="alertname" style="width:80px; "><%suite_val= YAML::load(lease.suite_ids)
+									suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+								%><% suite.each_with_index do |suite_detail,j|%>
+										<%comma = (j+1 != suite.count) ? ',' : ''%>
+										<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+									<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=lease ? lease.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=lease.lease_id%>','management');load_completer();return false;"><%= lease ? truncate(lease.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+								<div class="alertname" style="width:80px; ">
+									<%if lease.try(:mtm)%>
+																																																				MTM
+									<%else%>
+										<%=lease.expiration? ? lease.expiration.to_date.strftime("%m/%d/%Y") : "" %>
+									<%end%>
+								</div>
+								<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Lease End<br />
+								</div>
+								<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">Lease : <%if lease.commencement?%><%=lease.commencement.to_date.strftime("%m/%Y") %> to  <%if lease.try(:mtm)%>MTM<%else%><%=lease.expiration.to_date.strftime("%m/%Y") %><%end%>
+									<%end%>
+								</div>
+							</div>
+						<%end%>
+					<%end%>
+
+					<%if find_option.present?%>
+						<%find_option.uniq.each do |opt|%>
+
+							<%if opt.option_start.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.option_start.to_date.strftime("%Y-%m") == YAML::load(i) %>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=opt ? opt.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=opt.lease_id%>','management');load_completer();return false;"><%= opt ? truncate(opt.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= opt.option_start.to_date.strftime("%m/%d/%Y")%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Option Start<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">Type : <%= opt.option_type%><br/>
+										<%if opt.option_end.present?%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%else%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %><%end%><br/>
+										<%if opt.notice_start.present? && opt.notice_end.present?%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%elsif opt.notice_start.present? %>Notice Start:<%= opt.notice_start.to_date.strftime("%m/%Y") %><%elsif opt.notice_end.present?%>Notice End:<%= opt.notice_end.to_date.strftime("%m/%Y")%> <%end%><br/>
+										<%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+									</div>
+								</div>
+							<%end%>
+
+							<%if opt.option_end.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.option_end.to_date.strftime("%Y-%m") == YAML::load(i) %>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=opt ? opt.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=opt.lease_id%>','management');load_completer();return false;"><%= opt ? truncate(opt.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= opt.option_end.to_date.strftime("%m/%d/%Y")%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Option End<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">Type : <%= opt.option_type%><br/>
+										<%if opt.option_start.present?%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%else%>Option : <%= opt.option_start.to_date.strftime("%m/%Y") %><%end%> <br/>
+									 <%if opt.notice_start.present? && opt.notice_end.present?%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%elsif opt.notice_start.present? %>Notice Start:<%= opt.notice_start.to_date.strftime("%m/%Y") %><%elsif opt.notice_end.present?%>Notice End: <%= opt.notice_end.to_date.strftime("%m/%Y")%> <%end%><br/>
+										<%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+									</div>
+								</div>
+							<%end%>
+
+							<%if opt.notice_start.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present? && opt.notice_start.to_date.strftime("%Y-%m") == YAML::load(i) %>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=opt ? opt.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=opt.lease_id%>','management');load_completer();return false;"><%= opt ? truncate(opt.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= opt.notice_start.to_date.strftime("%m/%d/%Y")%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Notice Start<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">Type : <%= opt.option_type%><br/>
+										<%if opt.option_start.present? && opt.option_end.present? %>Option:<%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%elsif opt.option_start.present? %>Option Start: <%= opt.option_start.to_date.strftime("%m/%Y") %><%elsif opt.option_end.present?%> Option End:<%= opt.option_end.to_date.strftime("%m/%Y")%><%end%><br/>
+										<%if opt.notice_end.present? %>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%else%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %><%end%><br/>
+										<%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+									</div>
+								</div>
+							<%end%>
+
+							<%if opt.notice_end.present? && opt.suite_ids.present? && YAML::load(opt.suite_ids).present?  && opt.notice_end.to_date.strftime("%Y-%m") == YAML::load(i) %>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(opt.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=opt ? opt.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=opt.lease_id%>','management');load_completer();return false;"><%= opt ? truncate(opt.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= opt.notice_end.to_date.strftime("%m/%d/%Y")%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Notice End<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">Type : <%= opt.option_type%><br/>
+										<%if opt.option_start.present? &&  opt.option_end.present? %>Option:<%= opt.option_start.to_date.strftime("%m/%Y") %> to <%= opt.option_end.to_date.strftime("%m/%Y")%><%elsif opt.option_start.present? %>Option Start: <%= opt.option_start.to_date.strftime("%m/%Y") %><%elsif opt.option_end.present?%> Option End:<%= opt.option_end.to_date.strftime("%m/%Y")%><%end%><br/>
+										<%if opt.notice_start.present? %>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %> to <%= opt.notice_end.to_date.strftime("%m/%Y")%><%else%>Notice : <%= opt.notice_start.to_date.strftime("%m/%Y") %><%end%><br/>
+										<%if  !opt.note.nil? %>Notes :<%= opt.note.content %><%end%>
+									</div>
+								</div>
+							<%end%>
+						<%end%>
+					<%end%>
+
+					<%if find_insurance.present?%>
+						<%find_insurance.compact.each do |ins|%>
+							<%if ins.expiration_date.present? && ins.suite_ids.present? && YAML::load(ins.suite_ids).present? && ins.expiration_date.to_date.strftime("%Y-%m") == YAML::load(i)%>
+						<%if ins.expiration_date.to_date.strftime("%m")==i.split("-")[1]%>
+						<%if (!ins.is_insurance_complete? && ins.insurance_required?)%>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(ins.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=ins ? ins.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=ins.lease_id%>','management');load_completer();return false;"><%= ins ? truncate(ins.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Insurance<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;" title="Insur : <%= ins.filename.present? ? ins.filename : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%>">Insur : <%= ins.filename.present? ? truncate(ins.filename,:length=>18) : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%></div>
+								</div>
+								<%end%>
+								<%else%>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(ins.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=ins ? ins.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=ins.lease_id%>','management');load_completer();return false;"><%= ins ? truncate(ins.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Insurance<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;" title="Insur : <%= ins.filename.present? ? ins.filename : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%>">Insur : <%= ins.filename.present? ? truncate(ins.filename,:length=>18) : ""%> <%= ins.expiration_date.present? ? ins.expiration_date.to_date.strftime("%m/%d/%Y") : ""%></div>
+								</div>
+								<%end%>
+							<%end%>
+						<%end%>
+					<%end%>
+
+					<%if find_tmp.present? %>
+						<%find_tmp.uniq.each do |tmp|%>
+							<%if tmp.work_start_date.present? && tmp.suite_ids.present? && YAML::load(tmp.suite_ids).present? && tmp.work_start_date.to_date.strftime("%Y-%m") == YAML::load(i)%>
+								<div class="tbl-row <%= cycle("alertview-odd", "alertview-even") %>">
+									<div class="alertname" style="width:80px; "><%suite_val= YAML::load(tmp.suite_ids)
+										suite = Suite.find(:all,:conditions=>['id IN (?)',suite_val])
+									%><% suite.each_with_index do |suite_detail,j|%>
+											<%comma = (j+1 != suite.count) ? ',' : ''%>
+											<%= !suite_detail.suite_no.nil? ? "#{suite_detail.suite_no}#{comma}"  :  raw("&nbsp;") %>
+										<%end%></div>
+								<div class="alertname left" style="width:170px;" title = "<%=tmp ? tmp.tenant_legal_name : raw("&nbsp;") %>">
+									<a href="#" onclick="set_call('mgmt_terms','<%=portfolio_collection.id%>',selected_item,'','<%=tmp.lease_id%>','management');load_completer();return false;"><%= tmp ? truncate(tmp.tenant_legal_name, :length=>43) : raw("&nbsp;") %></a>
+								</div>
+									<div class="alertname" style="width:80px; "><%= tmp.work_start_date.present? ? tmp.work_start_date.to_date.strftime("%m/%d/%Y") : "" %></div>
+									<div class="alertname left" style="width:180px; text-align:left; line-height:18px;">Tenant Improvements<br />
+									</div>
+									<div class="alertname left" style="width:230px; text-align:left; line-height:18px;">TI : <%= tmp.work_start_date.present? ? tmp.work_start_date.to_date.strftime("%m/%d/%Y") : "" %><br/><%if  !tmp.note.nil? %>Notes :<%= tmp.note.content %><%end%></div>
+								</div>
+							<%end%>
+						<%end%>
+					<%end%>
+
+					
+				</div>
+			<%end%>
+		<%end%>
+		<% leasess = RealEstateProperty.find_real_estate_property(note_collection.id).executed_leases %>
+		<%suite_idss = []%>
+		<% leasess.present? && leasess.each do |lease|%>
+			<%suite_idss << lease.property_lease_suite.suite_ids%>
+		<%end%>
+		<% if suite_idss.flatten.compact.blank?%>
+			<div class="no-data"> No Data to Display </div>
+		<%end%>
+	</div>
+</div>
+

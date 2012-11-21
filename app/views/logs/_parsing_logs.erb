@@ -1,0 +1,47 @@
+<% status_flags = {nil=>'In Progress', '0'=>'Failed', '1'=>'Completed'} %>
+<% status_imgs = {nil=>'/images/process_icon.png', '0'=>'/images/del.png', '1'=>'/images/tasks_icon.png'} %>
+<div id ="show_assets_list" class="collab_left" style="padding-left: 10px;">
+  <div class="managenoterhsrow1 iefix">
+    <div class="propertyrow" style="border-bottom: none;">
+      <div class="setupiconrow"><img width="16" border="0" height="16" src="/images/asset_breedcrumb_icon.png"/></div>
+      <div class="breadcrumblabel"><%= prop_name %></div>
+    </div>
+    <div class="propertyrow">
+      <div class="showfileswrapper" style="float: left;"><div class="parentimg"><a href="#" onclick="show_hide_asset_docs1_real_estate(<%= pid %>,<%= fol %>,'show_del');return false;"><img width="34" border="0" height="27" src="/images/collaboration_hub_new_parentimg.png"/></a> </div>
+        <div class="showfiles_label"><a href="#" onclick="show_hide_asset_docs1_real_estate(<%= pid %>,<%= fol %>,'hide_del');return false;">Show Files</a></div>
+      </div>
+    </div>
+    <div class="parsing_headlabel">File Upload Status</div>
+    <% unless logs.blank? %>
+      <div class="parsing_tablewrapper">
+
+        <div class="parsing_tableheadrow">
+          <div class="parsing_tablecoll1">Path </div>
+          <div class="parsing_tablecoll2">File Name </div>
+          <div class="parsing_tablecoll3">Date</div>
+          <div class="parsing_tablecoll4">Status</div>
+        </div>
+        <% logs.each do |log| %>
+          <div class="parsing_tablerow">
+            <div class="parsing_tablecoll1"><span title="<%= log.path %>"><%= lengthy_word_simplification(log.path , 15, 20)%></span></div>
+            <div class="parsing_tablecoll2"><span title="<%= log.filename %>"><%= lengthy_word_simplification(log.filename , 15, 20)%></span></div>
+            <div class="parsing_tablecoll3"><%= log.created_at.strftime("%m/%d/%y  %I:%S%p") %></div>
+            <div class="parsing_tablecoll4"><img src="<%= status_imgs[log.parsing_done] %>"/><%= status_flags[log.parsing_done] %></div>
+          </div>
+        <% end %>
+      </div>
+      <div class="paginationcol" style="margin-left:600px;">
+        <%= will_paginate  logs,:inner_window => 1, :outer_window => 0, :renderer => 'RemoteLinkRenderer',:params =>{:controller => 'documents', :action => 'show_parsing_logs', :page=>params[:page], :id=>params[:id], :fol_id=>params[:fol_id] }%>
+        <div class="paginationcol" style="margin-left:600px;">
+        <%else%>
+          <div class="for_ie7 for_ie7_padding"><font color='gray' size="3px;"> No Parsing logs for this property</font></div>
+        <% end %>
+
+      </div>
+    </div>
+
+<!--[if IE 7]>
+<style type="text/css">
+body .iefix {margin-left:-20px}
+</style>
+<![endif]-->

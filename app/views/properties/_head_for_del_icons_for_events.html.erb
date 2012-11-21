@@ -1,0 +1,19 @@
+<div class="setupnavbar temp-class" style="margin-left:0px">
+<div class="folderlabel">
+<%if request.env['HTTP_REFERER'] && request.env['HTTP_REFERER'].include?("transaction")%>
+<%#if params[:deal_room] == 'true'%>
+<a href="#" title="" onclick="show_hide_asset_docs1_real_estate_for_deal_room(<%=@folder.portfolio_id %>,<%= @folder.id %>,'hide_del');return false;">
+<img src="/images/asset_folder_icon2.png"  width="20" height="20" border="0"/>
+<div class="folderlabelcol">Show Files</div>
+</a>
+<%else%>
+<a href="#" title="" onclick="show_hide_asset_docs1_real_estate(<%=@folder.portfolio_id %>,<%= @folder.id %>,'hide_del');return false;">
+<img src="/images/asset_folder_icon2.png"  width="20" height="20" border="0"/>
+<div class="folderlabelcol">Show Files</div>
+</a>
+<%end%>
+<span><img src="/images/upllodright.png"  width="2" height="27"/></span>
+<span id="select_one"></span>
+</div>
+<%= render  :partial => '/properties/folder_title' %>
+</div>

@@ -1,0 +1,25 @@
+<div class="adpsectiontitle" id >Accounting System Types :</div>
+<div class="adprowwrapper">
+  <%unless accounting_system_types.empty?%>
+    <div class="tabulardataborder">
+      <div class="adpsectionheadblue" style="background-image: none">
+        <div class="adptabularcol1" style="width: 100px;padding-left:200px;">S.No</div>
+        <div class="adptabularcol1" style="">Accounting System Types</div>
+      </div>
+      <% accounting_system_types.each_with_index do |p, count| %>
+        <div class="<%=cycle('adpsectionheadwhite', 'adpsectionheadlightgray') %>" style="background-image: none" >
+          <div class="adptabularcol1" style="width: 100px;padding-left:200px;"><%= params[:page] ? (10*(params[:page].to_i-1)+count+1) : (count+1)%></div>
+          <div class="adptabularcol1" style=""><%=p.type_name  if !p.type_name.blank? %></div>
+        </div>
+      <%end%>
+    </div>
+    <div class="bottomrow" style="background-image: none; float: right">
+      <%=will_paginate accounting_system_types, :renderer => PaginationListLinkRenderer,:previous_label => "Previous",:next_label => "Next",:class => "bottomcol" %>
+    </div>
+  <%else%>
+    <h3>There is no Accounting Systen Type in the list...add one now !!</h3>
+  <%end%>
+</div>
+<style type="text/css">
+.adptabularcol1{width:200px;}
+</style>

@@ -1,0 +1,12 @@
+<span id="phone_number_profile" style="display:none;"><%if !user_collection.phone_number.blank? %><%= user_collection.phone_number %><% else %><% end %></span>
+<div class="phone_number" id="disp_phone_number"><strong>Phone number</strong> :&nbsp; <span style="color:#BBB;"> (10 digits required. Numbers Only) </span>
+  <div id="phone_number" style="white-space:normal;min-height:10px;max-height:50px;overflow:auto;padding:4px;"><h><%if !user_collection.phone_number.nil? && !user_collection.phone_number.blank?%><%= user_collection.phone_number %><%else%>No Phone number<%end%></h>
+  </div>
+  <div><a href="javascript:;" onclick="jQuery('div#disp_phone_number').hide();jQuery('div#change_phone_number').show();jQuery('div#change_phone_number span input[name]').focus();return false;" class="bluecolor" id="phone_number_edit">Edit
+  </a></div>
+</div>
+<div class="phone_number" id="change_phone_number" style="display:none;"><strong>Phone number</strong>:&nbsp; <span style="color:#BBB;"> (10 digits required. Numbers Only) </span>
+  <span><input id="edit_phone_number"type="text" value="<%= user_collection.phone_number %>" name="phone_number"/><a href="javascript:;" onclick="ajax_call_user_profile_update(jQuery('div#change_phone_number span input[name]').val(),'phone_number');return false;" class="bluecolor"  id="ok_save_phone_number">Save</a></span>&nbsp;<a href="javascript:;" onclick="jQuery('div#change_phone_number').hide();jQuery('div#disp_phone_number').show();
+jQuery('div#change_phone_number span input[name]').val(jQuery('div#phone_number').text().strip());jQuery('#emsg_phone_number').hide();return false;" class="bluecolor" id="cancel_save_phone_number">Cancel</a></div>
+<div id="emsg_phone_number" style="width: 445px;" class="errormessage" style="display:none"></div>
+

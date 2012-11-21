@@ -1,0 +1,69 @@
+<style>
+  .collab_name_col
+  {
+    white-space:normal;
+  }
+  .collab_description_col
+  {
+    white-space:normal;
+  }
+</style>
+<div id="overview">
+<div class="collab_profile_mainrow">
+  <div class="collabscontentrow">
+    <div class="collabs_content_container">
+      <div class="taskrow">&nbsp;Profile</div>
+      <div class="top"></div>
+      <div class="mid">
+        <div class="collab_headerow" style="max-height:1000px;min-height:195px;position:relative;" id="profile_details">
+          <%= render :partial => "collaboration_hub/render_profile",:locals => {:user_collection => user_collection} %>
+        </div>
+        <div class="changepiccol">
+          <div class="coll1 margin_updown">Your Access Details</div>
+        </div>
+        <div class="tasks_comment_row">
+          <div class="accessdetailsrow bottompadding">
+            <%roles =  current_user.roles.collect{|r| r.id}%>
+            <%if roles.include?(3)%>
+              <div class="iconcoll"><img src="/images/star_icon.png"  width="29" height="32" border="0"/></div>
+              <div class="accessrow">
+                <div class="subrow1">Access granted for features</div>
+                <div class="subrow2">
+                  <div class="coll5">Collaboration Hub:</div>
+                  <div class="coll5"> <img src="/images/filesharing_icon.png" width="16" height="16" />
+                    <div class="coll5">File Sharing</div>
+                  </div>						
+                </div>
+              </div>
+            <%end%>
+          </div>
+                    <% if !(find_user_has_properties.nil? || find_user_has_properties.blank?) && !is_leasing_agent %>
+          <div class="accessdetailsrow margin_updown">
+            <div class="iconcoll"><img src="/images/graph_icon.png"  width="27" height="32" border="0"/></div>
+            <div class="accessrow" style="<%if portfolios_collection.length > 10%>height:500px;<%end%>overflow-y:auto;overflow-x:hidden;">
+              <div class="subrow1">Access granted for Portfolios &amp; asset monitoring with Reports &amp; Analysis</div>
+              <%finding_shared_folders_portfolios%>
+              <%portfolios_collection.each do|p| %>
+                <div class="subrow1">
+                  <div class="collabimagecol">
+                    <a href="/dashboard/<%=p.id%>/financial_info">
+                      <img src="<% if p.portfolio_image %><%=p.portfolio_image.public_filename %><% else %><%= '/images/real_portfolio_img5.jpg'%><% end %>" width="65" height="41" style="cursor:pointer;border:0;"/>
+                    </a>
+                  </div>
+                  <div class="grantedreviewrow">
+                    <a href="/dashboard/<%=p.id%>/financial_info"><%=p.name%></a><% if !p.real_estate_properties.empty? %>: <%=collect_properties(p)%><% end %>
+                  </div>
+                </div>
+              <%end%>
+            </div>
+          </div>
+                    <% end %>
+          <div class="collab_bot_row">Access given by: <br />
+            <%=find_access_given_by(user_collection)%>
+          </div>
+        </div></div>
+      <div class="bot"></div>
+    </div>
+  </div>
+</div>
+</div>

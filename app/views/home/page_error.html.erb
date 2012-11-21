@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<title>&nbsp;<%= current_user.nil? || current_user.name.nil? ? "AMP - Simplified Intelligence" : current_user.name %></title>
+	<link href="/stylesheets/amp_v2.css" rel="stylesheet" type="text/css" />
+	<link href="/stylesheets/ampnew.css" rel="stylesheet" type="text/css" />
+	<link href="/stylesheets/amp_rf.css" rel="stylesheet" type="text/css" />
+	<link href="/stylesheets/screen_v1.0.css" rel="stylesheet" type="text/css" />
+	    <%= stylesheet_link_tag "client_admin", :media=>"all" %>
+
+        <script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+        <script type="text/javascript">
+                jQuery(document).ready(function()
+        {
+        logo_src= jQuery('#logo_img').attr('src');
+        if ( !( logo_src.indexOf( "/images/amp-logo.png" ) !== -1 ))
+        jQuery('#span_id').show();
+        }
+        );
+        </script>
+</head>
+<%user_leasing_agent = is_leasing_agent%>
+<body>
+ <div id="callout" onblur="blurTimerStart()"></div>
+<div class="container">
+	<%if current_user%>
+			<%last_portfolio, first_property = Portfolio.last_created_portfolio_of_a_user(current_user)%>
+			<%portfolio = session[:portfolio__id].present? ? session[:portfolio__id] : params[:real_estate_id].present? ? params[:real_estate_id].to_i : params[:portfolio_id].present? ? params[:portfolio_id].to_i : params[:pid].present? ? params[:pid].to_i : (params[:id].present? && params[:action].eql?("add_property")) ? params[:id].to_i : last_portfolio.present? ? last_portfolio.try(:id) : @portfolio.present?  ? @portfolio.try(:id) : last_portfolio.try(:id) %>
+			<%portfolio_obj = Portfolio.find_by_id(portfolio)%>
+			<%note = session[:property__id].present? ? session[:property__id] : params[:property_id].present? ? params[:property_id].to_i : (params[:id].present? && !params[:action].eql?("add_property")) ? params[:id].to_i : params[:nid].present? ? params[:nid].to_i : portfolio_obj.present? ? first_property.try(:id) : @note.present? ? @note.try(:id) : first_property.try(:id) %>
+			<%property_obj = RealEstateProperty.find_by_id(note)%>
+
+<%if (property_obj.try(:leasing_type)=="Commercial" || portfolio_obj.try(:leasing_type)=="Commercial") && (!is_leasing_agent)
+href_var = "/lease/#{portfolio}/management/#{(params[:property_id].present? || params[:id].present?)? note : portfolio_obj.try(:real_estate_properties).try(:first).try(:id)}/management"
+elsif (property_obj.try(:leasing_type)=="Commercial" || portfolio_obj.try(:leasing_type)=="Commercial") && (is_leasing_agent)
+href_var = "/lease/#{portfolio}/pipeline/#{(params[:property_id].present? || params[:id].present?)? note : portfolio_obj.try(:real_estate_properties).try(:first).try(:id)}/property_pipeline"
+else
+href_var = "/performance_review_property/rent_roll?portfolio_id=#{portfolio}&id=#{note}&property_id=#{note}&partial_page=rent_roll_highlight&tl_year=#{Time.now.year}&from_lease=ya"
+end%>
+  <%end%>
+
+<%if current_user && current_user.has_role?('Client Admin') && params[:current_uri]%>
+<!--Client Admin Headers-->
+   <div class="header">
+        <div class="acInfo">
+				  <span id="span_id" style="display:none;"><a href="http://localhost:3000/" style="margin-left: 0px !important;"><img  src="/images/amplogo_small.png" border="0" class="amplogoM5" style="margin-bottom:-3px;"/></a> |</span>
+          <span style="margin-left: 7px !important;"><%= current_user.email %></span>|
+
+          <%
+          if current_user && current_user.last_visited_url.present?
+            user_console_url = current_user.last_visited_url
+          else
+            real_props = RealEstateProperty.find_owned_and_shared_properties_of_a_user(current_user.id,prop_folder=true)
+            if real_props.present?
+              last_portfolio, first_property = Portfolio.last_created_portfolio_of_a_user(current_user)
+              if last_portfolio.present? && first_property.present?
+                user_console_url = "/dashboard/#{last_portfolio.id}/financial_info?property_id=#{first_property.id}"
+              else
+                user_console_url = notify_admin_path(:from_session=> true)
+              end
+            else
+              user_console_url = notify_admin_path(:from_session=> true)
+            end
+          end
+        %>
+          <a href="<%=user_console_url%>" class="highlightacInfo">
+            <span id="current_user_console">Switch to User Console</span>
+          </a>
+          |
+          <a href="<%= logout_path %>">Logout</a>
+        </div>
+        <div class="logo">
+          <%check_logo_from_public = "false"%>
+          <%if current_user && current_user.logo_image && current_user.logo_image.full_filename%>
+            <%check_logo_from_public = FileTest.exists?("#{current_user.logo_image.full_filename}") ? "true" : "false" %>
+            <%if check_logo_from_public.eql?('true')%>
+              <% check_user_logo = current_user.logo_image.nil? %>
+              <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" height="35" width="104" border="0" src="<%= check_user_logo ? ((find_logo_extension.nil? || !FileTest.exists?("#{find_logo_extension.public_filename}")) ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+            <%else%>
+              <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" src="/images/amp-logo.png" height="35" width="104" border="0" /></a>
+            <%end%>
+          <%else%>
+            <% check_user_logo = current_user.logo_image.nil? %>
+            <a href="/client_admin/<%=current_user.id%>/properties"><img border="0" id="logo_img" height="35" width="104" border="0" src="<%= check_user_logo ? ((find_logo_extension.nil? || !FileTest.exists?("#{find_logo_extension.public_filename}")) ? "/images/amp-logo.png" : find_logo_extension.public_filename(:thumb)) : current_user.logo_image.public_filename %>?time=<%= Time.now.to_i %>" /></a>
+          <%end%>
+        </div>
+        <div class="navpostion">
+          <div class="nav">
+            <%user_id=current_user.id%>
+            <div>
+              <a href="/client_admin/<%=user_id%>/properties" class='<%=params[:controller]=="client_admin/properties" ? "selected" : ""%>           loader_event'>Properties</a>
+              <a href="/client_admin/<%=user_id%>/users" class='<%=params[:controller]=="client_admin/users" ? "selected" : ""%> loader_event'>Users</a>
+              <a href="/client_admin/<%=user_id%>/portfolios" class='<%=params[:controller]=="client_admin/portfolios" ? "selected" : ""%>            loader_event'>Portfolios</a>
+								<%if current_user.try(:client).try(:is_financials_required)%>
+              <a href="/client_admin/<%=user_id%>/accounting" class='<%=params[:controller]=="client_admin/accounting" ? "selected" : ""%>            loader_event'>Accounting</a>
+							<%end%>
+              <a href="/client_admin/<%= user_id %>/company/<%= current_user.try(:client_id) %>/edit" class='<%=params[:controller]=="client_admin/company" ? "selected" : ""%> loader_event'>Company</a>
+              <a href="/client_admin/<%= user_id %>/settings/<%= current_user.try(:client_id) %>/edit" class='<%=params[:controller]=="client_admin/settings" ? "selected" : ""%> loader_event'>App Settings</a>
+            </div>
+          </div>
+           <div class="megaDdContainer">
+            <div class="headertitle">
+              <h3>Admin Console</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+	<%else%>
+	<!--User Console Headers!-->
+	  <div class="header">
+		<!--top header display start-->
+		<div class="acInfo"><span id="span_id" style="display:none;"><a href="http://localhost:3000/" style="margin-left: 0px !important;" target="_blank"><img  src="/images/amplogo_small.png" border="0" class="amplogoM5" style="margin-bottom:-3px;" /></a> |</span>
+			<% if current_user %>
+				<span style="margin-left: 7px !important;"><%= current_user.try(:email).present? ? current_user.try(:email) : current_user.try(:name)%>
+								</span>|
+								<% if !current_user.has_role?('Admin') && !current_user.has_role?('Server Admin') %>
+									<% if current_user.has_role?('Client Admin') %>
+										<a href="<%=my_profile_collaboration_hub_index_path%>?open_user_profile=true" onclick="return confirmSubmit();"><img src="<%= user_default_image(current_user.id)%>"  width="12px" height="12px" border="0" title="" alt="" class="valign"  id="user_profile_image"/> Profile</a>
+									<%else%>
+										<a href="<%=my_profile_collaboration_hub_index_path%>?open_user_profile=true"><img src="<%= user_default_image(current_user.id)%>"  width="12px" height="12px" border="0" title="" alt="" class="valign"  id="user_profile_image"/> Profile</a>
+									<% end %>
+								<% end %><% if current_user.has_role?('Client Admin') %>| <a href="/client_admin/<%=current_user.id%>/users" class="highlightacInfo"><span>Switch to Admin Console</span></a>
+                    <% end %>|<a href="<% if current_user.has_role?('Asset Manager') %><%= logout_path %><% else %><%= logout_path %><% end %>">Logout</a>
+			<% else %>
+				<a href="/login">Login</a>
+			<% end %>
+		</div>
+		<div class="logo" id="amp_logo">
+			<%= render :partial => "layouts/logo",:locals => {:portfolio_obj => portfolio_obj,:property_obj => property_obj} %>
+		</div>
+		<!--top header display end-->
+		<!-- main header start-->
+    <div class="navpostion">
+      <div class="nav">
+        <div>
+								<% if current_user && current_user.has_role?('Asset Manager') || is_leasing_agent%>
+                  <% if (current_user.approval_status == nil || current_user.approval_status == true) %>
+								<%if !is_leasing_agent%>
+                      <%if current_user.has_role?("Asset Manager") %>
+                        <a href="/dashboard/<%=portfolio_obj.id%>/financial_info?property_id=<%=property_obj.id%>" class="<%= (controller_name == 'dashboard') ? 'selected' : '' %>">Dashboard</a>
+                      <%else%>
+                        <a href="<%= shared_users_path %>" class="<%= (controller_name == 'users' && action_name == 'welcome') ? 'selected' : '' %>">Dashboard</a>
+                      <%end%>
+                        <%if current_user.try(:client).try(:is_financials_required)%>
+											<a href="/real_estate/<%=portfolio_obj.id%>/properties/<%=property_obj.id%>" id='asset_view_path' class="<%= (((controller_name == 'properties' ) && ( action_name == 'show' || action_name == 'show_folder_files')) || (controller_name == 'lease' && action_name == 'show_pipeline')) ? 'selected' : '' %>">Financials</a>
+									<%end%>
+									<%end%>
+                  <% end %>
+									<%if session[:property__id].present? || (is_leasing_agent && (controller_name == 'lease' && action_name =='show_pipeline'))%>
+									<a href="<%=href_var%>"  class="<%= (controller_name == 'lease') || (controller_name == 'performance_review_property' && action_name == 'rent_roll') ? 'selected' : '' %>">Leasing </a>
+                                                                        <%else%>
+									<a class="disable" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Leasing</a>
+                                                                        <%end%>
+                  <a href='/files/<%=portfolio%>/<%=note%>' class="<%= (controller_name == 'properties' && action_name == 'show_asset_files') || (controller_name == 'collaboration_hub' && action_name == 'index') || (controller_name == 'transaction') ? 'selected' : '' %>">Files </a>
+									<%if !is_leasing_agent%><%if session[:property__id].present?%><a href= "/real_estates/add_property/<%=portfolio%>/?property_id=<%=note%>" class="<%= (controller_name == 'real_estates') ? 'selected' : '' %>">Settings</a>
+                                                                          <%else%>
+																		<a class="disable" <%if !params[:action].eql?("notify_admin")%>title="Please select a property"<%end%>>Settings</a><%end%><%end%>
+                  <a href="/home/news?portfolio_id=<%=portfolio%>&property_id=<%=note%>" class="<%= (controller_name == 'home' && action_name == 'news') ? 'selected' : '' %>">News</a>
+
+              <% end %>
+							<%if current_user && !current_user.has_role?("Asset Manager") && !is_leasing_agent%>
+								<a href='/shared_users' class="<%= (controller_name == 'shared_users')  ? 'selected' : '' %>">Files </a>
+								<a href="/home/news" class="<%= (controller_name == 'home' && action_name == 'news') ? 'selected' : '' %>">News</a>
+							<%end%>
+				</div>
+
+
+			</div>
+		</div>
+		<!-- main header end-->
+	</div>
+	<%end%>
+  <div class="clearfloat"></div>
+
+	<!--content display for error message start -->
+  <div class="content" id="content_detail">
+        <div class="error_bodywrapperrow">
+          <div class="homecontentwrapper">
+            <div class="error_contentwrapper">
+              <div class="error_imagecol"><img src="/images/404_error_2.jpg" width="137" height="204" /></div>
+              <div class="errorcontentcol1">
+                <div class="errorcontentcol1 margin_updown bottompadding">AMP is currently undergoing unscheduled System Upgrades and Maintenance.</div>
+                <div class="errorcontentcol1 margin_updown bottompadding">Please try again in a few hours.</div>
+                <div class="errorcontentcol2 margin_updown bottompadding" style="width: 550px;">For further information contact +1 510 508 2981 or <a href="mailto:support@theamp.com" >support@theamp.com</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+	</div>
+	<!--content display for error message end-->
+   <div class="clearfloat"></div>
+	 <!--footer start-->
+  <div class="footer" style="height:63px;">
+		<div class="footer-nav fltlft">
+			<% if current_user %>
+				© 2011 <% if Rails.env != "development" %><%= get_analytics_code %><% end %><a href="#">AMP Technologies</a> | <a href=<%= current_user.has_role?("Asset Manager") ? "/dashboard/#{portfolio_obj.id}/financial_info?property_id=#{property_obj.id}" : (is_leasing_agent ? goto_asset_view_path(current_user.id) : shared_users_path) %>>Home</a>
+				<%unless current_user.has_role?("Server Admin")%>
+					<% if !current_user.has_role?('Admin') && current_user.has_role?('Client Admin') %>
+					<%else%>
+						<%if current_user && !current_user.has_role?('Client Admin') && !params[:current_uri]%>
+							|<a href="<%=my_profile_collaboration_hub_index_path%>?open_user_profile=true">Profile</a>
+						<%end%>
+					<% end %>
+				<%end%> |
+			<a href="<%=APP_CONFIG[:main_url]%>/request_demo/" target="_blank" class="boxed" rel="{handler:'iframe',size:{x:760,y:300},iframePreload:true}">Contact Us </a>
+			<% end %>
+			</div>
+			<div class="footer-ssl fltrt">
+				<a target="GT__SIP" href="https://smarticon.geotrust.com/smarticonprofile?Referer=https://localhost:3000" tabindex="-1">
+				<img src="/images/ssl.png" width="99" height="40" align="left" /></a>&nbsp;&nbsp;<img src="/images/powered-by-logo.png" width="83" height="44" align="right" />
+			</div>
+	</div>
+	<!--footer end-->
+</div>
+	</body>
+  <div id="printable"></div>
+</html>

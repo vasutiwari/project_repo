@@ -1,0 +1,24 @@
+<head>
+<script type="text/javascript" src="/javascripts/jquery-1.4.2_co.js"></script>
+<script>
+setTimeout(fade_out, 5000);
+function fade_out() {
+  $("#usernote").fadeOut().empty();
+}
+</script>
+<style>
+.content
+{
+-moz-box-shadow:0 1px 3px rgba(0, 0, 0, 0.25);
+border-color:#DEE184;
+font-family:Chalkboard,'Comic Sans';
+margin:2.5em 0;
+padding:1.5em 1em;
+position:relative;
+}
+</style>
+</head>
+<%=form_tag '/notes',:id=>'notes_form' do%>
+			<textarea class="content" style="height:260px;width:460px;" name="content" onblur="document.forms.notes_form.submit();"><%=current_user.content if current_user%></textarea>
+			<div style="margin-left:111px;margin-top:-30px;color: rgb(102, 102, 102); font-size: 11px;" id="usernote">Notes will be Auto - Saved </div>
+<%end%>

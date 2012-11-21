@@ -1,0 +1,65 @@
+<div class="adminbodyrapper">
+	<div class="addserverbut"></div>
+	<div class="listofownedbox">
+		<div class="listheadingbox">
+			<div class="listimgbox"><img border="0" width="13" height="12" src="/images/executivearrow.png">
+			</div>
+			<div class="listtextbox">
+				Server Admin: 6 Step AMP Connection Guide
+			</div>
+		</div>
+	</div>
+	<%= form_for :db_setting,:url=>{:controller=>"db_settings",:action=>"create"} do |f|-%>
+	<div class="adminsettingbody">
+		<div class="adminsetbodytext">
+			1. Select your Accounting System
+		</div>
+		<div class="adminsettingoption">
+			<%= f.select(:accounting_system_type,['YARDI','MRI'])%>
+		</div>
+		<div class="adminsetbodytext">
+			2. Please contact <span class="settingemail"><a href='mailto:praveeny@theamp.com'>praveeny@theamp.com</a></span> for instructions on how to configure your server environment.
+		</div>
+		<div class="adminsettingoption">
+			<span class="settingemail">Instructions Document</span>
+			<br>
+			<span class="settingemail">Connector Code file</span>
+		</div>
+		<div class="adminsetbodytext">
+			3. Enter your server URL + /Pages/iExtAdhoc.aspx below.
+		</div>
+		<div class="adminsettingoption">
+			<%= f.text_field  :server_url %> <span style="color:red;font-size:12px;"><%= error_message_on :db_setting, :server_url %></span>
+		</div>
+		<div class="adminsettingoption">
+			<div class="adminsetbodytext">
+				4. Specify Properties that can be viewed on AMP
+			</div>
+			<div class="adminsetbodytext">
+				<input type="radio" value="1" name="db_setting[property_select]" id="db_setting_property_select_1" checked="true" onclick="jQuery('#add_prop_code').hide();">
+				All Properties
+			</div>
+			<div class="adminsetbodytext">
+				<input type="radio" value="2" name="db_setting[property_select]" id="db_setting_property_select_2" onclick="jQuery('#add_prop_code').show();">
+				Selected Properties
+			</div>
+			<div  id="add_prop_code" style="display:none;">
+				<input name="db_setting[add_property]" type="text" value="Enter Property Codes here" style="color:gray;" onclick="this.value =''" onblur="if(/\S/.test(this.value) == false){this.value = 'Enter Property Codes here';this.style.color='gray';}"/>
+			</div>
+		</div>
+		<div class="adminsetbodytext">
+			5. Click on Save
+		</div>
+		<div class="adminsettingoption">
+			<div>
+				<%= button_to :Save %><span>&nbsp;</span>
+			</div>
+		</div>
+		<div class="adminsetbodytext">
+			6. Email <span class="settingemail"><a href='mailto:praveeny@theamp.com'>praveeny@theamp.com</a></span> for confirmation that the setup is complete.
+			<br>
+			The Client can Add your properties by Selecting the System&nbsp;
+		</div>
+	</div>
+	<%end%>
+</div>

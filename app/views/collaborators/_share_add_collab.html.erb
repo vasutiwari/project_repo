@@ -1,0 +1,139 @@
+<script>
+  revoke = 0;
+  load_completer();
+	new_collaborators = [];
+	deleted_already_added_users = [];
+  cur_email = '<%= current_user.email %>'
+  added_users = '<%=mem_list%>';
+  if(file != true && folder != true)
+	 {
+	owner = "";
+  	}
+		else
+		{
+			owner = "";
+		}
+
+jQuery(document).ready(function() {
+	user_email_str="<%=get_emails_of_all_users_for_autocomplete%>";
+	user_emails=user_email_str.split("&lt;$&gt;");
+	jQuery("#collaborator_list").autocomplete(
+	{
+      width: 350,
+      delimiter: /(,)\s*/,
+      lookup: user_emails
+	});
+});
+    asset_managers_and_collaborators_array = [];
+		<%find_collaborators_and_asset_managers%>
+		<%users_collection = @users_collection%>
+		<%if users_collection && !users_collection.empty?%>
+			var asset_managers_and_collaborators_collection = '<%=users_collection.join(',')%>';
+			asset_managers_and_collaborators_array = asset_managers_and_collaborators_collection.split(',');
+		<%end%>
+		<%if params[:is_lease_agent]%>
+		  form_txt = 'null'
+		<%end%>	
+</script>
+<div class="lightbox_container2" style="<%if params[:add_contacts] == "true"%> padding-left:5px;<%end%>">
+  <div class="lightbox_threshold">
+    <div class="lightbox_headerow">
+      <div class="headerow_coll1">
+			<%if params[:is_lease_agent] == 'true'%>
+  	 	   		<img src="/images/lease-agent.png"/>
+ 			<%elsif(folder_collection && folder_collection.parent_id == 0 && !folder_collection.is_master && folder_collection.name !='my_files' && params[:folder_revoke] == 'true')%>
+		 	   		<img width="18" height="17" src="/images/asset_manager_icon.png"/>
+			<%else%>
+  	   		<img width="18" height="17" src="/images/add_collabaraters_icon.png"/>
+	 		<%end%>
+			<%= ((folder_collection && folder_collection.parent_id == 0 && !folder_collection.is_master && folder_collection.name !='my_files' && params[:folder_revoke] == 'true') || (params[:add_contacts] == 'true')) ?   (params[:add_contacts] == 'true' ? "Add / Edit  '#{folder_collection.real_estate_property.property_name.titleize}' Users" :  (params[:is_lease_agent] == 'true' ? "Add / Edit Leasing Agents" : "Add / Edit Property Users"))  : "Add / Edit Collaborators"%>
+			<span  id='add_contact_step_property' style='font-size:12px;'></span>
+			</div>
+    </div>
+		<%=hidden_field_tag :deleted_users,params[:deleting_user].nil? ? "" : params[:deleting_user]%>
+		<%=hidden_field_tag :from_assign_task,params[:from_assign_task]%>
+    <%=hidden_field_tag :show_past_shared,params[:show_past_shared]%>
+		<%=hidden_field_tag :parent_delete,params[:parent_delete]%>
+		<%=hidden_field_tag :del_files,params[:del_files]%>
+  	<%=hidden_field_tag :add_contacts,params[:add_contacts].nil? ? "" : params[:add_contacts]%>
+  	<%=hidden_field_tag :from_dash_board,params[:from_dash_board].nil? ? "" : params[:from_dash_board]%>
+  	<%=hidden_field_tag :is_lease_agent,params[:is_lease_agent].nil? ? "" : params[:is_lease_agent]%>
+    <div class="collab_lightbox_contentrow" style="<%if params[:from_dash_board] == "true"%>width:700px;<%else%>width:724px;<%end%>">
+      <div class="add_users_contentrow">
+        <div class="add_users_headercol">Invite <%=(folder_collection && folder_collection.parent_id == 0 && !folder_collection.is_master && folder_collection.name !='my_files' && params[:folder_revoke] == 'true') ? (params[:is_lease_agent] == 'true' ? "Leasing Agents" : "Property Users") : "Collaborators" %> to this <% if check_is_property_user %>property<% else %><%=params[:folder_revoke] == 'true' ? 'folder' : (params[:from_task_add_collab] == 'true' ? 'task' : 'file') %><% end %>.</div>
+        <div class="add_users_fieldrow">
+          <input type="text" value="Enter email addresses here" style="color:gray;" onclick="if(this.value == 'Enter email addresses here'){this.value = '';this.style.color='black';}" onblur="if(/\S/.test(this.value) == false){this.value = 'Enter email addresses here';this.style.color='gray';}" class="add_users_fieldinput" name="collaborator_list"  id="collaborator_list"/>
+         </div>
+				 <% if (folder_collection && folder_collection.parent_id == 0 && !folder_collection.is_master && folder_collection.name !='my_files') %>
+					<div class="addpropertyrow" style="margin-top: 6px;"><a href="javascript:;" onclick='jQuery("#errmsg").empty();add_collaborators_list_for_property("<%=check_is_property_user ? 'true' : 'false'%>","<%=params[:from_debt_summary]%>","<%=params[:edit_inside_asset]%>","<%=params[:from_property_details]%>","<%=params[:call_from_prop_files]%>","<%=params[:is_lease_agent]%>");return false'><img border="0" width="16" height="16" src="/images/add.png" />Add </a>
+				 <% else %>
+					<div class="addpropertyrow" style="margin-top: 6px;"><a href="javascript:;" onclick='jQuery("#errmsg").empty();if(add_collab_list_if_parent_not_shared("<%=folder_collection.id%>")) {add_collaborators_list();return false;}'><img border="0" width="16" height="16" src="/images/add.png" />Add </a>
+				 <% end %>
+						 <span style="color: red; align: center;" id="errmsg"></span>
+						</div>				
+				<!-- changed scrollbar settings for add/edit collaborators------------------------------------ -->
+				<div class="variance_collaboraterow" style="margin-top:0px;">
+        <div class="addusers_coll" id="addpropertyrow_to" >
+          <div class="add_users_headercol">To</div>
+        </div>
+        <!--   <div class="add_files_scroll" style="width:790px;margin-bottom:15px;">-->
+        <div class="add_users_collaboraterow" >
+	        <%members =  @members%>
+  			  <div id="file_collaborators_list" class="add_files_scroll" style="width: 680px; margin-top: 5px; overflow-y: auto;height:<%=(members && members.length >=8 ? 96 : 63)%>px;">
+            <%= raw(data)%>
+						<%if params[:is_lease_agent] == 'true'%>
+		            <%= raw(@asset_managers_data)%>
+  					<%else%>
+		            <%= raw(@leasing_agents_data)%>
+						<%end%>
+						</div>
+        </div>
+        <!--			</div>-->
+      </div>
+				<!-- ------------settings for add/edit collaborators end here------------------------ -->
+      </div>
+    </div>
+	<%display_msg =  params[:task_id] || params[:from_task_add_collab]=='true' ? 'display:none;' : 'display:block;'%>
+    <div class="collab_lightbox_contentrow" style="<%if params[:from_dash_board] == "true"%>width:700px;<%else%>width:724px;<%end%><%=display_msg%>">
+      <div class="add_users_contentrow bottompadding">
+        <div class="add_users_headercol">Send a comment with your invitation<span class="graycolur">(optional)</span></div>
+        <div class="add_users_fieldrow">
+          <textarea style="height: 50px;" rows="3" cols="83" name="textarea" class="textarea_comment"></textarea>
+        </div>
+        </div>
+  </div>
+  </div>
+	<%=hidden_field_tag :notification_alert,1%>
+  <div class="buttonwrapper2" id="save_cancel_button">
+    <div id="save_button" class="greenbutton">
+		<a href="javascript:;" onclick="<%if check_is_property_user%>property_folder=true;<%else%>property_folder=false;<%end%>if(restrict_empty_collaborators(property_folder,'<%=params[:is_lease_agent]%>')){load_writter();jQuery('#collaborator_list').val('');document.forms.upload_form7.submit();return false;}"><%if  params[:task_id] || params[:from_task_add_collab]=='true'%>Ok <%else%>Save<%end%></a><span>&nbsp;</span></div>
+    <div id="cancel_button" class="graybutton"><a href="javascript:;" onclick='Control.Modal.close();return false;' style="cursor: pointer;" >Cancel</a><span>&nbsp;</span></div>
+  </div>
+<div class="bot"></div>
+</div>
+<%=hidden_field_tag :already_added_users,!params[:collaborators_list].nil? ? params[:collaborators_list] : ""%>
+<script>
+
+<%if params[:add_contacts] == 'true'%>
+  jQuery('span#add_contact_step_property').html('- Step 2 of 2');
+<%end%>
+
+property_collaborators_arr = [];
+parent_collaborators_arr = [];
+property_collaborators = '<%= folder_collection.parent_id == 0 ? "" : find_property_folder_members(folder_collection).join(",") %>';
+parent_collaborators = '<%= folder_collection.parent_id == 0 ? "" : find_parent_folder_members(folder_collection).join(",") %>';
+
+property_collaborators_arr = property_collaborators.split(',');
+parent_collaborators_arr = parent_collaborators.split(',');
+diff_arr = property_collaborators_arr.diff(parent_collaborators_arr);
+
+load_completer();
+cur_email = '<%= current_user.email %>';
+if(new_collaborators.length==0 && added_users=="")
+  jQuery('#addpropertyrow_to').hide();
+else
+  jQuery('#addpropertyrow_to').show();	
+	
+</script>
+
+
