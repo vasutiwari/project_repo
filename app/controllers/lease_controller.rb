@@ -10,8 +10,8 @@ class LeaseController < ApplicationController
     # if request.xhr?
      # unless @pdf
       #  respond_to do |format|
-          format.js {
-            render :update do |page|
+          #format.js {
+            #render :update do |page|
               page.replace_html  "show_assets_list", :partial => "/lease/management", :locals => {:note_collection => @note, :portfolio_collection => @portfolio_collection}
             end
           }
